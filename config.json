@@ -1,0 +1,15 @@
+{
+  "voice_settings": {
+    "default_accent": "US",
+    "available_accents": ["US", "British", "Indian"]
+  },
+  "critical_actions": {
+    "delete_file": true,
+    "access_control_panel": true
+  },
+  "custom_commands": {},
+  "auth": {
+    "voice_auth_enabled": true,
+    "admin_actions": ["delete_file", "access_control_panel"]
+  }
+}
