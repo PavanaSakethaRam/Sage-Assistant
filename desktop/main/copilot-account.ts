@@ -240,6 +240,8 @@ export class AccountBroker {
   private operation = 0;
   private active: AbortController | undefined;
   private closed = false;
+  private modeTransitions = 0;
+  private revocations = 0;
   private lookups = new Set<Promise<string | null>>();
   constructor(
     private readonly options: {
@@ -251,8 +253,22 @@ export class AccountBroker {
       select(account: SelectedAccount | null): Promise<SelectionAck>;
     },
   ) {}
+  beginModeTransition(): () => void {
+    this.modeTransitions++;
+    ++this.operation;
+    this.active?.abort();
+    let finished = false;
+    return () => {
+      if (finished) return;
+      finished = true;
+      this.modeTransitions--;
+      ++this.operation;
+      this.active?.abort();
+    };
+  }
   async choose(): Promise<{ status: SelectionAck["status"] }> {
-    if (this.closed) return { status: "unavailable" };
+    if (this.closed || this.modeTransitions > 0 || this.revocations > 0)
+      return { status: "unavailable" };
     const operation = ++this.operation;
     this.active?.abort();
     const controller = new AbortController();
@@ -297,15 +313,17 @@ export class AccountBroker {
     }
   }
   async disconnect(): Promise<{ status: SelectionAck["status"] }> {
-    const operation = ++this.operation;
+    ++this.operation;
+    this.revocations++;
     this.active?.abort();
-    await Promise.all([...this.lookups]);
-    if (this.closed || operation !== this.operation)
-      return { status: "unavailable" };
     try {
+      await Promise.all([...this.lookups]);
+      if (this.closed) return { status: "unavailable" };
       return { status: (await this.options.select(null)).status };
     } catch {
       return { status: "unavailable" };
+    } finally {
+      this.revocations--;
     }
   }
   async close(): Promise<void> {

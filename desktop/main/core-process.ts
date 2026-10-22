@@ -175,6 +175,7 @@ export class CoreProcess {
   private _launches = 0;
   private bootId = "";
   private generation = 0;
+  private clearing: Promise<SelectionAck> | undefined;
   constructor(private readonly options: CoreOptions) {
     if (
       !isAbsolute(options.executable) ||
@@ -331,7 +332,18 @@ export class CoreProcess {
       return Promise.resolve(failure(request.id, "invalid_request"));
     return this.send(request) as Promise<CoreResponse>;
   }
-  async selectAccount(account: SelectedAccount | null): Promise<SelectionAck> {
+  selectAccount(account: SelectedAccount | null): Promise<SelectionAck> {
+    if (account !== null) return this.changeAccount(account);
+    if (this.clearing) return this.clearing;
+    const clearing = this.changeAccount(null).finally(() => {
+      if (this.clearing === clearing) this.clearing = undefined;
+    });
+    this.clearing = clearing;
+    return clearing;
+  }
+  private async changeAccount(
+    account: SelectedAccount | null,
+  ): Promise<SelectionAck> {
     if (!this.launch()) throw new TypeError("Core unavailable");
     const response = await this.send(
       parseSelection({
@@ -343,8 +355,13 @@ export class CoreProcess {
         account,
       }),
     );
-    if (response.kind !== "response")
+    if (response.kind !== "response") {
+      // A failed revocation must not leave a selected capability alive.
+      // Keep the existing bounded graceful cleanup/failure fallback and report
+      // unavailable rather than inventing successful cleanup evidence.
+      if (account === null) await this.close();
       throw new TypeError("Selection unavailable");
+    }
     return parseSelectionAck(response.result);
   }
   private send(request: CoreRequest | SelectionFrame): Promise<Terminal> {
@@ -355,7 +372,19 @@ export class CoreProcess {
     if (this.seen.size >= 4096)
       return Promise.resolve(failure(request.id, "session_limit"));
     this.seen.add(request.id);
-    if (this.pending.size >= 8)
+    const controls = [...this.pending.values()].filter(
+      (entry) => entry.request.kind === "host_copilot_selection",
+    ).length;
+    const publicWork = this.pending.size - controls;
+    // One selection plus one reserved, coalesced revocation; public capacity
+    // remains eight. A new selection cannot queue behind a pending clear.
+    if (
+      request.kind === "request"
+        ? publicWork >= 8
+        : request.account === null
+          ? controls >= 2
+          : controls >= 1
+    )
       return Promise.resolve(failure(request.id, "busy"));
     const child = this.launch();
     if (!child) return Promise.resolve(failure(request.id, "internal_error"));
@@ -377,7 +406,11 @@ export class CoreProcess {
           )
             void this.cancel(request.id);
         },
-        request.kind === "request" ? (request.timeout_ms ?? 30000) : 30000,
+        // Internal lifecycle control shares the 60s cleanup budget. This does
+        // not change public 1..30000ms requests or the 30s partial-frame limit.
+        request.kind === "request"
+          ? (request.timeout_ms ?? 30000)
+          : SHUTDOWN_GRACE_MS,
       );
       this.pending.set(request.id, { request, resolve, timer });
       try {

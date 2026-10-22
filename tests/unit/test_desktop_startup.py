@@ -135,6 +135,15 @@ def test_windows_startup_registers_owned_handles_and_closes_partial_startup(
         assert core.backend.runtime_path == tmp_path / "native"
         assert core.backend._clock == core.clock
         assert core.backend._token_source is None
+        await core.dispatch(
+            {
+                "version": 1,
+                "kind": "request",
+                "id": "assistant-mode",
+                "method": "settings.update",
+                "params": {"ai_mode": "assistant", "reasoning_backend": "copilot"},
+            }
+        )
         await core.select_account(
             {
                 "version": 1,

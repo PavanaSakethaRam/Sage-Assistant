@@ -150,6 +150,10 @@ class CoreService:
             self._seen.add(frame.id)
             self._selection_boot = frame.boot_id
             self._selection_generation = frame.generation
+            if frame.account is not None and self.get_settings().ai_mode != "assistant":
+                return Response(
+                    id=frame.id, result={"generation": frame.generation, "status": "unavailable"}
+                ).model_dump(mode="json")
             await self._replace_source(frame.account)
             status = (
                 "cleared"
@@ -206,18 +210,16 @@ class CoreService:
             self.clock()
             if envelope.method in {"reasoning.start", "connection.test", "reasoning.cancel"}:
                 value = await self._provider_dispatch(envelope)
-            else:
-                if envelope.method == "settings.update":
-                    Settings.model_validate(envelope.params)
+            elif envelope.method == "settings.update":
+                settings = Settings.model_validate(envelope.params)
+                async with self._selection_lock:
                     self._generation += 1
                     await self._cancel_inflight()
-                    if (
-                        Settings.model_validate(envelope.params).ai_mode != "assistant"
-                        and self._backend_factory is not None
-                    ):
-                        async with self._selection_lock:
-                            await self._replace_source(None)
-                elif envelope.method == "app.shutdown":
+                    if settings.ai_mode != "assistant" and self._backend_factory is not None:
+                        await self._replace_source(None)
+                    value = self._dispatch(envelope)
+            else:
+                if envelope.method == "app.shutdown":
                     Empty.model_validate(envelope.params)
                     await self._cancel_inflight()
                 elif envelope.method == "tasks.cancel":

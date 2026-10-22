@@ -42,6 +42,7 @@ async function fake(mode = "normal") {
     executable,
     `#!${process.execPath}\n${String.raw`
  const fs=require('node:fs'); let input=Buffer.alloc(0); const mode=MODE;const root=process.argv[process.argv.indexOf('--root')+1];fs.appendFileSync(root+'/launches','1\n');
+ let selected=null;const held=[];let heldSelection;
  const send=value=>{const b=Buffer.from(JSON.stringify(value));const h=Buffer.alloc(4);h.writeUInt32BE(b.length);process.stdout.write(Buffer.concat([h,b]));};
  process.stderr.write('SYNTHETIC_SECRET raw exception\n');fs.writeFileSync(process.argv[process.argv.indexOf('--root')+1]+'/pid',String(process.pid));if(mode==='stubborn'){process.on('SIGTERM',()=>{});setInterval(()=>{},1000);}
  process.stdin.on('data',chunk=>{input=Buffer.concat([input,chunk]);while(input.length>=4&&input.length>=4+input.readUInt32BE(0)){const n=input.readUInt32BE(0);const r=JSON.parse(input.subarray(4,4+n));input=input.subarray(4+n);
@@ -50,7 +51,8 @@ async function fake(mode = "normal") {
  if(mode==='overflow'){process.stdout.write(Buffer.from([0,16,0,1]));return;}
  let result=r.method==='app.shutdown'?{status:'shutting_down'}:r.method==='reasoning.cancel'?{status:'cancelled'}:r.method==='reasoning.start'?{status:'completed',task_id:'t',text:'late',proposal:null,usage:null}:{ai_mode:'local',reasoning_backend:null};
  if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
- if(r.kind==='host_copilot_selection'){fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');result={generation:mode==='selection-mismatch'?r.generation+1:r.generation,status:r.account?'selected':'cleared'};}
+ if(mode==='saturated-selection'&&r.kind==='request'&&r.method==='settings.get'){held.push(r);fs.writeFileSync(root+'/held',String(held.length));continue;}
+ if(r.kind==='host_copilot_selection'){if(mode==='control-overlap'&&r.account){fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');heldSelection=r;fs.writeFileSync(root+'/selection-held','1');continue;}if(mode==='control-overlap'&&heldSelection){send({version:1,id:heldSelection.id,kind:'response',result:{generation:heldSelection.generation,status:'selected'}});heldSelection=undefined;}if(mode==='saturated-selection'){selected=r.account;fs.writeFileSync(root+'/selected',JSON.stringify(selected));if(!selected){fs.writeFileSync(root+'/disposed',String(held.length));for(const old of held.splice(0))send({version:1,id:old.id,kind:'error',code:'cancelled'});}}fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');result={generation:mode==='selection-mismatch'?r.generation+1:r.generation,status:r.account?'selected':'cleared'};}
  if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME)) result.ai_mode='bad';
  const answer={version:['protocol','stubborn'].includes(mode)?2:1,id:r.id,kind:'response',result};
  if(mode==='late'&&r.id==='slow') setTimeout(()=>send(answer),70);else send(answer);
@@ -358,6 +360,12 @@ it("private selection correlates and clears in the real core without becoming re
     dataDir: root,
   });
   owned.push(core);
+  await core.request(
+    request("assistant-mode", "settings.update", {
+      ai_mode: "assistant",
+      reasoning_backend: "copilot",
+    }),
+  );
   expect(
     await core.selectAccount({ host: "github.com", login: "synthetic-user" }),
   ).toEqual({ generation: 1, status: "selected" });
@@ -373,7 +381,10 @@ it("private selection correlates and clears in the real core without becoming re
   ).toMatchObject({
     result: {
       items: expect.arrayContaining([
-        expect.objectContaining({ provider: "copilot", status: "unavailable" }),
+        expect.objectContaining({
+          provider: "copilot",
+          status: "auth_required",
+        }),
       ]),
     },
   });
@@ -491,4 +502,92 @@ subprocessIt(
     }
   },
   10000,
+);
+
+subprocessIt(
+  "private clear bypasses eight public slots and acknowledges only after old work is disposed",
+  async () => {
+    const core = await fake("saturated-selection");
+    const root = roots.at(-1)!;
+    await core.selectAccount({ host: "github.com", login: "synthetic-user" });
+    const work = Array.from({ length: 8 }, (_, i) =>
+      core.request(request(`held-${i}`)),
+    );
+    for (let i = 0; i < 200; i++) {
+      try {
+        if ((await readFile(join(root, "held"), "utf8")) === "8") break;
+      } catch {
+        /* Worker has not read the requests yet. */
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    expect(await readFile(join(root, "held"), "utf8")).toBe("8");
+    expect(await core.request(request("ninth"))).toMatchObject({
+      code: "busy",
+    });
+    expect(await core.selectAccount(null)).toEqual({
+      generation: 2,
+      status: "cleared",
+    });
+    expect(await readFile(join(root, "selected"), "utf8")).toBe("null");
+    expect(await readFile(join(root, "disposed"), "utf8")).toBe("8");
+    expect(
+      (await Promise.all(work)).every(
+        (result) => result.kind === "error" && result.code === "cancelled",
+      ),
+    ).toBe(true);
+  },
+);
+
+subprocessIt(
+  "reserves one coalesced clear behind an in-flight selection without unbounded controls",
+  async () => {
+    const core = await fake("control-overlap");
+    const root = roots.at(-1)!;
+    const selecting = core.selectAccount({
+      host: "github.com",
+      login: "synthetic-user",
+    });
+    for (let i = 0; i < 200; i++) {
+      try {
+        await readFile(join(root, "selection-held"));
+        break;
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+    }
+    const clearA = core.selectAccount(null);
+    const clearB = core.selectAccount(null);
+    expect(clearA).toBe(clearB);
+    await expect(
+      core.selectAccount({ host: "github.com", login: "other" }),
+    ).rejects.toThrow();
+    expect(await selecting).toEqual({ generation: 1, status: "selected" });
+    expect(await clearA).toEqual({ generation: 2, status: "cleared" });
+    const frames = (await readFile(join(root, "selection-frames"), "utf8"))
+      .trim()
+      .split("\n");
+    expect(frames).toHaveLength(2);
+  },
+);
+subprocessIt(
+  "session-budget revocation failure closes the owned core before reporting unavailable",
+  async () => {
+    const core = await fake("saturated-selection");
+    const root = roots.at(-1)!;
+    await core.selectAccount({ host: "github.com", login: "synthetic-user" });
+    const work = Array.from({ length: 8 }, (_, i) =>
+      core.request(request(`held-${i}`)),
+    );
+    for (let i = 0; i < 4087; i++) await core.request(request(`busy-${i}`));
+    const pid = Number(await readFile(join(root, "pid"), "utf8"));
+    await expect(core.selectAccount(null)).rejects.toThrow();
+    expect(() => process.kill(pid, 0)).toThrow();
+    expect(
+      (await Promise.all(work)).every((result) => result.kind === "error"),
+    ).toBe(true);
+    expect(await core.request(request("after-failed-clear"))).toMatchObject({
+      code: "shutting_down",
+    });
+  },
 );

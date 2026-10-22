@@ -21,6 +21,7 @@ export async function handleRequest(
     core: { request(request: CoreRequest): Promise<CoreResponse> };
     openExternal(url: string): Promise<void>;
     account?: {
+      beginModeTransition(): () => void;
       choose(): Promise<{ status: "selected" | "cleared" | "unavailable" }>;
       disconnect(): Promise<{ status: "selected" | "cleared" | "unavailable" }>;
     };
@@ -46,11 +47,16 @@ export async function handleRequest(
         request.method,
       );
     }
-    if (
-      request.method === "settings.update" &&
-      request.params.ai_mode !== "assistant"
-    )
-      await deps.account?.disconnect();
+    if (request.method === "settings.update") {
+      const finish = deps.account?.beginModeTransition();
+      try {
+        if (request.params.ai_mode !== "assistant")
+          await deps.account?.disconnect();
+        return parseResponse(await deps.core.request(request), request.method);
+      } finally {
+        finish?.();
+      }
+    }
     if (request.method === "external.open") {
       const url = validateExternalUrl(request.params.url);
       try {

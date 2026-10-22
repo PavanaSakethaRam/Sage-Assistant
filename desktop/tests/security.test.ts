@@ -221,6 +221,12 @@ it("handles native account requests locally, denies input and clears selection b
       },
     },
     account: {
+      beginModeTransition: () => {
+        calls.push("begin");
+        return () => {
+          calls.push("finish");
+        };
+      },
       choose: async () => {
         calls.push("choose");
         return { status: "selected" as const };
@@ -261,7 +267,9 @@ it("handles native account requests locally, denies input and clears selection b
   expect(calls).toEqual([
     "choose",
     "disconnect",
+    "begin",
     "disconnect",
     "settings.update",
+    "finish",
   ]);
 });

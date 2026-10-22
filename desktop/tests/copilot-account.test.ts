@@ -470,3 +470,139 @@ it("failed mode lookup and failed clear remain unavailable with no confirmation"
   expect(await broker.disconnect()).toEqual({ status: "unavailable" });
   expect(confirmed).toBe(0);
 });
+
+import { handleRequest } from "../main/ipc";
+import { createTrust } from "../main/security";
+import { pathToFileURL } from "node:url";
+import type { CoreRequest, CoreResponse, Settings } from "../shared/contracts";
+import type { SelectedAccount } from "../main/copilot-account";
+subprocessIt(
+  "mode transition fences late native confirmation and requires a fresh choice after local mode",
+  async () => {
+    const f = await fixture("synthetic-user\n");
+    let mode: Settings["ai_mode"] = "assistant";
+    let selected: SelectedAccount | null = {
+      host: "github.com",
+      login: "previous",
+    };
+    let generation = 0;
+    let clearEntered = () => {},
+      releaseClear = () => {},
+      confirmEntered = () => {},
+      releaseConfirm = () => {};
+    const clearing = new Promise<void>((resolve) => {
+      clearEntered = resolve;
+    });
+    const clearGate = new Promise<void>((resolve) => {
+      releaseClear = resolve;
+    });
+    const confirming = new Promise<void>((resolve) => {
+      confirmEntered = resolve;
+    });
+    const confirmGate = new Promise<void>((resolve) => {
+      releaseConfirm = resolve;
+    });
+    let defer = true;
+    const broker = new AccountBroker({
+      executable: f.executable,
+      ownedRoot: join(f.root, "owned"),
+      configDir: join(f.root, "synthetic-config"),
+      enabled: async () => mode === "assistant",
+      confirm: async () => {
+        confirmEntered();
+        if (defer) await confirmGate;
+        return true;
+      },
+      select: async (account) => {
+        if (account === null && defer) {
+          clearEntered();
+          await clearGate;
+        }
+        selected = account;
+        return {
+          generation: ++generation,
+          status: account ? "selected" : "cleared",
+        };
+      },
+    });
+    const trust = createTrust({ packaged: true, rendererDir: f.root });
+    const sender = { id: 100 };
+    const frame = { url: pathToFileURL(join(f.root, "index.html")).href };
+    const deps = {
+      owner: { webContents: sender, mainFrame: frame },
+      trust,
+      account: broker,
+      openExternal: async () => {},
+      core: {
+        request: async (request: CoreRequest): Promise<CoreResponse> => {
+          if (request.method === "settings.update")
+            mode = request.params.ai_mode ?? "local";
+          return {
+            version: 1,
+            id: request.id,
+            kind: "response",
+            result: {
+              ai_mode: mode,
+              reasoning_backend: mode === "assistant" ? "copilot" : null,
+            },
+          };
+        },
+      },
+    };
+    const send = (id: string, method: string, params: unknown = {}) =>
+      handleRequest(
+        { sender, senderFrame: frame },
+        { version: 1, kind: "request", id, method, params },
+        deps,
+      );
+    try {
+      const changing = send("local", "settings.update", { ai_mode: "local" });
+      await clearing;
+      const choosing = send("stale-choice", "copilot.chooseAccount");
+      await Promise.race([confirming, choosing]);
+      releaseClear();
+      await changing;
+      expect(mode).toBe("local");
+      releaseConfirm();
+      expect(await choosing).toMatchObject({
+        result: { status: "unavailable" },
+      });
+      expect(selected).toBeNull();
+      await send("assistant", "settings.update", {
+        ai_mode: "assistant",
+        reasoning_backend: "copilot",
+      });
+      expect(selected).toBeNull();
+      defer = false;
+      expect(await send("fresh-choice", "copilot.chooseAccount")).toMatchObject(
+        { result: { status: "selected" } },
+      );
+      expect(selected).toEqual({ host: "github.com", login: "synthetic-user" });
+    } finally {
+      releaseClear();
+      releaseConfirm();
+      await broker.close();
+      f.restore();
+    }
+  },
+  10000,
+);
+
+subprocessIt(
+  "disconnect fences a simultaneous chooser until revocation completes",
+  async () => {
+    const f = await fixture("synthetic-user\n");
+    try {
+      expect(await f.broker.choose()).toEqual({ status: "selected" });
+      const disconnecting = f.broker.disconnect();
+      const choosing = f.broker.choose();
+      expect(await disconnecting).toEqual({ status: "cleared" });
+      expect(await choosing).toEqual({ status: "unavailable" });
+      expect(f.selected.at(-1)).toBeNull();
+      expect(await f.broker.choose()).toEqual({ status: "selected" });
+    } finally {
+      await f.broker.close();
+      f.restore();
+    }
+  },
+);
