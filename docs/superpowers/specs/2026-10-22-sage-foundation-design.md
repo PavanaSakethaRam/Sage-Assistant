@@ -1,6 +1,6 @@
 # Sage foundation and controlled provider connection
 
-Date: 22 October 2026. Status: written spec for owner review, before implementation planning. Scope: delivery slice 1 in [the delivery scope](2026-10-22-sage-delivery-scope.md). The owner approved the architecture direction and requested implementation, strong tests and security validation. This document makes the first deliverable concrete.
+Date: 22 October 2026. Status: approved by the owner on 22 October 2026; implementation planning may proceed. Scope: delivery slice 1 in [the delivery scope](2026-10-22-sage-delivery-scope.md). The owner approved the architecture direction and requested implementation, strong tests and security validation. This document makes the first deliverable concrete.
 
 ## 1. Outcome and scope
 
