@@ -26,3 +26,7 @@ playwright-report/
 credentials.json
 *.key
 *.pem
+
+.vite/
+out/
+coverage/

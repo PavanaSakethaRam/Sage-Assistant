@@ -1,0 +1,11 @@
+[
+ {"label":"BOM is literal nonblank", "title":"﻿", "body":"﻿", "valid":true},
+ {"label":"zero width space is literal", "title":"​", "body":"​", "valid":true},
+ {"label":"Unicode spaces are blank", "title":"  　", "body":"body", "valid":false},
+ {"label":"body Unicode spaces blank", "title":"title", "body":"  　\t\n", "valid":false},
+ {"label":"line separators blank", "title":"title", "body":"  ", "valid":false},
+ {"label":"C1 controls rejected", "title":"title", "body":"ab", "valid":false},
+ {"label":"NUL rejected", "title":"title", "body":"x\u0000", "valid":false},
+ {"label":"title tabs rejected", "title":"a\tb", "body":"x", "valid":false},
+ {"label":"body line endings preserved", "title":"é 😀", "body":"\tline\r\nline\n", "valid":true}
+]
