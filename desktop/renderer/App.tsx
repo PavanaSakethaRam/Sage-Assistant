@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
+  ActionResult,
   Page,
   Proposal,
   Results,
@@ -30,7 +31,9 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     [task, setTask] = useState<Results["tasks.get"] | null>(null),
     [status, setStatus] = useState("");
   const generation = useRef(0),
-    taskGeneration = useRef(0);
+    taskGeneration = useRef(0),
+    alive = useRef(true),
+    cancelledTasks = useRef(new Map<string, ActionResult>());
   const updateSettings = useCallback(
     (s: Settings | null) => setSettings(s),
     [],
@@ -42,7 +45,15 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     let alive = true;
     void call(api, "tasks.list", { limit: 20, offset }).then(
       (p) => {
-        if (alive) setTasks(p);
+        if (alive)
+          setTasks({
+            ...p,
+            items: p.items.map((item) =>
+              cancelledTasks.current.has(item.id)
+                ? { ...item, status: "cancelled" }
+                : item,
+            ),
+          });
       },
       (e) => {
         if (alive) setStatus(`Task history unavailable: ${message(e)}`);
@@ -52,13 +63,45 @@ export function App({ api = window.sage }: { api?: SageApi }) {
       alive = false;
     };
   }, [api, offset, refresh]);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
       taskGeneration.current++;
-    },
-    [],
-  );
+    };
+  }, []);
+  function cancelledTask(value: Results["tasks.get"]): Results["tasks.get"] {
+    const outcome = cancelledTasks.current.get(value.id);
+    return outcome
+      ? {
+          ...value,
+          status: "cancelled",
+          proposal: null,
+          review_required: false,
+          outcome,
+        }
+      : value;
+  }
+  function purgeCancelledTask(task_id: string, outcome: ActionResult) {
+    if (!alive.current) return;
+    // The acknowledgement fences this identity, independently of selected detail.
+    cancelledTasks.current.set(task_id, outcome);
+    setDraft((current) =>
+      current?.proposal?.task_id === task_id ? null : current,
+    );
+    setTask((current) =>
+      current?.id === task_id ? cancelledTask(current) : current,
+    );
+    setTasks((page) => ({
+      ...page,
+      items: page.items.map((item) =>
+        item.id === task_id ? { ...item, status: "cancelled" } : item,
+      ),
+    }));
+    setRefresh((v) => v + 1);
+  }
   function openDraft(proposal: Proposal | null, reviewRequired = false) {
+    if (proposal && cancelledTasks.current.has(proposal.task_id)) return;
     dirty();
     setDraft({ proposal, reviewRequired, key: generation.current });
   }
@@ -67,7 +110,7 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     try {
       const t = await call(api, "tasks.get", { task_id });
       if (token === taskGeneration.current) {
-        setTask(t);
+        setTask(cancelledTask(t));
         setStatus("");
       }
     } catch (e) {
@@ -79,18 +122,14 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     const token = ++taskGeneration.current;
     try {
       const result = await call(api, "tasks.cancel", { task_id });
+      if (!alive.current) return;
+      if (result.status === "cancelled") purgeCancelledTask(task_id, result);
+      else setRefresh((v) => v + 1);
       if (token === taskGeneration.current) {
-        setTask(null);
-        if (result.status === "cancelled") {
-          dirty();
-          setDraft((current) =>
-            current?.proposal?.task_id === task_id ? null : current,
-          );
-        }
+        if (result.status !== "cancelled") setTask(null);
         setStatus(
           `Task ${result.status}${result.diagnostic ? ` — ${result.diagnostic}` : ""}`,
         );
-        setRefresh((v) => v + 1);
       }
     } catch (e) {
       if (token === taskGeneration.current)
@@ -137,6 +176,19 @@ export function App({ api = window.sage }: { api?: SageApi }) {
               reviewRequired={draft.reviewRequired}
               onChange={dirty}
               onSaved={() => setRefresh((v) => v + 1)}
+              onProposal={(proposal) => {
+                setDraft((current) =>
+                  current?.key === draft.key
+                    ? cancelledTasks.current.has(proposal.task_id)
+                      ? null
+                      : { ...current, proposal }
+                    : current,
+                );
+              }}
+              onOutcome={(result, identity) => {
+                if (result.status === "cancelled")
+                  purgeCancelledTask(identity.task_id, result);
+              }}
             />
           )}
           <Notes api={api} refresh={refresh} />

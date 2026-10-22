@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type {
+  ActionResult,
   NoteContent,
   Proposal,
   SageApi,
@@ -14,12 +15,19 @@ export function NoteReview({
   reviewRequired = false,
   onChange = () => {},
   onSaved = () => {},
+  onProposal = () => {},
+  onOutcome = () => {},
 }: {
   api: SageApi;
   proposal?: Proposal | null;
   reviewRequired?: boolean;
   onChange?: () => void;
   onSaved?: () => void;
+  onProposal?: (proposal: Proposal) => void;
+  onOutcome?: (
+    result: ActionResult,
+    identity: Pick<Proposal, "id" | "task_id">,
+  ) => void;
 }) {
   const [proposal, setProposal] = useState(initial),
     [content, setContent] = useState<NoteContent>(
@@ -55,6 +63,7 @@ export function NoteReview({
           })
         : await call(api, "notes.propose", content);
       if (alive.current) {
+        onProposal(p);
         setProposal(p);
         setContent(p.arguments);
         setEditing(false);
@@ -77,6 +86,8 @@ export function NoteReview({
         revision: proposal.revision,
         decision,
       });
+      // Lifecycle acknowledgements still belong to App if this editor was replaced.
+      onOutcome(result, { id: proposal.id, task_id: proposal.task_id });
       if (!alive.current) return;
       setStatus(
         `${result.status}${result.diagnostic ? ` — ${result.diagnostic}` : ""}`,
