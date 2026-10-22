@@ -139,3 +139,57 @@ def test_ordinary_gate_has_independent_exact_thresholds(
     }
     j.write_text(json.dumps(entries))
     assert run(p, j).returncode == expected
+
+
+def portable_python_paths(path: Path, style: str) -> None:
+    report = json.loads(path.read_text())
+    entries = {}
+    for name, value in report["files"].items():
+        key = str(ROOT / name) if style.startswith("absolute") else name
+        if style.endswith("windows"):
+            key = key.replace("/", "\\")
+        entries[key] = value
+    report["files"] = entries
+    path.write_text(json.dumps(report))
+
+
+@pytest.mark.parametrize("style", ["relative_windows", "absolute_native", "absolute_windows"])
+def test_portable_python_paths_preserve_passing_counts(tmp_path: Path, style: str) -> None:
+    p, j = reports(tmp_path)
+    portable_python_paths(p, style)
+    assert run(p, j).returncode == 0
+
+
+@pytest.mark.parametrize("style", ["relative_windows", "absolute_native", "absolute_windows"])
+def test_portable_python_paths_still_require_each_source(tmp_path: Path, style: str) -> None:
+    p, j = reports(tmp_path)
+    report = json.loads(p.read_text())
+    del report["files"]["src/sage/storage.py"]
+    p.write_text(json.dumps(report))
+    portable_python_paths(p, style)
+    assert run(p, j).returncode == 1
+
+
+@pytest.mark.parametrize("alias", ["src\\sage\\storage.py", str(ROOT / "src/sage/storage.py")])
+@pytest.mark.parametrize("alias_first", [False, True])
+def test_python_report_rejects_colliding_source_identities(
+    tmp_path: Path, alias: str, alias_first: bool
+) -> None:
+    p, j = reports(tmp_path)
+    report = json.loads(p.read_text())
+    duplicate = {alias: report["files"]["src/sage/storage.py"]}
+    report["files"] = (
+        {**duplicate, **report["files"]} if alias_first else {**report["files"], **duplicate}
+    )
+    p.write_text(json.dumps(report))
+    assert run(p, j).returncode == 1
+
+
+@pytest.mark.parametrize("files", [[], None, "malformed"])
+def test_invalid_python_file_map_remains_a_static_failure(tmp_path: Path, files: object) -> None:
+    p, j = reports(tmp_path)
+    p.write_text(json.dumps({"files": files}))
+    result = run(p, j)
+    assert result.returncode == 1
+    assert result.stdout.startswith("coverage gate failed:")
+    assert result.stderr == ""

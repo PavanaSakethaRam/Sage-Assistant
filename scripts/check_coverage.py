@@ -31,7 +31,15 @@ def check(python: Path, javascript: Path) -> dict[str, object]:
     )
     if manifest["python"] != actual_py or manifest["javascript"] != actual_js:
         raise ValueError("source inventory drift; review manifest")
-    py = json.loads(python.read_text())["files"]
+    files = json.loads(python.read_text())["files"]
+    if not isinstance(files, dict):
+        raise ValueError("invalid Python file map")
+    py = {}
+    for filename, data in files.items():
+        identity = Path(filename.replace("\\", "/")).as_posix().removeprefix(ROOT.as_posix() + "/")
+        if identity in py:
+            raise ValueError("ambiguous Python source identity")
+        py[identity] = data
     js = json.loads(javascript.read_text())
     js = {Path(k).as_posix().removeprefix(ROOT.as_posix() + "/"): v for k, v in js.items()}
     counts: dict[str, dict[str, tuple[tuple[int, int], tuple[int, int]]]] = {
@@ -50,7 +58,7 @@ def check(python: Path, javascript: Path) -> dict[str, object]:
             pair(s["statements"]["covered"], s["statements"]["total"]),
             pair(s["branches"]["covered"], s["branches"]["total"]),
         )
-    result = {}
+    result: dict[str, object] = {}
     for lang, entries in counts.items():
         trusted = manifest["trusted_" + lang]
         if not trusted or not set(trusted) <= set(entries):
