@@ -424,3 +424,42 @@ def test_record_columns_preserve_contract_values_on_restart(tmp_path: Path) -> N
             )
     finally:
         restarted.close()
+
+
+def test_rejected_revision_scrubs_renewed_approvals_only(store: Store) -> None:
+    # Rejecting one approval must not leave another copy of that draft, or erase a newer one.
+    with store.transaction() as connection:
+        seed_note(connection)
+        seed_task(connection, "task", NOW)
+        connection.execute(
+            "INSERT INTO approvals SELECT ?,task_id,proposal_id,tool,arguments_title,"
+            "arguments_body,arguments_hash,revision,scope,policy_version,issued_at,"
+            "expires_at,decision,boot_id,consumed_at FROM approvals WHERE id=?",
+            ("renewed", "a-task"),
+        )
+        connection.execute(
+            "INSERT INTO revisions VALUES(?,?,?,?,?,?,?,?)",
+            ("new-proposal", "task", 2, "notes.create", "notes", "new title", "new body", STAMP),
+        )
+        connection.execute(
+            "INSERT INTO approvals SELECT ?,task_id,?,tool,?,?,arguments_hash,?,scope,"
+            "policy_version,issued_at,expires_at,decision,boot_id,consumed_at "
+            "FROM approvals WHERE id=?",
+            ("new-approval", "new-proposal", "new title", "new body", 2, "a-task"),
+        )
+        connection.execute("UPDATE approvals SET decision=? WHERE id=?", ("rejected", "a-task"))
+        assert [
+            tuple(row)
+            for row in connection.execute(
+                "SELECT id,arguments_title,arguments_body FROM approvals ORDER BY id"
+            )
+        ] == [
+            ("a-task", None, None),
+            ("new-approval", "new title", "new body"),
+            ("renewed", None, None),
+        ]
+        assert [
+            tuple(row)
+            for row in connection.execute("SELECT id,title,body FROM revisions ORDER BY id")
+        ] == [("new-proposal", "new title", "new body"), ("p-task", None, None)]
+    assert [note.id for note in store.list_notes()] == ["saved"]

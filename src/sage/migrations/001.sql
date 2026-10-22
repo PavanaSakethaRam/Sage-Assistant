@@ -85,7 +85,8 @@ WHEN new.status IN ('cancelled', 'rejected') BEGIN
 END;
 CREATE TRIGGER rejected_approval_scrub AFTER UPDATE OF decision ON approvals
 WHEN new.decision = 'rejected' BEGIN
-    UPDATE approvals SET arguments_title = NULL, arguments_body = NULL WHERE id = new.id;
+    UPDATE approvals SET arguments_title = NULL, arguments_body = NULL
+        WHERE proposal_id = new.proposal_id AND revision = new.revision;
     UPDATE revisions SET title = NULL, body = NULL
         WHERE id = new.proposal_id AND revision = new.revision;
 END;
