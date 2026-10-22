@@ -145,7 +145,8 @@ def release_artifacts(tmp_path_factory: pytest.TempPathFactory) -> dict[str, str
         )
     for command in commands:
         result = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=60, check=False)
-        assert result.returncode == 0, f"Release artifact build failed: {command[:3]}"
+        if result.returncode != 0:
+            pytest.fail("Release artifact build failed", pytrace=False)
     files = {}
     wheels = list(output.glob("*.whl"))
     assert len(wheels) == 1
@@ -189,16 +190,30 @@ def test_secret_scan_reports_synthetic_markers_without_their_values() -> None:
     assert redacted_findings({"clean.py": 'token = token_source()\npassword = ""'}) == []
 
 
-def test_artifact_scan_failure_does_not_expose_content_in_pytest_output(tmp_path: Path) -> None:
+@pytest.mark.parametrize("failure_path", ["content", "build"])
+def test_artifact_scan_failure_does_not_expose_content_in_pytest_output(
+    tmp_path: Path, failure_path: str
+) -> None:
     marker = "gho_" + "SYNTHETIC" * 5
     probe = tmp_path / "test_redacted_failure.py"
     probe.write_text(
-        "import runpy\n"
-        "def test_synthetic_artifact():\n"
-        f"    suite = runpy.run_path({str(Path(__file__).resolve())!r})\n"
+        "import sys\n"
+        "import pytest\n"
+        "from subprocess import CompletedProcess\n"
+        f"sys.path.insert(0, {str(ROOT)!r})\n"
+        "pytest.register_assert_rewrite('tests.security.test_release_surface')\n"
+        "from tests.security import test_release_surface as suite\n"
+        "def test_synthetic_artifact(tmp_path_factory, monkeypatch):\n"
         "    marker = 'gho_' + 'SYNTHETIC' * 5\n"
-        "    suite['test_actual_wheel_and_desktop_bundles_exclude_legacy_and_secrets'](\n"
-        "        {'wheel/sage/example.py': 'token = ' + repr(marker)})\n",
+        f"    if {failure_path!r} == 'content':\n"
+        "        suite.test_actual_wheel_and_desktop_bundles_exclude_legacy_and_secrets(\n"
+        "            {'wheel/sage/example.py': 'token = ' + repr(marker)})\n"
+        "    else:\n"
+        "        def failed_build(command, **kwargs):\n"
+        "            return CompletedProcess(command, 1, stdout=marker.encode(), "
+        "stderr=marker.encode())\n"
+        "        monkeypatch.setattr(suite.subprocess, 'run', failed_build)\n"
+        "        suite.release_artifacts.__wrapped__(tmp_path_factory)\n",
         encoding="utf-8",
     )
     result = subprocess.run(
@@ -211,4 +226,5 @@ def test_artifact_scan_failure_does_not_expose_content_in_pytest_output(tmp_path
     )
     assert result.returncode == 1
     assert marker not in result.stdout + result.stderr
-    assert "[REDACTED]" in result.stdout
+    diagnostic = "[REDACTED]" if failure_path == "content" else "Release artifact build failed"
+    assert diagnostic in result.stdout
