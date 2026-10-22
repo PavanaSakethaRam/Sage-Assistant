@@ -1,0 +1,55 @@
+name: Verify foundation
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    env:
+      UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
+      UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/.runtime/python
+      npm_config_cache: ${{ github.workspace }}/.cache/npm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.10.0'
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: '0.13.5'
+          python-version: '3.13.16'
+          enable-cache: false
+      - name: Provision locked dependencies and verified scanner (network)
+        run: |
+          uv sync --locked --all-groups
+          npm ci --include=dev
+          uv run --locked --no-sync python scripts/provision_gitleaks.py
+      - name: Deterministic execution (no accounts, model or secrets)
+        run: npm run verify:deterministic
+      - name: Locked dependency, static and redacting current/new diff scans (network)
+        if: always()
+        env:
+          DIFF_BASE: ${{ github.event.pull_request.base.sha }}
+          DIFF_HEAD: ${{ github.sha }}
+        run: uv run --locked --no-sync python scripts/verify_security.py --base "$env:DIFF_BASE" --head "$env:DIFF_HEAD"
+        shell: pwsh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: sanitized-gates-${{ matrix.os }}
+          path: |
+            coverage/security.json
+            coverage/verification.json
+            coverage/coverage-summary.json
+            coverage.json
+          if-no-files-found: error
+          retention-days: 7

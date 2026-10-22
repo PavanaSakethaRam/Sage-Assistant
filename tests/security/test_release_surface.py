@@ -171,6 +171,18 @@ def test_actual_wheel_and_desktop_bundles_exclude_legacy_and_secrets(
         pytest.fail("Credential patterns in artifacts:\n" + "\n".join(findings), pytrace=False)
     for name, text in release_artifacts.items():
         assert_safe_text(name, text)
+        if any(
+            marker in text
+            for marker in (
+                "e2e/fixtures",
+                "__sageE2E",
+                "FakeReasoner",
+                "events.jsonl",
+                "full.once",
+                "egress_probe",
+            )
+        ):
+            pytest.fail("Test-only composition in production artifact", pytrace=False)
         assert not any(
             part in {"modules", "credentials.json", ".env", "test.py", "config.json"}
             for part in Path(name).parts

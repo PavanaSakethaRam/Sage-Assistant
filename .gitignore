@@ -35,3 +35,5 @@ credentials.json
 .vite/
 out/
 coverage/
+
+coverage.json

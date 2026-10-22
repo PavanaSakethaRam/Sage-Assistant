@@ -1,0 +1,73 @@
+{
+  "python": [
+    "src/sage/__init__.py",
+    "src/sage/__main__.py",
+    "src/sage/actions.py",
+    "src/sage/config.py",
+    "src/sage/contracts.py",
+    "src/sage/logging.py",
+    "src/sage/paths.py",
+    "src/sage/protocol.py",
+    "src/sage/providers/__init__.py",
+    "src/sage/providers/base.py",
+    "src/sage/providers/copilot.py",
+    "src/sage/providers/protected_auth.py",
+    "src/sage/providers/session_store.py",
+    "src/sage/service.py",
+    "src/sage/storage.py"
+  ],
+  "javascript": [
+    "desktop/main/copilot-account.ts",
+    "desktop/main/core-launch.ts",
+    "desktop/main/core-process.ts",
+    "desktop/main/index.ts",
+    "desktop/main/ipc.ts",
+    "desktop/main/security.ts",
+    "desktop/preload/index.ts",
+    "desktop/renderer/App.tsx",
+    "desktop/renderer/Conversation.tsx",
+    "desktop/renderer/NoteReview.tsx",
+    "desktop/renderer/Notes.tsx",
+    "desktop/renderer/SafeMarkdown.tsx",
+    "desktop/renderer/Setup.tsx",
+    "desktop/renderer/host.ts",
+    "desktop/renderer/main.tsx",
+    "desktop/shared/contracts.ts",
+    "desktop/shared/external-url.ts"
+  ],
+  "trusted_python": [
+    "src/sage/__init__.py",
+    "src/sage/__main__.py",
+    "src/sage/actions.py",
+    "src/sage/config.py",
+    "src/sage/contracts.py",
+    "src/sage/logging.py",
+    "src/sage/paths.py",
+    "src/sage/protocol.py",
+    "src/sage/providers/__init__.py",
+    "src/sage/providers/base.py",
+    "src/sage/providers/copilot.py",
+    "src/sage/providers/protected_auth.py",
+    "src/sage/providers/session_store.py",
+    "src/sage/service.py",
+    "src/sage/storage.py"
+  ],
+  "trusted_javascript": [
+    "desktop/main/copilot-account.ts",
+    "desktop/main/core-launch.ts",
+    "desktop/main/core-process.ts",
+    "desktop/main/index.ts",
+    "desktop/main/ipc.ts",
+    "desktop/main/security.ts",
+    "desktop/preload/index.ts",
+    "desktop/renderer/SafeMarkdown.tsx",
+    "desktop/renderer/host.ts",
+    "desktop/shared/contracts.ts",
+    "desktop/shared/external-url.ts"
+  ],
+  "excluded": [
+    "generated build outputs: .vite, out, dist",
+    "vendor/dependencies: .venv, node_modules, .runtime",
+    "test fixtures, tests, and quality tooling are not application runtime source"
+  ]
+}

@@ -38,9 +38,17 @@ it("Forge composition emits distinct main and single CJS preload with only the p
         build: { ...merged.build, outDir: root, emptyOutDir: false },
       });
     }
-    expect(
-      (await readFile(join(root, "main.cjs"), "utf8")).length,
-    ).toBeGreaterThan(1000);
+    const production = await readFile(join(root, "main.cjs"), "utf8");
+    expect(production.length).toBeGreaterThan(1000);
+    for (const fixture of [
+      "e2e/fixtures",
+      "__sageE2E",
+      "FakeReasoner",
+      "events.jsonl",
+      "full.once",
+      "egress_probe",
+    ])
+      expect(production).not.toContain(fixture);
     const bundle = await readFile(join(root, "preload.cjs"), "utf8");
     expect(
       [...bundle.matchAll(/require\(["']([^"']+)["']\)/g)].map(

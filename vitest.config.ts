@@ -4,6 +4,7 @@ export default defineConfig({
     include: ["desktop/tests/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
+      reporter: ["text", "json-summary"],
       include: [
         "desktop/main/**/*.ts",
         "desktop/shared/**/*.ts",

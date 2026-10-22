@@ -1,6 +1,6 @@
 /** Fixed owned child; framed stdout only, redacted stderr, no replay after failure. */
-import { spawn, type ChildProcessByStdio } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import type { ChildProcessByStdio } from "node:child_process";
+import { launchCore } from "./core-launch";
 import { isAbsolute, join } from "node:path";
 import type { Readable, Writable } from "node:stream";
 import { randomUUID } from "node:crypto";
@@ -191,33 +191,7 @@ export class CoreProcess {
     this._launches++;
     this.bootId = randomUUID().replaceAll("-", "");
     this.generation = 0;
-    mkdirSync(this.options.dataDir, { recursive: true, mode: 0o700 });
-    const temporary = join(this.options.dataDir, "tmp");
-    mkdirSync(temporary, { recursive: true, mode: 0o700 });
-    const env: NodeJS.ProcessEnv = {
-      LANG: "C.UTF-8",
-      TMPDIR: temporary,
-      TMP: temporary,
-      TEMP: temporary,
-    };
-    for (const key of ["SystemRoot", "WINDIR"])
-      if (process.env[key]) env[key] = process.env[key];
-    const args = [
-      ...(this.options.pythonModule ? ["-I", "-m", "sage"] : []),
-      "--root",
-      this.options.dataDir,
-      ...(this.options.ghPath ? ["--gh-runtime", this.options.ghPath] : []),
-      ...(this.options.runtimePath
-        ? ["--copilot-runtime", this.options.runtimePath]
-        : []),
-    ];
-    const child = spawn(this.options.executable, args, {
-      cwd: this.options.dataDir,
-      env,
-      shell: false,
-      windowsHide: true,
-      stdio: ["overlapped", "overlapped", "overlapped"],
-    }) as Child;
+    const child = launchCore(this.options);
     this.child = child;
     this.children.add(child);
     const decoder = new FrameDecoder();
