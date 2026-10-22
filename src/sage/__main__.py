@@ -22,7 +22,9 @@ async def _run(root: Path | None) -> None:
         service = CoreService(store)
         sessions = SessionStore(paths.cache_dir / "copilot-disposable")
         sessions.recover_cleanup()
-        service.backend = CopilotReasoner(sessions, settings=service.get_settings)
+        service.backend = CopilotReasoner(
+            sessions, settings=service.get_settings, clock=service.clock
+        )
         loop = asyncio.get_running_loop()
         reader = asyncio.StreamReader()
         transport, _ = await loop.connect_read_pipe(

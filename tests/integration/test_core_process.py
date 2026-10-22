@@ -166,3 +166,159 @@ def test_startup_partial_failure_closes_opened_store(
     with closing(sqlite3.connect(tmp_path / "data" / "sage.sqlite3", timeout=0)) as check:
         check.execute("BEGIN EXCLUSIVE")
         assert check.execute("SELECT status FROM tasks").fetchone()[0] == "reasoning"
+
+
+@pytest.mark.parametrize("high_observation", ["completion", "sdk_error", "cleanup_error"])
+def test_production_provider_clock_expires_old_review_after_rollback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, high_observation: str
+) -> None:
+    """Removing startup's shared clock lets provider-only high samples revive Save."""
+    import io
+    from datetime import UTC, datetime, timedelta
+    from typing import Any, Self
+
+    import sage.__main__ as entry
+    import sage.providers.copilot as provider_module
+    import sage.service as service_module
+    from sage.providers.copilot import CopilotReasoner
+    from sage.providers.session_store import SessionStore
+    from tests.helpers.copilot_fake import FakeSdk
+
+    current = [datetime(2035, 1, 2, tzinfo=UTC)]
+    baseline = current[0]
+
+    class WallClock(datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> Self:
+            return cls.fromtimestamp(current[0].timestamp(), tz)
+
+    class AdvancingSdk(FakeSdk):
+        async def send(self, prompt: str, **kwargs: Any) -> Any:
+            if high_observation != "cleanup_error":
+                current[0] = baseline + timedelta(seconds=20)
+            return await super().send(prompt, **kwargs)
+
+        async def stop(self) -> None:
+            if high_observation == "cleanup_error":
+                current[0] = baseline + timedelta(seconds=20)
+                self.stop_error = True
+            await super().stop()
+
+    sdk = AdvancingSdk()
+    sdk.output = '{"text":"Sage connection check","proposal":null}'
+    if high_observation == "sdk_error":
+        sdk.error = OSError("synthetic-private-marker")
+    native = tmp_path / "native" / "copilot-runtime"
+    native.parent.mkdir()
+    native.touch()
+    (native.parent / "runtime.node").touch()
+    (native.parent / ".hostless-runtime-assets-v2").touch()
+
+    class ConfiguredReasoner(CopilotReasoner):
+        def __init__(self, sessions: SessionStore, **kwargs: Any) -> None:
+            # Supply fake prerequisites only. Startup must supply its clock binding.
+            super().__init__(
+                sessions,
+                runtime_path=native,
+                token_source=lambda: "gho_synthetic",
+                client_factory=sdk.client,
+                **kwargs,
+            )
+
+    monkeypatch.setattr(service_module, "datetime", WallClock)
+    monkeypatch.setattr(provider_module, "datetime", WallClock)
+    monkeypatch.setattr(entry, "CopilotReasoner", ConfiguredReasoner)
+
+    async def run() -> None:
+        source_read, source_write = os.pipe()
+        output_read, output_write = os.pipe()
+        output_transport: asyncio.ReadTransport | None = None
+        owned: asyncio.Task[None] | None = None
+        with (
+            os.fdopen(source_read, "rb") as source,
+            os.fdopen(output_write, "wb") as sink,
+            os.fdopen(output_read, "rb") as output,
+            monkeypatch.context() as patch,
+        ):
+            patch.setattr(sys, "stdin", io.TextIOWrapper(source))
+            patch.setattr(sys, "stdout", io.TextIOWrapper(sink))
+            loop = asyncio.get_running_loop()
+            reader = asyncio.StreamReader()
+            output_transport, _ = await loop.connect_read_pipe(
+                lambda: asyncio.StreamReaderProtocol(reader), output
+            )
+            owned = asyncio.create_task(entry._run(tmp_path))
+
+            async def call(identifier: str, method: str, params: dict[str, Any]) -> Any:
+                os.write(
+                    source_write,
+                    encode_frame(
+                        {
+                            "version": 1,
+                            "id": identifier,
+                            "kind": "request",
+                            "method": method,
+                            "params": params,
+                        }
+                    ),
+                )
+                response = await asyncio.wait_for(read_frame(reader), 5)
+                assert response["id"] == identifier and response["kind"] == "response"
+                return response["result"]
+
+            try:
+                await call(
+                    "settings",
+                    "settings.update",
+                    {"ai_mode": "assistant", "reasoning_backend": "copilot"},
+                )
+                proposal = await call(
+                    "propose", "notes.propose", {"title": "old", "body": "old body"}
+                )
+                connection = await call("check", "connection.test", {})
+                expected = {
+                    "completion": "ready",
+                    "sdk_error": "error",
+                    "cleanup_error": "incompatible",
+                }
+                assert connection["status"] == expected[high_observation]
+                assert current[0] == baseline + timedelta(seconds=20)
+                current[0] = baseline + timedelta(seconds=10)
+                saved = await call(
+                    "save",
+                    "notes.decide",
+                    {"proposal_id": proposal["id"], "revision": 1, "decision": "save"},
+                )
+                assert saved["status"] == "rejected"
+                assert (await call("before", "notes.list", {}))["items"] == []
+                revised = await call(
+                    "revise",
+                    "notes.revise",
+                    {
+                        "proposal_id": proposal["id"],
+                        "revision": 1,
+                        "title": "fresh",
+                        "body": "fresh body",
+                    },
+                )
+                fresh = await call(
+                    "freshsave",
+                    "notes.decide",
+                    {"proposal_id": revised["id"], "revision": 2, "decision": "save"},
+                )
+                assert fresh["status"] == "succeeded"
+                await call("shutdown", "app.shutdown", {})
+                await asyncio.wait_for(owned, 5)
+                assert list((tmp_path / "cache" / "copilot-disposable").iterdir()) == []
+            finally:
+                os.close(source_write)
+                if owned is not None and not owned.done():
+                    await asyncio.wait_for(owned, 5)
+                if output_transport is not None:
+                    output_transport.close()
+        assert sdk.created == 1 and len(sdk.prompts) == 1
+        with closing(sqlite3.connect(tmp_path / "data" / "sage.sqlite3", timeout=0)) as db:
+            db.execute("BEGIN EXCLUSIVE")
+            assert db.execute("SELECT COUNT(*) FROM notes").fetchone()[0] == 1
+
+    asyncio.run(run())
