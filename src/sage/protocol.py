@@ -100,17 +100,18 @@ def encode_frame(message: dict[str, object]) -> bytes:
 
 
 async def read_frame(reader: asyncio.StreamReader) -> dict[str, object]:
+    # Healthy idle pipes have no deadline. Once a frame starts, one budget covers
+    # the rest of its prefix and body; fragments never renew that budget.
+    first = await reader.read(1)
+    if not first:
+        raise EOFError
     try:
-        prefix = await reader.readexactly(4)
-    except asyncio.IncompleteReadError as error:
-        if not error.partial:
-            raise EOFError from None
-        raise ProtocolError("Invalid frame") from None
-    length = int.from_bytes(prefix, "big")
-    if not 0 < length <= MAX_FRAME_BYTES:
-        raise ProtocolError("Invalid frame")
-    try:
-        body = await reader.readexactly(length)
+        async with asyncio.timeout(30):
+            prefix = first + await reader.readexactly(3)
+            length = int.from_bytes(prefix, "big")
+            if not 0 < length <= MAX_FRAME_BYTES:
+                raise ProtocolError("Invalid frame")
+            body = await reader.readexactly(length)
         text = body.decode("utf-8")
         value = json.loads(text, object_pairs_hook=_pairs, parse_constant=_constant)
         stack = [(value, 0)]
@@ -127,5 +128,5 @@ async def read_frame(reader: asyncio.StreamReader) -> dict[str, object]:
         if not isinstance(value, dict):
             raise ValueError
         return cast(dict[str, object], value)
-    except (asyncio.IncompleteReadError, ValueError, UnicodeError, RecursionError):
+    except (asyncio.IncompleteReadError, TimeoutError, ValueError, UnicodeError, RecursionError):
         raise ProtocolError("Invalid frame") from None

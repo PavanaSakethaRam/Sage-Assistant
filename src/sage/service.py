@@ -173,11 +173,13 @@ class CoreService:
                 )
             case "notes.revise":
                 edit = RevisionInput.model_validate(params)
+                self.store.cleanup(self.clock())
                 return self.actions.revise_note(
                     edit.proposal_id, edit.revision, edit.title, edit.body
                 ).model_dump(mode="json")
             case "notes.decide":
                 decision = Decision.model_validate(params)
+                self.store.cleanup(self.clock())
                 return self.actions.decide(
                     decision.proposal_id, decision.revision, decision.decision
                 ).model_dump(mode="json")
@@ -198,9 +200,11 @@ class CoreService:
                 return self._page(items, page)
             case "tasks.list":
                 page = Page.model_validate(params)
+                self.store.cleanup(self.clock())
                 return self._page(self.store.task_summaries(page.limit + 1, page.offset), page)
             case "tasks.get":
                 task = TaskId.model_validate(params)
+                self.store.cleanup(self.clock())
                 detail = self.store.task_detail(task.task_id)
                 if detail is None:
                     raise LookupError
@@ -209,6 +213,7 @@ class CoreService:
                 return detail
             case "tasks.cancel":
                 task = TaskId.model_validate(params)
+                self.store.cleanup(self.clock())
                 return self.actions.cancel_task(task.task_id).model_dump(mode="json")
             case "app.shutdown":
                 Empty.model_validate(params)
@@ -311,12 +316,10 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
             try:
                 incoming = asyncio.create_task(read_frame(reader))
                 done, _ = await asyncio.wait(
-                    (incoming, stop_waiter), timeout=30, return_when=asyncio.FIRST_COMPLETED
+                    (incoming, stop_waiter), return_when=asyncio.FIRST_COMPLETED
                 )
                 if stop_waiter in done:
                     break
-                if incoming not in done:
-                    raise TimeoutError
                 message = incoming.result()
             except EOFError:
                 break

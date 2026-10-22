@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
@@ -692,3 +692,210 @@ def test_owner_cancellation_discards_late_completion(tmp_path: Path) -> None:
         service.close()
 
     asyncio.run(run())
+
+
+def test_idle_connection_survives_receive_budget_and_accepts_later_request(
+    core: CoreService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def run() -> None:
+        original_wait = asyncio.wait
+
+        async def accelerated_wait(
+            fs: Iterable[asyncio.Future[object]],
+            *,
+            timeout: float | None = None,
+            return_when: str = asyncio.ALL_COMPLETED,
+        ) -> tuple[set[asyncio.Future[object]], set[asyncio.Future[object]]]:
+            # Expire any 30s budget immediately; an untouched reader must have none.
+            return await original_wait(
+                fs, timeout=0 if timeout == 30 else timeout, return_when=return_when
+            )
+
+        monkeypatch.setattr(asyncio, "wait", accelerated_wait)
+        reader = asyncio.StreamReader()
+        writer = Writer()
+        running = asyncio.create_task(run_service(reader, writer, core))
+        for _ in range(20):
+            await asyncio.sleep(0)
+        assert not running.done()
+        assert writer.data == b""
+        reader.feed_data(encode_frame(request("later", "settings.get")))
+        reader.feed_data(encode_frame(request("stop", "app.shutdown")))
+        await asyncio.wait_for(running, 1)
+        found = await responses(writer)
+        assert [frame["id"] for frame in found] == ["later", "stop"]
+        assert found[0]["result"] == {"ai_mode": "local", "reasoning_backend": None}
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("partial", [b"\0", (10).to_bytes(4, "big") + b"{"])
+def test_partial_frame_receive_budget_starts_after_first_byte(
+    core: CoreService, monkeypatch: pytest.MonkeyPatch, partial: bytes
+) -> None:
+    async def run() -> None:
+        original_timeout = asyncio.timeout
+
+        def accelerated_timeout(delay: float | None) -> asyncio.Timeout:
+            return original_timeout(0 if delay == 30 else delay)
+
+        monkeypatch.setattr(asyncio, "timeout", accelerated_timeout)
+        reader = asyncio.StreamReader()
+        writer = Writer()
+        reader.feed_data(partial)
+        await asyncio.wait_for(run_service(reader, writer, core), 1)
+        found = await responses(writer)
+        assert found == [{"version": 1, "id": None, "kind": "error", "code": "invalid_frame"}]
+        assert writer.closed
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("microseconds,retained", [(-1, True), (0, False)])
+def test_tasks_get_enforces_exact_draft_retention_without_periodic_sweep(
+    tmp_path: Path, microseconds: int, retained: bool
+) -> None:
+    now = [datetime.now(UTC)]
+    service = CoreService(Store.open(tmp_path / "read-cutoff.sqlite3"), clock=lambda: now[0])
+    try:
+        proposal = service.actions.propose_note("draft", "Private title", "Private body")
+        now[0] += timedelta(hours=24, microseconds=microseconds)
+        detail = result(dispatch(service, request("get", "tasks.get", task_id=proposal.task_id)))
+        assert (detail["proposal"] is not None) is retained
+        assert detail["review_required"] is retained
+        if not retained:
+            assert "Private" not in json.dumps(detail)
+        with service.store.transaction() as db:
+            assert (db.execute("SELECT body FROM revisions").fetchone()[0] is not None) is retained
+            assert (
+                db.execute("SELECT arguments_body FROM approvals").fetchone()[0] is not None
+            ) is retained
+    finally:
+        service.close()
+
+
+@pytest.mark.parametrize("microseconds,retained", [(-1, True), (0, False)])
+def test_revision_cannot_renew_retention_expired_text_without_prior_get(
+    tmp_path: Path, microseconds: int, retained: bool
+) -> None:
+    now = [datetime.now(UTC)]
+    service = CoreService(Store.open(tmp_path / "revise-cutoff.sqlite3"), clock=lambda: now[0])
+    try:
+        proposal = service.actions.propose_note("draft", "Private title", "Private body")
+        now[0] += timedelta(hours=24, microseconds=microseconds)
+        revised = dispatch(
+            service,
+            request(
+                "edit",
+                "notes.revise",
+                proposal_id=proposal.id,
+                revision=1,
+                title="New title",
+                body="New body",
+            ),
+        )
+        if retained:
+            edited = result(revised)
+            saved = result(
+                dispatch(
+                    service,
+                    request(
+                        "save",
+                        "notes.decide",
+                        proposal_id=edited["id"],
+                        revision=2,
+                        decision="save",
+                    ),
+                )
+            )
+            assert saved["status"] == "succeeded"
+        else:
+            assert revised["code"] == "invalid_request"
+            assert service.store.list_notes() == []
+            with service.store.transaction() as db:
+                assert db.execute("SELECT count(*) FROM revisions").fetchone()[0] == 1
+                assert db.execute("SELECT count(*) FROM approvals").fetchone()[0] == 1
+                assert db.execute("SELECT body FROM revisions").fetchone()[0] is None
+                assert db.execute("SELECT arguments_body FROM approvals").fetchone()[0] is None
+    finally:
+        service.close()
+
+
+@pytest.mark.parametrize("microseconds,retained", [(-1, True), (0, False)])
+def test_decision_boundary_scrubs_expired_draft_and_recovers_completed_note(
+    tmp_path: Path, microseconds: int, retained: bool
+) -> None:
+    now = [datetime.now(UTC)]
+    service = CoreService(Store.open(tmp_path / "decision-cutoff.sqlite3"), clock=lambda: now[0])
+    try:
+        pending = service.actions.propose_note("pending", "Expired title", "Expired body")
+        completed = service.actions.propose_note("completed", "Saved title", "Saved body")
+        saved = service.actions.decide(completed.id, 1, "save")
+        now[0] += timedelta(hours=24, microseconds=microseconds)
+        rejected = result(
+            dispatch(
+                service,
+                request(
+                    "expired", "notes.decide", proposal_id=pending.id, revision=1, decision="save"
+                ),
+            )
+        )
+        assert rejected["status"] == "rejected"
+        with service.store.transaction() as db:
+            assert db.execute("SELECT count(*) FROM revisions WHERE body IS NOT NULL").fetchone()[
+                0
+            ] == (2 if retained else 0)
+            assert db.execute(
+                "SELECT count(*) FROM approvals WHERE arguments_body IS NOT NULL"
+            ).fetchone()[0] == (2 if retained else 0)
+        recovered = result(
+            dispatch(
+                service,
+                request(
+                    "saved", "notes.decide", proposal_id=completed.id, revision=1, decision="save"
+                ),
+            )
+        )
+        assert recovered["note_id"] == saved.note_id
+        detail = result(dispatch(service, request("outcome", "tasks.get", task_id="completed")))
+        assert cast(dict[str, object], detail["outcome"])["note_id"] == saved.note_id
+        assert len(service.store.list_notes()) == 1
+    finally:
+        service.close()
+
+
+def test_failed_retention_blocks_expired_reads_revision_and_decision(tmp_path: Path) -> None:
+    now = [datetime.now(UTC)]
+    service = CoreService(Store.open(tmp_path / "failed-cutoff.sqlite3"), clock=lambda: now[0])
+    try:
+        proposal = service.actions.propose_note("draft", "Private title", "Private body")
+        with service.store.transaction() as db:
+            db.execute(
+                "CREATE TRIGGER deny_retention BEFORE UPDATE ON revisions "
+                "BEGIN SELECT RAISE(ABORT,'SYNTHETIC_SECRET'); END"
+            )
+        now[0] += timedelta(hours=24)
+        messages = [
+            request("get", "tasks.get", task_id="draft"),
+            request(
+                "edit",
+                "notes.revise",
+                proposal_id=proposal.id,
+                revision=1,
+                title="New title",
+                body="New body",
+            ),
+            request("save", "notes.decide", proposal_id=proposal.id, revision=1, decision="save"),
+        ]
+        for message in messages:
+            response = dispatch(service, message)
+            assert response["code"] == "internal_error"
+            assert "Private" not in json.dumps(response)
+            assert "SYNTHETIC_SECRET" not in json.dumps(response)
+        with service.store.transaction() as db:
+            assert db.execute("SELECT count(*) FROM revisions").fetchone()[0] == 1
+            assert db.execute("SELECT count(*) FROM approvals").fetchone()[0] == 1
+            assert db.execute("SELECT count(*) FROM operations").fetchone()[0] == 0
+        assert service.store.list_notes() == []
+    finally:
+        service.close()
