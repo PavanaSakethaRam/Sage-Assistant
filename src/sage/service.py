@@ -2,7 +2,8 @@
 
 import asyncio
 from collections.abc import Callable
-from datetime import UTC, datetime
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal, Protocol
 from uuid import uuid4
 
@@ -10,7 +11,15 @@ from pydantic import AfterValidator, Field, ValidationError, field_validator
 
 from sage.actions import ActionService
 from sage.config import Settings
-from sage.contracts import Backend, Contract, NoteContent, Revision, _context_text
+from sage.contracts import (
+    Backend,
+    Contract,
+    NoteContent,
+    ReasoningRequest,
+    ReasoningResult,
+    Revision,
+    _context_text,
+)
 from sage.logging import diagnostic
 from sage.protocol import (
     ErrorCode,
@@ -24,6 +33,7 @@ from sage.protocol import (
     read_frame,
     request,
 )
+from sage.providers.base import ReasoningBackend
 from sage.storage import Store
 
 
@@ -86,13 +96,29 @@ class ReasoningInput(Contract):
         return value
 
 
+@dataclass
+class _Inference:
+    request: ReasoningRequest
+    generation: int
+    cancelled: bool = False
+
+
 class CoreService:
     """Startup owns one Store and one long-lived ActionService with a fresh boot."""
 
-    def __init__(self, store: Store, clock: Callable[[], datetime] | None = None) -> None:
+    def __init__(
+        self,
+        store: Store,
+        clock: Callable[[], datetime] | None = None,
+        backend: ReasoningBackend | None = None,
+    ) -> None:
         self.store = store
         self.clock = clock or (lambda: datetime.now(UTC))
         self.actions = ActionService(store, self.clock, uuid4().hex)
+        self.clock = self.actions.observe_clock
+        self.backend = backend
+        self._generation = 0
+        self._inflight: dict[str, _Inference] = {}
         self._seen: set[str] = set()
         self.shutting_down = False
         self.store.interrupt_inference(self.clock())
@@ -100,6 +126,21 @@ class CoreService:
     def close(self) -> None:
         self.shutting_down = True
         self.store.close()
+
+    async def aclose(self) -> None:
+        self.shutting_down = True
+        for entry in self._inflight.values():
+            entry.cancelled = True
+        try:
+            if self.backend is not None:
+                await self.backend.aclose()
+        finally:
+            self.close()
+
+    def get_settings(self) -> Settings:
+        with self.store.transaction() as db:
+            row = db.execute("SELECT data_json FROM settings WHERE id=1").fetchone()
+        return Settings.model_validate_json(row[0]) if row else Settings()
 
     async def dispatch(self, message: dict[str, object]) -> dict[str, object]:
         try:
@@ -114,7 +155,23 @@ class CoreService:
         if self.shutting_down:
             return failure(envelope.id, "shutting_down")
         try:
-            value = self._dispatch(envelope)
+            self.clock()
+            if envelope.method in {"reasoning.start", "connection.test", "reasoning.cancel"}:
+                value = await self._provider_dispatch(envelope)
+            else:
+                if envelope.method == "settings.update":
+                    Settings.model_validate(envelope.params)
+                    self._generation += 1
+                    await self._cancel_inflight()
+                elif envelope.method == "app.shutdown":
+                    Empty.model_validate(envelope.params)
+                    await self._cancel_inflight()
+                elif envelope.method == "tasks.cancel":
+                    target = TaskId.model_validate(envelope.params)
+                    for identifier, entry in list(self._inflight.items()):
+                        if entry.request.task_id == target.task_id:
+                            await self._cancel_request(identifier)
+                value = self._dispatch(envelope)
             return Response(id=envelope.id, result=value).model_dump(mode="json")
         except LookupError:
             return failure(envelope.id, "not_found")
@@ -123,6 +180,151 @@ class CoreService:
         except Exception:
             diagnostic("request_failed")
             return failure(envelope.id, "internal_error")
+
+    async def _cancel_request(self, request_id: str) -> bool:
+        entry = self._inflight.get(request_id)
+        if entry is None:
+            return False
+        entry.cancelled = True
+        with self.store.transaction() as db:
+            db.execute(
+                "UPDATE tasks SET status='cancelled' WHERE id=? AND status='reasoning'",
+                (entry.request.task_id,),
+            )
+        if self.backend is not None:
+            await self.backend.cancel(request_id)
+        return True
+
+    async def _cancel_inflight(self) -> None:
+        for identifier in list(self._inflight):
+            await self._cancel_request(identifier)
+
+    async def _provider_dispatch(self, envelope: Request) -> dict[str, object]:
+        if envelope.method == "reasoning.cancel":
+            cancel = Cancel.model_validate(envelope.params)
+            cancelled = await self._cancel_request(cancel.request_id)
+            return {"status": "cancelled" if cancelled else "unknown_request"}
+        if envelope.method == "connection.test":
+            Empty.model_validate(envelope.params)
+            if self.backend is None or self.get_settings().ai_mode != "assistant":
+                return {"status": "unavailable", "code": "inference_unavailable"}
+            # Fixed supported Copilot capability, not a provider/plugin method registry.
+            from sage.providers.copilot import CopilotReasoner
+
+            if not isinstance(self.backend, CopilotReasoner):
+                return {"status": "unavailable", "code": "inference_unavailable"}
+            return (
+                self.backend.readiness().model_dump(mode="json")
+                if self.shutting_down
+                else (await self.backend.connection_test()).model_dump(mode="json")
+            )
+        value = ReasoningInput.model_validate(envelope.params)
+        settings = self.get_settings()
+        if (
+            self.backend is None
+            or settings.ai_mode != "assistant"
+            or settings.reasoning_backend != "copilot"
+            or value.backend != "copilot"
+        ):
+            return {"status": "unavailable", "code": "inference_unavailable"}
+        if self.backend.readiness().status in {"unavailable", "auth_required", "incompatible"}:
+            return {"status": "unavailable", "code": "inference_unavailable"}
+        now = self.clock()
+        request = ReasoningRequest(
+            request_id=envelope.id,
+            task_id=uuid4().hex,
+            user_text=value.user_text,
+            attached_context=tuple(value.attached_context),
+            backend=value.backend,
+            model=value.model,
+            deadline=now + timedelta(milliseconds=envelope.timeout_ms),
+            cancellation_id=uuid4().hex,
+        )
+        entry = _Inference(request, self._generation)
+        self._inflight[envelope.id] = entry
+        stamp = now.isoformat(timespec="microseconds")
+        with self.store.transaction() as db:
+            db.execute(
+                "INSERT INTO tasks (id,status,created_at,updated_at) VALUES (?,?,?,?)",
+                (request.task_id, "reasoning", stamp, stamp),
+            )
+        try:
+            result = ReasoningResult.model_validate(await self.backend.reason(request))
+            now = self.clock()
+            current = self._inflight.get(envelope.id)
+            with self.store.transaction() as db:
+                task = db.execute(
+                    "SELECT status FROM tasks WHERE id=?", (request.task_id,)
+                ).fetchone()
+                revision = db.execute(
+                    "SELECT 1 FROM revisions WHERE task_id=?", (request.task_id,)
+                ).fetchone()
+            # No await occurs from this authority check through trusted draft insertion.
+            active_task = asyncio.current_task()
+            valid = (
+                current is entry
+                and not entry.cancelled
+                and not self.shutting_down
+                and entry.generation == self._generation
+                and now < request.deadline
+                and self.get_settings() == settings
+                and result.request_id == envelope.id
+                and task is not None
+                and task["status"] == "reasoning"
+                and revision is None
+                and not (active_task and active_task.cancelling())
+            )
+            if not valid:
+                with self.store.transaction() as db:
+                    db.execute(
+                        "UPDATE tasks SET status='cancelled',updated_at=? "
+                        "WHERE id=? AND status='reasoning'",
+                        (now.isoformat(timespec="microseconds"), request.task_id),
+                    )
+                return {
+                    "status": "cancelled",
+                    "task_id": request.task_id,
+                    "text": "",
+                    "proposal": None,
+                    "usage": None,
+                }
+            proposal = None
+            if result.status == "completed" and result.proposal is not None:
+                proposal = self.actions.complete_reasoning(request.task_id, result.proposal)
+            else:
+                status = {"completed": "completed", "error": "failed", "cancelled": "cancelled"}[
+                    result.status
+                ]
+                with self.store.transaction() as db:
+                    db.execute(
+                        "UPDATE tasks SET status=?,updated_at=? WHERE id=? AND status='reasoning'",
+                        (status, now.isoformat(timespec="microseconds"), request.task_id),
+                    )
+            return {
+                "status": result.status,
+                "task_id": request.task_id,
+                "text": result.text,
+                "proposal": proposal.model_dump(mode="json") if proposal else None,
+                "usage": result.usage.model_dump(mode="json") if result.usage else None,
+            }
+        except asyncio.CancelledError:
+            entry.cancelled = True
+            with self.store.transaction() as db:
+                db.execute(
+                    "UPDATE tasks SET status='cancelled' WHERE id=? AND status='reasoning'",
+                    (request.task_id,),
+                )
+            await self.backend.cancel(request.request_id)
+            raise
+        except Exception:
+            with self.store.transaction() as db:
+                db.execute(
+                    "UPDATE tasks SET status='failed' WHERE id=? AND status='reasoning'",
+                    (request.task_id,),
+                )
+            raise
+        finally:
+            self._inflight.pop(envelope.id, None)
 
     def _dispatch(self, envelope: Request) -> dict[str, object]:
         params = envelope.params
@@ -144,28 +346,20 @@ class CoreService:
                 return settings.model_dump(mode="json")
             case "readiness.list":
                 Empty.model_validate(params)
-                return {
-                    "items": [
-                        {
-                            "provider": provider,
-                            "status": "unavailable",
-                            "evidence": [],
-                            "version": None,
-                            "destination": None,
-                            "explanation": "inference_unavailable",
-                        }
-                        for provider in ("copilot", "local", "api")
-                    ]
-                }
-            case "reasoning.start":
-                ReasoningInput.model_validate(params)
-                return {"status": "unavailable", "code": "inference_unavailable"}
-            case "connection.test":
-                Empty.model_validate(params)
-                return {"status": "unavailable", "code": "inference_unavailable"}
-            case "reasoning.cancel":
-                Cancel.model_validate(params)
-                return {"status": "unknown_request"}
+                items: list[dict[str, object]] = [
+                    {
+                        "provider": provider,
+                        "status": "unavailable",
+                        "evidence": [],
+                        "version": None,
+                        "destination": None,
+                        "explanation": "inference_unavailable",
+                    }
+                    for provider in ("copilot", "local", "api")
+                ]
+                if self.backend is not None:
+                    items[0] = self.backend.readiness().model_dump(mode="json")
+                return {"items": items}
             case "notes.propose":
                 note = NoteContent.model_validate(params)
                 return self.actions.propose_note(uuid4().hex, note.title, note.body).model_dump(

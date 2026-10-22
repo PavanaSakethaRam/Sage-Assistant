@@ -3,7 +3,8 @@
 import hashlib
 import json
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 from uuid import uuid4
@@ -60,6 +61,20 @@ class ActionService:
         self._clock = clock
         self._boot_id = boot_id
         self._latest: datetime | None = None
+        self._clock_invalidation_pending = False
+
+    @contextmanager
+    def _transaction(self) -> Iterator[sqlite3.Connection]:
+        # A transient write/commit failure cannot revive leases after clock catchup.
+        with self._store.transaction() as db:
+            if self._clock_invalidation_pending:
+                db.execute(
+                    "UPDATE approvals SET expires_at=issued_at "
+                    "WHERE boot_id=? AND consumed_at IS NULL",
+                    (self._boot_id,),
+                )
+            yield db
+        self._clock_invalidation_pending = False
 
     def _now(self, db: sqlite3.Connection) -> datetime:
         now = self._clock()
@@ -67,13 +82,17 @@ class ActionService:
             raise ValueError("Actions require a timezone-aware clock")
         now = now.astimezone(UTC)
         if self._latest is not None and now < self._latest:
+            self._clock_invalidation_pending = True
+        if self._clock_invalidation_pending:
             # Persist invalidation, so catching up or recreating the service cannot
             # restore a lease. Do not reject/scrub recoverable preview content.
             db.execute(
                 "UPDATE approvals SET expires_at=issued_at WHERE boot_id=? AND consumed_at IS NULL",
                 (self._boot_id,),
             )
-        self._latest = max(now, self._latest) if self._latest is not None else now
+        # Once the anomaly's invalidation commits, a fresh explicit review may
+        # use this clock baseline. Pending invalidation survives any failed commit.
+        self._latest = now
         return now
 
     def _create(
@@ -142,7 +161,7 @@ class ActionService:
         content = NoteContent(title=title, body=body)
         if type(task_id) is not str or not task_id:
             raise ValueError("A task identity is required")
-        with self._store.transaction() as db:
+        with self._transaction() as db:
             now = self._now(db)
             task = db.execute("SELECT id FROM tasks WHERE id=?", (task_id,)).fetchone()
             proposal = None
@@ -157,11 +176,37 @@ class ActionService:
             raise ValueError("Task already exists; review its current revision")
         return proposal
 
+    def observe_clock(self) -> datetime:
+        """All core time observations share the approval rollback high-water mark."""
+        with self._transaction() as db:
+            return self._now(db)
+
+    def complete_reasoning(self, task_id: str, content: NoteContent) -> ActionProposal:
+        """Trusted one-way reasoning-to-review transition; never saves a note."""
+        content = NoteContent.model_validate(content)
+        proposal = None
+        with self._transaction() as db:
+            now = self._now(db)
+            task = db.execute("SELECT status FROM tasks WHERE id=?", (task_id,)).fetchone()
+            if (
+                task is not None
+                and task["status"] == "reasoning"
+                and not db.execute("SELECT 1 FROM revisions WHERE task_id=?", (task_id,)).fetchone()
+                and not db.execute(
+                    "SELECT 1 FROM operations WHERE task_id=?", (task_id,)
+                ).fetchone()
+            ):
+                proposal = self._create(db, task_id, 1, content, now)
+                db.execute("UPDATE tasks SET status='pending' WHERE id=?", (task_id,))
+        if proposal is None:
+            raise ValueError("Reasoning task is no longer current")
+        return proposal
+
     def revise_note(self, proposal_id: str, revision: int, title: str, body: str) -> ActionProposal:
         content = NoteContent(title=title, body=body)
         if not _identity(proposal_id, revision):
             raise ValueError("Invalid proposal identity")
-        with self._store.transaction() as db:
+        with self._transaction() as db:
             now = self._now(db)
             row = db.execute(
                 "SELECT * FROM revisions WHERE id=? AND revision=?", (proposal_id, revision)
@@ -287,7 +332,7 @@ class ActionService:
         if not _identity(proposal_id, revision) or decision not in ("save", "cancel"):
             return ActionResult(status="rejected", diagnostic="Invalid review request")
         try:
-            with self._store.transaction() as db:
+            with self._transaction() as db:
                 now = self._now(db)
                 return self._decide(db, proposal_id, revision, decision, now)
         except StorageError:
@@ -396,7 +441,7 @@ class ActionService:
         if type(task_id) is not str or not task_id:
             return ActionResult(status="rejected")
         try:
-            with self._store.transaction() as db:
+            with self._transaction() as db:
                 now = self._now(db)
                 task = db.execute("SELECT status FROM tasks WHERE id=?", (task_id,)).fetchone()
                 if task is None:
@@ -414,7 +459,7 @@ class ActionService:
 
     def get_outcome(self, task_id: str) -> ActionResult | None:
         """Read validated committed evidence without attempting a new effect."""
-        with self._store.transaction() as db:
+        with self._transaction() as db:
             proposal = db.execute(
                 "SELECT * FROM revisions WHERE task_id=? ORDER BY revision DESC LIMIT 1",
                 (task_id,),

@@ -7,16 +7,22 @@ from pathlib import Path
 
 from sage.logging import diagnostic
 from sage.paths import app_paths
+from sage.providers.copilot import CopilotReasoner
+from sage.providers.session_store import SessionStore
 from sage.service import CoreService, run_service
 from sage.storage import Store
 
 
 async def _run(root: Path | None) -> None:
-    store = Store.open(app_paths(root).database)
+    paths = app_paths(root)
+    store = Store.open(paths.database)
     service: CoreService | None = None
     transport: asyncio.ReadTransport | None = None
     try:
         service = CoreService(store)
+        sessions = SessionStore(paths.cache_dir / "copilot-disposable")
+        sessions.recover_cleanup()
+        service.backend = CopilotReasoner(sessions, settings=service.get_settings)
         loop = asyncio.get_running_loop()
         reader = asyncio.StreamReader()
         transport, _ = await loop.connect_read_pipe(
@@ -33,7 +39,7 @@ async def _run(root: Path | None) -> None:
         if transport is not None:
             transport.close()
         if service is not None:
-            service.close()
+            await service.aclose()
         else:
             store.close()
         diagnostic("core_stopped")

@@ -21,6 +21,10 @@ import pytest
         "sage.service",
         "sage.logging",
         "sage.__main__",
+        "sage.providers",
+        "sage.providers.base",
+        "sage.providers.copilot",
+        "sage.providers.session_store",
     ],
 )
 def test_import_is_inert(module: str, tmp_path: Path) -> None:
