@@ -19,7 +19,12 @@ test-results/
 playwright-report/
 .env
 .env.*
-!.env.example
+# No credential samples are part of the release surface, including env examples.
+config.json
+test.py
+voice_profile*.json
+voice_profiles*.json
+custom_commands.json
 *.sqlite
 *.sqlite3
 *.sqlite3-*

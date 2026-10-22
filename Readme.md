@@ -1,137 +1,87 @@
-# Sage Assistant 🤖
+# Sage Assistant
 
-SageAssistant is an AI-powered desktop assistant for Windows that enables real-time voice interaction and screen automation. Inspired by futuristic assistants like JARVIS and EDITH, SageAssistant lets you control browsers, VS Code, WhatsApp, Notepad, system settings, and more—all through natural voice commands. Simply say "Hey Sage" and let the magic begin! 🎤✨
+Sage is a desktop assistant foundation with typed conversation, explicit setup, and reviewed local Markdown notes. You can create, review, save, search and reopen notes without an AI account. A model can suggest a draft; only a separate human Save can authorize the note write.
 
-## Features 🌟
+This checkout is under development. It does not yet establish a production release, a complete JARVIS demo, Windows/macOS support parity or authenticated provider operation. The original voice and screen automation prototype has been retired.
 
-- **Wake Word Detection 🔊**  
-    Continuously listens for "Hey Sage" using an offline wake word detector running in a separate thread, with adjustable sensitivity.
+## Current behavior and support
 
-- **Speech-to-Text (STT) 🗣️➡️💬**  
-    Utilizes OpenAI Whisper (small model) for fast (<500ms delay) real-time transcription of your voice commands.
+| Surface                                                         | Current state                                                                                                                                      |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local notes                                                     | Implemented: literal title/body review, revision-bound Save/Cancel, SQLite persistence, search and task history                                    |
+| Local AI only                                                   | Default mode; local notes work. Local inference is unavailable, so this is not offline AI                                                          |
+| GitHub Copilot                                                  | Pinned SDK adapter and explicit protected-account selection/test flow implemented; real account, entitlement and model operation remain unverified |
+| Codex, OpenCode, Claude                                         | Unavailable; no adapters implemented                                                                                                               |
+| API key mode                                                    | Unavailable; no API adapter or key-entry/storage flow                                                                                              |
+| Desktop                                                         | Sandboxed Electron/React implementation; unpackaged macOS arm64 host/core/preload smoke evidence only                                              |
+| Windows                                                         | Paths and overlapped pipe implementation exist; native execution and clean-machine verification outstanding                                        |
+| Linux                                                           | Development path candidates exist; no release support claim                                                                                        |
+| Packaging                                                       | Build configuration exists; frozen core staging, protected package proof, signing and installers remain outstanding                                |
+| Voice, screen, browser, coding, organizer and social automation | Future slices; no maintained execution capability                                                                                                  |
 
-- **Natural Language Processing & Dialogue Management 💡**  
-    Powered by a custom NLP module based on spaCy to interpret commands and maintain conversation context, backed by a training set of 100-150 common phrases.
+VS Code sign-in does not establish SDK authentication. Account selection is consent to a candidate, not proof of credentials or Copilot readiness. Only a separate explicit connection test attempts a fixed synthetic cloud request and may consume quota. See [security and evidence boundaries](docs/security.md).
 
-- **Screen Understanding 🖥️🔍**  
-    Combines Windows UI Automation (pywinauto), Tesseract OCR, and OpenCV for capturing screen content and extracting both text and visuals.
+## Locked development setup
 
-- **Browser Automation (Selenium) 🌐**  
-    Controls Chrome, Edge, and Opera to automate tasks like sending LinkedIn messages, filling out forms, and managing media playback.
+The maintained Python package is `src/sage`; the desktop is `desktop`. Use Python 3.13 and Node 26.10.0 (the manifest requires >=26.10.0 <27). Current development evidence uses CPython 3.13.16; the final 3.13.17 build check remains outstanding. `uv.lock` and `package-lock.json` pin the dependency graphs.
 
-- **VS Code Automation (pywinauto) 📝**  
-    Launches VS Code, searches files, edits code, and manages extensions seamlessly.
+From the repository root, with uv and the stated Node version available, the following POSIX-shell commands keep downloaded Python and caches in the project:
 
-- **WhatsApp Automation (pywinauto) 💬**  
-    Opens the WhatsApp Microsoft Store App, searches contacts, sends messages, and even manages audio/video calls.
+```sh
+export UV_CACHE_DIR="$PWD/.cache/uv"
+export UV_PYTHON_INSTALL_DIR="$PWD/.runtime/python"
+uv sync --frozen --all-groups --python 3.13.16
+npm ci --cache .cache/npm
+```
 
-- **Notepad Automation (pywinauto) 🗒️**  
-    Facilitates voice typing, file management, text summarization, and language translation (e.g., Japanese, Korean, Chinese to English).
+On Windows, set the equivalent environment variables in your shell; native Windows validation remains outstanding. `npm ci` uses the repository postinstall script to install Electron into the project cache. Do not install the retired dependency list or run historical launchers.
 
-- **System Actions ⚙️**  
-    Offers control over 15-20 system settings including Windows Settings, File Explorer, connectivity (WiFi, Bluetooth, airplane mode), plus volume and brightness adjustments.
+```sh
+# Inspect the maintained private core entrypoint.
+uv run --frozen python -m sage --help
 
-- **Text-to-Speech (TTS) 🔈**  
-    Delivers natural-sounding voice responses using open-source TTS engines (like Mimic 3 or Coqui TTS) with US, British, or Indian accents.
+# Start the development desktop with local note controls.
+npm start
 
-- **Confirmation & Safety Module ✅**  
-    Prompts for voice confirmation for critical actions, with a 10-second timeout fallback to a CLI prompt. Settings are configurable via JSON.
+# Build the maintained main, preload and renderer bundles.
+npm run build
+```
 
-- **User Authentication (Voice Profile Detection) 🛡️🎤**  
-    Enrolls user voice profiles for security during sensitive operations, with an option for admin override.
+`python -m sage` is a length-prefixed JSON pipe service for the owned desktop host, not an interactive chat prompt. The desktop starts its fixed `.venv` interpreter in isolated mode. Without verified managed native runtime staging, provider controls remain unavailable; notes still work. Runtime provisioning and final production staging are not yet a supported automated setup flow. `npm run package` and `npm run make` exist, but do not by themselves establish a releasable package.
 
-- **Custom Commands 🛠️**  
-    Allows adding user-defined commands via a CLI prompt or manual JSON modifications. Custom commands can override built-in actions.
+## Verification
 
-- **On-Demand Screen Capture 📸**  
-    Captures your desktop upon voice command, with real-time translation of on-screen non-English text (like Manga dialogues).
+These scripts and direct commands currently exist. Ordinary tests use synthetic fixtures and require no account, paid model call, microphone, screen permission or signed-in browser.
 
-- **Logging & Error Handling 📝❗**  
-    Offers detailed logging (default INFO with DEBUG available) and descriptive error messages. Certain debug functions are protected by a password.
+```sh
+uv run --frozen pytest tests/security/test_release_surface.py -q
+uv run --frozen pytest -q
+uv run --frozen ruff check src/sage tests
+uv run --frozen ruff format --check src/sage tests
+uv run --frozen mypy
+npm test
+npm run typecheck
+npm run lint
+npm run format:check
+npm run test:coverage
+```
 
-## Requirements 💻
+The release-surface test builds and inspects a Python wheel and all three desktop bundles; it needs the locked Python development dependencies and `node_modules`. The native Electron smoke may need permission to start a local GUI process in a restricted runner. Current trusted-host coverage and real Chromium interaction gates are still open; a previous passing deterministic subset does not close them. The opt-in live Copilot fixture is separate and does not run during ordinary tests.
 
-- Windows 11 Home (Latest)  
-- Python 3.10.10, pip 25.0.1  
-- Tesseract OCR (installed & added to PATH)  
-- ChromeDriver, EdgeDriver, OperaDriver (configured in PATH)  
-- Intel Core i5 (11th Gen) or AMD Ryzen 5 (5000 series) CPU (Recommended)  
-- 16GB RAM (Recommended)  
-- NVIDIA GPU (optional for CUDA acceleration)  
-- CUDA Toolkit and cuDNN (if GPU acceleration needed)
+Audit both complete maintained dependency graphs, including development/build dependencies:
 
-## Installation 🚀
+```sh
+uv export --frozen --all-groups --no-emit-project --format requirements-txt --output-file .cache/sage-audit-requirements.txt
+PIP_CACHE_DIR="$PWD/.cache/pip" uv run --frozen pip-audit --requirement .cache/sage-audit-requirements.txt --require-hashes --disable-pip --strict --cache-dir .cache/pip-audit --progress-spinner off
+npm audit --json --cache .cache/npm
+```
 
-1. Clone the repository:
-     ```
-     git clone https://github.com/PavanaSakethaRam/SageAssistant.git
-     cd SageAssistant
-     ```
+Native binary provenance, redistribution rights and platform behavior need separate evidence; dependency audits do not establish them. Consolidated verification/security wrappers and final testing documentation are outstanding work.
 
-2. Create and activate a virtual environment:
-     ```
-     python -m venv venv
-     venv\Scripts\activate
-     ```
+## Data, history and licensing
 
-3. Install the required packages:
-     ```
-     pip install -r requirements.txt
-     ```
+Settings, task metadata, retained draft content and saved notes live in the local SQLite store. Cancel/reject clears draft fields immediately; drafts age out after 24 hours and task metadata after 30 days during cleanup. Saved notes persist; no saved-note deletion UI/API is implemented. Storage is not encrypted or a forensic erasure mechanism. Model requests include only the current text and explicitly attached context, never an automatically loaded transcript or workspace. More detail is in [security.md](docs/security.md).
 
-4. Download the spaCy English model:
-     ```
-     python -m spacy download en_core_web_sm
-     ```
+Historical audit material describes the [original prototype at commit c7943bd](https://github.com/PavanaSakethaRam/Sage-Assistant/tree/c7943bd). Historical Graphify output describes that prototype, not this maintained implementation. Credentials exposed in repository history require owner triage and confirmation of revocation/rotation. Removing files does not revoke credentials or remove Git history; this work does neither.
 
-5. Install Tesseract OCR and ensure its installation directory is added to your system PATH.
-
-6. Download and configure the necessary web drivers for Selenium (ChromeDriver, EdgeDriver, OperaDriver).
-
-## Configuration ⚙️
-
-Edit the `config.json` file to set:
-- Default TTS voice accent (US, British, Indian)
-- Critical action settings
-- Custom command mappings
-- User authentication preferences
-
-## Usage 🎙️
-
-1. Run the assistant:
-     ```
-     python main.py
-     ```
-2. SageAssistant listens in the background for the wake word "Hey Sage".
-3. Once activated, it prompts you for your command using voice input.
-4. Commands are processed using NLP and appropriate actions are executed:
-     - Opening apps (Notepad, VS Code, WhatsApp, etc.)
-     - Executing browser tasks with Selenium
-     - Performing screen capture and translation tasks on demand
-5. For sensitive actions, a voice confirmation prompt is issued with a 10-second CLI fallback.
-6. Custom commands can be added via the provided CLI prompt or directly in `config.json`.
-
-## Testing 🧪
-
-Test individual modules:
-- `python modules/wake_word/wake_detector.py` for wake word detection.
-- `python modules/stt/stt_engine.py` for voice transcription.
-- `python modules/screen_analysis/ocr_engine.py` for screen capture and OCR.
-- `python modules/logger/logger_manager.py` for logging.
-
-After module tests, run `main.py` for an end-to-end assessment of the assistant.
-
-## Future Enhancements 🔮
-
-- Expand NLP capabilities with a more advanced dialogue manager.
-- Improve computer vision templates and enhance dynamic UI element detection.
-- Integrate control over more system settings related to connectivity and hardware.
-- Transition from CLI to a full-featured GUI dashboard.
-
-## License 📄
-
-This project is licensed under the MIT License. Feel free to use, modify, and share the code as per the license terms.
-
-## Contact 📧
-
-For issues or feature requests, please open an issue or contact the project maintainer.
+No repository license grant is established by this README. Upstream dependency notices and native runtime inventories must be preserved; the SDK's MIT metadata does not settle separate Copilot native runtime terms. Final notices, redistribution review and package provenance remain release gates.
