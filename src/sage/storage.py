@@ -167,3 +167,84 @@ class Store:
     def close(self) -> None:
         """Release the connection; repeated shutdown is harmless."""
         self._connection.close()
+
+    def get_note(self, note_id: str) -> Note | None:
+        with self.transaction() as db:
+            row = db.execute("SELECT * FROM notes WHERE id=?", (note_id,)).fetchone()
+            return _note(row) if row is not None else None
+
+    def note_summaries(
+        self, limit: int, offset: int, query: str | None = None
+    ) -> list[dict[str, object]]:
+        """Select bounded metadata only; never load all saved bodies for a page."""
+        if type(limit) is not int or not 1 <= limit <= 101 or type(offset) is not int or offset < 0:
+            raise ValueError("Invalid page")
+        with self.transaction() as db:
+            if query is None:
+                rows = db.execute(
+                    "SELECT id,title,created_at,updated_at,task_id FROM notes "
+                    "ORDER BY created_at,id LIMIT ? OFFSET ?",
+                    (limit, offset),
+                )
+            elif not query.strip() or "\x00" in query:
+                return []
+            else:
+                phrase = '"' + query.replace('"', '""') + '"'
+                rows = db.execute(
+                    "SELECT notes.id,notes.title,notes.created_at,notes.updated_at,notes.task_id "
+                    "FROM notes JOIN notes_fts ON notes.rowid=notes_fts.rowid "
+                    "WHERE notes_fts MATCH ? ORDER BY notes.created_at,notes.id LIMIT ? OFFSET ?",
+                    (phrase, limit, offset),
+                )
+            return [dict(row) for row in rows]
+
+    def task_summaries(self, limit: int, offset: int) -> list[dict[str, object]]:
+        if type(limit) is not int or not 1 <= limit <= 101 or type(offset) is not int or offset < 0:
+            raise ValueError("Invalid page")
+        with self.transaction() as db:
+            return [
+                dict(row)
+                for row in db.execute(
+                    "SELECT id,status,created_at,updated_at FROM tasks ORDER BY created_at,id "
+                    "LIMIT ? OFFSET ?",
+                    (limit, offset),
+                )
+            ]
+
+    def task_detail(self, task_id: str) -> dict[str, object] | None:
+        """Current retained preview only; approvals never leave the trusted domain."""
+        from sage.contracts import ActionProposal, NoteContent
+
+        with self.transaction() as db:
+            task = db.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
+            if task is None:
+                return None
+            detail: dict[str, object] = dict(task)
+            row = db.execute(
+                "SELECT * FROM revisions WHERE task_id=? ORDER BY revision DESC LIMIT 1",
+                (task_id,),
+            ).fetchone()
+            detail["proposal"] = None
+            detail["review_required"] = False
+            if task["status"] == "pending" and row is not None and row["body"] is not None:
+                proposal = ActionProposal(
+                    id=row["id"],
+                    task_id=row["task_id"],
+                    revision=row["revision"],
+                    tool=row["tool"],
+                    scope=row["scope"],
+                    arguments=NoteContent(title=row["title"], body=row["body"]),
+                )
+                detail["proposal"] = proposal.model_dump(mode="json")
+                detail["review_required"] = True
+            return detail
+
+    def interrupt_inference(self, now: datetime) -> None:
+        """Mark only actual in-flight inference; never replay or change note tasks."""
+        if now.utcoffset() is None:
+            raise ValueError("Aware clock required")
+        with self.transaction() as db:
+            db.execute(
+                "UPDATE tasks SET status='interrupted',updated_at=? WHERE status='reasoning'",
+                (now.astimezone(UTC).isoformat(timespec="microseconds"),),
+            )

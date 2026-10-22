@@ -411,3 +411,20 @@ class ActionService:
                 return self._cancel(db, task_id, now)
         except StorageError:
             return ActionResult(status="failed", diagnostic="Could not cancel task")
+
+    def get_outcome(self, task_id: str) -> ActionResult | None:
+        """Read validated committed evidence without attempting a new effect."""
+        with self._store.transaction() as db:
+            proposal = db.execute(
+                "SELECT * FROM revisions WHERE task_id=? ORDER BY revision DESC LIMIT 1",
+                (task_id,),
+            ).fetchone()
+            if proposal is None:
+                return None
+            approvals = db.execute(
+                "SELECT * FROM approvals WHERE proposal_id=? AND revision=?",
+                (proposal["id"], proposal["revision"]),
+            ).fetchall()
+            if len(approvals) != 1:
+                return None
+            return self._completed(db, proposal, approvals[0])
