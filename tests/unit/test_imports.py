@@ -9,7 +9,8 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "module", ["sage", "sage.contracts", "sage.config", "sage.paths", "sage.storage"]
+    "module",
+    ["sage", "sage.contracts", "sage.config", "sage.paths", "sage.storage", "sage.actions"],
 )
 def test_import_is_inert(module: str, tmp_path: Path) -> None:
     source = Path(__file__).resolve().parents[2] / "src"
