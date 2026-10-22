@@ -20,6 +20,10 @@ export async function handleRequest(
     trust: Trust;
     core: { request(request: CoreRequest): Promise<CoreResponse> };
     openExternal(url: string): Promise<void>;
+    account?: {
+      choose(): Promise<{ status: "selected" | "cleared" | "unavailable" }>;
+      disconnect(): Promise<{ status: "selected" | "cleared" | "unavailable" }>;
+    };
   },
 ): Promise<CoreResponse> {
   let identifier: string | null = null;
@@ -28,6 +32,25 @@ export async function handleRequest(
       return failure(null, "invalid_request");
     const request = parseRequest(value);
     identifier = request.id;
+    if (
+      request.method === "copilot.chooseAccount" ||
+      request.method === "copilot.disconnect"
+    ) {
+      const result = deps.account
+        ? await (request.method === "copilot.chooseAccount"
+            ? deps.account.choose()
+            : deps.account.disconnect())
+        : { status: "unavailable" };
+      return parseResponse(
+        { version: 1, id: request.id, kind: "response", result },
+        request.method,
+      );
+    }
+    if (
+      request.method === "settings.update" &&
+      request.params.ai_mode !== "assistant"
+    )
+      await deps.account?.disconnect();
     if (request.method === "external.open") {
       const url = validateExternalUrl(request.params.url);
       try {

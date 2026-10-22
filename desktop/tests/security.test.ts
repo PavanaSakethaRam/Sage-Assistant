@@ -202,3 +202,66 @@ it("validates explicit external clicks and never forwards them or forged senders
   ).toMatchObject({ result: { ai_mode: "local" } });
   expect(forwarded).toHaveLength(1);
 });
+
+it("handles native account requests locally, denies input and clears selection before local mode", async () => {
+  const calls: string[] = [];
+  const deps = {
+    owner: { webContents: sender, mainFrame: frame },
+    trust,
+    openExternal: async () => {},
+    core: {
+      request: async (r: import("../shared/contracts").CoreRequest) => {
+        calls.push(r.method);
+        return {
+          version: 1 as const,
+          kind: "response" as const,
+          id: r.id,
+          result: { ai_mode: "local" as const, reasoning_backend: null },
+        };
+      },
+    },
+    account: {
+      choose: async () => {
+        calls.push("choose");
+        return { status: "selected" as const };
+      },
+      disconnect: async () => {
+        calls.push("disconnect");
+        return { status: "cleared" as const };
+      },
+    },
+  };
+  const account = (method: string, params: unknown = {}) => ({
+    version: 1,
+    kind: "request",
+    id: method.replaceAll(".", "-"),
+    method,
+    params,
+  });
+  expect(
+    await handleRequest(event, account("copilot.chooseAccount"), deps),
+  ).toMatchObject({ result: { status: "selected" } });
+  expect(
+    await handleRequest(event, account("copilot.disconnect"), deps),
+  ).toMatchObject({ result: { status: "cleared" } });
+  expect(
+    await handleRequest(
+      event,
+      account("copilot.chooseAccount", { login: "evil" }),
+      deps,
+    ),
+  ).toMatchObject({ code: "invalid_request" });
+  expect(
+    await handleRequest(
+      event,
+      account("settings.update", { ai_mode: "local" }),
+      deps,
+    ),
+  ).toMatchObject({ result: { ai_mode: "local" } });
+  expect(calls).toEqual([
+    "choose",
+    "disconnect",
+    "disconnect",
+    "settings.update",
+  ]);
+});

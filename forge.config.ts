@@ -9,7 +9,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     download: { cacheRoot: resolve(".cache/electron") },
-    extraResource: [".runtime/package/core", ".runtime/copilot"],
+    extraResource: [".runtime/package/core", ".runtime/copilot", ".runtime/gh"],
   },
   makers: [new MakerSquirrel({}), new MakerZIP({}, ["darwin"])],
   plugins: [

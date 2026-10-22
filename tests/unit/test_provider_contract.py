@@ -40,7 +40,7 @@ def backend(
         SessionStore(tmp_path / "sessions"),
         runtime,
         settings=lambda: settings,
-        token_source=(lambda: "gho_synthetic") if auth else None,
+        token_source=(lambda *_: asyncio.sleep(0, result="gho_synthetic")) if auth else None,
         client_factory=sdk.client,
     )
 
@@ -206,7 +206,7 @@ def test_missing_runtime_and_bad_token_never_construct_sdk(tmp_path: Path) -> No
     assert asyncio.run(provider.reason(request())).text == "runtime_unavailable"
     assert sdk.created == 0
     provider.runtime_path.touch()
-    provider._token_source = lambda: "ghp_not-supported"
+    provider._token_source = lambda *_: asyncio.sleep(0, result="ghp_not-supported")
     assert asyncio.run(provider.reason(request())).text == "auth_required"
     assert sdk.created == 0
 

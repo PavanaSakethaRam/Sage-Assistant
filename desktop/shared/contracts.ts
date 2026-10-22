@@ -88,6 +88,8 @@ export type Params = {
   "tasks.cancel": { task_id: string };
   "app.shutdown": Record<string, never>;
   "external.open": { url: string };
+  "copilot.chooseAccount": Record<string, never>;
+  "copilot.disconnect": Record<string, never>;
 };
 export type Method = keyof Params;
 export type CoreRequest = {
@@ -134,6 +136,8 @@ export type Results = {
   "tasks.cancel": ActionResult;
   "app.shutdown": { status: "shutting_down" };
   "external.open": { status: "opened" | "unavailable" };
+  "copilot.chooseAccount": { status: "selected" | "cleared" | "unavailable" };
+  "copilot.disconnect": { status: "selected" | "cleared" | "unavailable" };
 };
 const errorCodes = [
   "invalid_frame",
@@ -285,6 +289,8 @@ export function parseRequest(value: unknown): CoreRequest {
   id(r.id);
   if (Object.hasOwn(r, "timeout_ms")) integer(r.timeout_ms, 1, 30000);
   switch (r.method) {
+    case "copilot.chooseAccount":
+    case "copilot.disconnect":
     case "settings.get":
     case "readiness.list":
     case "connection.test":
@@ -561,6 +567,14 @@ function result(value: unknown, method: Method): void {
       break;
     case "app.shutdown":
       literal(object(value, ["status"]).status, ["shutting_down"]);
+      break;
+    case "copilot.chooseAccount":
+    case "copilot.disconnect":
+      literal(object(value, ["status"]).status, [
+        "selected",
+        "cleared",
+        "unavailable",
+      ]);
       break;
     case "external.open":
       literal(object(value, ["status"]).status, ["opened", "unavailable"]);

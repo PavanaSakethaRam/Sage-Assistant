@@ -38,6 +38,29 @@ class Request(Contract):
     timeout_ms: Annotated[int, Field(ge=1, le=30_000)] = 30_000
 
 
+class SelectedAccount(Contract):
+    host: Literal["github.com"]
+    login: Annotated[str, Field(pattern=r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$")]
+
+
+class SelectionFrame(Contract):
+    version: Literal[1]
+    kind: Literal["host_copilot_selection"]
+    id: RpcId
+    boot_id: Annotated[str, Field(pattern=r"^[a-f0-9]{32}$")]
+    generation: Annotated[int, Field(ge=1, le=9_007_199_254_740_991)]
+    account: SelectedAccount | None
+
+
+def selection(message: dict[str, object]) -> SelectionFrame:
+    try:
+        if type(message.get("version")) is not int or len(encode_frame(message)) - 4 > 1024:
+            raise ValueError
+        return SelectionFrame.model_validate(message)
+    except (ValueError, ValidationError):
+        raise ProtocolError("Invalid selection") from None
+
+
 class Response(Contract):
     version: Literal[1] = 1
     id: RpcId

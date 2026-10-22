@@ -4,7 +4,7 @@ import asyncio
 import os
 import platform
 import sys
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,7 @@ from copilot import CopilotClient
 from sage.config import Settings
 from sage.contracts import ReasoningRequest
 from sage.providers.copilot import CopilotReasoner
+from sage.providers.protected_auth import LOGIN, ProtectedSource, platform_key, trusted_executable
 from sage.providers.session_store import SessionStore
 
 pytestmark = pytest.mark.skipif(
@@ -25,14 +26,26 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.fixture
-def live_token_source() -> Callable[[], str | None]:
-    # Task6 must replace this fixture with its reviewed protected-host broker.
-    # No environment token, editor extraction, plaintext fallback or invented expiry.
-    pytest.skip("Protected credential host broker unavailable; no login or inference attempted")
+def live_token_source(tmp_path: Path) -> Callable[[str, datetime], Awaitable[str | None]]:
+    # This is explicitly trusted operator selection for a quota-bearing harness,
+    # not production renderer authority. Native main consent remains a live gate.
+    login = os.environ.get("SAGE_LIVE_COPILOT_LOGIN", "")
+    if not LOGIN.fullmatch(login):
+        pytest.skip("Explicit SAGE_LIVE_COPILOT_LOGIN selection is required; no credential read")
+    executable = (
+        Path(__file__).resolve().parents[2]
+        / ".runtime/gh/2.103.0"
+        / platform_key()
+        / "bin"
+        / ("gh.exe" if sys.platform == "win32" else "gh")
+    )
+    if not trusted_executable(executable):
+        pytest.skip("Pinned checksum-verified managed gh is not provisioned")
+    return ProtectedSource(executable, tmp_path / "protected-source", login)
 
 
 def test_one_synthetic_prompt_auth_cancellation_and_disposal(
-    tmp_path: Path, live_token_source: Callable[[], str | None]
+    tmp_path: Path, live_token_source: Callable[[str, datetime], Awaitable[str | None]]
 ) -> None:
     async def run() -> None:
         sent = asyncio.Event()

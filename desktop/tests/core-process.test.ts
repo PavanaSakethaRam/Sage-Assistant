@@ -1,5 +1,13 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  chmod,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -37,11 +45,12 @@ async function fake(mode = "normal") {
  const send=value=>{const b=Buffer.from(JSON.stringify(value));const h=Buffer.alloc(4);h.writeUInt32BE(b.length);process.stdout.write(Buffer.concat([h,b]));};
  process.stderr.write('SYNTHETIC_SECRET raw exception\n');fs.writeFileSync(process.argv[process.argv.indexOf('--root')+1]+'/pid',String(process.pid));if(mode==='stubborn'){process.on('SIGTERM',()=>{});setInterval(()=>{},1000);}
  process.stdin.on('data',chunk=>{input=Buffer.concat([input,chunk]);while(input.length>=4&&input.length>=4+input.readUInt32BE(0)){const n=input.readUInt32BE(0);const r=JSON.parse(input.subarray(4,4+n));input=input.subarray(4+n);
- if(mode==='exit'){process.exit(3);return;}
+ if(mode==='exit'||(mode==='selection-restart'&&r.id==='crash')){process.exit(3);return;}
  if(mode==='partial'){process.stdout.write(Buffer.from([0]));return;}
  if(mode==='overflow'){process.stdout.write(Buffer.from([0,16,0,1]));return;}
  let result=r.method==='app.shutdown'?{status:'shutting_down'}:r.method==='reasoning.cancel'?{status:'cancelled'}:r.method==='reasoning.start'?{status:'completed',task_id:'t',text:'late',proposal:null,usage:null}:{ai_mode:'local',reasoning_backend:null};
  if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
+ if(r.kind==='host_copilot_selection'){fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');result={generation:mode==='selection-mismatch'?r.generation+1:r.generation,status:r.account?'selected':'cleared'};}
  if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME)) result.ai_mode='bad';
  const answer={version:['protocol','stubborn'].includes(mode)?2:1,id:r.id,kind:'response',result};
  if(mode==='late'&&r.id==='slow') setTimeout(()=>send(answer),70);else send(answer);
@@ -334,4 +343,152 @@ subprocessIt(
     expect(await readFile(join(root, "pid"), "utf8")).toBe(String(pid));
     expect(await readFile(join(root, "launches"), "utf8")).toBe("1\n");
   },
+);
+
+it("private selection correlates and clears in the real core without becoming ready", async () => {
+  const root = await mkdtemp(join(tmpdir(), "sage-selection-core-"));
+  roots.push(root);
+  const core = startCore({
+    executable: resolve(
+      ".venv",
+      process.platform === "win32" ? "Scripts" : "bin",
+      process.platform === "win32" ? "python.exe" : "python",
+    ),
+    pythonModule: true,
+    dataDir: root,
+  });
+  owned.push(core);
+  expect(
+    await core.selectAccount({ host: "github.com", login: "synthetic-user" }),
+  ).toEqual({ generation: 1, status: "selected" });
+  expect(await core.selectAccount(null)).toEqual({
+    generation: 2,
+    status: "cleared",
+  });
+  expect(
+    await core.request(request("account-renderer", "copilot.chooseAccount")),
+  ).toMatchObject({ code: "invalid_request" });
+  expect(
+    await core.request(request("after-selection", "readiness.list")),
+  ).toMatchObject({
+    result: {
+      items: expect.arrayContaining([
+        expect.objectContaining({ provider: "copilot", status: "unavailable" }),
+      ]),
+    },
+  });
+});
+
+subprocessIt(
+  "core restart starts a fresh selection boot and cannot replay an account",
+  async () => {
+    const core = await fake("selection-restart");
+    const root = roots.at(-1)!;
+    expect(
+      await core.selectAccount({ host: "github.com", login: "synthetic-user" }),
+    ).toEqual({ generation: 1, status: "selected" });
+    expect(await core.request(request("crash"))).toMatchObject({
+      code: "internal_error",
+    });
+    expect(await core.selectAccount(null)).toEqual({
+      generation: 1,
+      status: "cleared",
+    });
+    const frames = (await readFile(join(root, "selection-frames"), "utf8"))
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    expect(frames).toHaveLength(2);
+    expect(frames[0].boot_id).not.toBe(frames[1].boot_id);
+    expect(frames[1].account).toBeNull();
+  },
+);
+subprocessIt(
+  "wrong selection acknowledgement generation closes its owned core",
+  async () => {
+    const core = await fake("selection-mismatch");
+    await expect(core.selectAccount(null)).rejects.toThrow();
+  },
+);
+
+subprocessIt(
+  "host waits for bounded core cleanup before killing a parent with owned helper descendants",
+  async () => {
+    const root = await realpath(
+      await mkdtemp(join(tmpdir(), "sage-shutdown-tree-")),
+    );
+    roots.push(root);
+    const executable = join(root, "core-fixture");
+    await symlink(resolve(".venv/bin/python"), join(root, "fixture-python"));
+    const fixtureSource = await readFile(
+      resolve("desktop/tests/fixtures/shutdown-core.py"),
+      "utf8",
+    );
+    await writeFile(
+      executable,
+      `#!${join(root, "fixture-python")}\n${fixtureSource.replace(JSON.stringify("__SAGE_TEST_PROJECT__"), JSON.stringify(resolve(".")))}`,
+    );
+    await chmod(executable, 0o700);
+    const core = startCore({ executable, dataDir: root });
+    owned.push(core);
+    let pids: number[] = [];
+    const waitFor = async (file: string) => {
+      for (let i = 0; i < 500; i++) {
+        try {
+          return await readFile(join(root, file), "utf8");
+        } catch {
+          await new Promise((resolve) => setTimeout(resolve, 5));
+        }
+      }
+      throw new Error("Synthetic worker did not start");
+    };
+    try {
+      expect(
+        await core.request(
+          request("settings", "settings.update", {
+            ai_mode: "assistant",
+            reasoning_backend: "copilot",
+          }),
+        ),
+      ).toMatchObject({ result: { ai_mode: "assistant" } });
+      const fast = core.request(
+        request("fast-sdk", "reasoning.start", {
+          user_text: "synthetic",
+          backend: "copilot",
+        }),
+      );
+      await waitFor("fast-started");
+      const slow = core.request(
+        request("slow-helper", "reasoning.start", {
+          user_text: "synthetic",
+          backend: "copilot",
+        }),
+      );
+      pids = (await waitFor("helper-pids")).split(" ").map(Number);
+      pids.push(Number(await waitFor("sdk-pid")));
+      const start = performance.now();
+      await core.close();
+      const alive = pids.filter((pid) => {
+        try {
+          process.kill(pid, 0);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+      expect(alive).toEqual([]);
+      expect(performance.now() - start).toBeGreaterThan(1200);
+      await Promise.all([fast, slow]);
+    } finally {
+      for (const pid of pids) {
+        try {
+          process.kill(pid, "SIGKILL");
+        } catch {
+          /* Owned fixture already reaped. */
+        }
+      }
+      await core.close();
+    }
+  },
+  10000,
 );

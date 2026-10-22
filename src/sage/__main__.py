@@ -9,7 +9,9 @@ from pathlib import Path
 
 from sage.logging import diagnostic
 from sage.paths import app_paths
+from sage.protocol import SelectedAccount
 from sage.providers.copilot import CopilotReasoner
+from sage.providers.protected_auth import ProtectedSource
 from sage.providers.session_store import SessionStore
 from sage.service import CoreService, run_service
 from sage.storage import Store
@@ -47,7 +49,9 @@ class WindowsPipe:
             os.close(self.descriptor)
 
 
-async def _run(root: Path | None, runtime_path: Path | None = None) -> None:
+async def _run(
+    root: Path | None, runtime_path: Path | None = None, gh_path: Path | None = None
+) -> None:
     paths = app_paths(root)
     store = Store.open(paths.database)
     service: CoreService | None = None
@@ -55,19 +59,26 @@ async def _run(root: Path | None, runtime_path: Path | None = None) -> None:
     output_transport: asyncio.WriteTransport | None = None
     owned_pipes: list[WindowsPipe] = []
     try:
-        service = CoreService(store)
         sessions = SessionStore(paths.cache_dir / "copilot-disposable")
         sessions.recover_cleanup()
-        service.backend = (
-            CopilotReasoner(
+
+        def backend(account: SelectedAccount | None) -> CopilotReasoner:
+            assert service is not None
+            source = (
+                ProtectedSource(gh_path, paths.cache_dir / "gh-protected", account.login)
+                if gh_path is not None and account is not None
+                else None
+            )
+            return CopilotReasoner(
                 sessions,
+                runtime_path=runtime_path,
                 settings=service.get_settings,
                 clock=service.clock,
-                runtime_path=runtime_path,
+                token_source=source,
             )
-            if runtime_path is not None
-            else CopilotReasoner(sessions, settings=service.get_settings, clock=service.clock)
-        )
+
+        service = CoreService(store, backend_factory=backend)
+        service.backend = backend(None)
         loop = asyncio.get_running_loop()
         reader = asyncio.StreamReader()
         source = sys.stdin.buffer
@@ -127,9 +138,15 @@ def main() -> int:
         default=None,
         help="Fixed trusted deployment runtime (not an RPC option)",
     )
+    parser.add_argument(
+        "--gh-runtime",
+        type=absolute_path,
+        default=None,
+        help="Fixed managed gh2.103.0 deployment (not an RPC option)",
+    )
     args = parser.parse_args()
     try:
-        asyncio.run(_run(args.root, args.copilot_runtime))
+        asyncio.run(_run(args.root, args.copilot_runtime, args.gh_runtime))
         return 0
     except (Exception, KeyboardInterrupt):
         diagnostic("startup_failed")

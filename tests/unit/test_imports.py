@@ -24,6 +24,7 @@ import pytest
         "sage.providers",
         "sage.providers.base",
         "sage.providers.copilot",
+        "sage.providers.protected_auth",
         "sage.providers.session_store",
     ],
 )

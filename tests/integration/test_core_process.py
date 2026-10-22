@@ -225,10 +225,12 @@ def test_production_provider_clock_expires_old_review_after_rollback(
     class ConfiguredReasoner(CopilotReasoner):
         def __init__(self, sessions: SessionStore, **kwargs: Any) -> None:
             # Supply fake prerequisites only. Startup must supply its clock binding.
+            kwargs.pop("runtime_path", None)
+            kwargs.pop("token_source", None)
             super().__init__(
                 sessions,
                 runtime_path=native,
-                token_source=lambda: "gho_synthetic",
+                token_source=lambda *_: asyncio.sleep(0, result="gho_synthetic"),
                 client_factory=sdk.client,
                 **kwargs,
             )

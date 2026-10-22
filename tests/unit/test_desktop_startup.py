@@ -3,12 +3,13 @@
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
 
 from sage.contracts import NoteContent
+from sage.providers.protected_auth import ProtectedSource
 
 
 def test_shared_unicode_parity() -> None:
@@ -73,8 +74,10 @@ def test_runtime_cli_is_absolute_and_not_rpc_input(
 
     calls: list[Any] = []
 
-    async def run(root: Path | None, runtime_path: Path | None = None) -> None:
-        calls.append((root, runtime_path))
+    async def run(
+        root: Path | None, runtime_path: Path | None = None, gh_path: Path | None = None
+    ) -> None:
+        calls.append((root, runtime_path, gh_path))
 
     monkeypatch.setattr(entry, "_run", run)
     monkeypatch.setattr(
@@ -82,7 +85,7 @@ def test_runtime_cli_is_absolute_and_not_rpc_input(
         ["sage", "--root", str(tmp_path), "--copilot-runtime", str(tmp_path / "runtime")],
     )
     assert entry.main() == 0
-    assert calls == [(tmp_path, tmp_path / "runtime")]
+    assert calls == [(tmp_path, tmp_path / "runtime", None)]
     monkeypatch.setattr("sys.argv", ["sage", "--copilot-runtime", "relative"])
     with pytest.raises(SystemExit):
         entry.main()
@@ -131,6 +134,22 @@ def test_windows_startup_registers_owned_handles_and_closes_partial_startup(
     async def service(reader: object, writer: object, core: Any) -> None:
         assert core.backend.runtime_path == tmp_path / "native"
         assert core.backend._clock == core.clock
+        assert core.backend._token_source is None
+        await core.select_account(
+            {
+                "version": 1,
+                "kind": "host_copilot_selection",
+                "id": "selection",
+                "boot_id": "a" * 32,
+                "generation": 1,
+                "account": {"host": "github.com", "login": "synthetic-user"},
+            }
+        )
+        assert core.backend._clock == core.clock
+        selected_source = cast(ProtectedSource, core.backend._token_source)
+        assert selected_source.executable == tmp_path / "managed-gh"
+        assert selected_source.root == tmp_path / "cache/gh-protected"
+        assert selected_source.login == "synthetic-user"
 
     async def run() -> None:
         read, write = os.pipe()
@@ -144,9 +163,9 @@ def test_windows_startup_registers_owned_handles_and_closes_partial_startup(
                 patch.setattr(asyncio, "get_running_loop", Loop)
                 if fail_output:
                     with pytest.raises(OSError):
-                        await entry._run(tmp_path, tmp_path / "native")
+                        await entry._run(tmp_path, tmp_path / "native", tmp_path / "managed-gh")
                 else:
-                    await entry._run(tmp_path, tmp_path / "native")
+                    await entry._run(tmp_path, tmp_path / "native", tmp_path / "managed-gh")
             assert received == wrappers and len(wrappers) == 2
             for wrapper in wrappers:
                 with pytest.raises(OSError):

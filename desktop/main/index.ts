@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, session, shell } from "electron";
+import { app, BrowserWindow, ipcMain, session, shell, dialog } from "electron";
 import { join, resolve } from "node:path";
+import { randomUUID } from "node:crypto";
 import { startCore, deployment, type CoreProcess } from "./core-process";
 import {
   createTrust,
@@ -9,11 +10,17 @@ import {
   isTrustedSender,
 } from "./security";
 import { handleRequest } from "./ipc";
-import { REQUEST_CHANNEL, PROGRESS_CHANNEL } from "../shared/contracts";
+import { AccountBroker, defaultGhConfig } from "./copilot-account";
+import {
+  REQUEST_CHANNEL,
+  PROGRESS_CHANNEL,
+  type Settings,
+} from "../shared/contracts";
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 let core: CoreProcess | undefined;
 let window: BrowserWindow | undefined;
 let closing = false;
+let account: AccountBroker | undefined;
 app.enableSandbox();
 void app
   .whenReady()
@@ -39,15 +46,14 @@ void app
         },
       }),
     );
-    core = startCore(
-      deployment({
-        packaged: app.isPackaged,
-        projectDir,
-        resourcesDir: process.resourcesPath,
-        dataDir: app.getPath("userData"),
-        platform: process.platform,
-      }),
-    );
+    const configured = deployment({
+      packaged: app.isPackaged,
+      projectDir,
+      resourcesDir: process.resourcesPath,
+      dataDir: app.getPath("userData"),
+      platform: process.platform,
+    });
+    core = startCore(configured);
     window = new BrowserWindow({
       ...createWindowOptions(join(__dirname, "preload.cjs")),
       webPreferences: {
@@ -57,6 +63,42 @@ void app
     });
     const owned = window;
     const child = core;
+    account = new AccountBroker({
+      executable: configured.ghPath!,
+      ownedRoot: join(app.getPath("userData"), "gh-metadata"),
+      configDir: defaultGhConfig(
+        process.platform,
+        app.getPath("home"),
+        app.getPath("appData"),
+      ),
+      enabled: async () => {
+        const response = await child.request({
+          version: 1,
+          kind: "request",
+          id: randomUUID(),
+          method: "settings.get",
+          params: {},
+        });
+        return (
+          response.kind === "response" &&
+          (response.result as Settings).ai_mode === "assistant"
+        );
+      },
+      confirm: async (login) =>
+        (
+          await dialog.showMessageBox(owned, {
+            type: "question",
+            title: "Use existing GitHub account",
+            buttons: ["Use account", "Cancel"],
+            defaultId: 1,
+            cancelId: 1,
+            message: `Use configured account candidate ${login} on github.com?`,
+            detail:
+              "Allow Sage to read this account's existing protected credential for requested Copilot operations until disconnect or restart. The configured label does not verify its credential source, identity, health or Copilot access. An explicit connection test performs those checks and consumes model quota. Configure the account manually outside Sage if unavailable.",
+          })
+        ).response === 0,
+      select: (selected) => child.selectAccount(selected),
+    });
     guardWindow(owned.webContents);
     ipcMain.handle(REQUEST_CHANNEL, (event, value: unknown) =>
       handleRequest(event, value, {
@@ -66,6 +108,7 @@ void app
         },
         trust,
         core: child,
+        account,
         openExternal: (url) => shell.openExternal(url),
       }),
     );
@@ -104,5 +147,5 @@ app.on("before-quit", (event) => {
   if (closing) return;
   closing = true;
   event.preventDefault();
-  void (core?.close() ?? Promise.resolve()).finally(() => app.quit());
+  void Promise.all([account?.close(), core?.close()]).finally(() => app.quit());
 });

@@ -28,10 +28,12 @@ from sage.protocol import (
     Request,
     Response,
     RpcId,
+    SelectedAccount,
     encode_frame,
     failure,
     read_frame,
     request,
+    selection,
 )
 from sage.providers.base import ReasoningBackend
 from sage.storage import Store
@@ -111,17 +113,63 @@ class CoreService:
         store: Store,
         clock: Callable[[], datetime] | None = None,
         backend: ReasoningBackend | None = None,
+        backend_factory: Callable[[SelectedAccount | None], ReasoningBackend] | None = None,
     ) -> None:
         self.store = store
         self.clock = clock or (lambda: datetime.now(UTC))
         self.actions = ActionService(store, self.clock, uuid4().hex)
         self.clock = self.actions.observe_clock
         self.backend = backend
+        self._backend_factory = backend_factory
+        self._selection_boot: str | None = None
+        self._selection_generation = 0
+        self._selection_lock = asyncio.Lock()
         self._generation = 0
         self._inflight: dict[str, _Inference] = {}
         self._seen: set[str] = set()
         self.shutting_down = False
         self.store.interrupt_inference(self.clock())
+
+    async def select_account(self, message: dict[str, object]) -> dict[str, object]:
+        """Parent pipe only. Boot correlates; the inherited pipe supplies authority."""
+        try:
+            frame = selection(message)
+        except ProtocolError:
+            return failure(None, "invalid_request")
+        async with self._selection_lock:
+            if self.shutting_down:
+                return failure(frame.id, "shutting_down")
+            if frame.id in self._seen:
+                return failure(frame.id, "duplicate_id")
+            if len(self._seen) >= 4096:
+                return failure(frame.id, "session_limit")
+            if (
+                self._selection_boot is not None and frame.boot_id != self._selection_boot
+            ) or frame.generation <= self._selection_generation:
+                return failure(frame.id, "invalid_request")
+            self._seen.add(frame.id)
+            self._selection_boot = frame.boot_id
+            self._selection_generation = frame.generation
+            await self._replace_source(frame.account)
+            status = (
+                "cleared"
+                if frame.account is None
+                else "selected"
+                if self._backend_factory is not None
+                else "unavailable"
+            )
+            return Response(
+                id=frame.id, result={"generation": frame.generation, "status": status}
+            ).model_dump(mode="json")
+
+    async def _replace_source(self, account: SelectedAccount | None) -> None:
+        self._generation += 1
+        previous, self.backend = self.backend, None
+        await self._cancel_inflight()
+        if previous is not None:
+            await previous.aclose()
+        if self._backend_factory is not None:
+            self.backend = self._backend_factory(account)
 
     def close(self) -> None:
         self.shutting_down = True
@@ -163,6 +211,12 @@ class CoreService:
                     Settings.model_validate(envelope.params)
                     self._generation += 1
                     await self._cancel_inflight()
+                    if (
+                        Settings.model_validate(envelope.params).ai_mode != "assistant"
+                        and self._backend_factory is not None
+                    ):
+                        async with self._selection_lock:
+                            await self._replace_source(None)
                 elif envelope.method == "app.shutdown":
                     Empty.model_validate(envelope.params)
                     await self._cancel_inflight()
@@ -520,6 +574,12 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
             except (ProtocolError, TimeoutError):
                 await send(failure(None, "invalid_frame"))
                 break
+            if message.get("kind") == "host_copilot_selection":
+                try:
+                    await send(await service.select_account(message))
+                except Exception:
+                    await send(failure(None, "internal_error"))
+                continue
             try:
                 envelope = request(message)
             except ProtocolError:

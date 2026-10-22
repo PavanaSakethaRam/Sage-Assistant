@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from importlib.metadata import version
@@ -53,6 +53,7 @@ class _Running:
     cancelled: bool = False
     permission_denied: bool = False
     aborted: bool = False
+    acquiring: bool = True
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -77,7 +78,7 @@ class CopilotReasoner:
         runtime_path: Path | None = None,
         *,
         settings: Callable[[], Settings] = Settings,
-        token_source: Callable[[], str | None] | None = None,
+        token_source: Callable[[str, datetime], Awaitable[str | None]] | None = None,
         client_factory: Callable[..., Any] | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
@@ -156,8 +157,16 @@ class CopilotReasoner:
         result: ReasoningResult | None = None
         cleanup_failed = False
         cancellation: asyncio.CancelledError | None = None
+        token: str | None = None
         try:
-            token = self._token_source()
+            async with asyncio.timeout(remaining):
+                token = await self._token_source(request.request_id, request.deadline)
+            running.acquiring = False
+            current = asyncio.current_task()
+            if running.cancelled or self._closed or (current and current.cancelling()):
+                raise _Cancelled
+            if self._clock() >= request.deadline:
+                raise TimeoutError
             if not token or not token.startswith(("gho_", "ghu_")):
                 raise PermissionError
             path = self.sessions.create(request.request_id)
@@ -196,6 +205,7 @@ class CopilotReasoner:
                 running.permission_denied = True
                 return PermissionDecisionReject(feedback="Sage permits no runtime actions")
 
+            remaining = min(remaining, (request.deadline - self._clock()).total_seconds())
             async with asyncio.timeout(remaining):
                 await client.start()
                 status = await client.get_status()
@@ -273,8 +283,9 @@ class CopilotReasoner:
                     except (AttributeError, ValueError, ValidationError, RecursionError):
                         result = self._error(request, "malformed_output")
         except asyncio.CancelledError as exc:
+            if not running.cancelled:
+                cancellation = exc
             running.cancelled = True
-            cancellation = exc
         except _Incompatible:
             result = self._error(request, "runtime_incompatible")
         except _Cancelled:
@@ -291,6 +302,7 @@ class CopilotReasoner:
             code = "auth_required" if auth else "quota_exhausted" if quota else "runtime_error"
             result = self._error(request, code)
         finally:
+            token = None
             cleanup_task = asyncio.create_task(
                 self._cleanup(client, running, ram, path, request.request_id)
             )
@@ -364,6 +376,8 @@ class CopilotReasoner:
         active = self._active.get(request_id)
         if active is not None:
             active.cancelled = True
+            if active.acquiring and active.task is not None:
+                active.task.cancel()
             if active.session is not None:
                 async with asyncio.timeout(3):
                     await active.session.abort()
