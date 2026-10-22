@@ -149,6 +149,26 @@ describe("closed renderer contracts", () => {
       }),
     ).toThrow();
   });
+  it.each(["connection.test", "readiness.list"] as const)(
+    "%s accepts ready evidence from the reviewed provider",
+    (method) => {
+      const ready = {
+        provider: "copilot",
+        status: "ready",
+        evidence: ["explicit_synthetic_check"],
+        version: "sdk:1.0.25/runtime:1.0.102",
+        destination: "GitHub Copilot cloud",
+        explanation: "explicit_connection_check_succeeded",
+      };
+      const response = {
+        version: 1,
+        id: "ready",
+        kind: "response",
+        result: method === "readiness.list" ? { items: [ready] } : ready,
+      };
+      expect(parseResponse(response, method)).toEqual(response);
+    },
+  );
   it("accepts every existing method with defaults and validates all shared result shapes", () => {
     for (const method of [
       "settings.get",

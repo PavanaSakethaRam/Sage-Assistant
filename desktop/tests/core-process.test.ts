@@ -40,7 +40,8 @@ async function fake(mode = "normal") {
  if(mode==='exit'){process.exit(3);return;}
  if(mode==='partial'){process.stdout.write(Buffer.from([0]));return;}
  if(mode==='overflow'){process.stdout.write(Buffer.from([0,16,0,1]));return;}
- const result=r.method==='app.shutdown'?{status:'shutting_down'}:r.method==='reasoning.cancel'?{status:'cancelled'}:r.method==='reasoning.start'?{status:'completed',task_id:'t',text:'late',proposal:null,usage:null}:{ai_mode:'local',reasoning_backend:null};
+ let result=r.method==='app.shutdown'?{status:'shutting_down'}:r.method==='reasoning.cancel'?{status:'cancelled'}:r.method==='reasoning.start'?{status:'completed',task_id:'t',text:'late',proposal:null,usage:null}:{ai_mode:'local',reasoning_backend:null};
+ if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
  if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME)) result.ai_mode='bad';
  const answer={version:['protocol','stubborn'].includes(mode)?2:1,id:r.id,kind:'response',result};
  if(mode==='late'&&r.id==='slow') setTimeout(()=>send(answer),70);else send(answer);
@@ -296,5 +297,41 @@ subprocessIt(
       id: "slow",
       result: { ai_mode: "local" },
     });
+  },
+);
+
+subprocessIt(
+  "valid ready replies leave the owned core alive without restarting",
+  async () => {
+    const core = await fake("ready");
+    await core.request(request("before"));
+    const root = roots.at(-1)!;
+    const pid = Number(await readFile(join(root, "pid"), "utf8"));
+    const ready = {
+      provider: "copilot",
+      status: "ready",
+      evidence: ["explicit_synthetic_check"],
+      version: "sdk:1.0.25/runtime:1.0.102",
+      destination: "GitHub Copilot cloud",
+      explanation: "explicit_connection_check_succeeded",
+    };
+    for (const method of ["connection.test", "readiness.list"] as const) {
+      expect(
+        await core.request(request(method.replace(".", "-"), method)),
+      ).toEqual({
+        version: 1,
+        id: method.replace(".", "-"),
+        kind: "response",
+        result: method === "readiness.list" ? { items: [ready] } : ready,
+      });
+    }
+    expect(await core.request(request("after"))).toMatchObject({
+      kind: "response",
+      id: "after",
+      result: { ai_mode: "local" },
+    });
+    expect(() => process.kill(pid, 0)).not.toThrow();
+    expect(await readFile(join(root, "pid"), "utf8")).toBe(String(pid));
+    expect(await readFile(join(root, "launches"), "utf8")).toBe("1\n");
   },
 );

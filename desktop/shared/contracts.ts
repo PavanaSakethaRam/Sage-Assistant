@@ -234,7 +234,7 @@ function array(
   max = 100,
 ): void {
   if (!Array.isArray(value) || value.length > max) invalid();
-  value.forEach(check);
+  value.forEach((item) => check(item));
 }
 function bounded(value: unknown): void {
   try {
