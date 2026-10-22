@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   createWindowOptions,
@@ -9,8 +10,9 @@ import {
   guardSession,
 } from "../main/security";
 import { handleRequest } from "../main/ipc";
-const trust = createTrust({ packaged: true, rendererDir: "/app/ui" });
-const url = pathToFileURL("/app/ui/index.html").href;
+const rendererRoot = resolve("/app/ui");
+const trust = createTrust({ packaged: true, rendererDir: rendererRoot });
+const url = pathToFileURL(join(rendererRoot, "index.html")).href;
 const sender = { id: 1 };
 const frame = { url };
 const event = { sender, senderFrame: frame };
@@ -37,7 +39,11 @@ it("allows exactly the owned local main frame and static UI subtree", () => {
     expect(
       isTrustedSender(bad, { webContents: sender, mainFrame: frame }, trust),
     ).toBe(false);
-  expect(trust.resourceAllowed("file:///app/ui/assets/a.js")).toBe(true);
+  expect(
+    trust.resourceAllowed(
+      pathToFileURL(join(rendererRoot, "assets/a.js")).href,
+    ),
+  ).toBe(true);
   for (const bad of [
     "file:///app/secret",
     "file:///app/ui-evil/a.js",

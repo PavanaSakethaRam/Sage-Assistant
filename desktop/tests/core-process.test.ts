@@ -8,6 +8,7 @@ import {
   encodeFrame,
   FrameDecoder,
 } from "../main/core-process";
+import type { CoreOptions } from "../main/core-process";
 import type { CoreRequest } from "../shared/contracts";
 // Script-executable adversarial children require POSIX; Windows launch is a native gate.
 const subprocessIt = it.skipIf(process.platform === "win32");
@@ -85,15 +86,22 @@ it("frames fragmented bounded UTF8 and rejects duplicate keys/depth/surrogates/o
   ).toThrow();
 });
 it("derives deployment solely from trusted project/resources locations", () => {
+  const paths = (value: CoreOptions) => ({
+    ...value,
+    executable: value.executable.replaceAll("\\", "/"),
+    runtimePath: value.runtimePath?.replaceAll("\\", "/"),
+  });
   expect(
-    deployment({
-      packaged: false,
-      projectDir: "/project",
-      resourcesDir: "/resources",
-      dataDir: "/state",
-      platform: "darwin",
-      arch: "arm64",
-    }),
+    paths(
+      deployment({
+        packaged: false,
+        projectDir: "/project",
+        resourcesDir: "/resources",
+        dataDir: "/state",
+        platform: "darwin",
+        arch: "arm64",
+      }),
+    ),
   ).toMatchObject({
     executable: "/project/.venv/bin/python",
     runtimePath:
@@ -102,14 +110,16 @@ it("derives deployment solely from trusted project/resources locations", () => {
     dataDir: "/state",
   });
   expect(
-    deployment({
-      packaged: true,
-      projectDir: "/evil",
-      resourcesDir: "/resources",
-      dataDir: "/state",
-      platform: "win32",
-      arch: "x64",
-    }),
+    paths(
+      deployment({
+        packaged: true,
+        projectDir: "/evil",
+        resourcesDir: "/resources",
+        dataDir: "/state",
+        platform: "win32",
+        arch: "x64",
+      }),
+    ),
   ).toMatchObject({
     executable: "/resources/core/sage-core.exe",
     runtimePath:

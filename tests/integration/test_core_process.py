@@ -92,6 +92,10 @@ def test_bad_process_frame_never_prints_content(tmp_path: Path) -> None:
     asyncio.run(run())
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="POSIX synchronous os.pipe fixture; Windows needs overlapped handles",
+)
 def test_entrypoint_real_pipes_and_failure_cleanup(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -168,6 +172,10 @@ def test_startup_partial_failure_closes_opened_store(
         assert check.execute("SELECT status FROM tasks").fetchone()[0] == "reasoning"
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="POSIX synchronous os.pipe fixture; Windows needs overlapped handles",
+)
 @pytest.mark.parametrize("high_observation", ["completion", "sdk_error", "cleanup_error"])
 def test_production_provider_clock_expires_old_review_after_rollback(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, high_observation: str

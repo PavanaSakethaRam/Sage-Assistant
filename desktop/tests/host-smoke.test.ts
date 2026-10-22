@@ -36,7 +36,15 @@ it("loads the built CJS sandbox preload and serves validated IPC in a real Elect
         electron as unknown as string,
         [join(root, "smoke.cjs"), root, resolve(".")],
         {
-          env: { PATH: "/usr/bin:/bin", TMPDIR: root },
+          env: {
+            TMPDIR: root,
+            TMP: root,
+            TEMP: root,
+            ...(process.env.SystemRoot
+              ? { SystemRoot: process.env.SystemRoot }
+              : {}),
+            ...(process.env.WINDIR ? { WINDIR: process.env.WINDIR } : {}),
+          },
           stdio: ["ignore", "pipe", "pipe"],
         },
       );

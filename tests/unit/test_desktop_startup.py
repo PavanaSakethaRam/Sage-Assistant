@@ -12,7 +12,9 @@ from sage.contracts import NoteContent
 
 
 def test_shared_unicode_parity() -> None:
-    rows = json.loads((Path(__file__).parents[1] / "fixtures/text-parity.json").read_text())
+    rows = json.loads(
+        (Path(__file__).parents[1] / "fixtures/text-parity.json").read_text(encoding="utf-8")
+    )
     for row in rows:
         if row["valid"]:
             assert NoteContent(title=row["title"], body=row["body"]).model_dump() == {
