@@ -53,6 +53,8 @@ def test_default_paths_are_per_user_and_inert(
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "xdg-data"))
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg-config"))
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "xdg-cache"))
+    # Windows resolves its local app-data folder independently of HOME/XDG.
+    monkeypatch.setenv("WIN_PD_OVERRIDE_LOCAL_APPDATA", str(tmp_path / "win-local"))
     paths = app_paths()
     for path in (paths.data_dir, paths.config_dir, paths.cache_dir):
         assert path.is_relative_to(tmp_path)
