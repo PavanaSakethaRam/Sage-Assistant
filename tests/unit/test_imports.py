@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.parametrize("module", ["sage", "sage.contracts", "sage.config", "sage.paths"])
+@pytest.mark.parametrize(
+    "module", ["sage", "sage.contracts", "sage.config", "sage.paths", "sage.storage"]
+)
 def test_import_is_inert(module: str, tmp_path: Path) -> None:
     source = Path(__file__).resolve().parents[2] / "src"
     script = r"""
@@ -22,7 +24,8 @@ def guard(event, args):
     blocked = (
         event.startswith(("socket.", "subprocess.", "ctypes."))
         or event in {"os.system", "os.posix_spawn", "os.fork", "os.exec", "os.mkdir",
-                     "os.remove", "os.rename", "os.rmdir", "os.truncate", "os.chmod"}
+                     "os.remove", "os.rename", "os.rmdir", "os.truncate", "os.chmod",
+                     "sqlite3.connect"}
     )
     if event == "open":
         path, mode, flags = args
