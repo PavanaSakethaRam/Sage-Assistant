@@ -83,7 +83,7 @@ export function createTrust(options: {
         return false;
       }
     },
-    csp: `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src ${dev ? `${dev.origin} ws://${dev.host}` : "'none'"}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'`,
+    csp: `default-src 'none'; script-src 'self'; style-src 'self'${dev ? " 'unsafe-inline'" : ""}; img-src 'self'; font-src 'self'; connect-src ${dev ? `${dev.origin} ws://${dev.host}` : "'none'"}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'`,
   };
 }
 export type SenderEvent = {
@@ -103,23 +103,7 @@ export function isTrustedSender(
     trust.documentAllowed(event.senderFrame.url)
   );
 }
-export function validateExternalUrl(value: string): string {
-  if (
-    value.length > 2048 ||
-    /[\u0000-\u0020\u007F-\u009F]/u.test(value) ||
-    /%(?:0[0-9a-f]|1[0-9a-f]|7f|8[0-9a-f]|9[0-9a-f])/i.test(value)
-  )
-    throw new TypeError("Invalid external URL");
-  const url = new URL(value);
-  if (
-    !["https:", "http:"].includes(url.protocol) ||
-    !url.hostname ||
-    url.username ||
-    url.password
-  )
-    throw new TypeError("Invalid external URL");
-  return url.href;
-}
+export { validateExternalUrl } from "../shared/external-url";
 export type WindowGuard = {
   on(
     name: string,

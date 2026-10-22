@@ -16,7 +16,7 @@ export default tseslint.config(
   },
   ...tseslint.configs.recommended,
   {
-    files: ["desktop/**/*.ts", "*.ts"],
+    files: ["desktop/**/*.{ts,tsx}", "*.ts"],
     rules: { "@typescript-eslint/no-explicit-any": "error" },
   },
 );

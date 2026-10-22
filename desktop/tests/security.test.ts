@@ -273,3 +273,28 @@ it("handles native account requests locally, denies input and clears selection b
     "finish",
   ]);
 });
+it("permits Vite injected styles only in validated loopback development trust", () => {
+  const dev = createTrust({
+    packaged: false,
+    rendererDir: "/app/ui",
+    devServerUrl: "http://127.0.0.1:5173/",
+  });
+  expect(dev.csp).toContain("style-src 'self' 'unsafe-inline'");
+  expect(dev.csp).toContain(
+    "connect-src http://127.0.0.1:5173 ws://127.0.0.1:5173",
+  );
+  expect(trust.csp).toContain("style-src 'self';");
+  expect(trust.csp).not.toContain("unsafe-inline");
+  expect(trust.csp).toContain("connect-src 'none'");
+  for (const devServerUrl of [
+    "http://evil.test/",
+    "http://user@localhost:5173/",
+    "http://localhost:5173/path",
+    "http://localhost:5173/?anything",
+    "https://localhost:5173/",
+  ]) {
+    expect(() =>
+      createTrust({ packaged: false, rendererDir: "/app/ui", devServerUrl }),
+    ).toThrow();
+  }
+});
