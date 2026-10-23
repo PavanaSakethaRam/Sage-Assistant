@@ -58,10 +58,10 @@ afterEach(async () => {
 });
 it("uses OS defaults without inherited custom GH/XDG configuration", () => {
   expect(defaultGhConfig("darwin", "/profile", "/app-data")).toBe(
-    "/profile/.config/gh",
+    join("/profile", ".config", "gh"),
   );
   expect(defaultGhConfig("win32", "/profile", "/app-data")).toBe(
-    "/app-data/GitHub CLI",
+    join("/app-data", "GitHub CLI"),
   );
 });
 it("closes the private selection and acknowledgement schemas", () => {

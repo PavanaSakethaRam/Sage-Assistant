@@ -4,16 +4,52 @@ import asyncio
 import json
 import os
 import sqlite3
+import subprocess
 import sys
 from contextlib import closing
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 
 from sage.protocol import encode_frame, read_frame
 
 
+def windows_overlapped_core(tmp_path: Path, scenario: str) -> dict[str, Any]:
+    root = Path(__file__).resolve().parents[2]
+    result = subprocess.run(
+        [
+            "node",
+            str(root / "tests/fixtures/overlapped_core_client.mjs"),
+            sys.executable,
+            str(root / "src"),
+            str(tmp_path),
+            scenario,
+        ],
+        cwd=root,
+        capture_output=True,
+        timeout=20,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr.decode(errors="replace")
+    return cast(dict[str, Any], json.loads(result.stdout))
+
+
 def test_process_shutdown_releases_resources(tmp_path: Path) -> None:
+    if sys.platform == "win32":
+        report = windows_overlapped_core(tmp_path, "shutdown")
+        frames = report["frames"]
+        assert report["code"] == 0
+        assert report["trailingBytes"] == 0
+        assert report["hasTraceback"] is False
+        assert [frame["id"] for frame in frames] == ["p", "shutdown"]
+        assert all(frame["kind"] == "response" for frame in frames)
+        database = tmp_path / "data" / "sage.sqlite3"
+        with closing(sqlite3.connect(database, timeout=0)) as db:
+            db.execute("BEGIN EXCLUSIVE")
+            assert db.execute("SELECT count(*) FROM revisions WHERE body='Body'").fetchone()[0] == 1
+        return
+
     async def run() -> None:
         process = await asyncio.create_subprocess_exec(
             sys.executable,
@@ -63,6 +99,17 @@ def test_process_shutdown_releases_resources(tmp_path: Path) -> None:
 
 
 def test_bad_process_frame_never_prints_content(tmp_path: Path) -> None:
+    if sys.platform == "win32":
+        report = windows_overlapped_core(tmp_path, "invalid")
+        assert report["code"] == 0
+        assert report["trailingBytes"] == 0
+        assert report["hasSecret"] is False
+        assert "SYNTHETIC_SECRET" not in json.dumps(report["frames"])
+        assert len(report["frames"]) == 1
+        assert report["frames"][0]["kind"] == "error"
+        assert report["frames"][0]["code"] == "invalid_frame"
+        return
+
     async def run() -> None:
         process = await asyncio.create_subprocess_exec(
             sys.executable,

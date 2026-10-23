@@ -8,6 +8,7 @@ on:
       - '*lock*'
       - '*.spec'
       - 'forge.config.ts'
+      - '.gitattributes'
       - '.github/workflows/package.yml'
 permissions:
   contents: read

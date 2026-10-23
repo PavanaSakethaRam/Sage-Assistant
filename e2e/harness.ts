@@ -20,7 +20,10 @@ export const python = resolve(
   ".venv",
   process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
 );
-export async function launch(existing?: string): Promise<Host> {
+export async function launch(
+  existing?: string,
+  allowUnavailable = false,
+): Promise<Host> {
   const root = existing ?? (await mkdtemp(join(tmpdir(), "sage-e2e-")));
   let app: ElectronApplication | undefined;
   try {
@@ -64,6 +67,36 @@ export async function launch(existing?: string): Promise<Host> {
           { method, params },
         ),
     };
+    if (!allowUnavailable) {
+      const readiness = (await host.rpc("settings.get", {})) as {
+        kind?: unknown;
+        code?: unknown;
+      };
+      if (readiness.kind !== "response") {
+        let fixtureStage = "no_core_event";
+        try {
+          const lines = (
+            await readFile(join(root, "userData/events.jsonl"), "utf8")
+          )
+            .trim()
+            .split("\n")
+            .map((line) => JSON.parse(line) as { event?: unknown });
+          fixtureStage = lines.some((line) => line.event === "started")
+            ? lines.some((line) => line.event === "stopped")
+              ? "core_stopped"
+              : "core_started"
+            : "no_core_event";
+        } catch {
+          // An import failure can happen before the synthetic core writes events.
+        }
+        const code =
+          typeof readiness.code === "string" &&
+          /^[a-z_]{1,40}$/.test(readiness.code)
+            ? readiness.code
+            : "unknown";
+        throw new Error(`E2E core readiness ${code}; ${fixtureStage}`);
+      }
+    }
     return host;
   } catch (error) {
     // A failed initialization still owns the acquired app and any new root.

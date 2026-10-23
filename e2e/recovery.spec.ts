@@ -107,7 +107,7 @@ test("migration startup failure preserves schema/content and recovers on owned a
     const before = await database(host);
     await close(host, false);
     await writeFile(join(root, "userData/migration.fail"), "1");
-    host = await launch(root);
+    host = await launch(root, true);
     await expect(host.page.getByLabel("Setup status")).toContainText(
       "unavailable",
     );

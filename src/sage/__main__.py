@@ -6,6 +6,7 @@ import os
 import sys
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any, cast
 
 from sage.logging import diagnostic
 from sage.paths import app_paths
@@ -28,7 +29,7 @@ class WindowsPipe:
         if handle_of is None:
             import msvcrt
 
-            handle_of = msvcrt.get_osfhandle  # type: ignore[attr-defined]
+            handle_of = getattr(msvcrt, "get_osfhandle")  # noqa: B009 -- absent on POSIX stubs
         self.descriptor = os.dup(descriptor)
         self._closed = False
         try:
@@ -90,8 +91,8 @@ async def _run(
             owned_pipes.append(source_pipe)
             sink_pipe = WindowsPipe(sink.fileno())
             owned_pipes.append(sink_pipe)
-            source = source_pipe  # type: ignore[assignment]
-            sink = sink_pipe  # type: ignore[assignment]
+            source = cast(Any, source_pipe)
+            sink = cast(Any, sink_pipe)
         transport, _ = await loop.connect_read_pipe(
             lambda: asyncio.StreamReaderProtocol(reader), source
         )

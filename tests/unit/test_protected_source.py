@@ -328,7 +328,8 @@ def test_cancel_during_subprocess_startup_still_obtains_and_reaps_owned_process(
         finally:
             for process in processes:
                 if process.returncode is None:
-                    os.killpg(process.pid, signal.SIGKILL)
+                    killpg = getattr(os, "killpg")  # noqa: B009 -- POSIX-only fixture
+                    killpg(process.pid, getattr(signal, "SIGKILL"))  # noqa: B009
                     await process.wait()
 
     asyncio.run(run())

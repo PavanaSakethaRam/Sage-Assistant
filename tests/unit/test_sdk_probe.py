@@ -15,6 +15,15 @@ import pytest
 from sage.sdk_probe import CapabilityGuard, decode_result, probe
 
 
+def isolated_python_env() -> dict[str, str]:
+    env = {"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())}
+    # Windows needs its own OS root to initialize native system providers.
+    for key in ("SystemRoot", "WINDIR"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    return env
+
+
 def test_real_pinned_sdk_constructs_without_runtime_or_store(tmp_path: Path) -> None:
     env = {"LANG": "C.UTF-8", "TMPDIR": str(tmp_path), "TMP": str(tmp_path), "TEMP": str(tmp_path)}
     for key in ("SystemRoot", "WINDIR"):
@@ -28,7 +37,68 @@ def test_real_pinned_sdk_constructs_without_runtime_or_store(tmp_path: Path) -> 
         timeout=20,
         check=False,
     )
-    assert child.returncode == 0 and child.stderr == b""
+    if child.returncode != 0:
+        diagnostic = subprocess.run(
+            [
+                sys.executable,
+                "-I",
+                "-B",
+                str(Path(__file__).resolve().parents[1] / "fixtures/sdk_guard_diagnostic.py"),
+                str(Path(__file__).resolve().parents[2] / "src"),
+            ],
+            cwd=tmp_path,
+            env=env,
+            capture_output=True,
+            timeout=20,
+            check=False,
+        )
+        allowed = {"stage", "category", "event", "path_class"}
+        fixed_events = {
+            "import",
+            "open",
+            "os.listdir",
+            "os.scandir",
+            "metadata_read",
+            "socket",
+            "subprocess",
+            "sqlite3",
+            "winreg",
+            "ctypes",
+            "os.other",
+            "other",
+            "none",
+        }
+        fixed_paths = {"none", "non_path", "invalid_path", "container", "outside"} | {
+            f"trusted_{index}" for index in range(4)
+        }
+        try:
+            labels = json.loads(diagnostic.stdout) if len(diagnostic.stdout) <= 256 else {}
+            if (
+                diagnostic.returncode != 0
+                or not isinstance(labels, dict)
+                or set(labels) != allowed
+                or labels["stage"] not in {"guard", "sdk_import", "sdk_construct", "complete"}
+                or labels["category"]
+                not in {
+                    "none",
+                    "dependency_error",
+                    "contract_error",
+                    "io_error",
+                    "unexpected_error",
+                    "blocked_network",
+                    "blocked_process",
+                    "blocked_storage",
+                    "blocked_native",
+                    "blocked_output",
+                }
+                or labels["event"] not in fixed_events
+                or labels["path_class"] not in fixed_paths
+            ):
+                labels = {"diagnostic": "unavailable"}
+        except (UnicodeError, json.JSONDecodeError):
+            labels = {"diagnostic": "unavailable"}
+        pytest.fail(f"SDK self-check failed; denial labels={labels}")
+    assert child.stderr == b""
     result = decode_result(child.stdout)
     assert result == {
         "schema": 1,
@@ -56,7 +126,7 @@ def test_real_pinned_sdk_constructs_without_runtime_or_store(tmp_path: Path) -> 
 def test_probe_accepts_no_parameters(options: list[str]) -> None:
     result = subprocess.run(
         [sys.executable, "-m", "sage", "--sdk-self-check", *options],
-        env={"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())},
+        env=isolated_python_env(),
         capture_output=True,
         timeout=10,
         check=False,
@@ -87,7 +157,7 @@ def test_installed_guard_denies_and_latches_even_if_caught(operation: str, categ
     )
     child = subprocess.run(
         [sys.executable, "-B", "-c", program],
-        env={"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())},
+        env=isolated_python_env(),
         capture_output=True,
         timeout=10,
         check=False,
@@ -150,7 +220,7 @@ def test_installed_import_event_denial_uses_inert_sys_audit_only(filename: str) 
     )
     child = subprocess.run(
         [sys.executable, "-B", "-c", program, filename],
-        env={"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())},
+        env=isolated_python_env(),
         capture_output=True,
         timeout=10,
         check=False,
@@ -169,7 +239,7 @@ def test_installed_guard_preserves_genuine_trusted_pure_python_import(tmp_path: 
     )
     child = subprocess.run(
         [sys.executable, "-B", "-c", program, str(tmp_path)],
-        env={"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())},
+        env=isolated_python_env(),
         capture_output=True,
         timeout=10,
         check=False,

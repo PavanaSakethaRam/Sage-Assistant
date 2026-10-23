@@ -112,7 +112,11 @@ async def _reap(process: asyncio.subprocess.Process) -> None:
     def stop(force: bool) -> None:
         try:
             if os.name == "posix":
-                os.killpg(process.pid, signal.SIGKILL if force else signal.SIGTERM)
+                killpg = getattr(os, "killpg")  # noqa: B009 -- POSIX branch; Windows stubs omit it
+                killpg(
+                    process.pid,
+                    getattr(signal, "SIGKILL") if force else signal.SIGTERM,  # noqa: B009
+                )
             elif process.returncode is None:
                 process.kill() if force else process.terminate()
         except ProcessLookupError:

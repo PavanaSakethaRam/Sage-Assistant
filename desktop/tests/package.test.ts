@@ -32,6 +32,19 @@ test("release makers produce only portable ZIPs on macOS and Windows", async () 
   expect(maker.platforms).toEqual(["darwin", "win32"]);
 });
 
+test("ASAR entries use one portable spelling for admission checks", async () => {
+  const { canonicalArchiveEntry } = await import("../../scripts/check_package");
+  expect(canonicalArchiveEntry("\\.vite\\build\\main.cjs", "win32")).toBe(
+    "/.vite/build/main.cjs",
+  );
+  expect(canonicalArchiveEntry("/.vite/build/main.cjs", "darwin")).toBe(
+    "/.vite/build/main.cjs",
+  );
+  expect(canonicalArchiveEntry("/.vite\\build/main.cjs", "darwin")).toBe(
+    "/.vite\\build/main.cjs",
+  );
+});
+
 test("actual ASAR inspection rejects private test composition and credential patterns", async () => {
   const { validateArchive } = await import("../../scripts/check_package");
   const root = await mkdtemp(join(tmpdir(), "sage-asar-negative-"));

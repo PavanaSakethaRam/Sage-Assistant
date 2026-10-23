@@ -5,6 +5,15 @@ import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+export function canonicalArchiveEntry(
+  name: string,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  // @electron/asar lists header paths through node:path.join, which uses
+  // backslashes on Windows. Keep the raw path for stat/extract operations.
+  return platform === "win32" ? name.replaceAll("\\", "/") : name;
+}
+
 export function validateArchive(archive: string): void {
   uncache(archive);
   const directories = new Set([
@@ -20,8 +29,9 @@ export function validateArchive(archive: string): void {
     "/.vite/build/preload.cjs",
     "/.vite/renderer/main_window/index.html",
   ]);
-  for (const name of listPackage(archive, { isPack: false })) {
-    const entry = statFile(archive, name.slice(1), false);
+  for (const rawName of listPackage(archive, { isPack: false })) {
+    const name = canonicalArchiveEntry(rawName);
+    const entry = statFile(archive, rawName.slice(1), false);
     if ("link" in entry || entry.unpacked)
       throw Error("Unsafe application archive");
     if ("files" in entry) {
@@ -35,7 +45,7 @@ export function validateArchive(archive: string): void {
       )
     )
       throw Error("Unsafe application archive");
-    const content = extractFile(archive, name.slice(1)).toString("utf8");
+    const content = extractFile(archive, rawName.slice(1)).toString("utf8");
     if (
       /__sageE2E|FakeReasoner|e2e\/fixtures|events\.jsonl|full\.once|egress_probe/.test(
         content,
@@ -55,7 +65,9 @@ async function main(): Promise<void> {
       : join(app, "resources");
   const archive = join(resources, "app.asar");
   validateArchive(archive);
-  const entries = listPackage(archive, { isPack: false });
+  const entries = listPackage(archive, { isPack: false }).map((name) =>
+    canonicalArchiveEntry(name),
+  );
   for (const required of [
     "/.vite/build/main.cjs",
     "/.vite/build/preload.cjs",

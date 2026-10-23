@@ -1,0 +1,11 @@
+# The package stage verifies this vendor notice's exact upstream bytes.
+docs/third-party/github-copilot-sdk-1.0.25-LICENSE.txt -text
+
+# Prettier checks these maintained sources byte-for-byte on both CI hosts.
+desktop/** text eol=lf
+e2e/** text eol=lf
+scripts/*.ts text eol=lf
+scripts/*.mjs text eol=lf
+/*.ts text eol=lf
+/*.json text eol=lf
+/*.mjs text eol=lf

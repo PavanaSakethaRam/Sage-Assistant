@@ -55,6 +55,19 @@ def examples() -> dict[str, Any]:
         ("e\u0301" * 100, "body", True),
         ("e\u0301" * 100 + "x", "body", False),
     ],
+    ids=[
+        "maximum-title-and-body",
+        "title-too-long",
+        "body-too-long",
+        "empty-title",
+        "empty-body",
+        "whitespace-title",
+        "whitespace-body",
+        "maximum-emoji-title",
+        "emoji-title-too-long",
+        "maximum-combining-title",
+        "combining-title-too-long",
+    ],
 )
 def test_note_limits(title: str, body: str, valid: bool) -> None:
     if valid:
