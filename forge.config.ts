@@ -1,6 +1,5 @@
 import { resolve } from "node:path";
 import type { ForgeConfig } from "@electron-forge/shared-types";
-import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
@@ -16,7 +15,7 @@ const config: ForgeConfig = {
       ".runtime/package/notices",
     ],
   },
-  makers: [new MakerSquirrel({}), new MakerZIP({}, ["darwin"])],
+  makers: [new MakerZIP({}, ["darwin", "win32"])],
   plugins: [
     new VitePlugin({
       build: [

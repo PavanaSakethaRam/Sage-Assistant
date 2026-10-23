@@ -1,0 +1,207 @@
+{
+  "node_count": 509,
+  "unverified_node_count": 0,
+  "raw_edge_count": 1450,
+  "non_object_edges": 0,
+  "missing_endpoint_edges": 0,
+  "dangling_endpoint_edges": 134,
+  "external_reference_edges": 49,
+  "self_loop_edges": 5,
+  "valid_candidate_edges": 1267,
+  "exact_duplicate_edges": 1,
+  "directed_unique_endpoint_pairs": 1201,
+  "directed_same_endpoint_collapsed_edges": 66,
+  "undirected_unique_endpoint_pairs": 1198,
+  "undirected_same_endpoint_collapsed_edges": 69,
+  "same_endpoint_group_count": 64,
+  "relation_variant_groups": 51,
+  "source_file_variant_groups": 0,
+  "source_location_variant_groups": 8,
+  "context_variant_groups": 4,
+  "post_build_graph_type": "Graph",
+  "post_build_node_count": 564,
+  "post_build_edge_count": 1380,
+  "post_build_error": "",
+  "producer_suppression": {
+    "path": "<graphify-package>/extract.py",
+    "total_sites": 12,
+    "sites": [
+      {
+        "line": 1677,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2210,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2212,
+        "name": "seen_doc_refs",
+        "tuple_arity": 0,
+        "sample": "seen_doc_refs: set[str] = set()"
+      },
+      {
+        "line": 2629,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2776,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n.get(\"id\") for n in nodes}"
+      },
+      {
+        "line": 3502,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 3675,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 5804,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 5912,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 5991,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 6506,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 6507,
+        "name": "seen_edges",
+        "tuple_arity": 4,
+        "sample": "seen_edges: set[tuple[str, str, str, str | None]] = set()"
+      }
+    ],
+    "error": ""
+  },
+  "examples": [
+    {
+      "source": "src_sage_main_run",
+      "target": "src_sage_main_run_backend",
+      "edge_count": 3,
+      "relations": [
+        "calls",
+        "contains",
+        "indirect_call"
+      ],
+      "source_files": [
+        "src/sage/__main__.py"
+      ],
+      "source_locations": [
+        "L65",
+        "L80",
+        "L81"
+      ],
+      "contexts": [
+        "",
+        "argument",
+        "call"
+      ]
+    },
+    {
+      "source": "src_sage_actions_proposal",
+      "target": "src_sage_contracts_actionproposal",
+      "edge_count": 3,
+      "relations": [
+        "calls",
+        "references",
+        "uses"
+      ],
+      "source_files": [
+        "src/sage/actions.py"
+      ],
+      "source_locations": [
+        "L38",
+        "L39"
+      ],
+      "contexts": [
+        "",
+        "call",
+        "return_type"
+      ]
+    },
+    {
+      "source": "desktop_main_core_process_decode",
+      "target": "desktop_main_core_process_decode_walk",
+      "edge_count": 2,
+      "relations": [
+        "calls",
+        "contains"
+      ],
+      "source_files": [
+        "desktop/main/core-process.ts"
+      ],
+      "source_locations": [
+        "L57",
+        "L68"
+      ],
+      "contexts": [
+        "",
+        "call"
+      ]
+    },
+    {
+      "source": "desktop_main_ipc",
+      "target": "desktop_shared_external_url_validateexternalurl",
+      "edge_count": 2,
+      "relations": [
+        "imports"
+      ],
+      "source_files": [
+        "desktop/main/ipc.ts"
+      ],
+      "source_locations": [
+        "L8"
+      ],
+      "contexts": [
+        "import"
+      ]
+    },
+    {
+      "source": "desktop_main_security",
+      "target": "desktop_shared_external_url",
+      "edge_count": 2,
+      "relations": [
+        "imports_from",
+        "re_exports"
+      ],
+      "source_files": [
+        "desktop/main/security.ts"
+      ],
+      "source_locations": [
+        "L106"
+      ],
+      "contexts": [
+        "export",
+        "re-export"
+      ]
+    }
+  ]
+}

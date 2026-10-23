@@ -1,0 +1,132 @@
+{
+  "method": "Native CUA interaction with actual production-fuse extracted portable app; independent read-only SQLite queries",
+  "artifact_path": ".runtime/task10-portable-final/Sage.app",
+  "user_data": ".runtime/task10-portable-native-ui",
+  "file_url_matches_extracted_app": true,
+  "local_unavailable_inference_visible": true,
+  "literal_title_codepoints": 21,
+  "literal_body_codepoints": 127,
+  "literal_body_sha256": "d6876ccfb57860d8ec9eb00a707e4be8387d92111d2bec01762105f05bac23dc",
+  "review_revisions_seen": [
+    1,
+    2
+  ],
+  "before_save": {
+    "notes": 0,
+    "operations": 0
+  },
+  "after_explicit_save": {
+    "notes": 1,
+    "operations": 1,
+    "exact_title_body_match": true,
+    "persisted_full_ui_visible": true
+  },
+  "after_cancel_other_draft": {
+    "cancelled_panel_text_removed": true,
+    "cancelled_history_status_visible": true,
+    "notes": 1,
+    "operations": 1,
+    "cancelled_sentinel_logical_text_occurrences": 0
+  },
+  "quit": {
+    "native_cmd_q": true,
+    "exact_host_pid_6058_and_core_6087_exited": true
+  },
+  "restart": {
+    "same_profile": true,
+    "saved_note_listed": true,
+    "opened_full_literal_body_matches": true,
+    "cancelled_history_no_retained_text": true,
+    "new_host_pid": 8720,
+    "new_core_pid": 8725
+  },
+  "account_live": {
+    "assistant_ack_visible": true,
+    "auth_required_visible": true,
+    "quota_disclosure_visible": true,
+    "configured_candidate_discovered": true,
+    "native_consent_sheet_visible": true,
+    "protected_credential_read": false,
+    "identity_request": false,
+    "model_request": false,
+    "action_time_approval": "pending; native selection cancelled without credential access so independent tests can proceed",
+    "native_cancel_observed": true
+  },
+  "model_calls": 0,
+  "limits": [
+    "No native network capture inferred from AX",
+    "Logical text scrub is not forensic deletion",
+    "Windows and signing gates remain separate"
+  ],
+  "returned_to_local_ack": true,
+  "second_quit": "native Cmd-Q observed App quit; exact PID exit checked separately",
+  "negative_missing_core": {
+    "app_path": ".runtime/task10-negative-missing/Sage.app",
+    "user_data": ".runtime/task10-negative-missing-ui",
+    "actual_copy_file_url_visible": true,
+    "shell_remains_open": true,
+    "actual_mode": "unknown",
+    "mode_controls_disabled": true,
+    "inference_send_disabled": true,
+    "setup_error": "internal_error",
+    "notes_error": "internal_error",
+    "history_error": "internal_error",
+    "reload_error": "Setup unavailable: internal_error; readiness unavailable: internal_error",
+    "fallback_core_process": false,
+    "native_cmd_q_observed": true,
+    "specific_missing_core_diagnostic": false
+  },
+  "negative_incompatible_core": {
+    "app_path": ".runtime/task10-negative-version/Sage.app",
+    "user_data": ".runtime/task10-negative-version-ui",
+    "fixed_native_version2_fixture": true,
+    "actual_copy_file_url_visible": true,
+    "shell_remains_open": true,
+    "actual_mode": "unknown",
+    "mode_controls_disabled": true,
+    "inference_send_disabled": true,
+    "setup_error": "internal_error",
+    "notes_error": "internal_error",
+    "history_error": "internal_error",
+    "reload_error": "Setup unavailable: internal_error; readiness unavailable: internal_error",
+    "native_cmd_q_observed": true,
+    "specific_protocol_diagnostic": false
+  },
+  "exact_owned_process_exit_checks": {
+    "first_host_and_core": true,
+    "restart_host_and_core": true,
+    "missing_host": true,
+    "incompatible_host": true
+  },
+  "negative_fixture_scope": "Only disposable copied core differs; fixed native version2 fixture is local test evidence, not a shipped alternative core",
+  "negative_preparation": {
+    "missing": {
+      "removed": [
+        "Contents/Resources/core/sage-core"
+      ],
+      "added": [],
+      "changed": [],
+      "expected": "Usable native window reports unavailable core/internal_error; no fallback or note write"
+    },
+    "version": {
+      "removed": [],
+      "added": [],
+      "changed": [
+        "Contents/Resources/core/sage-core"
+      ],
+      "expected": "Usable native window reports unavailable core/internal_error; no fallback or note write"
+    },
+    "fixture": {
+      "protocol_version": 2,
+      "single_bounded_frame": true,
+      "source_sha256": "cd90195ea8bae9bb319c132b6d8b90ebad3d2fbbf72d378bc401e97ff94e350a",
+      "executable_sha256": "3702ea994ff72c1bdb2777161e0adeefa98f6596c49c4a1c9d8392fe77e3331c",
+      "native_sdk_network_storage": false,
+      "shipped": false
+    }
+  },
+  "credential_store_unavailable_test": {
+    "status": "SKIP",
+    "reason": "Protected-source flow not entered while human action-time approval pending; no owner store/config modified to induce failure"
+  }
+}

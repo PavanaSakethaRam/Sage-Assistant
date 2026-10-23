@@ -16,7 +16,7 @@ This checkout is under development. It does not yet establish a production relea
 | Desktop                                                         | Sandboxed Electron/React implementation; macOS arm64 host/core/preload and local package evidence; signing and clean-machine gates remain                                              |
 | Windows                                                         | Paths and overlapped pipe implementation exist; native execution and clean-machine verification outstanding                                        |
 | Linux                                                           | Development path candidates exist; no release support claim                                                                                        |
-| Packaging                                                       | Native onedir core and selected-resource package tooling implemented; final release/platform/signing gates remain                                |
+| Packaging                                                       | Portable ZIPs configured for macOS and Windows; local macOS core/package evidence; final release/platform/signing gates remain                                |
 | Voice, screen, browser, coding, organizer and social automation | Future slices; no maintained execution capability                                                                                                  |
 
 VS Code sign-in does not establish SDK authentication. Account selection is consent to a candidate, not proof of credentials or Copilot readiness. Only a separate explicit connection test attempts a fixed synthetic cloud request and may consume quota. See [security and evidence boundaries](docs/security.md).
@@ -48,7 +48,7 @@ npm start
 npm run build
 ```
 
-`python -m sage` is a length-prefixed JSON pipe service for the owned desktop host, not an interactive chat prompt. The desktop starts its fixed `.venv` interpreter in isolated mode. Without verified managed native runtime staging, provider controls remain unavailable; notes still work. Explicit build-time provisioning and staging are described in [testing](docs/testing.md). Packaged startup never downloads a runtime or falls back to developer Python. A successful `npm run package` or `npm run make` does not establish release support, a valid outer signature, notarization, or redistribution clearance.
+`python -m sage` is a length-prefixed JSON pipe service for the owned desktop host, not an interactive chat prompt. The desktop starts its fixed `.venv` interpreter in isolated mode. Without verified managed native runtime staging, provider controls remain unavailable; notes still work. Explicit build-time provisioning and staging are described in [testing](docs/testing.md). Packaged startup never downloads a runtime or falls back to developer Python. `npm run make` targets portable ZIPs on macOS and Windows. Installers are deferred; no installer lifecycle support or readiness is claimed. A successful package/make does not establish release support, a valid outer signature, notarization, or redistribution clearance.
 
 ## Verification
 

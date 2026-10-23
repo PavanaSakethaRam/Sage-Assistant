@@ -74,13 +74,15 @@
     "status": "pass",
     "dependencies": {
       "prod": 89,
-      "dev": 373,
-      "optional": 59,
+      "dev": 341,
+      "optional": 28,
       "peer": 0,
       "peerOptional": 0,
-      "total": 461
+      "total": 429
     },
-    "findings": []
+    "findings": [],
+    "lock_sha256": "d6bdf7a1f2895c14b5a24d8e4c9c1fc2dfccc35e1aeca8e276cfbbdd646ac344",
+    "scope": "Complete final lock after portable ZIP policy change; all categories included"
   },
   "bandit": {
     "status": "pass",
@@ -6765,23 +6767,23 @@
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/package.test.ts",
-        "line": 12,
+        "line": 23,
         "triage": "hotspot_requires_review",
-        "source_sha256": "2ef567bf7192e1a491cf582fbf9fa56c5b10e89ff81fe894ff7a6b7c01c58166"
+        "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/package.test.ts",
-        "line": 13,
+        "line": 24,
         "triage": "hotspot_requires_review",
-        "source_sha256": "2ef567bf7192e1a491cf582fbf9fa56c5b10e89ff81fe894ff7a6b7c01c58166"
+        "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/package.test.ts",
-        "line": 17,
+        "line": 28,
         "triage": "hotspot_requires_review",
-        "source_sha256": "2ef567bf7192e1a491cf582fbf9fa56c5b10e89ff81fe894ff7a6b7c01c58166"
+        "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
       }
     ]
   },
@@ -6820,11 +6822,19 @@
   "post_aggregate_test_cleanup": {
     "status": "pass",
     "path": "desktop/tests/package.test.ts",
-    "change": "ASAR sibling cleanup moved into finally; production/build source unchanged",
-    "focused_test": "1 passed",
+    "change": "ASAR cleanup preserved; added portable ZIP-only release-maker regression",
+    "focused_test": "2 passed",
     "typescript": "pass",
     "eslint": "pass",
     "prettier": "pass",
-    "source_sha256": "2ef567bf7192e1a491cf582fbf9fa56c5b10e89ff81fe894ff7a6b7c01c58166"
+    "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
+  },
+  "portable_zip_policy": {
+    "focused_package_tests": 2,
+    "typescript": "pass",
+    "eslint": "pass",
+    "production_dependency_entries_unchanged": 88,
+    "removed_build_packages": 32,
+    "lock_sha256": "d6bdf7a1f2895c14b5a24d8e4c9c1fc2dfccc35e1aeca8e276cfbbdd646ac344"
   }
 }

@@ -7,8 +7,8 @@
     "arch": "arm64"
   },
   "artifact": {
-    "zip_bytes": 214581793,
-    "zip_sha256": "2e875ce946bfc7e58866d0f3a765d4afe4cdb416d06cdec79ab50b3c91f8c69e",
+    "zip_bytes": 214581796,
+    "zip_sha256": "517b0b17f33ec8683344f169e65f5eeb2f717735ebb22709cc40bd447d287e6b",
     "core_sha256": "61c1ff15af7e74a4c07e8471ab556e0599c81199bcc36413dbf22afb49afb642",
     "full_app_entries": 1956,
     "symlinks": 14,
@@ -511,7 +511,7 @@
       {
         "path": "Contents/MacOS/Sage",
         "file": "Mach-O 64-bit executable arm64",
-        "sha256": "cef454f8fe7abc155eaf4da9f8c3bfc29bf915f55deff53595ebe33039a98cf4",
+        "sha256": "5786c298ed0139d84685b04d29703805119beae2c9515a4d917a63b2492c3425",
         "signature_verify_exit": 1,
         "signature_details": [
           "Identifier=com.github.Electron",
@@ -521,16 +521,16 @@
           "VersionMin=851968",
           "VersionSDK=1705216",
           "Hash type=sha256 size=32",
-          "CandidateCDHash sha256=943972a8d9b639f53b8bb6a2d59972beacd7ea2a",
-          "CandidateCDHashFull sha256=943972a8d9b639f53b8bb6a2d59972beacd7ea2a60e56eb886de3ea634ecdc4b",
+          "CandidateCDHash sha256=dcc3eccff0ea42a7c36037f5c00bc113bc05a2d4",
+          "CandidateCDHashFull sha256=dcc3eccff0ea42a7c36037f5c00bc113bc05a2d470640c02e946082d3b8db52b",
           "Hash choices=sha256",
-          "CMSDigest=943972a8d9b639f53b8bb6a2d59972beacd7ea2a60e56eb886de3ea634ecdc4b",
+          "CMSDigest=dcc3eccff0ea42a7c36037f5c00bc113bc05a2d470640c02e946082d3b8db52b",
           "CMSDigestType=2",
           "Executable Segment base=0",
           "Executable Segment limit=16384",
           "Executable Segment flags=0x1",
           "Page size=16384",
-          "CDHash=943972a8d9b639f53b8bb6a2d59972beacd7ea2a",
+          "CDHash=dcc3eccff0ea42a7c36037f5c00bc113bc05a2d4",
           "Signature=adhoc",
           "Info.plist=not bound",
           "TeamIdentifier=not set",
@@ -1031,13 +1031,55 @@
   },
   "cloud_model_calls": 0,
   "native_ui": {
-    "status": "SKIP",
-    "reason": "Mac locked; automatic unlock failed; manual unlock required"
+    "status": "PASS for local note/restart and generic closed failure UI",
+    "observer": "Controller CUA bound to exact final portable app file URL",
+    "owned_profile": true,
+    "local_mode_unavailable_ai": true,
+    "review_revision": 2,
+    "literal_body_codepoints": 127,
+    "saved_only_after_explicit_save": true,
+    "saved_notes_before": 0,
+    "saved_operations_before": 0,
+    "saved_notes_after": 1,
+    "saved_operations_after": 1,
+    "saved_literal_match": true,
+    "cancelled_draft_panel_removed": true,
+    "cancelled_sentinel_logical_text_occurrences": 0,
+    "forensic_erasure_claim": false,
+    "restart_open_literal_match": true,
+    "cancelled_history_no_retained_draft": true,
+    "assistant_mode_acknowledged": true,
+    "auth_required_and_quota_disclosure_visible": true,
+    "configured_candidate_native_confirmation_visible": true,
+    "protected_credential_access": "SKIP: human action-time approval pending; configured candidate found and native consent cancelled; protected reads/identity/model requests0",
+    "cloud_model_calls": 0,
+    "packaged_negative_ui": "PASS: disposable missing executable and fixed native protocol-version2 child; actual shell remains open, controls disabled, generic internal_error; both exited after native Quit",
+    "protected_credential_reads": 0,
+    "identity_requests": 0,
+    "account_confirmation_cancelled": true,
+    "main_window_note_restart": "PASS",
+    "missing_core": {
+      "status": "PASS",
+      "same_final_host_asar_fuses": true,
+      "only_core_executable_removed": true,
+      "window_remained_open": true,
+      "actual_mode_unknown": true,
+      "mode_and_send_controls_disabled": true,
+      "setup_notes_history": "internal_error",
+      "reload_remained_closed": true,
+      "missing_specific_friendly_diagnostic": false,
+      "native_quit_observed": true,
+      "exact_host_exit_verified": true
+    },
+    "detailed_evidence": "macos-arm64-native-ui.json",
+    "credential_store_unavailable": "SKIP: protected-source path unentered pending human action-time approval; no owner store/config mutation"
   },
   "asar_enforcement": {
     "status": "PASS",
     "tampered_copy_exit": 133,
-    "final_asar_main_framework_identical_to_probed_copy": true
+    "signal_returncode": -5,
+    "final_asar_main_framework_identical_to_probed_copy": true,
+    "scope": "Fresh disposable copy of portable ZIP; only disposable ASAR header mutated"
   },
   "additional_spec_static": {
     "status": "PASS",
@@ -1049,5 +1091,17 @@
     "scanner": "bandit1.9.4",
     "scope": "Additional Python build configuration outside directory-recursive aggregate targets"
   },
-  "status": "local evidence; release incomplete"
+  "status": "local evidence; release incomplete",
+  "portable_zip_policy": {
+    "platforms": [
+      "darwin",
+      "win32"
+    ],
+    "installer": "deferred",
+    "squirrel_dependency": "removed",
+    "production_lock_entries_unchanged": 88,
+    "prior_zip_sha256": "2e875ce946bfc7e58866d0f3a765d4afe4cdb416d06cdec79ab50b3c91f8c69e",
+    "core_asar_framework_unchanged": true,
+    "main_binary_remeasured": true
+  }
 }

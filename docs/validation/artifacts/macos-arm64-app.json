@@ -2682,7 +2682,7 @@
   "Contents/MacOS/Sage": {
     "type": "file",
     "bytes": 33920,
-    "sha256": "cef454f8fe7abc155eaf4da9f8c3bfc29bf915f55deff53595ebe33039a98cf4",
+    "sha256": "5786c298ed0139d84685b04d29703805119beae2c9515a4d917a63b2492c3425",
     "mode": 493
   },
   "Contents/PkgInfo": {
@@ -10642,7 +10642,7 @@
   "Contents/_CodeSignature/CodeResources": {
     "type": "file",
     "bytes": 6028,
-    "sha256": "7fa290219b52c9f0f7c2a7782a92bdc7fdd2f480746abf90250f2f1c2e6732ca",
+    "sha256": "e6ac8a1c228462eb643a5bc01f0bb02768dcde030271928c77f7ec79928c4546",
     "mode": 420
   }
 }

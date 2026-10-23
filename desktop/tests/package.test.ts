@@ -2,7 +2,18 @@ import { mkdtemp, writeFile, rm, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createPackage } from "@electron/asar";
+import { MakerZIP } from "@electron-forge/maker-zip";
 import { expect, test } from "vitest";
+
+test("release makers produce only portable ZIPs on macOS and Windows", async () => {
+  const { default: config } = await import("../../forge.config");
+  expect(config.makers).toHaveLength(1);
+  const maker = config.makers?.[0];
+  expect(maker).toBeInstanceOf(MakerZIP);
+  if (!(maker instanceof MakerZIP))
+    throw new Error("Expected portable ZIP maker");
+  expect(maker.platforms).toEqual(["darwin", "win32"]);
+});
 
 test("actual ASAR inspection rejects private test composition and credential patterns", async () => {
   const { validateArchive } = await import("../../scripts/check_package");

@@ -1,0 +1,337 @@
+{
+  "source_baseline_commit": "b3080e0e1da3d0740d9dc06ef0e0941e6959e593",
+  "snapshot": "Exact selected source/document SHA256 snapshot after portable ZIP policy and native UI evidence; source_commit is ancestor and working-tree delta is included by hashes",
+  "files": [
+    {
+      "path": "Readme.md",
+      "sha256": "290a42455943c43e497c41651b2f575a075401fbd709e0e97369af62e09475e4"
+    },
+    {
+      "path": "desktop/main/copilot-account.ts",
+      "sha256": "6bbec10f3d727ed31cfdcb17c7f058003c758b3ef9c95de9ab0f386e6f2e0a60"
+    },
+    {
+      "path": "desktop/main/core-launch.ts",
+      "sha256": "9d0f764a5ccdcac682dcf5cdd1d5473ef5b42cbb6263e52949dacdfa3e7d597d"
+    },
+    {
+      "path": "desktop/main/core-process.ts",
+      "sha256": "709f35c5009cb35e00cc3a0bef6d89d1c772d607156369bf1152fd12ab5bce16"
+    },
+    {
+      "path": "desktop/main/index.ts",
+      "sha256": "bb74921e8323287873034e02fb89e8538047e2e2ff15bced5b5d781fd5f51662"
+    },
+    {
+      "path": "desktop/main/ipc.ts",
+      "sha256": "c8d6294cb4f1828fa889d94838659027932606dc636b8a6395edd4dae0707e55"
+    },
+    {
+      "path": "desktop/main/security.ts",
+      "sha256": "9ab883acdfd2b4ec1f293d16af3748fd0e0731bed34b67541a590127d34d2731"
+    },
+    {
+      "path": "desktop/preload/index.ts",
+      "sha256": "1a20b1f89d1fa1b44f8639968f1e72e1e37e6f84ac610618dd994c6b8db3aa1c"
+    },
+    {
+      "path": "desktop/renderer/App.tsx",
+      "sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
+    },
+    {
+      "path": "desktop/renderer/Conversation.tsx",
+      "sha256": "2efd02bc71b8a657f0c3d5b5085bdb561988830fc788cf1057695d591d535895"
+    },
+    {
+      "path": "desktop/renderer/NoteReview.tsx",
+      "sha256": "4996ff6dfd6677b2c4e4e6a2d7f21650b87ae9ad9eb92765a333d0a13a106f89"
+    },
+    {
+      "path": "desktop/renderer/Notes.tsx",
+      "sha256": "961cf9dbec30cb0c33aa5208cd1c4d581d45eef5773e006482fe8551eb8972bb"
+    },
+    {
+      "path": "desktop/renderer/SafeMarkdown.tsx",
+      "sha256": "7192865ca4943a08994658fa2b4f0d3cfc4c5295bb4a779c00467092c5933ad3"
+    },
+    {
+      "path": "desktop/renderer/Setup.tsx",
+      "sha256": "58c71129476af61f796b08379c79ea335609d052e90dcd9e0c30cdaedaac39e9"
+    },
+    {
+      "path": "desktop/renderer/host.ts",
+      "sha256": "c1b2464779f7ada711c0e1f26a5f8c7000b91711907188594c18cff3221accd7"
+    },
+    {
+      "path": "desktop/renderer/main.tsx",
+      "sha256": "853c30b1221cc02d3acf08a0890cbe6b3ad6c14163d73eadbdee201a85cfbbef"
+    },
+    {
+      "path": "desktop/shared/contracts.ts",
+      "sha256": "d527dfc795c4eed706b37371c506923f0a6d1152c4e75530106714170273799f"
+    },
+    {
+      "path": "desktop/shared/external-url.ts",
+      "sha256": "504833c92d2e50b05b2111f220da0015381e3867ac29993ec979859795956d6f"
+    },
+    {
+      "path": "docs/security.md",
+      "sha256": "7c2374b50b78ee0615efba11a61b423c4686bf8146262df43cf8e2181c71e4b4"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
+      "sha256": "0985aba3f66ed86d180bef76ae2e0f2f82a275d3a00bb7fa05477404449b27f5"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
+      "sha256": "10b5de8ce50ff99ed5218197331fc3affb43918e0165992da4bd27c11f5581fd"
+    },
+    {
+      "path": "docs/testing.md",
+      "sha256": "b48e0c9b621ee3f3845e4b6319dd14d8383e13dddce221929ccc83d5b6c9e9df"
+    },
+    {
+      "path": "docs/validation/foundation-results.md",
+      "sha256": "a0fbe6c9ddd2ba7db36c9f6a4dcafba8eb08124be8fe17871c7ffa4201d46f67"
+    },
+    {
+      "path": "forge.config.ts",
+      "sha256": "939b4cd93fd83ff217bc326cda95a7931329348921bad0dce6fe7cc2c2259e7c"
+    },
+    {
+      "path": "scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "scripts/build_core.py",
+      "sha256": "84ff0ff955025b0ab72728faa7770f9689a1928e7a35dbf95ec4d8721f83cd57"
+    },
+    {
+      "path": "scripts/check_coverage.py",
+      "sha256": "ace798110679864b9fead460d44ab177b1912763ae334552900e5363b8946618"
+    },
+    {
+      "path": "scripts/check_package.ts",
+      "sha256": "f6ee0675339a53448fb85db9b497a4adb7a0789e0ed57e99acd8f916b31e544a"
+    },
+    {
+      "path": "scripts/install-electron.mjs",
+      "sha256": "00f763a5df6b43653e152b7889f9000182bd4c96842fc83ac805d31b5e5b5bf0"
+    },
+    {
+      "path": "scripts/package_manifest.py",
+      "sha256": "e8290d2e54e3adb980f19a18de668d6a61b95b6dd7c7a78bfd45a45718fd12bb"
+    },
+    {
+      "path": "scripts/provision_gitleaks.py",
+      "sha256": "17eeac43c2226e52dee6251248267b9649311e1e1de9438acc6dd53003a23a61"
+    },
+    {
+      "path": "scripts/provision_package.py",
+      "sha256": "073f2b29f2e248fdd76ec5b41e0aac3b0b97b98fd9fb4b56b38bb8acaad20009"
+    },
+    {
+      "path": "scripts/smoke_package.mjs",
+      "sha256": "104483b022fa7e92736b53029d247fe49811b13856accce1f8ee866a32bbcc89"
+    },
+    {
+      "path": "scripts/stage_package.py",
+      "sha256": "e4879c4163c2722e5898c569434a7730235af3f21c970b39fa3201f4aa0a78e8"
+    },
+    {
+      "path": "scripts/verify.mjs",
+      "sha256": "34d96498dfee1d223e5d5b8a512212e3fcadbf7440d17c035c351f4ae9dc6df9"
+    },
+    {
+      "path": "scripts/verify.py",
+      "sha256": "c250abf27780e2eed46019aae647d1ceccf97fd02f8e25141ab28fbf205789f6"
+    },
+    {
+      "path": "scripts/verify_security.py",
+      "sha256": "3fbceb0f8f5a8244bf979f7ee504d0365a111fb55710ca29fc851ceeadce51ee"
+    },
+    {
+      "path": "src/sage/__init__.py",
+      "sha256": "fa35376eb1f2487dab70dc08150de6f16fb02f143f0cef6f2cd67475cc83ab59"
+    },
+    {
+      "path": "src/sage/__main__.py",
+      "sha256": "8f725848ea4bbb8aeeff58c394f15419a8a31569f690144e0bd7f51e0bc0deea"
+    },
+    {
+      "path": "src/sage/actions.py",
+      "sha256": "c34ab2afb75354bc8c774518988dda55f1db0980e4dd87e30122273ae69b23af"
+    },
+    {
+      "path": "src/sage/config.py",
+      "sha256": "e4a7fdc2a409a92bdd929e8d13485127b143e58b583a93bdf1525e974f3af15c"
+    },
+    {
+      "path": "src/sage/contracts.py",
+      "sha256": "e433b39acea2971d7f25d71210f1cc053cb2b294ea211e89cd7583485ec2110c"
+    },
+    {
+      "path": "src/sage/logging.py",
+      "sha256": "a303ab95adf1c2c036ff116024f1004914456d8d1e97f44f13107e1d1b4f23f2"
+    },
+    {
+      "path": "src/sage/paths.py",
+      "sha256": "982bfa32268543a2f747f0f328ff446b2eb0c8a098ef3879581207b4aa3c516d"
+    },
+    {
+      "path": "src/sage/protocol.py",
+      "sha256": "b90d14ba5d94399df7d47617b87aab78b18a998954a8cb89a8f8e660c593ca0c"
+    },
+    {
+      "path": "src/sage/providers/__init__.py",
+      "sha256": "02ac95c950bad8a0db5f3560dce59b486c134eaad0261c9f81f78145eb357685"
+    },
+    {
+      "path": "src/sage/providers/base.py",
+      "sha256": "e73dbe433075e7f9508c292837593a1e198f0fd213d489fe5104de612e929077"
+    },
+    {
+      "path": "src/sage/providers/copilot.py",
+      "sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5"
+    },
+    {
+      "path": "src/sage/providers/protected_auth.py",
+      "sha256": "201d23587b5c72a075b4e0a7d4dfbc25def6f969ff165867b34402f2d2a027c1"
+    },
+    {
+      "path": "src/sage/providers/session_store.py",
+      "sha256": "50d4cd6b2a81c02984d1181741a0421846b99b44a6937e16ae3185b292c96f48"
+    },
+    {
+      "path": "src/sage/service.py",
+      "sha256": "7e6927b77373da6ad05eef53091bf0774e93076dbfd3a3627a529e4b7b7520db"
+    },
+    {
+      "path": "src/sage/storage.py",
+      "sha256": "814ead488bb4412e4582fea81b92d4691b9c58d3e342c74706bc40d866d2cdd6"
+    },
+    {
+      "path": "vite.main.config.ts",
+      "sha256": "a60312155552d7f5a7389e564e8152a7df45961897c030881cd97877eb7cc542"
+    },
+    {
+      "path": "vite.preload.config.ts",
+      "sha256": "4dcce48e142ac323a252bdc5c1529273a123065ba9a2a33e4986e1ea4c832669"
+    },
+    {
+      "path": "vite.renderer.config.ts",
+      "sha256": "2966b6d02368b46c8a604c6e466e75e0387b9c45d12d86a72d0e1c3107b4396c"
+    }
+  ],
+  "source_commit": "a8763a03634cd5585c2ae30897c570a58c35d127",
+  "working_tree_selected_delta": [
+    "Readme.md",
+    "docs/security.md",
+    "docs/testing.md",
+    "docs/validation/foundation-results.md",
+    "forge.config.ts"
+  ],
+  "tool": "graphifyy 0.9.75 existing local installation",
+  "code": {
+    "files": 49,
+    "nodes": 483,
+    "edges": 1418,
+    "failed_sources": [],
+    "extracted_sources": [
+      "desktop/main/copilot-account.ts",
+      "desktop/main/core-launch.ts",
+      "desktop/main/core-process.ts",
+      "desktop/main/index.ts",
+      "desktop/main/ipc.ts",
+      "desktop/main/security.ts",
+      "desktop/preload/index.ts",
+      "desktop/renderer/App.tsx",
+      "desktop/renderer/Conversation.tsx",
+      "desktop/renderer/NoteReview.tsx",
+      "desktop/renderer/Notes.tsx",
+      "desktop/renderer/SafeMarkdown.tsx",
+      "desktop/renderer/Setup.tsx",
+      "desktop/renderer/host.ts",
+      "desktop/renderer/main.tsx",
+      "desktop/shared/contracts.ts",
+      "desktop/shared/external-url.ts",
+      "forge.config.ts",
+      "scripts/__init__.py",
+      "scripts/build_core.py",
+      "scripts/check_coverage.py",
+      "scripts/check_package.ts",
+      "scripts/install-electron.mjs",
+      "scripts/package_manifest.py",
+      "scripts/provision_gitleaks.py",
+      "scripts/provision_package.py",
+      "scripts/smoke_package.mjs",
+      "scripts/stage_package.py",
+      "scripts/verify.mjs",
+      "scripts/verify.py",
+      "scripts/verify_security.py",
+      "src/sage/__init__.py",
+      "src/sage/__main__.py",
+      "src/sage/actions.py",
+      "src/sage/config.py",
+      "src/sage/contracts.py",
+      "src/sage/logging.py",
+      "src/sage/paths.py",
+      "src/sage/protocol.py",
+      "src/sage/providers/__init__.py",
+      "src/sage/providers/base.py",
+      "src/sage/providers/copilot.py",
+      "src/sage/providers/protected_auth.py",
+      "src/sage/providers/session_store.py",
+      "src/sage/service.py",
+      "src/sage/storage.py",
+      "vite.main.config.ts",
+      "vite.preload.config.ts",
+      "vite.renderer.config.ts"
+    ]
+  },
+  "semantic": {
+    "status": "Host extraction complete against all six frozen document hashes",
+    "fragment_sha256": "99d0c7e97bdbd4f637d334904b3c530663e2d9db131ba64bc2a496c754678e9e",
+    "prompt_sha256": "32d7decad42d58129c6694ea4e4ce1f72a531bc5161827d2095787e9448735e9",
+    "documents": 6,
+    "nodes": 26,
+    "edges": 32,
+    "hyperedges": 2,
+    "input_tokens": null,
+    "output_tokens": null,
+    "measurement": "Host counters unavailable; extraction-schema zero placeholders are not cost data",
+    "external_model_jobs": 0
+  },
+  "projection": {
+    "directed": false,
+    "nodes": 564,
+    "edges": 1380,
+    "communities": 32
+  },
+  "original_exported_edges": 1449,
+  "unresolved_export_edges": [
+    {
+      "source": "src_sage_providers_copilot",
+      "target": "logging",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "total_words": 33875,
+  "exclusions": [
+    "nonstandard extension root spec, SQL, JSON and YAML data/configuration (identified by exact corpus scope)",
+    "tests and e2e",
+    "dependencies",
+    "runtime and native binary payloads",
+    "build output",
+    "project and private state",
+    "original owner audit/research/graph corpus"
+  ],
+  "source_commit_is_ancestor_not_exact_snapshot": true,
+  "graph_artifact_commit": "Not included; generated after this input snapshot"
+}
