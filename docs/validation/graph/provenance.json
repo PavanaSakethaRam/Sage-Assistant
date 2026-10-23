@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "b3080e0e1da3d0740d9dc06ef0e0941e6959e593",
-  "snapshot": "Exact selected source SHA256 snapshot after Task10 I3 final lexical-metadata guard fix; final six docs re-frozen after new actual probes/package/evidence; source_commit is ancestor and exact working-tree delta is included by hashes",
+  "snapshot": "Exact selected corpus bytes committed in implementation 2652a67dbcbe433cc351f7740ea5283e7e4c92c6; final fix3 six docs frozen after actual v3 package/probes; graph artifacts generated afterward",
   "files": [
     {
       "path": "Readme.md",
@@ -76,7 +76,7 @@
     },
     {
       "path": "docs/security.md",
-      "sha256": "2578f90f636d12fef2676b9bffacb75c935c921da9f8ac1beffe9cd181a65724"
+      "sha256": "7ffb60a0c5386cc47c27997db20532112f00a9c9e1def2a0afcdc3ef971cf5cb"
     },
     {
       "path": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
@@ -88,11 +88,11 @@
     },
     {
       "path": "docs/testing.md",
-      "sha256": "b5af0371ae5f9f7e409715166e15d5cde0a11528e30d2ba3c4657cbac781220f"
+      "sha256": "82d778617b20059d8cbeea97035f41f0a9dea10498184904747bea4e719c7c2e"
     },
     {
       "path": "docs/validation/foundation-results.md",
-      "sha256": "7d0249fe58f4b312fc64bee64f8cc659f06b7e37a0ea5614e0ce03ae1b390ddf"
+      "sha256": "69065a226f8e2b8d685cda182253bb15d7a9c8e1c9860e4f7f43c3797668ac60"
     },
     {
       "path": "forge.config.ts",
@@ -204,7 +204,7 @@
     },
     {
       "path": "src/sage/sdk_probe.py",
-      "sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25"
+      "sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e"
     },
     {
       "path": "src/sage/service.py",
@@ -227,22 +227,8 @@
       "sha256": "2966b6d02368b46c8a604c6e466e75e0387b9c45d12d86a72d0e1c3107b4396c"
     }
   ],
-  "source_commit": "0bd73be6072e65b0396291ab0942040a4ebc5e34",
-  "working_tree_selected_delta": [
-    "Readme.md",
-    "desktop/renderer/Setup.tsx",
-    "desktop/shared/contracts.ts",
-    "docs/security.md",
-    "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-    "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-    "docs/testing.md",
-    "docs/validation/foundation-results.md",
-    "src/sage/__main__.py",
-    "src/sage/contracts.py",
-    "src/sage/providers/copilot.py",
-    "src/sage/sdk_probe.py",
-    "src/sage/service.py"
-  ],
+  "source_commit": "2652a67dbcbe433cc351f7740ea5283e7e4c92c6",
+  "working_tree_selected_delta": [],
   "tool": "graphifyy 0.9.75 existing local installation",
   "code": {
     "files": 50,
@@ -306,10 +292,12 @@
     "replaced_pre_I3_fragment": true,
     "final_hash_revalidation_retained_fragment_unchanged": true,
     "same_host_semantic_seat_revalidation": true,
-    "operation": "Same host seat I3 update, then final Ruling43 source-hash revalidation unchanged",
+    "operation": "Same host semantic seat final fix3 source-hash revalidation: retained I3 fragment unchanged, no deltas",
     "final_source_hash_revalidation": {
       "result": "unchanged",
-      "record_sha256": "82fbf949f314bb01d15a0c20e57edfa6d61dfecf7144aedfac47f008c0550c32",
+      "record_path": ".superpowers/sdd/2026-10-22-sage-foundation/task-10-semantic-fix3-revalidation.json",
+      "record_scope": "Local controller evidence for final fix3 source-hash revalidation; prior I3 record preserved separately as historical scope",
+      "record_sha256": "fe4e5b196a7b830674fb91d6349064fec534531fcac72f105142c5d95c3a1efb",
       "documents": [
         {
           "path": "Readme.md",
@@ -317,15 +305,15 @@
         },
         {
           "path": "docs/security.md",
-          "sha256": "2578f90f636d12fef2676b9bffacb75c935c921da9f8ac1beffe9cd181a65724"
+          "sha256": "7ffb60a0c5386cc47c27997db20532112f00a9c9e1def2a0afcdc3ef971cf5cb"
         },
         {
           "path": "docs/testing.md",
-          "sha256": "b5af0371ae5f9f7e409715166e15d5cde0a11528e30d2ba3c4657cbac781220f"
+          "sha256": "82d778617b20059d8cbeea97035f41f0a9dea10498184904747bea4e719c7c2e"
         },
         {
           "path": "docs/validation/foundation-results.md",
-          "sha256": "7d0249fe58f4b312fc64bee64f8cc659f06b7e37a0ea5614e0ce03ae1b390ddf"
+          "sha256": "69065a226f8e2b8d685cda182253bb15d7a9c8e1c9860e4f7f43c3797668ac60"
         },
         {
           "path": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
@@ -369,7 +357,7 @@
       "_origin": "ast"
     }
   ],
-  "total_words": 35951,
+  "total_words": 36198,
   "exclusions": [
     "nonstandard extension root spec, SQL, JSON and YAML data/configuration (identified by exact corpus scope)",
     "tests and e2e",
@@ -379,6 +367,6 @@
     "project and private state",
     "original owner audit/research/graph corpus"
   ],
-  "source_commit_is_ancestor_not_exact_snapshot": true,
+  "source_commit_is_ancestor_not_exact_snapshot": false,
   "graph_artifact_commit": "Not included; generated after this input snapshot"
 }

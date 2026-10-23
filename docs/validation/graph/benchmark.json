@@ -1,6 +1,6 @@
 {
-  "corpus_tokens": 47934,
-  "corpus_words": 35951,
+  "corpus_tokens": 48264,
+  "corpus_words": 36198,
   "nodes": 600,
   "edges": 1476,
   "avg_query_tokens": 5806,
@@ -14,12 +14,12 @@
     {
       "question": "How does a reviewed local note become persistent storage?",
       "query_tokens": 5921,
-      "reduction": 8.1
+      "reduction": 8.2
     },
     {
       "question": "What gates protect the portable native package?",
       "query_tokens": 2863,
-      "reduction": 16.7
+      "reduction": 16.9
     }
   ],
   "interpretation": "Heuristic words/graph-context estimate only; not measured host/model usage or proven token savings"

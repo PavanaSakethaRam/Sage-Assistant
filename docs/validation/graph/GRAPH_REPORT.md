@@ -2,7 +2,7 @@
 
 ## Corpus Check
 
-- 56 files · ~35,951 words
+- 56 files · ~36,198 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -162,7 +162,7 @@ _Questions this graph is uniquely positioned to answer:_
 
 [Exact selected input hashes and provenance](provenance.json), [graph data](graph.json), [full extracted relationships](extraction.json), [interactive graph](graph.html), [health diagnostics](diagnostics.json), [estimated retrieval benchmark](benchmark.json).
 
-The graph uses the ancestor commit and exact file hashes in provenance, including the current runtime, contract, and document working-tree delta. It does not include its own artifact commit or certify native/runtime behavior. The original untracked prototype graph is preserved separately.
+All 56 selected source files match implementation commit 2652a67dbcbe433cc351f7740ea5283e7e4c92c6 exactly; the selected working-tree delta is empty. The graph artifacts were generated afterward and do not include their own artifact commit or certify native/runtime behavior. The original untracked prototype graph is preserved separately.
 
 The undirected community projection combines parallel relationships; graph.json retains every original edge whose endpoints resolve. Health diagnostics expose any dangling endpoints, self-loops or projected edge collapse. The interactive view uses the pinned Graphify vis-network9.1.6 CDN script with SRI; it was not executed here and is not certified as an offline viewer. Five code files yielded no symbols: desktop/main/index.ts, desktop/renderer/main.tsx and the three Vite config entry files. This extraction limit is retained.
 
@@ -209,4 +209,4 @@ examples:
 note: normal graph.json is post-build; raw producer loss must be measured earlier.
 
 Explicit health limits: 145 raw dangling-endpoint edges, 48 external-reference edges, 5 self-loops, 1 exact duplicates, and 78 relationships combined by the undirected projection. 1 raw edges have unresolved export endpoints and are omitted from graph.json; extraction.json preserves all 1555 raw edges. These are extraction limitations, not a clean graph-health claim.
-The six final document hashes and same-seat revalidated semantic fragment define this I3 snapshot. Runtime/contract AST and exact source hashes include the I3 changes; the extra redistribution evidence is linked but outside the selected six-document semantic corpus.
+The final fix3 source hashes were revalidated by the same semantic seat, which retained the 33-node/44-edge/3-hyperedge I3 fragment unchanged. The current AST includes the filename-bearing import boundary fix; the extra redistribution evidence is linked but outside the selected six-document semantic corpus.
