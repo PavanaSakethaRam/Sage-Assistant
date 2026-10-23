@@ -582,20 +582,20 @@
       "_origin": "ast"
     },
     {
-      "id": "desktop_renderer_app_app_cancelledtask",
-      "label": "cancelledTask()",
+      "id": "desktop_renderer_app_app_reconciledtask",
+      "label": "reconciledTask()",
       "file_type": "code",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L73",
+      "source_location": "L79",
       "_callable": true,
       "_origin": "ast"
     },
     {
-      "id": "desktop_renderer_app_app_purgecancelledtask",
-      "label": "purgeCancelledTask()",
+      "id": "desktop_renderer_app_app_reconcileoutcome",
+      "label": "reconcileOutcome()",
       "file_type": "code",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L85",
+      "source_location": "L91",
       "_callable": true,
       "_origin": "ast"
     },
@@ -604,7 +604,7 @@
       "label": "openDraft()",
       "file_type": "code",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L103",
+      "source_location": "L123",
       "_callable": true,
       "_origin": "ast"
     },
@@ -613,7 +613,7 @@
       "label": "getTask()",
       "file_type": "code",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L108",
+      "source_location": "L128",
       "_callable": true,
       "_origin": "ast"
     },
@@ -622,7 +622,7 @@
       "label": "cancelTask()",
       "file_type": "code",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L121",
+      "source_location": "L141",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3758,7 +3758,7 @@
       "label": "sdk_self_check()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L260",
+      "source_location": "L261",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4783,7 +4783,7 @@
     },
     {
       "id": "docs_validation_foundation_results_live_copilot_skipped",
-      "label": "Live Copilot check skipped on rebuilt I3 package",
+      "label": "Live Copilot check skipped on rebuilt final-wave package",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
@@ -4807,7 +4807,7 @@
     },
     {
       "id": "docs_validation_foundation_results_offline_sdk_probe",
-      "label": "New I3 frozen SDK import and construction probe passed offline",
+      "label": "Final-wave frozen SDK import and construction probe passed offline",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
@@ -6860,21 +6860,21 @@
     },
     {
       "source": "desktop_renderer_app_app",
-      "target": "desktop_renderer_app_app_cancelledtask",
+      "target": "desktop_renderer_app_app_reconciledtask",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L73",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
       "source": "desktop_renderer_app_app",
-      "target": "desktop_renderer_app_app_purgecancelledtask",
+      "target": "desktop_renderer_app_app_reconcileoutcome",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L85",
+      "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6884,7 +6884,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L103",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6894,7 +6894,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L108",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6904,7 +6904,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L121",
+      "source_location": "L141",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6915,18 +6915,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L155",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
       "source": "desktop_renderer_app_app",
-      "target": "desktop_renderer_app_app_purgecancelledtask",
+      "target": "desktop_renderer_app_app_reconcileoutcome",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L190",
+      "source_location": "L210",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6937,7 +6937,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L209",
+      "source_location": "L238",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -6948,24 +6948,13 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L251",
+      "source_location": "L280",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "desktop_renderer_app_app_purgecancelledtask",
-      "target": "desktop_renderer_app_app_cancelledtask",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L93",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_renderer_app_app_gettask",
-      "target": "desktop_renderer_app_app_cancelledtask",
+      "source": "desktop_renderer_app_app_reconcileoutcome",
+      "target": "desktop_renderer_app_app_reconciledtask",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -6975,13 +6964,24 @@
       "_origin": "ast"
     },
     {
-      "source": "desktop_renderer_app_app_canceltask",
-      "target": "desktop_renderer_app_app_purgecancelledtask",
+      "source": "desktop_renderer_app_app_gettask",
+      "target": "desktop_renderer_app_app_reconciledtask",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L126",
+      "source_location": "L133",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_renderer_app_app_canceltask",
+      "target": "desktop_renderer_app_app_reconcileoutcome",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/renderer/App.tsx",
+      "source_location": "L146",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16396,7 +16396,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L260",
+      "source_location": "L261",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16518,7 +16518,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L263",
+      "source_location": "L264",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16529,7 +16529,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L265",
+      "source_location": "L266",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19082,7 +19082,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L46",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19093,7 +19093,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L59",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20492,7 +20492,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L148",
+      "source_location": "L168",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20504,7 +20504,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L149",
+      "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20516,7 +20516,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L172",
+      "source_location": "L192",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20528,7 +20528,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L194",
+      "source_location": "L223",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20540,7 +20540,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L111",
+      "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20552,7 +20552,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L118",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20564,7 +20564,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L124",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20576,7 +20576,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L136",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast"
     },

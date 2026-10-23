@@ -1196,18 +1196,6 @@
       "source_location": "L16"
     },
     {
-      "id": "desktop_renderer_app_app_cancelledtask",
-      "label": "cancelledTask()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Renderer and strict shared wire contracts",
-      "file_type": "code",
-      "norm_label": "cancelledtask()",
-      "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L73"
-    },
-    {
       "id": "desktop_renderer_app_app_canceltask",
       "label": "cancelTask()",
       "_callable": true,
@@ -1217,7 +1205,7 @@
       "file_type": "code",
       "norm_label": "canceltask()",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L121"
+      "source_location": "L141"
     },
     {
       "id": "desktop_renderer_app_app_gettask",
@@ -1229,7 +1217,7 @@
       "file_type": "code",
       "norm_label": "gettask()",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L108"
+      "source_location": "L128"
     },
     {
       "id": "desktop_renderer_app_app_opendraft",
@@ -1241,19 +1229,31 @@
       "file_type": "code",
       "norm_label": "opendraft()",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L103"
+      "source_location": "L123"
     },
     {
-      "id": "desktop_renderer_app_app_purgecancelledtask",
-      "label": "purgeCancelledTask()",
+      "id": "desktop_renderer_app_app_reconciledtask",
+      "label": "reconciledTask()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "Renderer and strict shared wire contracts",
       "file_type": "code",
-      "norm_label": "purgecancelledtask()",
+      "norm_label": "reconciledtask()",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L85"
+      "source_location": "L79"
+    },
+    {
+      "id": "desktop_renderer_app_app_reconcileoutcome",
+      "label": "reconcileOutcome()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Renderer and strict shared wire contracts",
+      "file_type": "code",
+      "norm_label": "reconcileoutcome()",
+      "source_file": "desktop/renderer/App.tsx",
+      "source_location": "L91"
     },
     {
       "id": "desktop_renderer_conversation_conversation",
@@ -2045,7 +2045,7 @@
       "file_type": "code",
       "norm_label": "sdk_self_check()",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L260"
+      "source_location": "L261"
     },
     {
       "id": "src_sage_providers_session_store_memorysessionfs_append_file",
@@ -6343,7 +6343,7 @@
     },
     {
       "id": "docs_validation_foundation_results_live_copilot_skipped",
-      "label": "Live Copilot check skipped on rebuilt I3 package",
+      "label": "Live Copilot check skipped on rebuilt final-wave package",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
@@ -6351,7 +6351,7 @@
       "community_name": "Foundation documents and evidence limits",
       "contributor": null,
       "file_type": "concept",
-      "norm_label": "live copilot check skipped on rebuilt i3 package",
+      "norm_label": "live copilot check skipped on rebuilt final-wave package",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
       "source_url": null
@@ -6388,7 +6388,7 @@
     },
     {
       "id": "docs_validation_foundation_results_offline_sdk_probe",
-      "label": "New I3 frozen SDK import and construction probe passed offline",
+      "label": "Final-wave frozen SDK import and construction probe passed offline",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
@@ -6396,7 +6396,7 @@
       "community_name": "Foundation documents and evidence limits",
       "contributor": null,
       "file_type": "concept",
-      "norm_label": "new i3 frozen sdk import and construction probe passed offline",
+      "norm_label": "final-wave frozen sdk import and construction probe passed offline",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
       "source_url": null
@@ -7746,7 +7746,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L148",
+      "source_location": "L168",
       "weight": 1.0
     },
     {
@@ -7758,7 +7758,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L149",
+      "source_location": "L169",
       "weight": 1.0
     },
     {
@@ -7770,7 +7770,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L155",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -7782,19 +7782,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L172",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
       "source": "desktop_renderer_app_app",
-      "target": "desktop_renderer_app_app_purgecancelledtask",
+      "target": "desktop_renderer_app_app_reconcileoutcome",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L190",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -7806,7 +7806,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L194",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -7818,7 +7818,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L209",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -7830,7 +7830,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L251",
+      "source_location": "L280",
       "weight": 1.0
     },
     {
@@ -7842,7 +7842,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L46",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -7854,7 +7854,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L59",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -7866,19 +7866,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L124",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
       "source": "desktop_renderer_app_app_canceltask",
-      "target": "desktop_renderer_app_app_purgecancelledtask",
+      "target": "desktop_renderer_app_app_reconcileoutcome",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L126",
+      "source_location": "L146",
       "weight": 1.0
     },
     {
@@ -7890,7 +7890,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L136",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -7902,12 +7902,36 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L111",
+      "source_location": "L131",
       "weight": 1.0
     },
     {
       "source": "desktop_renderer_app_app_gettask",
-      "target": "desktop_renderer_app_app_cancelledtask",
+      "target": "desktop_renderer_app_app_reconciledtask",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "desktop/renderer/App.tsx",
+      "source_location": "L133",
+      "weight": 1.0
+    },
+    {
+      "source": "desktop_renderer_app_app_gettask",
+      "target": "desktop_renderer_host_message",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "desktop/renderer/App.tsx",
+      "source_location": "L138",
+      "weight": 1.0
+    },
+    {
+      "source": "desktop_renderer_app_app_reconcileoutcome",
+      "target": "desktop_renderer_app_app_reconciledtask",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7915,30 +7939,6 @@
       "context": "call",
       "source_file": "desktop/renderer/App.tsx",
       "source_location": "L113",
-      "weight": 1.0
-    },
-    {
-      "source": "desktop_renderer_app_app_gettask",
-      "target": "desktop_renderer_host_message",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L118",
-      "weight": 1.0
-    },
-    {
-      "source": "desktop_renderer_app_app_purgecancelledtask",
-      "target": "desktop_renderer_app_app_cancelledtask",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -11262,7 +11262,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L263",
+      "source_location": "L264",
       "weight": 1.0
     },
     {
@@ -11274,7 +11274,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L265",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -19261,7 +19261,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L103",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -19272,7 +19272,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L108",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -19283,29 +19283,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L121",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
       "source": "desktop_renderer_app_app",
-      "target": "desktop_renderer_app_app_cancelledtask",
+      "target": "desktop_renderer_app_app_reconciledtask",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L73",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
       "source": "desktop_renderer_app_app",
-      "target": "desktop_renderer_app_app_purgecancelledtask",
+      "target": "desktop_renderer_app_app_reconcileoutcome",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "desktop/renderer/App.tsx",
-      "source_location": "L85",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -21307,7 +21307,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L260",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -25357,5 +25357,5 @@
       "_origin": "semantic"
     }
   ],
-  "built_at_commit": "2652a67dbcbe433cc351f7740ea5283e7e4c92c6"
+  "built_at_commit": "dd51710aa4f2e18cce95bf4977b84aec276f6dfb"
 }

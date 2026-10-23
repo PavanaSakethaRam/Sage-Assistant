@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "b3080e0e1da3d0740d9dc06ef0e0941e6959e593",
-  "snapshot": "Exact selected corpus bytes committed in implementation 2652a67dbcbe433cc351f7740ea5283e7e4c92c6; final fix3 six docs frozen after actual v3 package/probes; graph artifacts generated afterward",
+  "snapshot": "Consolidated final-review fix implementation source; exact selected bytes, graph generated afterward",
   "files": [
     {
       "path": "Readme.md",
@@ -36,7 +36,7 @@
     },
     {
       "path": "desktop/renderer/App.tsx",
-      "sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
+      "sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5"
     },
     {
       "path": "desktop/renderer/Conversation.tsx",
@@ -76,7 +76,7 @@
     },
     {
       "path": "docs/security.md",
-      "sha256": "7ffb60a0c5386cc47c27997db20532112f00a9c9e1def2a0afcdc3ef971cf5cb"
+      "sha256": "b3da9fdaf07208c50081a10edde5073bd6b2bce03cb88ff32fae638c262f137e"
     },
     {
       "path": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
@@ -88,11 +88,11 @@
     },
     {
       "path": "docs/testing.md",
-      "sha256": "82d778617b20059d8cbeea97035f41f0a9dea10498184904747bea4e719c7c2e"
+      "sha256": "3b73f885462ab4717cc08829596f35408eef40107e65fe2d131fec62e666b395"
     },
     {
       "path": "docs/validation/foundation-results.md",
-      "sha256": "69065a226f8e2b8d685cda182253bb15d7a9c8e1c9860e4f7f43c3797668ac60"
+      "sha256": "d8f4804d8bcc3a16d3a85f249e230560b73c730549c7ee30178c679168aeb8a7"
     },
     {
       "path": "forge.config.ts",
@@ -204,7 +204,7 @@
     },
     {
       "path": "src/sage/sdk_probe.py",
-      "sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e"
+      "sha256": "8abb49e0ac2dddbdc05951dfdae8cf4eb6743826a21e779c81c0a3c017ce6c2c"
     },
     {
       "path": "src/sage/service.py",
@@ -227,8 +227,8 @@
       "sha256": "2966b6d02368b46c8a604c6e466e75e0387b9c45d12d86a72d0e1c3107b4396c"
     }
   ],
-  "source_commit": "2652a67dbcbe433cc351f7740ea5283e7e4c92c6",
-  "working_tree_selected_delta": [],
+  "source_commit": "dd51710aa4f2e18cce95bf4977b84aec276f6dfb",
+  "working_tree_selected_delta": {},
   "tool": "graphifyy 0.9.75 existing local installation",
   "code": {
     "files": 50,
@@ -290,14 +290,14 @@
   },
   "semantic": {
     "replaced_pre_I3_fragment": true,
-    "final_hash_revalidation_retained_fragment_unchanged": true,
+    "final_hash_revalidation_retained_fragment_unchanged": false,
     "same_host_semantic_seat_revalidation": true,
-    "operation": "Same host semantic seat final fix3 source-hash revalidation: retained I3 fragment unchanged, no deltas",
+    "operation": "Same host semantic seat consolidated final-fix source-hash revalidation: two current-package node labels updated; relationships unchanged",
     "final_source_hash_revalidation": {
-      "result": "unchanged",
-      "record_path": ".superpowers/sdd/2026-10-22-sage-foundation/task-10-semantic-fix3-revalidation.json",
-      "record_scope": "Local controller evidence for final fix3 source-hash revalidation; prior I3 record preserved separately as historical scope",
-      "record_sha256": "fe4e5b196a7b830674fb91d6349064fec534531fcac72f105142c5d95c3a1efb",
+      "result": "delta_required",
+      "record_path": ".superpowers/sdd/2026-10-22-sage-foundation/final-fix-semantic-revalidation.json",
+      "record_scope": "Local controller evidence for consolidated final-fix source-hash revalidation; prior I3 record preserved separately as historical scope",
+      "record_sha256": "80e53c648d13f759d2b6f54ed698309211d54e2ae8ffd16a7e0d764a09fa1f57",
       "documents": [
         {
           "path": "Readme.md",
@@ -305,15 +305,15 @@
         },
         {
           "path": "docs/security.md",
-          "sha256": "7ffb60a0c5386cc47c27997db20532112f00a9c9e1def2a0afcdc3ef971cf5cb"
+          "sha256": "b3da9fdaf07208c50081a10edde5073bd6b2bce03cb88ff32fae638c262f137e"
         },
         {
           "path": "docs/testing.md",
-          "sha256": "82d778617b20059d8cbeea97035f41f0a9dea10498184904747bea4e719c7c2e"
+          "sha256": "3b73f885462ab4717cc08829596f35408eef40107e65fe2d131fec62e666b395"
         },
         {
           "path": "docs/validation/foundation-results.md",
-          "sha256": "69065a226f8e2b8d685cda182253bb15d7a9c8e1c9860e4f7f43c3797668ac60"
+          "sha256": "d8f4804d8bcc3a16d3a85f249e230560b73c730549c7ee30178c679168aeb8a7"
         },
         {
           "path": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
@@ -326,7 +326,7 @@
       ]
     },
     "status": "Host extraction complete against all six frozen document hashes",
-    "fragment_sha256": "c52095fc1ae996945f437b47365fb5bf4feee34355ba2d9e228fbac3677a072f",
+    "fragment_sha256": "75308ae3804088029b6435dc243383949e22f1f1f6d6e3f2e63c3f7d4ed43940",
     "prompt_sha256": "32d7decad42d58129c6694ea4e4ce1f72a531bc5161827d2095787e9448735e9",
     "documents": 6,
     "nodes": 33,
@@ -335,7 +335,12 @@
     "input_tokens": null,
     "output_tokens": null,
     "measurement": "Host counters unavailable; extraction-schema zero placeholders are not cost data",
-    "external_model_jobs": 0
+    "external_model_jobs": 0,
+    "original_fragment_sha256": "c52095fc1ae996945f437b47365fb5bf4feee34355ba2d9e228fbac3677a072f",
+    "label_deltas": 2,
+    "unchanged_relationships": true,
+    "delta_record_path": ".superpowers/sdd/2026-10-22-sage-foundation/final-fix-semantic-delta.json",
+    "delta_record_sha256": "ebba9ebab7ea894e5931fd76f0b319168185f38fc5e41f33447549c27e3b3078"
   },
   "projection": {
     "directed": false,
@@ -357,7 +362,7 @@
       "_origin": "ast"
     }
   ],
-  "total_words": 36198,
+  "total_words": 37013,
   "exclusions": [
     "nonstandard extension root spec, SQL, JSON and YAML data/configuration (identified by exact corpus scope)",
     "tests and e2e",
