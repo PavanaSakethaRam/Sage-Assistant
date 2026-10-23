@@ -14,12 +14,26 @@ from sage.contracts import (
     Approval,
     Note,
     NoteContent,
+    ProviderDiagnostic,
     ProviderReadiness,
     ReasoningRequest,
     ReasoningResult,
 )
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "contracts.json"
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"stage": "raw error", "category": "io_error"},
+        {"stage": "sdk_import", "category": "raw error"},
+        {"stage": "sdk_import", "category": "io_error", "message": "private"},
+    ],
+)
+def test_provider_diagnostic_is_closed(bad: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        ProviderDiagnostic.model_validate(bad)
 
 
 def examples() -> dict[str, Any]:

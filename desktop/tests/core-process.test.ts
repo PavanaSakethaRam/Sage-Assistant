@@ -50,7 +50,7 @@ async function fake(mode = "normal") {
  if(mode==='partial'){process.stdout.write(Buffer.from([0]));return;}
  if(mode==='overflow'){process.stdout.write(Buffer.from([0,16,0,1]));return;}
  let result=r.method==='app.shutdown'?{status:'shutting_down'}:r.method==='reasoning.cancel'?{status:'cancelled'}:r.method==='reasoning.start'?{status:'completed',task_id:'t',text:'late',proposal:null,usage:null}:{ai_mode:'local',reasoning_backend:null};
- if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
+ if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',diagnostic:null,explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
  if(mode==='saturated-selection'&&r.kind==='request'&&r.method==='settings.get'){held.push(r);fs.writeFileSync(root+'/held',String(held.length));continue;}
  if(r.kind==='host_copilot_selection'){if(mode==='control-overlap'&&r.account){fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');heldSelection=r;fs.writeFileSync(root+'/selection-held','1');continue;}if(mode==='control-overlap'&&heldSelection){send({version:1,id:heldSelection.id,kind:'response',result:{generation:heldSelection.generation,status:'selected'}});heldSelection=undefined;}if(mode==='saturated-selection'){selected=r.account;fs.writeFileSync(root+'/selected',JSON.stringify(selected));if(!selected){fs.writeFileSync(root+'/disposed',String(held.length));for(const old of held.splice(0))send({version:1,id:old.id,kind:'error',code:'cancelled'});}}fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');result={generation:mode==='selection-mismatch'?r.generation+1:r.generation,status:r.account?'selected':'cleared'};}
  if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME)) result.ai_mode='bad';
@@ -325,6 +325,7 @@ subprocessIt(
       version: "sdk:1.0.25/runtime:1.0.102",
       destination: "GitHub Copilot cloud",
       explanation: "explicit_connection_check_succeeded",
+      diagnostic: null,
     };
     for (const method of ["connection.test", "readiness.list"] as const) {
       expect(

@@ -48,3 +48,6 @@ Deterministic suites run without accounts, devices or paid inference. Signed-in 
 ## Explicit limits
 
 No production social sending, unrestricted shell/desktop control, automatic deployments, all-day cloud microphone session, remote execution service or agent swarm is part of this portfolio scope. Future changes require a concrete workflow and enforceable boundary. Potentially exposed historical credentials require owner triage; implementing Sage does not establish their revocation.
+
+
+Current foundation evidence (23 October 2026) includes local macOS note/restart and package checks, plus a fixed guarded offline public SDK import/construction probe. One approved native connection Test on the earlier artifact failed `runtime_error`; actual protected/identity/model counts are unknown, Disconnect and Quit were acknowledged, and no retry was run. The rebuilt package has no live validation. These observations leave foundation acceptance and all three broader demos incomplete; [foundation results](../../validation/foundation-results.md) identifies the separate snapshots and remaining gates.

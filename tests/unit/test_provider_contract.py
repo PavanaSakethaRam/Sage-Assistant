@@ -278,3 +278,70 @@ def test_wrong_native_version_never_creates_session(tmp_path: Path) -> None:
     assert sdk.session_options == {} and sdk.prompts == []
     assert sdk.stopped == 1
     assert provider.readiness().status == "incompatible"
+
+
+@pytest.mark.parametrize(
+    "stage",
+    [
+        "token_source",
+        "session_storage",
+        "sdk_import",
+        "sdk_construct",
+        "runtime_start",
+        "runtime_status",
+        "session_create",
+        "response_wait",
+    ],
+)
+def test_unexpected_failure_stages_are_closed_and_cleanup_preserved(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, stage: str
+) -> None:
+    import builtins
+
+    sdk = FakeSdk()
+    provider = backend(tmp_path, sdk)
+
+    def fail(*args: Any, **kwargs: Any) -> Any:
+        raise RuntimeError("synthetic-private-marker /private/account token")
+
+    async def async_fail(*args: Any, **kwargs: Any) -> Any:
+        fail()
+
+    if stage == "token_source":
+        provider._token_source = async_fail
+    elif stage == "session_storage":
+        monkeypatch.setattr(provider.sessions, "create", fail)
+    elif stage == "sdk_import":
+        original = builtins.__import__
+
+        def importing(name: str, *args: Any, **kwargs: Any) -> Any:
+            if name == "copilot":
+                fail()
+            return original(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", importing)
+    elif stage == "sdk_construct":
+        provider._client_factory = fail
+    else:
+        monkeypatch.setattr(
+            sdk,
+            {
+                "runtime_start": "start",
+                "runtime_status": "get_status",
+                "session_create": "create_session",
+                "response_wait": "send",
+            }[stage],
+            async_fail,
+        )
+    result = asyncio.run(provider.reason(request()))
+    readiness = provider.readiness()
+    assert result.text == "runtime_error"
+    assert readiness.diagnostic is not None
+    assert readiness.diagnostic.model_dump() == {"stage": stage, "category": "unexpected_error"}
+    assert "synthetic-private-marker" not in readiness.model_dump_json()
+    assert sdk.stopped == int(
+        stage in {"runtime_start", "runtime_status", "session_create", "response_wait"}
+    )
+    assert sdk.disconnected == int(stage == "response_wait")
+    assert not provider._active
+    assert not (tmp_path / "sessions").exists() or list((tmp_path / "sessions").iterdir()) == []

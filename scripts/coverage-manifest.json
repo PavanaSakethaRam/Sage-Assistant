@@ -13,6 +13,7 @@
     "src/sage/providers/copilot.py",
     "src/sage/providers/protected_auth.py",
     "src/sage/providers/session_store.py",
+    "src/sage/sdk_probe.py",
     "src/sage/service.py",
     "src/sage/storage.py"
   ],
@@ -49,6 +50,7 @@
     "src/sage/providers/copilot.py",
     "src/sage/providers/protected_auth.py",
     "src/sage/providers/session_store.py",
+    "src/sage/sdk_probe.py",
     "src/sage/service.py",
     "src/sage/storage.py"
   ],

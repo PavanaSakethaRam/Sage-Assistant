@@ -4,6 +4,27 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "../renderer/App";
 import { fixture, deferred } from "./renderer-fixture";
+it("renders only the closed provider failure stage and category", async () => {
+  const { api } = fixture({
+    "readiness.list": () => ({
+      items: [
+        {
+          provider: "copilot",
+          status: "error",
+          evidence: [],
+          version: "1.0.25",
+          destination: "GitHub Copilot cloud",
+          explanation: "runtime_error",
+          diagnostic: { stage: "sdk_construct", category: "contract_error" },
+        },
+      ],
+    }),
+  });
+  render(<App api={api} />);
+  expect(
+    await screen.findByText(/Stage: sdk_construct; category: contract_error/),
+  ).toBeInTheDocument();
+});
 it("shows all requested choices without unsupported key collection or fake local readiness", async () => {
   const { api, calls } = fixture();
   render(<App api={api} />);
@@ -142,6 +163,7 @@ it("holds setup controls during readiness reconciliation and clears old ready ev
                 version: "1.0.102",
                 destination: "GitHub Copilot cloud",
                 explanation: "Previously tested",
+                diagnostic: null,
               },
             ],
           }

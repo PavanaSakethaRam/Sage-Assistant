@@ -1,25 +1,25 @@
 {
-  "corpus_tokens": 45713,
-  "corpus_words": 34285,
-  "nodes": 565,
-  "edges": 1390,
-  "avg_query_tokens": 4596,
-  "reduction_ratio": 9.9,
+  "corpus_tokens": 47934,
+  "corpus_words": 35951,
+  "nodes": 600,
+  "edges": 1476,
+  "avg_query_tokens": 5806,
+  "reduction_ratio": 8.3,
   "per_question": [
     {
       "question": "How does protected account selection reach the Copilot session?",
-      "query_tokens": 5997,
-      "reduction": 7.6
+      "query_tokens": 8634,
+      "reduction": 5.6
     },
     {
       "question": "How does a reviewed local note become persistent storage?",
-      "query_tokens": 5356,
-      "reduction": 8.5
+      "query_tokens": 5921,
+      "reduction": 8.1
     },
     {
       "question": "What gates protect the portable native package?",
-      "query_tokens": 2437,
-      "reduction": 18.8
+      "query_tokens": 2863,
+      "reduction": 16.7
     }
   ],
   "interpretation": "Heuristic words/graph-context estimate only; not measured host/model usage or proven token savings"

@@ -9,15 +9,14 @@
     "evidence": [],
     "version": null,
     "destination": null,
-    "explanation": "Explicit setup required"
+    "explanation": "Explicit setup required",
+    "diagnostic": null
   },
   "ReasoningRequest": {
     "request_id": "request-1",
     "task_id": "task-1",
     "user_text": "Draft a note",
-    "attached_context": [
-      "Explicit context only"
-    ],
+    "attached_context": ["Explicit context only"],
     "backend": "copilot",
     "model": null,
     "deadline": "2026-10-22T19:00:00Z",

@@ -1,26 +1,26 @@
 {
-  "node_count": 511,
+  "node_count": 545,
   "unverified_node_count": 0,
-  "raw_edge_count": 1462,
+  "raw_edge_count": 1555,
   "non_object_edges": 0,
   "missing_endpoint_edges": 0,
-  "dangling_endpoint_edges": 134,
+  "dangling_endpoint_edges": 145,
   "external_reference_edges": 48,
   "self_loop_edges": 5,
-  "valid_candidate_edges": 1280,
+  "valid_candidate_edges": 1362,
   "exact_duplicate_edges": 1,
-  "directed_unique_endpoint_pairs": 1212,
-  "directed_same_endpoint_collapsed_edges": 68,
-  "undirected_unique_endpoint_pairs": 1209,
-  "undirected_same_endpoint_collapsed_edges": 71,
-  "same_endpoint_group_count": 65,
-  "relation_variant_groups": 52,
+  "directed_unique_endpoint_pairs": 1287,
+  "directed_same_endpoint_collapsed_edges": 75,
+  "undirected_unique_endpoint_pairs": 1284,
+  "undirected_same_endpoint_collapsed_edges": 78,
+  "same_endpoint_group_count": 71,
+  "relation_variant_groups": 56,
   "source_file_variant_groups": 0,
   "source_location_variant_groups": 8,
-  "context_variant_groups": 4,
+  "context_variant_groups": 6,
   "post_build_graph_type": "Graph",
-  "post_build_node_count": 565,
-  "post_build_edge_count": 1390,
+  "post_build_node_count": 600,
+  "post_build_edge_count": 1476,
   "post_build_error": "",
   "producer_suppression": {
     "path": "<graphify-package>/extract.py",
@@ -171,6 +171,25 @@
       ]
     },
     {
+      "source": "src_sage_providers_copilot_construct_client",
+      "target": "src_sage_providers_copilot_py_any",
+      "edge_count": 3,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "src/sage/providers/copilot.py"
+      ],
+      "source_locations": [
+        "L49"
+      ],
+      "contexts": [
+        "generic_arg",
+        "parameter_type",
+        "return_type"
+      ]
+    },
+    {
       "source": "desktop_main_core_process_decode",
       "target": "desktop_main_core_process_decode_walk",
       "edge_count": 2,
@@ -188,23 +207,6 @@
       "contexts": [
         "",
         "call"
-      ]
-    },
-    {
-      "source": "desktop_main_ipc",
-      "target": "desktop_shared_external_url_validateexternalurl",
-      "edge_count": 2,
-      "relations": [
-        "imports"
-      ],
-      "source_files": [
-        "desktop/main/ipc.ts"
-      ],
-      "source_locations": [
-        "L8"
-      ],
-      "contexts": [
-        "import"
       ]
     }
   ]

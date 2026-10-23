@@ -410,6 +410,7 @@ class CoreService:
                         "version": None,
                         "destination": None,
                         "explanation": "inference_unavailable",
+                        "diagnostic": None,
                     }
                     for provider in ("copilot", "local", "api")
                 ]

@@ -58,6 +58,19 @@ export type Readiness = {
   version: string | null;
   destination: string | null;
   explanation: string;
+  diagnostic: {
+    stage:
+      | "token_source"
+      | "session_storage"
+      | "sdk_import"
+      | "sdk_construct"
+      | "runtime_start"
+      | "runtime_status"
+      | "session_create"
+      | "response_wait";
+    category:
+      "dependency_error" | "contract_error" | "io_error" | "unexpected_error";
+  } | null;
 };
 export type Page<T> = { items: T[]; next_offset: number | null };
 type PageInput = { limit?: number; offset?: number };
@@ -436,6 +449,7 @@ function readiness(value: unknown): void {
     "version",
     "destination",
     "explanation",
+    "diagnostic",
   ]);
   literal(r.provider, backends);
   literal(r.status, [
@@ -450,6 +464,25 @@ function readiness(value: unknown): void {
   nullable(r.version, string);
   nullable(r.destination, string);
   string(r.explanation);
+  nullable(r.diagnostic, (v) => {
+    const d = object(v, ["stage", "category"]);
+    literal(d.stage, [
+      "token_source",
+      "session_storage",
+      "sdk_import",
+      "sdk_construct",
+      "runtime_start",
+      "runtime_status",
+      "session_create",
+      "response_wait",
+    ]);
+    literal(d.category, [
+      "dependency_error",
+      "contract_error",
+      "io_error",
+      "unexpected_error",
+    ]);
+  });
 }
 function unavailable(r: RecordValue): boolean {
   if (Object.hasOwn(r, "code")) {
@@ -534,6 +567,7 @@ function result(value: unknown, method: Method): void {
           "version",
           "destination",
           "explanation",
+          "diagnostic",
         ],
       );
       if (!unavailable(r)) readiness(r);

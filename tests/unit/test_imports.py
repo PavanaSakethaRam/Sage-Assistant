@@ -20,6 +20,7 @@ import pytest
         "sage.protocol",
         "sage.service",
         "sage.logging",
+        "sage.sdk_probe",
         "sage.__main__",
         "sage.providers",
         "sage.providers.base",

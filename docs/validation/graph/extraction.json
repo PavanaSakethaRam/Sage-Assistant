@@ -978,7 +978,7 @@
       "label": "Page",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L62",
+      "source_location": "L75",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -988,7 +988,7 @@
       "label": "PageInput",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L63",
+      "source_location": "L76",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -998,7 +998,7 @@
       "label": "Params",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L64",
+      "source_location": "L77",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1008,7 +1008,7 @@
       "label": "Method",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L94",
+      "source_location": "L107",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1018,7 +1018,7 @@
       "label": "CoreRequest",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L95",
+      "source_location": "L108",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1028,7 +1028,7 @@
       "label": "Unavailable",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L105",
+      "source_location": "L118",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1038,7 +1038,7 @@
       "label": "Results",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L106",
+      "source_location": "L119",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1048,7 +1048,7 @@
       "label": "errorCodes",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L142",
+      "source_location": "L155",
       "_origin": "ast"
     },
     {
@@ -1056,7 +1056,7 @@
       "label": "ErrorCode",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L155",
+      "source_location": "L168",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1066,7 +1066,7 @@
       "label": "CoreResponse",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L156",
+      "source_location": "L169",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1076,7 +1076,7 @@
       "label": "Progress",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L159",
+      "source_location": "L172",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1086,7 +1086,7 @@
       "label": "SageApi",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L166",
+      "source_location": "L179",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1096,7 +1096,7 @@
       "label": "RecordValue",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L171",
+      "source_location": "L184",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1106,7 +1106,7 @@
       "label": "invalid()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L172",
+      "source_location": "L185",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1115,7 +1115,7 @@
       "label": "object()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L175",
+      "source_location": "L188",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1124,7 +1124,7 @@
       "label": "literal()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L190",
+      "source_location": "L203",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1133,7 +1133,7 @@
       "label": "integer()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L193",
+      "source_location": "L206",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1142,7 +1142,7 @@
       "label": "string()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L202",
+      "source_location": "L215",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1151,7 +1151,7 @@
       "label": "text()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L213",
+      "source_location": "L226",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1160,7 +1160,7 @@
       "label": "id()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L228",
+      "source_location": "L241",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1169,7 +1169,7 @@
       "label": "nullable()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L232",
+      "source_location": "L245",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1178,7 +1178,7 @@
       "label": "array()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L235",
+      "source_location": "L248",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1187,7 +1187,7 @@
       "label": "bounded()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L243",
+      "source_location": "L256",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1196,7 +1196,7 @@
       "label": "note()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L253",
+      "source_location": "L266",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1205,7 +1205,7 @@
       "label": "parseNoteContent()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L258",
+      "source_location": "L271",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1214,7 +1214,7 @@
       "label": "backends",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L262",
+      "source_location": "L275",
       "_origin": "ast"
     },
     {
@@ -1222,7 +1222,7 @@
       "label": "parseRequest()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L280",
+      "source_location": "L293",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1231,7 +1231,7 @@
       "label": "action()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L385",
+      "source_location": "L398",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1240,7 +1240,7 @@
       "label": "date()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L403",
+      "source_location": "L416",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1249,7 +1249,7 @@
       "label": "summary()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L411",
+      "source_location": "L424",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1258,7 +1258,7 @@
       "label": "result()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L463",
+      "source_location": "L496",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1267,7 +1267,7 @@
       "label": "parseResponse()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L584",
+      "source_location": "L618",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1276,7 +1276,7 @@
       "label": "parseProgress()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L600",
+      "source_location": "L634",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1285,7 +1285,7 @@
       "label": "failure()",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L610",
+      "source_location": "L644",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1294,7 +1294,7 @@
       "label": "Window",
       "file_type": "code",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L615",
+      "source_location": "L649",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2461,11 +2461,21 @@
       "_origin": "ast"
     },
     {
+      "id": "src_sage_contracts_providerdiagnostic",
+      "label": "ProviderDiagnostic",
+      "file_type": "code",
+      "source_file": "src/sage/contracts.py",
+      "source_location": "L82",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
       "id": "src_sage_contracts_providerreadiness",
       "label": "ProviderReadiness",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L69",
+      "source_location": "L87",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2475,7 +2485,7 @@
       "label": "ReasoningRequest",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L80",
+      "source_location": "L99",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2485,7 +2495,7 @@
       "label": "TokenUsage",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L91",
+      "source_location": "L110",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2495,7 +2505,7 @@
       "label": "ReasoningResult",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L96",
+      "source_location": "L115",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2505,7 +2515,7 @@
       "label": "ActionProposal",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L104",
+      "source_location": "L123",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2515,7 +2525,7 @@
       "label": "Approval",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L113",
+      "source_location": "L132",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2525,7 +2535,7 @@
       "label": "ActionResult",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L131",
+      "source_location": "L150",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2535,7 +2545,7 @@
       "label": "Note",
       "file_type": "code",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L139",
+      "source_location": "L158",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2565,11 +2575,11 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_contracts_rationale_114",
+      "id": "src_sage_contracts_rationale_133",
       "label": "A stored binding; authorization still requires trusted-state verification.",
       "file_type": "rationale",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L114",
+      "source_location": "L133",
       "_origin": "ast"
     },
     {
@@ -2907,13 +2917,12 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_providers_copilot_incompatible",
-      "label": "_Incompatible",
+      "id": "src_sage_providers_copilot_failure_category",
+      "label": "failure_category()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L36",
+      "source_location": "L39",
       "_callable": true,
-      "_callable_class": true,
       "_origin": "ast"
     },
     {
@@ -2925,41 +2934,19 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_providers_copilot_cancelled",
-      "label": "_Cancelled",
+      "id": "failurecategory",
+      "label": "FailureCategory",
       "file_type": "code",
-      "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L40",
-      "_callable": true,
-      "_callable_class": true,
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_providers_copilot_output",
-      "label": "_Output",
+      "id": "src_sage_providers_copilot_construct_client",
+      "label": "construct_client()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L44",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast"
-    },
-    {
-      "id": "src_sage_providers_copilot_running",
-      "label": "_Running",
-      "file_type": "code",
-      "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L50",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast"
-    },
-    {
-      "id": "src_sage_providers_copilot_unique_object",
-      "label": "_unique_object()",
-      "file_type": "code",
-      "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L59",
+      "source_location": "L49",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2972,11 +2959,60 @@
       "_origin": "ast"
     },
     {
+      "id": "src_sage_providers_copilot_incompatible",
+      "label": "_Incompatible",
+      "file_type": "code",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L74",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_providers_copilot_cancelled",
+      "label": "_Cancelled",
+      "file_type": "code",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L78",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_providers_copilot_output",
+      "label": "_Output",
+      "file_type": "code",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L82",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_providers_copilot_running",
+      "label": "_Running",
+      "file_type": "code",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L88",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_providers_copilot_unique_object",
+      "label": "_unique_object()",
+      "file_type": "code",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L97",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
       "id": "src_sage_providers_copilot_copilotreasoner",
       "label": "CopilotReasoner",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L68",
+      "source_location": "L106",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2986,7 +3022,7 @@
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3011,7 +3047,7 @@
       "label": ".readiness()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L96",
+      "source_location": "L135",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3020,7 +3056,7 @@
       "label": "._runtime_present()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L123",
+      "source_location": "L163",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3029,7 +3065,7 @@
       "label": ".reason()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L133",
+      "source_location": "L173",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3038,7 +3074,7 @@
       "label": "deny()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L204",
+      "source_location": "L232",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3047,7 +3083,7 @@
       "label": "._cleanup()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L329",
+      "source_location": "L367",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3056,7 +3092,7 @@
       "label": "._error()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L370",
+      "source_location": "L408",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3065,7 +3101,7 @@
       "label": ".cancel()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L375",
+      "source_location": "L416",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3074,7 +3110,7 @@
       "label": ".connection_test()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L386",
+      "source_location": "L427",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3083,7 +3119,7 @@
       "label": ".aclose()",
       "file_type": "code",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L419",
+      "source_location": "L461",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3096,11 +3132,19 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_providers_copilot_rationale_69",
+      "id": "src_sage_providers_copilot_rationale_50",
+      "label": "The same public, explicit stdio options for the provider and inert SDK probe.",
+      "file_type": "rationale",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L50",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_providers_copilot_rationale_107",
       "label": "No ambient account reads; token_source is a trusted host-owned capability. It\u2026",
       "file_type": "rationale",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L69",
+      "source_location": "L107",
       "_origin": "ast"
     },
     {
@@ -3540,6 +3584,201 @@
       "_origin": "ast"
     },
     {
+      "id": "src_sage_sdk_probe",
+      "label": "sdk_probe.py",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_proberesult",
+      "label": "ProbeResult",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L39",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard",
+      "label": "CapabilityGuard",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L49",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_init",
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L57",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_py_path",
+      "label": "Path",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_deny",
+      "label": ".deny()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L78",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "category",
+      "label": "Category",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_py_any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_read",
+      "label": ".read()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L82",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_audit",
+      "label": ".audit()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L111",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_install",
+      "label": ".install()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L157",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_install_metadata",
+      "label": "metadata()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L167",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_install_metadata_checked",
+      "label": "checked()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L168",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_silent",
+      "label": "_Silent",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L188",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_silent_init",
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L189",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_silent_write",
+      "label": ".write()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L193",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_silent_flush",
+      "label": ".flush()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L196",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_probe",
+      "label": "probe()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L200",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_decode_result",
+      "label": "decode_result()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L240",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_sdk_self_check",
+      "label": "sdk_self_check()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L254",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_rationale_1",
+      "label": "Fixed public SDK import/constructor probe; Python capability guard, not an OS\u2026",
+      "file_type": "rationale",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_rationale_50",
+      "label": "Deny audited capabilities plus unaudited Python metadata/output entry points.\u2026",
+      "file_type": "rationale",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L50",
+      "_origin": "ast"
+    },
+    {
       "id": "src_sage_service",
       "label": "service.py",
       "file_type": "code",
@@ -3805,7 +4044,7 @@
       "label": "._page()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L476",
+      "source_location": "L477",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3814,7 +4053,7 @@
       "label": "Writer",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L483",
+      "source_location": "L484",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -3832,7 +4071,7 @@
       "label": ".write()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L484",
+      "source_location": "L485",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3841,7 +4080,7 @@
       "label": ".drain()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L485",
+      "source_location": "L486",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3850,7 +4089,7 @@
       "label": ".close()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L486",
+      "source_location": "L487",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3859,7 +4098,7 @@
       "label": ".wait_closed()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L487",
+      "source_location": "L488",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3868,7 +4107,7 @@
       "label": "run_service()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L490",
+      "source_location": "L491",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3885,7 +4124,7 @@
       "label": "send()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L507",
+      "source_location": "L508",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3894,7 +4133,7 @@
       "label": "execute()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L520",
+      "source_location": "L521",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3903,7 +4142,7 @@
       "label": "retention()",
       "file_type": "code",
       "source_file": "src/sage/service.py",
-      "source_location": "L554",
+      "source_location": "L555",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3932,11 +4171,11 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_service_rationale_491",
+      "id": "src_sage_service_rationale_492",
       "label": "One connection, at most eight requests; cancellation invalidates late output.\u2026",
       "file_type": "rationale",
       "source_file": "src/sage/service.py",
-      "source_location": "L491",
+      "source_location": "L492",
       "_origin": "ast"
     },
     {
@@ -4326,6 +4565,18 @@
       "_origin": "semantic"
     },
     {
+      "id": "readme_failed_native_connection_test",
+      "label": "Earlier approved connection Test failed runtime_error",
+      "file_type": "concept",
+      "source_file": "Readme.md",
+      "source_location": "Current behavior and support",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
       "id": "docs_security_security_architecture_and_evidence_boundaries",
       "label": "Security architecture and evidence boundaries",
       "file_type": "document",
@@ -4399,6 +4650,30 @@
       "_origin": "semantic"
     },
     {
+      "id": "docs_security_guarded_sdk_self_check",
+      "label": "Guarded offline SDK self-check boundary",
+      "file_type": "concept",
+      "source_file": "docs/security.md",
+      "source_location": "Package integrity and TLS policy",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_security_closed_provider_diagnostics",
+      "label": "Closed provider stage and category diagnostics",
+      "file_type": "concept",
+      "source_file": "docs/security.md",
+      "source_location": "Package integrity and TLS policy",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
       "id": "docs_testing_foundation_verification",
       "label": "Foundation verification",
       "file_type": "document",
@@ -4447,6 +4722,18 @@
       "_origin": "semantic"
     },
     {
+      "id": "docs_testing_guarded_sdk_probe",
+      "label": "Fixed guarded SDK probe verification",
+      "file_type": "concept",
+      "source_file": "docs/testing.md",
+      "source_location": "Native package checks",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
       "id": "docs_validation_foundation_results_foundation_evidence_2026_10_23",
       "label": "Foundation evidence, 2026-10-23",
       "file_type": "document",
@@ -4460,7 +4747,7 @@
     },
     {
       "id": "docs_validation_foundation_results_local_macos_arm64_checks",
-      "label": "Passed local macOS arm64 checks",
+      "label": "Combined local macOS arm64 verification evidence",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
@@ -4472,7 +4759,7 @@
     },
     {
       "id": "docs_validation_foundation_results_native_ui_note_restart",
-      "label": "Passed native UI note and restart check",
+      "label": "Earlier artifact passed native UI note and restart check",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
@@ -4484,7 +4771,7 @@
     },
     {
       "id": "docs_validation_foundation_results_outer_signature_failure",
-      "label": "Failed final host and outer signatures",
+      "label": "Fresh host and outer signature verification failed",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
@@ -4496,7 +4783,7 @@
     },
     {
       "id": "docs_validation_foundation_results_live_copilot_skipped",
-      "label": "Protected access and live Copilot checks skipped",
+      "label": "Live Copilot check skipped on rebuilt I3 package",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": "Executed checks",
@@ -4512,6 +4799,42 @@
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
       "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_validation_foundation_results_offline_sdk_probe",
+      "label": "New I3 frozen SDK import and construction probe passed offline",
+      "file_type": "concept",
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Executed checks",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_validation_foundation_results_failed_native_connection_test",
+      "label": "One approved Test failed runtime_error on prior package with stage counts unknown",
+      "file_type": "concept",
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Executed checks",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_validation_foundation_results_separate_artifact_snapshots",
+      "label": "Distinct new offline and prior failed-live artifact snapshots",
+      "file_type": "concept",
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Separate artifact snapshots",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -7505,7 +7828,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/renderer/Setup.tsx",
-      "source_location": "L262",
+      "source_location": "L269",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7830,7 +8153,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L62",
+      "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7840,7 +8163,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L63",
+      "source_location": "L76",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7850,7 +8173,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L64",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7860,7 +8183,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L94",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7870,7 +8193,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L95",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7880,7 +8203,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L105",
+      "source_location": "L118",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7890,7 +8213,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L106",
+      "source_location": "L119",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7900,7 +8223,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L142",
+      "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7910,7 +8233,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L155",
+      "source_location": "L168",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7920,7 +8243,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L156",
+      "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7930,7 +8253,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L159",
+      "source_location": "L172",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7940,7 +8263,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L166",
+      "source_location": "L179",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7950,7 +8273,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L171",
+      "source_location": "L184",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7960,7 +8283,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L172",
+      "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7970,7 +8293,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L175",
+      "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7980,7 +8303,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L190",
+      "source_location": "L203",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -7990,7 +8313,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L193",
+      "source_location": "L206",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8000,7 +8323,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L202",
+      "source_location": "L215",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8010,7 +8333,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L213",
+      "source_location": "L226",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8020,7 +8343,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L228",
+      "source_location": "L241",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8030,7 +8353,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L232",
+      "source_location": "L245",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8040,7 +8363,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L235",
+      "source_location": "L248",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8050,7 +8373,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L243",
+      "source_location": "L256",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8060,7 +8383,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L253",
+      "source_location": "L266",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8070,7 +8393,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L258",
+      "source_location": "L271",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8080,7 +8403,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L262",
+      "source_location": "L275",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8090,7 +8413,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L263",
+      "source_location": "L276",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8100,7 +8423,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L276",
+      "source_location": "L289",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8110,7 +8433,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L280",
+      "source_location": "L293",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8120,7 +8443,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L369",
+      "source_location": "L382",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8130,7 +8453,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L385",
+      "source_location": "L398",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8140,7 +8463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L403",
+      "source_location": "L416",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8150,7 +8473,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L411",
+      "source_location": "L424",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8160,7 +8483,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L431",
+      "source_location": "L444",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8170,7 +8493,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L454",
+      "source_location": "L487",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8180,7 +8503,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L463",
+      "source_location": "L496",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8190,7 +8513,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L584",
+      "source_location": "L618",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8200,7 +8523,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L600",
+      "source_location": "L634",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8210,7 +8533,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L610",
+      "source_location": "L644",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8220,7 +8543,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L615",
+      "source_location": "L649",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8231,7 +8554,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L181",
+      "source_location": "L194",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8242,7 +8565,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L191",
+      "source_location": "L204",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8253,7 +8576,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L200",
+      "source_location": "L213",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8264,7 +8587,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L211",
+      "source_location": "L224",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8275,7 +8598,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L219",
+      "source_location": "L232",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8286,7 +8609,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L226",
+      "source_location": "L239",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8297,7 +8620,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L230",
+      "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8308,7 +8631,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L240",
+      "source_location": "L253",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8319,7 +8642,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L248",
+      "source_location": "L261",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8330,7 +8653,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L254",
+      "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8341,7 +8664,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L255",
+      "source_location": "L268",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8352,7 +8675,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L259",
+      "source_location": "L272",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8363,7 +8686,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L264",
+      "source_location": "L277",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8374,7 +8697,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L270",
+      "source_location": "L283",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8385,7 +8708,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L272",
+      "source_location": "L285",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8396,56 +8719,12 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L274",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_pageinput",
-      "target": "desktop_shared_contracts_integer",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L277",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_bounded",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L281",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_object",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L282",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_literal",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
       "source_location": "L287",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "desktop_shared_contracts_parserequest",
+      "source": "desktop_shared_contracts_pageinput",
       "target": "desktop_shared_contracts_integer",
       "relation": "calls",
       "context": "call",
@@ -8457,51 +8736,62 @@
     },
     {
       "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_bounded",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L294",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_object",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L295",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_literal",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L300",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_integer",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L303",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_parserequest",
       "target": "desktop_shared_contracts_note",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L304",
+      "source_location": "L317",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
       "source": "desktop_shared_contracts_parserequest",
       "target": "desktop_shared_contracts_text",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L337",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_nullable",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L348",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_string",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L348",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_array",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -8512,18 +8802,40 @@
     },
     {
       "source": "desktop_shared_contracts_parserequest",
-      "target": "desktop_shared_contracts_invalid",
+      "target": "desktop_shared_contracts_nullable",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L357",
+      "source_location": "L361",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "desktop_shared_contracts_proposal",
-      "target": "desktop_shared_contracts_object",
+      "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_string",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L361",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_array",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L363",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_parserequest",
+      "target": "desktop_shared_contracts_invalid",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -8534,12 +8846,23 @@
     },
     {
       "source": "desktop_shared_contracts_proposal",
+      "target": "desktop_shared_contracts_object",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/shared/contracts.ts",
+      "source_location": "L383",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_shared_contracts_proposal",
       "target": "desktop_shared_contracts_literal",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L380",
+      "source_location": "L393",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8550,7 +8873,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L381",
+      "source_location": "L394",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8561,7 +8884,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L382",
+      "source_location": "L395",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8572,7 +8895,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L386",
+      "source_location": "L399",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8583,7 +8906,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L393",
+      "source_location": "L406",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8595,7 +8918,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L393",
+      "source_location": "L406",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8606,7 +8929,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L394",
+      "source_location": "L407",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8618,7 +8941,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L401",
+      "source_location": "L414",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8629,7 +8952,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L404",
+      "source_location": "L417",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8640,7 +8963,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L409",
+      "source_location": "L422",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8651,7 +8974,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L413",
+      "source_location": "L426",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8662,7 +8985,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L416",
+      "source_location": "L429",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8673,7 +8996,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L427",
+      "source_location": "L440",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8684,7 +9007,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L428",
+      "source_location": "L441",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8696,7 +9019,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L428",
+      "source_location": "L441",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8707,7 +9030,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L432",
+      "source_location": "L445",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8718,7 +9041,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L440",
+      "source_location": "L454",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8729,7 +9052,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L449",
+      "source_location": "L463",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8741,7 +9064,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L449",
+      "source_location": "L463",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8752,7 +9075,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L450",
+      "source_location": "L464",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8763,7 +9086,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L452",
+      "source_location": "L466",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8774,7 +9097,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L456",
+      "source_location": "L489",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8785,7 +9108,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L457",
+      "source_location": "L490",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8796,7 +9119,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L475",
+      "source_location": "L508",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8807,7 +9130,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L478",
+      "source_location": "L511",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8818,7 +9141,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L486",
+      "source_location": "L519",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8829,7 +9152,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L487",
+      "source_location": "L520",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8840,7 +9163,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L494",
+      "source_location": "L527",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8851,7 +9174,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L494",
+      "source_location": "L527",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8862,7 +9185,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L495",
+      "source_location": "L528",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8873,7 +9196,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L518",
+      "source_location": "L551",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8884,7 +9207,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L552",
+      "source_location": "L586",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8895,7 +9218,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L585",
+      "source_location": "L619",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8906,7 +9229,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L586",
+      "source_location": "L620",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8917,7 +9240,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L587",
+      "source_location": "L621",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8928,7 +9251,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L590",
+      "source_location": "L624",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8940,7 +9263,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L590",
+      "source_location": "L624",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8951,7 +9274,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L596",
+      "source_location": "L630",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8962,7 +9285,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L601",
+      "source_location": "L635",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8973,7 +9296,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L602",
+      "source_location": "L636",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -8984,7 +9307,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/shared/contracts.ts",
-      "source_location": "L603",
+      "source_location": "L637",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11283,7 +11606,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L201",
+      "source_location": "L206",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11294,7 +11617,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L204",
+      "source_location": "L212",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12740,11 +13063,31 @@
     },
     {
       "source": "src_sage_contracts",
+      "target": "src_sage_contracts_providerdiagnostic",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/contracts.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_contracts_providerdiagnostic",
+      "target": "src_sage_contracts_contract",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/contracts.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_contracts",
       "target": "src_sage_contracts_providerreadiness",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L69",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12754,7 +13097,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L69",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12764,7 +13107,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L80",
+      "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12774,7 +13117,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L80",
+      "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12784,7 +13127,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L91",
+      "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12794,7 +13137,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L91",
+      "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12804,7 +13147,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L96",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12814,7 +13157,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L96",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12824,7 +13167,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L104",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12834,7 +13177,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L104",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12844,7 +13187,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L113",
+      "source_location": "L132",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12854,7 +13197,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L113",
+      "source_location": "L132",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12864,7 +13207,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L131",
+      "source_location": "L150",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12874,7 +13217,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L131",
+      "source_location": "L150",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12884,7 +13227,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L139",
+      "source_location": "L158",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12894,7 +13237,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L139",
+      "source_location": "L158",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -12962,12 +13305,12 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_contracts_rationale_114",
+      "source": "src_sage_contracts_rationale_133",
       "target": "src_sage_contracts_approval",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/contracts.py",
-      "source_location": "L114",
+      "source_location": "L133",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13855,7 +14198,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L26",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13866,7 +14209,82 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L29",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot",
+      "target": "src_sage_providers_copilot_failure_category",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_failure_category",
+      "target": "exception",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_failure_category",
+      "target": "failurecategory",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot",
+      "target": "src_sage_providers_copilot_construct_client",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_construct_client",
+      "target": "src_sage_providers_copilot_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_construct_client",
+      "target": "src_sage_providers_copilot_py_any",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_construct_client",
+      "target": "src_sage_providers_copilot_py_any",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13876,7 +14294,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L36",
+      "source_location": "L74",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13886,7 +14304,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L36",
+      "source_location": "L74",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13896,7 +14314,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L40",
+      "source_location": "L78",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13906,7 +14324,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L40",
+      "source_location": "L78",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13916,7 +14334,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L44",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13926,7 +14344,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L44",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13936,7 +14354,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L50",
+      "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13946,7 +14364,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L59",
+      "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13957,7 +14375,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L59",
+      "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13967,7 +14385,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L68",
+      "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13977,7 +14395,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13988,7 +14406,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13999,7 +14417,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14010,7 +14428,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14021,7 +14439,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14032,7 +14450,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L75",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14042,7 +14460,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L96",
+      "source_location": "L135",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14053,7 +14471,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L96",
+      "source_location": "L135",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14063,7 +14481,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L123",
+      "source_location": "L163",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14073,7 +14491,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L133",
+      "source_location": "L173",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14084,7 +14502,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L133",
+      "source_location": "L173",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14095,7 +14513,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L133",
+      "source_location": "L173",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14105,7 +14523,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L204",
+      "source_location": "L232",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14115,7 +14533,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L329",
+      "source_location": "L367",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14126,7 +14544,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L329",
+      "source_location": "L367",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14137,7 +14555,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L329",
+      "source_location": "L367",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14148,7 +14566,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L329",
+      "source_location": "L367",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14159,7 +14577,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L329",
+      "source_location": "L367",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14169,7 +14587,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L370",
+      "source_location": "L408",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14180,7 +14598,18 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L370",
+      "source_location": "L408",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_copilotreasoner_error",
+      "target": "src_sage_contracts_providerdiagnostic",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L408",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14191,7 +14620,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L370",
+      "source_location": "L408",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14201,7 +14630,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L375",
+      "source_location": "L416",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14211,7 +14640,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L386",
+      "source_location": "L427",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14222,7 +14651,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L386",
+      "source_location": "L427",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14232,7 +14661,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L419",
+      "source_location": "L461",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14243,7 +14672,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L105",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14254,7 +14683,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L140",
+      "source_location": "L180",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14265,7 +14694,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L143",
+      "source_location": "L183",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14276,7 +14705,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L152",
+      "source_location": "L192",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_copilotreasoner_reason",
+      "target": "src_sage_providers_copilot_construct_client",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L225",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14288,7 +14728,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L221",
+      "source_location": "L252",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14300,7 +14740,18 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L275",
+      "source_location": "L307",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_copilotreasoner_reason",
+      "target": "src_sage_providers_copilot_failure_category",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L338",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14311,7 +14762,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L307",
+      "source_location": "L345",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14322,7 +14773,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L388",
+      "source_location": "L429",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14333,7 +14784,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L406",
+      "source_location": "L448",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14344,7 +14795,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L417",
+      "source_location": "L459",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14355,7 +14806,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L423",
+      "source_location": "L465",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -14370,12 +14821,22 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_providers_copilot_rationale_69",
+      "source": "src_sage_providers_copilot_rationale_50",
+      "target": "src_sage_providers_copilot_construct_client",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_rationale_107",
       "target": "src_sage_providers_copilot_copilotreasoner",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L69",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15506,6 +15967,593 @@
       "_origin": "ast"
     },
     {
+      "source": "src_sage_sdk_probe",
+      "target": "importlib_metadata",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "stat",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "struct",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "sysconfig",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "collections_abc",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "pydantic",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_contracts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_providers_copilot",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_sdk_probe_proberesult",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_proberesult",
+      "target": "src_sage_contracts_contract",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_sdk_probe_capabilityguard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_init",
+      "target": "src_sage_sdk_probe_py_path",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_deny",
+      "target": "category",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_deny",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_read",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_read",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_audit",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_audit",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_install",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install",
+      "target": "src_sage_sdk_probe_capabilityguard_install_metadata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L167",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install_metadata",
+      "target": "src_sage_sdk_probe_capabilityguard_install_metadata_checked",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L168",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_sdk_probe_silent",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L188",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_silent",
+      "target": "src_sage_sdk_probe_silent_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L189",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_silent_init",
+      "target": "src_sage_sdk_probe_capabilityguard",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L189",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_silent",
+      "target": "src_sage_sdk_probe_silent_write",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L193",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_silent_write",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L193",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_silent_write",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L193",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_silent",
+      "target": "src_sage_sdk_probe_silent_flush",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L196",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_sdk_probe_probe",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L200",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_probe",
+      "target": "src_sage_sdk_probe_capabilityguard",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L200",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_probe",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L200",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_sdk_probe_decode_result",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L240",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_decode_result",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L240",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_sdk_probe_sdk_self_check",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L254",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_read",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_audit",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L118",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_audit",
+      "target": "src_sage_sdk_probe_capabilityguard_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L119",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install",
+      "target": "src_sage_sdk_probe_capabilityguard_install_metadata",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L176",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L180",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install",
+      "target": "src_sage_sdk_probe_silent",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L185",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install_metadata",
+      "target": "src_sage_sdk_probe_capabilityguard_install_metadata_checked",
+      "relation": "indirect_call",
+      "context": "return",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install_metadata_checked",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L170",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_install_metadata_checked",
+      "target": "src_sage_sdk_probe_capabilityguard_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_probe",
+      "target": "src_sage_sdk_probe_capabilityguard",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L210",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_sdk_self_check",
+      "target": "src_sage_sdk_probe_probe",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L257",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_sdk_self_check",
+      "target": "src_sage_sdk_probe_decode_result",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L259",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_rationale_1",
+      "target": "src_sage_sdk_probe",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_rationale_50",
+      "target": "src_sage_sdk_probe_capabilityguard",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "src_sage_service",
       "target": "asyncio",
       "relation": "imports",
@@ -16146,7 +17194,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L476",
+      "source_location": "L477",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16157,7 +17205,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L476",
+      "source_location": "L477",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16167,7 +17215,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L483",
+      "source_location": "L484",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16177,7 +17225,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L483",
+      "source_location": "L484",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16187,7 +17235,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L484",
+      "source_location": "L485",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16197,7 +17245,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L485",
+      "source_location": "L486",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16207,7 +17255,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L486",
+      "source_location": "L487",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16217,7 +17265,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L487",
+      "source_location": "L488",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16227,7 +17275,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L490",
+      "source_location": "L491",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16238,7 +17286,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L490",
+      "source_location": "L491",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16249,7 +17297,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L490",
+      "source_location": "L491",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16260,7 +17308,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L490",
+      "source_location": "L491",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16270,7 +17318,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L507",
+      "source_location": "L508",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16280,7 +17328,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L520",
+      "source_location": "L521",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16290,7 +17338,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L554",
+      "source_location": "L555",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16444,7 +17492,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L450",
+      "source_location": "L451",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16455,7 +17503,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L562",
+      "source_location": "L563",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16466,7 +17514,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L577",
+      "source_location": "L578",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16477,7 +17525,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L618",
+      "source_location": "L619",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16488,7 +17536,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L547",
+      "source_location": "L548",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16523,12 +17571,12 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_service_rationale_491",
+      "source": "src_sage_service_rationale_492",
       "target": "src_sage_service_run_service",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L491",
+      "source_location": "L492",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17445,6 +18493,17 @@
       "_origin": "ast"
     },
     {
+      "source": "src_sage_main",
+      "target": "src_sage_sdk_probe_sdk_self_check",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/__main__.py",
+      "source_location": "L208",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "src_sage_actions",
       "target": "src_sage_contracts_actionproposal",
       "relation": "imports",
@@ -17600,6 +18659,17 @@
     },
     {
       "source": "src_sage_providers_copilot",
+      "target": "src_sage_contracts_providerdiagnostic",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot",
       "target": "src_sage_contracts_providerreadiness",
       "relation": "imports",
       "context": "import",
@@ -17638,7 +18708,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L26",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17649,7 +18719,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L26",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17661,6 +18731,50 @@
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
       "source_location": "L311",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_contracts_contract",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_providers_copilot_unique_object",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_providers_copilot_construct_client",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "src_sage_providers_copilot_failure_category",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18403,12 +19517,23 @@
     },
     {
       "source": "src_sage_main_main",
+      "target": "src_sage_sdk_probe_sdk_self_check",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/__main__.py",
+      "source_location": "L210",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_main_main",
       "target": "src_sage_logging_diagnostic",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L207",
+      "source_location": "L215",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18435,13 +19560,35 @@
       "_origin": "ast"
     },
     {
+      "source": "src_sage_sdk_probe_probe",
+      "target": "src_sage_providers_copilot_construct_client",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L229",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_probe",
+      "target": "src_sage_providers_copilot_failure_category",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L232",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "src_sage_service_run_service",
       "target": "src_sage_protocol_encode_frame",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L513",
+      "source_location": "L514",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18452,7 +19599,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L518",
+      "source_location": "L519",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18463,7 +19610,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L567",
+      "source_location": "L568",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18474,7 +19621,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/service.py",
-      "source_location": "L610",
+      "source_location": "L611",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18771,7 +19918,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L80",
+      "source_location": "L118",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18782,7 +19929,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L44",
+      "source_location": "L82",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18793,7 +19940,18 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L46",
+      "source_location": "L84",
+      "weight": 0.8,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_copilotreasoner",
+      "target": "src_sage_contracts_providerdiagnostic",
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L133",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18804,7 +19962,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L96",
+      "source_location": "L135",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18815,7 +19973,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L133",
+      "source_location": "L173",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18826,7 +19984,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L133",
+      "source_location": "L173",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18837,7 +19995,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L156",
+      "source_location": "L196",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18848,7 +20006,18 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L77",
+      "source_location": "L115",
+      "weight": 0.8,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_proberesult",
+      "target": "src_sage_contracts_contract",
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L39",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -18969,7 +20138,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/service.py",
-      "source_location": "L420",
+      "source_location": "L421",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19013,7 +20182,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/service.py",
-      "source_location": "L540",
+      "source_location": "L541",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19035,7 +20204,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/service.py",
-      "source_location": "L515",
+      "source_location": "L516",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19057,7 +20226,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/service.py",
-      "source_location": "L498",
+      "source_location": "L499",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19079,7 +20248,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/service.py",
-      "source_location": "L540",
+      "source_location": "L541",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19791,7 +20960,19 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L156",
+      "source_location": "L196",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_providers_copilot_copilotreasoner_reason",
+      "target": "src_sage_contracts_providerdiagnostic",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/sage/providers/copilot.py",
+      "source_location": "L338",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19803,7 +20984,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/providers/copilot.py",
-      "source_location": "L389",
+      "source_location": "L430",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19816,6 +20997,18 @@
       "confidence_score": 0.85,
       "source_file": "src/sage/providers/protected_auth.py",
       "source_location": "L313",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_decode_result",
+      "target": "src_sage_providers_copilot_unique_object",
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L244",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19911,7 +21104,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/service.py",
-      "source_location": "L513",
+      "source_location": "L514",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19923,7 +21116,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/service.py",
-      "source_location": "L518",
+      "source_location": "L519",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19935,7 +21128,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/service.py",
-      "source_location": "L530",
+      "source_location": "L531",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19947,7 +21140,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/service.py",
-      "source_location": "L560",
+      "source_location": "L561",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20001,6 +21194,17 @@
     {
       "source": "readme_sage_assistant",
       "target": "readme_development_support_limits",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Readme.md",
+      "source_location": "Current behavior and support",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "readme_sage_assistant",
+      "target": "readme_failed_native_connection_test",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -20099,6 +21303,28 @@
     },
     {
       "source": "docs_security_security_architecture_and_evidence_boundaries",
+      "target": "docs_security_guarded_sdk_self_check",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/security.md",
+      "source_location": "Package integrity and TLS policy",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_security_architecture_and_evidence_boundaries",
+      "target": "docs_security_closed_provider_diagnostics",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/security.md",
+      "source_location": "Package integrity and TLS policy",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_security_architecture_and_evidence_boundaries",
       "target": "docs_validation_foundation_results_foundation_evidence_2026_10_23",
       "relation": "references",
       "confidence": "EXTRACTED",
@@ -20133,6 +21359,17 @@
     {
       "source": "docs_testing_foundation_verification",
       "target": "docs_testing_portable_zip_package_checks",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/testing.md",
+      "source_location": "Native package checks",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_foundation_verification",
+      "target": "docs_testing_guarded_sdk_probe",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -20204,6 +21441,39 @@
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
       "source_location": null,
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_validation_foundation_results_foundation_evidence_2026_10_23",
+      "target": "docs_validation_foundation_results_offline_sdk_probe",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Executed checks",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_validation_foundation_results_foundation_evidence_2026_10_23",
+      "target": "docs_validation_foundation_results_failed_native_connection_test",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Executed checks",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_validation_foundation_results_foundation_evidence_2026_10_23",
+      "target": "docs_validation_foundation_results_separate_artifact_snapshots",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Separate artifact snapshots",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -20338,12 +21608,67 @@
       "source_location": null,
       "weight": 1.0,
       "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_guarded_sdk_self_check",
+      "target": "docs_testing_guarded_sdk_probe",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/security.md",
+      "source_location": "Package integrity and TLS policy",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_guarded_sdk_probe",
+      "target": "docs_validation_foundation_results_offline_sdk_probe",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/testing.md",
+      "source_location": "Native package checks",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "readme_failed_native_connection_test",
+      "target": "docs_validation_foundation_results_failed_native_connection_test",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "Readme.md",
+      "source_location": "Current behavior and support",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_validation_foundation_results_separate_artifact_snapshots",
+      "target": "docs_validation_foundation_results_offline_sdk_probe",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Separate artifact snapshots",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_validation_foundation_results_separate_artifact_snapshots",
+      "target": "docs_validation_foundation_results_failed_native_connection_test",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "Separate artifact snapshots",
+      "weight": 1.0,
+      "_origin": "semantic"
     }
   ],
   "hyperedges": [
     {
       "id": "reviewed_note_boundary_across_docs",
-      "label": "Reviewed local note authority across specification, security policy, implementation claim and native evidence",
+      "label": "Reviewed local note authority across specification, security policy, implementation claim and earlier native evidence",
       "nodes": [
         "docs_superpowers_specs_2026_10_22_sage_foundation_design_reviewed_note_authority",
         "docs_security_authority_and_trust_path",
@@ -20363,9 +21688,25 @@
         "docs_superpowers_specs_2026_10_22_sage_foundation_design_foundation_acceptance",
         "docs_validation_foundation_results_foundation_acceptance_incomplete",
         "docs_validation_foundation_results_outer_signature_failure",
+        "docs_validation_foundation_results_failed_native_connection_test",
         "docs_validation_foundation_results_live_copilot_skipped"
       ],
       "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/validation/foundation-results.md",
+      "_origin": "semantic"
+    },
+    {
+      "id": "separate_sdk_evidence_snapshots",
+      "label": "Guarded offline SDK evidence and earlier failed live connection remain separate",
+      "nodes": [
+        "docs_security_guarded_sdk_self_check",
+        "docs_testing_guarded_sdk_probe",
+        "docs_validation_foundation_results_offline_sdk_probe",
+        "docs_validation_foundation_results_failed_native_connection_test"
+      ],
+      "relation": "participate_in",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/validation/foundation-results.md",

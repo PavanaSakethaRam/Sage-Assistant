@@ -128,5 +128,7 @@
   "credential_store_unavailable_test": {
     "status": "SKIP",
     "reason": "Protected-source flow not entered while human action-time approval pending; no owner store/config modified to induce failure"
-  }
+  },
+  "snapshot_scope": "Historical native note/restart and negative-case proof; pre-approval live status is superseded by macos-arm64-live-attempt.json.",
+  "latest_live_evidence": "macos-arm64-live-attempt.json"
 }

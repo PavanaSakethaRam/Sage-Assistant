@@ -1,10 +1,10 @@
 {
   "source_baseline_commit": "b3080e0e1da3d0740d9dc06ef0e0941e6959e593",
-  "snapshot": "Exact selected source SHA256 snapshot after Task10 I1/I2 tooling fixes; six retained documents remain the frozen reviewed snapshot; source_commit is ancestor and code working-tree delta is included by hashes",
+  "snapshot": "Exact selected source SHA256 snapshot after Task10 I3 final lexical-metadata guard fix; final six docs re-frozen after new actual probes/package/evidence; source_commit is ancestor and exact working-tree delta is included by hashes",
   "files": [
     {
       "path": "Readme.md",
-      "sha256": "290a42455943c43e497c41651b2f575a075401fbd709e0e97369af62e09475e4"
+      "sha256": "8186224bcae2c951f323c997694b8730867dc994bf113fab27f3953c08384857"
     },
     {
       "path": "desktop/main/copilot-account.ts",
@@ -56,7 +56,7 @@
     },
     {
       "path": "desktop/renderer/Setup.tsx",
-      "sha256": "58c71129476af61f796b08379c79ea335609d052e90dcd9e0c30cdaedaac39e9"
+      "sha256": "4661280480b59e0973ef393755cb4c1c030a63d86605028cce63b94df692efa2"
     },
     {
       "path": "desktop/renderer/host.ts",
@@ -68,7 +68,7 @@
     },
     {
       "path": "desktop/shared/contracts.ts",
-      "sha256": "d527dfc795c4eed706b37371c506923f0a6d1152c4e75530106714170273799f"
+      "sha256": "9735c3e0c0da47de7fc1ce052bf37781ece3ae3014da463c41fa11e76580bfca"
     },
     {
       "path": "desktop/shared/external-url.ts",
@@ -76,23 +76,23 @@
     },
     {
       "path": "docs/security.md",
-      "sha256": "7c2374b50b78ee0615efba11a61b423c4686bf8146262df43cf8e2181c71e4b4"
+      "sha256": "2578f90f636d12fef2676b9bffacb75c935c921da9f8ac1beffe9cd181a65724"
     },
     {
       "path": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "sha256": "0985aba3f66ed86d180bef76ae2e0f2f82a275d3a00bb7fa05477404449b27f5"
+      "sha256": "9db2ce89779d5f816f834dc5bf1a1d4618e36f37edf99e0ea9e4036d777c3ebd"
     },
     {
       "path": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "sha256": "10b5de8ce50ff99ed5218197331fc3affb43918e0165992da4bd27c11f5581fd"
+      "sha256": "d5f757119afdd531db81a2d170022e1cdc9d7cf42cea39bf37a58383a663096b"
     },
     {
       "path": "docs/testing.md",
-      "sha256": "b48e0c9b621ee3f3845e4b6319dd14d8383e13dddce221929ccc83d5b6c9e9df"
+      "sha256": "b5af0371ae5f9f7e409715166e15d5cde0a11528e30d2ba3c4657cbac781220f"
     },
     {
       "path": "docs/validation/foundation-results.md",
-      "sha256": "a0fbe6c9ddd2ba7db36c9f6a4dcafba8eb08124be8fe17871c7ffa4201d46f67"
+      "sha256": "7d0249fe58f4b312fc64bee64f8cc659f06b7e37a0ea5614e0ce03ae1b390ddf"
     },
     {
       "path": "forge.config.ts",
@@ -156,7 +156,7 @@
     },
     {
       "path": "src/sage/__main__.py",
-      "sha256": "8f725848ea4bbb8aeeff58c394f15419a8a31569f690144e0bd7f51e0bc0deea"
+      "sha256": "e6530c27f1e884d98237867665dfbea9790679db49800f6933cfc3a175141c72"
     },
     {
       "path": "src/sage/actions.py",
@@ -168,7 +168,7 @@
     },
     {
       "path": "src/sage/contracts.py",
-      "sha256": "e433b39acea2971d7f25d71210f1cc053cb2b294ea211e89cd7583485ec2110c"
+      "sha256": "7098beef2afed420c4c66c648c026f249f88d6a7669e75e8bd2ea1cd5f817e47"
     },
     {
       "path": "src/sage/logging.py",
@@ -192,7 +192,7 @@
     },
     {
       "path": "src/sage/providers/copilot.py",
-      "sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5"
+      "sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a"
     },
     {
       "path": "src/sage/providers/protected_auth.py",
@@ -203,8 +203,12 @@
       "sha256": "50d4cd6b2a81c02984d1181741a0421846b99b44a6937e16ae3185b292c96f48"
     },
     {
+      "path": "src/sage/sdk_probe.py",
+      "sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25"
+    },
+    {
       "path": "src/sage/service.py",
-      "sha256": "7e6927b77373da6ad05eef53091bf0774e93076dbfd3a3627a529e4b7b7520db"
+      "sha256": "70936783b67a933ffcd567b8e951cdae06e0a93b410206fb9a7aef746ba503a6"
     },
     {
       "path": "src/sage/storage.py",
@@ -223,16 +227,27 @@
       "sha256": "2966b6d02368b46c8a604c6e466e75e0387b9c45d12d86a72d0e1c3107b4396c"
     }
   ],
-  "source_commit": "12f8eeb56c68c2b44c6936147e97e4fa22e36332",
+  "source_commit": "0bd73be6072e65b0396291ab0942040a4ebc5e34",
   "working_tree_selected_delta": [
-    "scripts/check_package.ts",
-    "scripts/smoke_package.mjs"
+    "Readme.md",
+    "desktop/renderer/Setup.tsx",
+    "desktop/shared/contracts.ts",
+    "docs/security.md",
+    "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
+    "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
+    "docs/testing.md",
+    "docs/validation/foundation-results.md",
+    "src/sage/__main__.py",
+    "src/sage/contracts.py",
+    "src/sage/providers/copilot.py",
+    "src/sage/sdk_probe.py",
+    "src/sage/service.py"
   ],
   "tool": "graphifyy 0.9.75 existing local installation",
   "code": {
-    "files": 49,
-    "nodes": 485,
-    "edges": 1430,
+    "files": 50,
+    "nodes": 512,
+    "edges": 1511,
     "failed_sources": [],
     "extracted_sources": [
       "desktop/main/copilot-account.ts",
@@ -279,6 +294,7 @@
       "src/sage/providers/copilot.py",
       "src/sage/providers/protected_auth.py",
       "src/sage/providers/session_store.py",
+      "src/sage/sdk_probe.py",
       "src/sage/service.py",
       "src/sage/storage.py",
       "vite.main.config.ts",
@@ -287,15 +303,47 @@
     ]
   },
   "semantic": {
-    "retained_fragment_unchanged": true,
-    "new_semantic_extraction_performed": false,
+    "replaced_pre_I3_fragment": true,
+    "final_hash_revalidation_retained_fragment_unchanged": true,
+    "same_host_semantic_seat_revalidation": true,
+    "operation": "Same host seat I3 update, then final Ruling43 source-hash revalidation unchanged",
+    "final_source_hash_revalidation": {
+      "result": "unchanged",
+      "record_sha256": "82fbf949f314bb01d15a0c20e57edfa6d61dfecf7144aedfac47f008c0550c32",
+      "documents": [
+        {
+          "path": "Readme.md",
+          "sha256": "8186224bcae2c951f323c997694b8730867dc994bf113fab27f3953c08384857"
+        },
+        {
+          "path": "docs/security.md",
+          "sha256": "2578f90f636d12fef2676b9bffacb75c935c921da9f8ac1beffe9cd181a65724"
+        },
+        {
+          "path": "docs/testing.md",
+          "sha256": "b5af0371ae5f9f7e409715166e15d5cde0a11528e30d2ba3c4657cbac781220f"
+        },
+        {
+          "path": "docs/validation/foundation-results.md",
+          "sha256": "7d0249fe58f4b312fc64bee64f8cc659f06b7e37a0ea5614e0ce03ae1b390ddf"
+        },
+        {
+          "path": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
+          "sha256": "d5f757119afdd531db81a2d170022e1cdc9d7cf42cea39bf37a58383a663096b"
+        },
+        {
+          "path": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
+          "sha256": "9db2ce89779d5f816f834dc5bf1a1d4618e36f37edf99e0ea9e4036d777c3ebd"
+        }
+      ]
+    },
     "status": "Host extraction complete against all six frozen document hashes",
-    "fragment_sha256": "99d0c7e97bdbd4f637d334904b3c530663e2d9db131ba64bc2a496c754678e9e",
+    "fragment_sha256": "c52095fc1ae996945f437b47365fb5bf4feee34355ba2d9e228fbac3677a072f",
     "prompt_sha256": "32d7decad42d58129c6694ea4e4ce1f72a531bc5161827d2095787e9448735e9",
     "documents": 6,
-    "nodes": 26,
-    "edges": 32,
-    "hyperedges": 2,
+    "nodes": 33,
+    "edges": 44,
+    "hyperedges": 3,
     "input_tokens": null,
     "output_tokens": null,
     "measurement": "Host counters unavailable; extraction-schema zero placeholders are not cost data",
@@ -303,11 +351,11 @@
   },
   "projection": {
     "directed": false,
-    "nodes": 565,
-    "edges": 1390,
-    "communities": 20
+    "nodes": 600,
+    "edges": 1476,
+    "communities": 21
   },
-  "original_exported_edges": 1461,
+  "original_exported_edges": 1554,
   "unresolved_export_edges": [
     {
       "source": "src_sage_providers_copilot",
@@ -321,7 +369,7 @@
       "_origin": "ast"
     }
   ],
-  "total_words": 34285,
+  "total_words": 35951,
   "exclusions": [
     "nonstandard extension root spec, SQL, JSON and YAML data/configuration (identified by exact corpus scope)",
     "tests and e2e",

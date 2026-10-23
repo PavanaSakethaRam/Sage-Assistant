@@ -248,6 +248,13 @@ export function Setup({
               {item.provider}: {item.status}
             </strong>{" "}
             — {item.explanation}
+            {item.diagnostic && (
+              <span>
+                {" "}
+                Stage: {item.diagnostic.stage}; category:{" "}
+                {item.diagnostic.category}.
+              </span>
+            )}
             {item.destination && <span> Destination: {item.destination}.</span>}
             {item.evidence.length > 0 && (
               <span> Evidence: {item.evidence.join(", ")}.</span>

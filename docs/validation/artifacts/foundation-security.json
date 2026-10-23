@@ -68,7 +68,7 @@
       "uv": "0.13.5"
     },
     "findings": [],
-    "export_sha256": "1a129a289f50f55603110d6d9f10739184ab4de02898dfdf96f94d1b60b922dc"
+    "export_sha256": "f521b1ce6227e4c2d74bfce8a69b649642137f996e8dd79ba9c1f4cec1faf482"
   },
   "node": {
     "status": "pass",
@@ -80,13 +80,11 @@
       "peerOptional": 0,
       "total": 429
     },
-    "findings": [],
-    "lock_sha256": "d6bdf7a1f2895c14b5a24d8e4c9c1fc2dfccc35e1aeca8e276cfbbdd646ac344",
-    "scope": "Complete final lock after portable ZIP policy change; all categories included"
+    "findings": []
   },
   "bandit": {
     "status": "pass",
-    "files": 52,
+    "files": 54,
     "findings": [
       {
         "rule": "B404",
@@ -302,43 +300,43 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "8f725848ea4bbb8aeeff58c394f15419a8a31569f690144e0bd7f51e0bc0deea"
+        "source_sha256": "e6530c27f1e884d98237867665dfbea9790679db49800f6933cfc3a175141c72"
       },
       {
         "rule": "B101",
         "path": "src/sage/providers/copilot.py",
-        "line": 173,
+        "line": 215,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5"
+        "source_sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a"
       },
       {
         "rule": "B106",
         "path": "src/sage/providers/copilot.py",
-        "line": 250,
+        "line": 281,
         "severity": "LOW",
         "confidence": "MEDIUM",
         "triage": "untriaged",
-        "source_sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5"
+        "source_sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a"
       },
       {
         "rule": "B105",
         "path": "src/sage/providers/copilot.py",
-        "line": 256,
+        "line": 287,
         "severity": "LOW",
         "confidence": "MEDIUM",
         "triage": "untriaged",
-        "source_sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5"
+        "source_sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a"
       },
       {
         "rule": "B101",
         "path": "src/sage/providers/copilot.py",
-        "line": 326,
+        "line": 364,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5"
+        "source_sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a"
       },
       {
         "rule": "B101",
@@ -4429,101 +4427,83 @@
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 48,
+        "line": 62,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 72,
+        "line": 86,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 80,
+        "line": 94,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 106,
+        "line": 120,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 107,
+        "line": 121,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 136,
+        "line": 150,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 176,
+        "line": 190,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 194,
+        "line": 208,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 197,
+        "line": 211,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
-      },
-      {
-        "rule": "B101",
-        "path": "tests/unit/test_contracts.py",
-        "line": 198,
-        "severity": "LOW",
-        "confidence": "HIGH",
-        "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
-      },
-      {
-        "rule": "B101",
-        "path": "tests/unit/test_contracts.py",
-        "line": 199,
-        "severity": "LOW",
-        "confidence": "HIGH",
-        "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
@@ -4532,7 +4512,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
@@ -4541,16 +4521,34 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_contracts.py",
-        "line": 214,
+        "line": 226,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f4a6827d3698ae93d4cb70a677c8e34f1e0bd5762d09e4e948ed2c19a13cb392"
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_contracts.py",
+        "line": 227,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_contracts.py",
+        "line": 228,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
       },
       {
         "rule": "B404",
@@ -4784,25 +4782,16 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f48372c5283e6ec9bda1304d4760cb94183dc7a9784fb25784933b6595a9be4d"
+        "source_sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
       },
       {
         "rule": "B603",
         "path": "tests/unit/test_imports.py",
-        "line": 65,
+        "line": 66,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f48372c5283e6ec9bda1304d4760cb94183dc7a9784fb25784933b6595a9be4d"
-      },
-      {
-        "rule": "B101",
-        "path": "tests/unit/test_imports.py",
-        "line": 74,
-        "severity": "LOW",
-        "confidence": "HIGH",
-        "triage": "untriaged",
-        "source_sha256": "f48372c5283e6ec9bda1304d4760cb94183dc7a9784fb25784933b6595a9be4d"
+        "source_sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
       },
       {
         "rule": "B101",
@@ -4811,7 +4800,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f48372c5283e6ec9bda1304d4760cb94183dc7a9784fb25784933b6595a9be4d"
+        "source_sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
       },
       {
         "rule": "B101",
@@ -4820,7 +4809,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f48372c5283e6ec9bda1304d4760cb94183dc7a9784fb25784933b6595a9be4d"
+        "source_sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
       },
       {
         "rule": "B101",
@@ -4829,7 +4818,16 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "f48372c5283e6ec9bda1304d4760cb94183dc7a9784fb25784933b6595a9be4d"
+        "source_sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_imports.py",
+        "line": 78,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
       },
       {
         "rule": "B404",
@@ -5585,7 +5583,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5594,7 +5592,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5603,7 +5601,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5612,7 +5610,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5621,7 +5619,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5630,7 +5628,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5639,7 +5637,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5648,7 +5646,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5657,7 +5655,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5666,7 +5664,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5675,7 +5673,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5684,7 +5682,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5693,7 +5691,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5702,7 +5700,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5711,7 +5709,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5720,7 +5718,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5729,7 +5727,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5738,7 +5736,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5747,7 +5745,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5756,7 +5754,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5765,7 +5763,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5774,7 +5772,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5783,7 +5781,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5792,7 +5790,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5801,7 +5799,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5810,7 +5808,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5819,7 +5817,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5828,7 +5826,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5837,7 +5835,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5846,7 +5844,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5855,7 +5853,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5864,7 +5862,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5873,7 +5871,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5882,7 +5880,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5891,7 +5889,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5900,7 +5898,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5909,7 +5907,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5918,7 +5916,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5927,7 +5925,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5936,7 +5934,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5945,7 +5943,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5954,7 +5952,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5963,7 +5961,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5972,7 +5970,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5981,7 +5979,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5990,7 +5988,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -5999,7 +5997,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6008,7 +6006,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6017,7 +6015,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6026,7 +6024,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6035,7 +6033,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6044,7 +6042,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6053,7 +6051,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6062,7 +6060,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6071,7 +6069,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6080,7 +6078,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6089,7 +6087,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6098,7 +6096,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6107,7 +6105,79 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "6c510ac4125f4b3270f81ca905fd10952aa4d630b3d2591c9c00f9b9a5d0e248"
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 338,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 339,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 340,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 341,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 342,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 345,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 346,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_provider_contract.py",
+        "line": 347,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
       },
       {
         "rule": "B101",
@@ -6225,6 +6295,467 @@
         "confidence": "HIGH",
         "triage": "untriaged",
         "source_sha256": "db0a7015a7c51aeb28243c9692975296376d392cad8616949af8d2f4bbdc5f9e"
+      },
+      {
+        "rule": "B404",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 6,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B603",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 23,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 31,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 33,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 42,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B603",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 57,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 64,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B603",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 88,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 95,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 117,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 134,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 171,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 173,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 217,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 218,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 240,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 241,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 242,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 243,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 258,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 283,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 295,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 308,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 329,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 331,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 340,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 358,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      }
+    ],
+    "source_hashes": [
+      {
+        "path": "desktop/tests/fixtures/shutdown-core.py",
+        "sha256": "960dad1e349482367811aa47fca35715e5845e433d79e53d7ec634dbab1a096c"
+      },
+      {
+        "path": "e2e/fixtures/core.py",
+        "sha256": "a6390297aaa871d5200b6ce8be96cc5396a77c6bdac57b61fd46a15895bb53eb"
+      },
+      {
+        "path": "scripts/__init__.py",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "scripts/build_core.py",
+        "sha256": "84ff0ff955025b0ab72728faa7770f9689a1928e7a35dbf95ec4d8721f83cd57"
+      },
+      {
+        "path": "scripts/check_coverage.py",
+        "sha256": "ace798110679864b9fead460d44ab177b1912763ae334552900e5363b8946618"
+      },
+      {
+        "path": "scripts/package_manifest.py",
+        "sha256": "e8290d2e54e3adb980f19a18de668d6a61b95b6dd7c7a78bfd45a45718fd12bb"
+      },
+      {
+        "path": "scripts/provision_gitleaks.py",
+        "sha256": "17eeac43c2226e52dee6251248267b9649311e1e1de9438acc6dd53003a23a61"
+      },
+      {
+        "path": "scripts/provision_package.py",
+        "sha256": "073f2b29f2e248fdd76ec5b41e0aac3b0b97b98fd9fb4b56b38bb8acaad20009"
+      },
+      {
+        "path": "scripts/stage_package.py",
+        "sha256": "e4879c4163c2722e5898c569434a7730235af3f21c970b39fa3201f4aa0a78e8"
+      },
+      {
+        "path": "scripts/verify.py",
+        "sha256": "c250abf27780e2eed46019aae647d1ceccf97fd02f8e25141ab28fbf205789f6"
+      },
+      {
+        "path": "scripts/verify_security.py",
+        "sha256": "3fbceb0f8f5a8244bf979f7ee504d0365a111fb55710ca29fc851ceeadce51ee"
+      },
+      {
+        "path": "src/sage/__init__.py",
+        "sha256": "fa35376eb1f2487dab70dc08150de6f16fb02f143f0cef6f2cd67475cc83ab59"
+      },
+      {
+        "path": "src/sage/__main__.py",
+        "sha256": "e6530c27f1e884d98237867665dfbea9790679db49800f6933cfc3a175141c72"
+      },
+      {
+        "path": "src/sage/actions.py",
+        "sha256": "c34ab2afb75354bc8c774518988dda55f1db0980e4dd87e30122273ae69b23af"
+      },
+      {
+        "path": "src/sage/config.py",
+        "sha256": "e4a7fdc2a409a92bdd929e8d13485127b143e58b583a93bdf1525e974f3af15c"
+      },
+      {
+        "path": "src/sage/contracts.py",
+        "sha256": "7098beef2afed420c4c66c648c026f249f88d6a7669e75e8bd2ea1cd5f817e47"
+      },
+      {
+        "path": "src/sage/logging.py",
+        "sha256": "a303ab95adf1c2c036ff116024f1004914456d8d1e97f44f13107e1d1b4f23f2"
+      },
+      {
+        "path": "src/sage/paths.py",
+        "sha256": "982bfa32268543a2f747f0f328ff446b2eb0c8a098ef3879581207b4aa3c516d"
+      },
+      {
+        "path": "src/sage/protocol.py",
+        "sha256": "b90d14ba5d94399df7d47617b87aab78b18a998954a8cb89a8f8e660c593ca0c"
+      },
+      {
+        "path": "src/sage/providers/__init__.py",
+        "sha256": "02ac95c950bad8a0db5f3560dce59b486c134eaad0261c9f81f78145eb357685"
+      },
+      {
+        "path": "src/sage/providers/base.py",
+        "sha256": "e73dbe433075e7f9508c292837593a1e198f0fd213d489fe5104de612e929077"
+      },
+      {
+        "path": "src/sage/providers/copilot.py",
+        "sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a"
+      },
+      {
+        "path": "src/sage/providers/protected_auth.py",
+        "sha256": "201d23587b5c72a075b4e0a7d4dfbc25def6f969ff165867b34402f2d2a027c1"
+      },
+      {
+        "path": "src/sage/providers/session_store.py",
+        "sha256": "50d4cd6b2a81c02984d1181741a0421846b99b44a6937e16ae3185b292c96f48"
+      },
+      {
+        "path": "src/sage/sdk_probe.py",
+        "sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25"
+      },
+      {
+        "path": "src/sage/service.py",
+        "sha256": "70936783b67a933ffcd567b8e951cdae06e0a93b410206fb9a7aef746ba503a6"
+      },
+      {
+        "path": "src/sage/storage.py",
+        "sha256": "814ead488bb4412e4582fea81b92d4691b9c58d3e342c74706bc40d866d2cdd6"
+      },
+      {
+        "path": "tests/__init__.py",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "tests/helpers/__init__.py",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "tests/helpers/copilot_fake.py",
+        "sha256": "4a7455030a44734e8c018be8f39884cc352ead8594b90b7ed560edbfa40a1d34"
+      },
+      {
+        "path": "tests/integration/test_core_process.py",
+        "sha256": "e2e72bba89e5a3f77c4fc8ab2868f407e21fdde23585a2126f744b9cd7f9348d"
+      },
+      {
+        "path": "tests/integration/test_migrations.py",
+        "sha256": "25a69db09b97a2115be91b4826029b01e1782367cf9d7d0858ce346d1988d385"
+      },
+      {
+        "path": "tests/integration/test_note_recovery.py",
+        "sha256": "96c84de321bb9f0119c4fc9fa3b2df099955bd1a1ce4b2225120c3266382e311"
+      },
+      {
+        "path": "tests/integration/test_provider_sessions.py",
+        "sha256": "af627b2de71bc7df38b06b1ff5d12b1e947991150aa5da9631012338d80427d3"
+      },
+      {
+        "path": "tests/integration/test_reasoning_service.py",
+        "sha256": "04817070262b1d09a852566b4c857aa661b6724429edbdf27881b6967bff2ede"
+      },
+      {
+        "path": "tests/integration/test_storage.py",
+        "sha256": "6dce7b8b67a2c2e6f4d50f1bbf6605094bc28ce33e7351b2b24bd62b768141de"
+      },
+      {
+        "path": "tests/live/test_copilot_smoke.py",
+        "sha256": "0991e03be94cf90f37de55dc16b025754834168ac7a9ee88df529a8d3aaabd8d"
+      },
+      {
+        "path": "tests/security/test_authorization.py",
+        "sha256": "674d58d541a71fbc3301cbc21f9ae5cbb9171ac68ec7598bc76c2cafa81b3345"
+      },
+      {
+        "path": "tests/security/test_copilot_selection.py",
+        "sha256": "ab1ad18ee7ea63f2e1f78890e096c9c28d7cae48d4aaae0ad52bbe69f88f6290"
+      },
+      {
+        "path": "tests/security/test_provider_isolation.py",
+        "sha256": "fb8762792d1c5f363deea024850cf20ee7fa37dd450f6f748e4188e8effdb55f"
+      },
+      {
+        "path": "tests/security/test_release_surface.py",
+        "sha256": "33ab8606cc6657475e6fd476b52b950a80ad1dc45e71ac261e0acb1d6cb6bd50"
+      },
+      {
+        "path": "tests/security/test_rpc.py",
+        "sha256": "e4110df5093b02ce3b67955680d254fa6f79037cb3e8f4f44a110417f729e8d8"
+      },
+      {
+        "path": "tests/unit/test_config.py",
+        "sha256": "fe8548ded4a9c1b8d099978e9966f0dd156c8a8d8e3ffc623c85ad1547d0927c"
+      },
+      {
+        "path": "tests/unit/test_contracts.py",
+        "sha256": "9016db3d76b954e4593e078cfca696e88ae1ad0c2fde180e33e70e155a84ce94"
+      },
+      {
+        "path": "tests/unit/test_coverage_gate.py",
+        "sha256": "82124459479bcec669481854ca8e708682262f22fa5d0f89f824c6abf2b95032"
+      },
+      {
+        "path": "tests/unit/test_desktop_startup.py",
+        "sha256": "7dab9bfea506c8173921613cba0fccc7a83bb7bd5888bd43de34511d56360ea2"
+      },
+      {
+        "path": "tests/unit/test_imports.py",
+        "sha256": "9e590a1f493c7f5fb5d1698763da329b201d15db4861305603781c22104c6c47"
+      },
+      {
+        "path": "tests/unit/test_package_manifest.py",
+        "sha256": "cbade10d45a489ffc06495b432ce115a1d2d8b097763bfca0face87de057572f"
+      },
+      {
+        "path": "tests/unit/test_package_self_check.py",
+        "sha256": "ce0282efd1ad67a804c1e432361e593162bf1fb7339c29c52837823c8b86e4d4"
+      },
+      {
+        "path": "tests/unit/test_protected_source.py",
+        "sha256": "fe0291125d4222245b7d1cb5c8168ba821520aeb186625ede1e72b7bb8e12350"
+      },
+      {
+        "path": "tests/unit/test_protocol.py",
+        "sha256": "91178b4ab0086703ae421cf5b40cfd2bac34866f6773e344e49d70cf8cd03d78"
+      },
+      {
+        "path": "tests/unit/test_provider_contract.py",
+        "sha256": "109470fd5bbea8575b548ab5f5abbb1b45c60ec0fd86ad12c66007df56ce72c2"
+      },
+      {
+        "path": "tests/unit/test_sdk_probe.py",
+        "sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      },
+      {
+        "path": "tests/unit/test_security_gate.py",
+        "sha256": "db0a7015a7c51aeb28243c9692975296376d392cad8616949af8d2f4bbdc5f9e"
       }
     ]
   },
@@ -6375,9 +6906,9 @@
       {
         "rule": "security/detect-object-injection",
         "path": "desktop/shared/contracts.ts",
-        "line": 393,
+        "line": 406,
         "triage": "hotspot_requires_review",
-        "source_sha256": "d527dfc795c4eed706b37371c506923f0a6d1152c4e75530106714170273799f"
+        "source_sha256": "9735c3e0c0da47de7fc1ce052bf37781ece3ae3014da463c41fa11e76580bfca"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
@@ -6538,189 +7069,140 @@
         "path": "desktop/tests/core-process.test.ts",
         "line": 41,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
         "line": 63,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
         "line": 198,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
         "line": 286,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
         "line": 320,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "desktop/tests/core-process.test.ts",
-        "line": 345,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
         "line": 346,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 408,
+        "line": 347,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 428,
+        "line": 409,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 433,
+        "line": 429,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 438,
+        "line": 434,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 442,
+        "line": 439,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 449,
+        "line": 443,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 518,
+        "line": 450,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 524,
+        "line": 519,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 532,
+        "line": 525,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
         "line": 533,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 553,
+        "line": 534,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 567,
+        "line": 554,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "desktop/tests/core-process.test.ts",
-        "line": 583,
+        "line": 568,
         "triage": "hotspot_requires_review",
-        "source_sha256": "48d51310fa230454f6dba3239c46fc21a0a51078061dbb5ee3a05dc927a65f60"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
-        "path": "desktop/tests/renderer-build.test.ts",
-        "line": 31,
+        "path": "desktop/tests/core-process.test.ts",
+        "line": 584,
         "triage": "hotspot_requires_review",
-        "source_sha256": "89a97ba84fd073f58caf04ed549150bde84c293306d5038bfed367252ffa5124"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/fixtures/bootstrap.ts",
-        "line": 14,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "0e825251b95724524b02cef993ee2954d4a2642f2bf15c10461b97199d090766"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/fixtures/core-launch.ts",
-        "line": 8,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "13ad886588a228d8f449c0c7471330cf03a3a2be766d411300eb222a2c160494"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/harness.ts",
-        "line": 25,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/harness.ts",
-        "line": 134,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/recovery.spec.ts",
-        "line": 26,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "037eb7f4de77d4ed33e0dabb96593e887c47107ecb1647b9bde2ce9ab0f2d625"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/recovery.spec.ts",
-        "line": 109,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "037eb7f4de77d4ed33e0dabb96593e887c47107ecb1647b9bde2ce9ab0f2d625"
+        "source_sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
@@ -6800,6 +7282,55 @@
         "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
       },
       {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/renderer-build.test.ts",
+        "line": 31,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "89a97ba84fd073f58caf04ed549150bde84c293306d5038bfed367252ffa5124"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/fixtures/bootstrap.ts",
+        "line": 14,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "0e825251b95724524b02cef993ee2954d4a2642f2bf15c10461b97199d090766"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/fixtures/core-launch.ts",
+        "line": 8,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "13ad886588a228d8f449c0c7471330cf03a3a2be766d411300eb222a2c160494"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/harness.ts",
+        "line": 25,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/harness.ts",
+        "line": 134,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/recovery.spec.ts",
+        "line": 26,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "037eb7f4de77d4ed33e0dabb96593e887c47107ecb1647b9bde2ce9ab0f2d625"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/recovery.spec.ts",
+        "line": 109,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "037eb7f4de77d4ed33e0dabb96593e887c47107ecb1647b9bde2ce9ab0f2d625"
+      },
+      {
         "rule": "security/detect-object-injection",
         "path": "scripts/check_package.ts",
         "line": 73,
@@ -6841,6 +7372,228 @@
         "triage": "hotspot_requires_review",
         "source_sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
       }
+    ],
+    "source_hashes": [
+      {
+        "path": "desktop/main/copilot-account.ts",
+        "sha256": "6bbec10f3d727ed31cfdcb17c7f058003c758b3ef9c95de9ab0f386e6f2e0a60"
+      },
+      {
+        "path": "desktop/main/core-launch.ts",
+        "sha256": "9d0f764a5ccdcac682dcf5cdd1d5473ef5b42cbb6263e52949dacdfa3e7d597d"
+      },
+      {
+        "path": "desktop/main/core-process.ts",
+        "sha256": "709f35c5009cb35e00cc3a0bef6d89d1c772d607156369bf1152fd12ab5bce16"
+      },
+      {
+        "path": "desktop/main/index.ts",
+        "sha256": "bb74921e8323287873034e02fb89e8538047e2e2ff15bced5b5d781fd5f51662"
+      },
+      {
+        "path": "desktop/main/ipc.ts",
+        "sha256": "c8d6294cb4f1828fa889d94838659027932606dc636b8a6395edd4dae0707e55"
+      },
+      {
+        "path": "desktop/main/security.ts",
+        "sha256": "9ab883acdfd2b4ec1f293d16af3748fd0e0731bed34b67541a590127d34d2731"
+      },
+      {
+        "path": "desktop/preload/index.ts",
+        "sha256": "1a20b1f89d1fa1b44f8639968f1e72e1e37e6f84ac610618dd994c6b8db3aa1c"
+      },
+      {
+        "path": "desktop/renderer/App.tsx",
+        "sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
+      },
+      {
+        "path": "desktop/renderer/Conversation.tsx",
+        "sha256": "2efd02bc71b8a657f0c3d5b5085bdb561988830fc788cf1057695d591d535895"
+      },
+      {
+        "path": "desktop/renderer/NoteReview.tsx",
+        "sha256": "4996ff6dfd6677b2c4e4e6a2d7f21650b87ae9ad9eb92765a333d0a13a106f89"
+      },
+      {
+        "path": "desktop/renderer/Notes.tsx",
+        "sha256": "961cf9dbec30cb0c33aa5208cd1c4d581d45eef5773e006482fe8551eb8972bb"
+      },
+      {
+        "path": "desktop/renderer/SafeMarkdown.tsx",
+        "sha256": "7192865ca4943a08994658fa2b4f0d3cfc4c5295bb4a779c00467092c5933ad3"
+      },
+      {
+        "path": "desktop/renderer/Setup.tsx",
+        "sha256": "4661280480b59e0973ef393755cb4c1c030a63d86605028cce63b94df692efa2"
+      },
+      {
+        "path": "desktop/renderer/host.ts",
+        "sha256": "c1b2464779f7ada711c0e1f26a5f8c7000b91711907188594c18cff3221accd7"
+      },
+      {
+        "path": "desktop/renderer/main.tsx",
+        "sha256": "853c30b1221cc02d3acf08a0890cbe6b3ad6c14163d73eadbdee201a85cfbbef"
+      },
+      {
+        "path": "desktop/shared/contracts.ts",
+        "sha256": "9735c3e0c0da47de7fc1ce052bf37781ece3ae3014da463c41fa11e76580bfca"
+      },
+      {
+        "path": "desktop/shared/external-url.ts",
+        "sha256": "504833c92d2e50b05b2111f220da0015381e3867ac29993ec979859795956d6f"
+      },
+      {
+        "path": "desktop/tests/build.test.ts",
+        "sha256": "82ba7106e5763fbe358b3c1eb5ad84fa477979ebab859468d94508138df041f8"
+      },
+      {
+        "path": "desktop/tests/contracts.test.ts",
+        "sha256": "b28d784e174701a8b95223da1583edff24b78b109060183848d214c0dd787dd4"
+      },
+      {
+        "path": "desktop/tests/conversation.test.tsx",
+        "sha256": "d72573aefcfd7d7b00450cdac993ceac2f2888e12445297dc03278af89e26d48"
+      },
+      {
+        "path": "desktop/tests/copilot-account.test.ts",
+        "sha256": "37818c2b422fd9e1e980e23e9258399fcb2243c5f5ad4134d4d2a8b9a8b3cc30"
+      },
+      {
+        "path": "desktop/tests/core-process.test.ts",
+        "sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
+      },
+      {
+        "path": "desktop/tests/fixtures/host-smoke.ts",
+        "sha256": "dff005afcbb18e8a0a2d2d9e8ad428b7e6284e92020c781b55fc6b0cc40d17dc"
+      },
+      {
+        "path": "desktop/tests/host-smoke.test.ts",
+        "sha256": "b5d05489ed333e3e50df601c981e572c23eb378a1677b2cdca075c57585c0d3f"
+      },
+      {
+        "path": "desktop/tests/main-entry.test.ts",
+        "sha256": "c7479e317bd9b12377810c6f178a9550e170fc6013f35e261f3e7dda123f1bef"
+      },
+      {
+        "path": "desktop/tests/note-review.test.tsx",
+        "sha256": "a641281ee1dfe650efd27889eb36354a7485717af03d5e9f54b8739d82f17191"
+      },
+      {
+        "path": "desktop/tests/notes.test.tsx",
+        "sha256": "4cf1b0f98532c9df17e93c50e4f683ff629fe419f52fdd527af5c38be10f092a"
+      },
+      {
+        "path": "desktop/tests/package-smoke.test.ts",
+        "sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "path": "desktop/tests/package.test.ts",
+        "sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
+      },
+      {
+        "path": "desktop/tests/preload.test.ts",
+        "sha256": "a1c00ce5f89d799ed80e3c2bdf51bc7a1cc4643f31447252cb07e0def7793cc4"
+      },
+      {
+        "path": "desktop/tests/renderer-build.test.ts",
+        "sha256": "89a97ba84fd073f58caf04ed549150bde84c293306d5038bfed367252ffa5124"
+      },
+      {
+        "path": "desktop/tests/renderer-fixture.ts",
+        "sha256": "8a34fca8e89879920fef8ae952beadd1509e246cf3690d817f11600facfd3ac9"
+      },
+      {
+        "path": "desktop/tests/renderer-host.test.ts",
+        "sha256": "064f26f29dbf82e3d39a93b6910ed526201eb0fd401988bda9697be6ff6d94f9"
+      },
+      {
+        "path": "desktop/tests/safe-markdown.test.tsx",
+        "sha256": "da150276912baa94a4143aae0e21eb7a47e5f94a58b14ccf7680693533135118"
+      },
+      {
+        "path": "desktop/tests/security.test.ts",
+        "sha256": "e1318731fbccb0427423c71b48953047e316520815121e1f5f4e672f1b9bea3a"
+      },
+      {
+        "path": "desktop/tests/setup.test.tsx",
+        "sha256": "f7f38bb1dedc6a4b694d2c2de59cff3da6b251937db62c02ee11d98bfc6c4269"
+      },
+      {
+        "path": "e2e/build.ts",
+        "sha256": "b5c1028bffa1aff96b56df7e1f2cc77f80b613f83a6aab99ed9de18f3aa2caaa"
+      },
+      {
+        "path": "e2e/fixtures/bootstrap.ts",
+        "sha256": "0e825251b95724524b02cef993ee2954d4a2642f2bf15c10461b97199d090766"
+      },
+      {
+        "path": "e2e/fixtures/core-launch.ts",
+        "sha256": "13ad886588a228d8f449c0c7471330cf03a3a2be766d411300eb222a2c160494"
+      },
+      {
+        "path": "e2e/foundation.spec.ts",
+        "sha256": "68c9c38a7f8fae728d71e5b477c5b78c6514552303bb50278ee159791ee66583"
+      },
+      {
+        "path": "e2e/harness.ts",
+        "sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
+      },
+      {
+        "path": "e2e/recovery.spec.ts",
+        "sha256": "037eb7f4de77d4ed33e0dabb96593e887c47107ecb1647b9bde2ce9ab0f2d625"
+      },
+      {
+        "path": "e2e/security.spec.ts",
+        "sha256": "fc8eacc97440bda6a21cd8778b4449600f9512e01cf456fd89d477c49b20f5bb"
+      },
+      {
+        "path": "eslint.config.mjs",
+        "sha256": "1dbe9b957a70b16ede0728753c5291e4eed9c98f1ae5f7495101445a37021066"
+      },
+      {
+        "path": "eslint.security.config.mjs",
+        "sha256": "481db4f9cb564671166f3923431fe2d215882269ea13b73aced5f594caff7c32"
+      },
+      {
+        "path": "forge.config.ts",
+        "sha256": "939b4cd93fd83ff217bc326cda95a7931329348921bad0dce6fe7cc2c2259e7c"
+      },
+      {
+        "path": "playwright.config.ts",
+        "sha256": "e2f45a4c7eca9b382e8e0b5148c95769b9bf629dbc73994542ae816490eeddbd"
+      },
+      {
+        "path": "scripts/check_package.ts",
+        "sha256": "4eeb7c24e18731b07953f0c68a00233b9ba369290ea6ab2694c29223d723f338"
+      },
+      {
+        "path": "scripts/install-electron.mjs",
+        "sha256": "00f763a5df6b43653e152b7889f9000182bd4c96842fc83ac805d31b5e5b5bf0"
+      },
+      {
+        "path": "scripts/smoke_package.mjs",
+        "sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
+      },
+      {
+        "path": "scripts/verify.mjs",
+        "sha256": "34d96498dfee1d223e5d5b8a512212e3fcadbf7440d17c035c351f4ae9dc6df9"
+      },
+      {
+        "path": "vite.main.config.ts",
+        "sha256": "a60312155552d7f5a7389e564e8152a7df45961897c030881cd97877eb7cc542"
+      },
+      {
+        "path": "vite.preload.config.ts",
+        "sha256": "4dcce48e142ac323a252bdc5c1529273a123065ba9a2a33e4986e1ea4c832669"
+      },
+      {
+        "path": "vite.renderer.config.ts",
+        "sha256": "2966b6d02368b46c8a604c6e466e75e0387b9c45d12d86a72d0e1c3107b4396c"
+      },
+      {
+        "path": "vitest.config.ts",
+        "sha256": "08e2d161be0bf1a118d4139ba58efee9eea1786ed5b7cc0e267f349b8e7cbdd6"
+      }
     ]
   },
   "secrets_current": {
@@ -6856,8 +7609,8 @@
     "files": []
   },
   "secret_scope": {
-    "base": "3b953a95ae44e81e05b31c0d9964595d0b1c0d43",
-    "head": "b3080e0e1da3d0740d9dc06ef0e0941e6959e593",
+    "base": "0bd73be6072e65b0396291ab0942040a4ebc5e34",
+    "head": "0bd73be6072e65b0396291ab0942040a4ebc5e34",
     "current_includes_untracked": true,
     "staged": "full current index contents of added/changed files; excludes deletions"
   },
@@ -6875,37 +7628,33 @@
     "uv": "0.13.5",
     "gitleaks": "8.30.1"
   },
-  "post_aggregate_test_cleanup": {
-    "status": "pass",
-    "path": "desktop/tests/package.test.ts",
-    "change": "ASAR cleanup preserved; added portable ZIP-only release-maker regression",
-    "focused_test": "Task10 I1/I2 follow-up recorded separately; prior aggregate preserved",
-    "typescript": "pass",
-    "eslint": "pass",
-    "prettier": "pass",
-    "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
+  "task10_I3_recovery": {
+    "scope": "Full existing security wrapper rerun once after Vitest removed original unsaved report; original aggregate security exit 0 retained in local log",
+    "base": "0bd73be6072e65b0396291ab0942040a4ebc5e34",
+    "original_payload_not_reconstructed": true,
+    "native_GUI_retry_scope": "Only test:coverage, test:e2e and dependent integer checker; initial sandbox native launch failures retained",
+    "committed_diff_limit": "base equals head here; fresh I3 delivery/index/range scans recorded separately",
+    "source_hash_binding": "Initial complete source snapshot bound after recovered scan; two subsequent changed Python files and their findings/hashes are refreshed under task10_I3_lexical_metadata_fix. Other scanned sources unchanged."
   },
-  "portable_zip_policy": {
-    "focused_package_tests": 2,
-    "typescript": "pass",
-    "eslint": "pass",
-    "production_dependency_entries_unchanged": 88,
-    "removed_build_packages": 32,
-    "lock_sha256": "d6bdf7a1f2895c14b5a24d8e4c9c1fc2dfccc35e1aeca8e276cfbbdd646ac344"
-  },
-  "task10_review_fix": {
-    "base": "12f8eeb56c68c2b44c6936147e97e4fa22e36332",
-    "scope": [
-      "Task10I1 closed ASAR admission",
-      "Task10I2 awaited smoke failure and bounded cleanup"
+  "task10_I3_lexical_metadata_fix": {
+    "scope": "Only two changed Python files rescanned after concrete guard admission correction; unchanged JS/E2E/dependency audits and other static results retained",
+    "files": [
+      "src/sage/sdk_probe.py",
+      "tests/unit/test_sdk_probe.py"
     ],
-    "static_collection": "Four affected files only; prior unchanged findings retained",
-    "affected_sources": {
-      "scripts/check_package.ts": "4eeb7c24e18731b07953f0c68a00233b9ba369290ea6ab2694c29223d723f338",
-      "scripts/smoke_package.mjs": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2",
-      "desktop/tests/package.test.ts": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6",
-      "desktop/tests/package-smoke.test.ts": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
-    },
-    "broad_aggregate_or_audit_rerun": false
+    "source_hashes": [
+      {
+        "path": "src/sage/sdk_probe.py",
+        "sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25"
+      },
+      {
+        "path": "tests/unit/test_sdk_probe.py",
+        "sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+      }
+    ],
+    "bandit_targeted_findings": 27,
+    "no_high_findings": true,
+    "ruling": "43",
+    "baseline_full_recovered_scan": "task10_I3_recovery"
   }
 }

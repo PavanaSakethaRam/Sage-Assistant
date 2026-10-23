@@ -14,14 +14,14 @@
     },
     "src/sage/__main__.py": {
       "statements": [
-        113,
-        120
+        119,
+        125
       ],
       "branches": [
-        21,
-        26
+        24,
+        28
       ],
-      "source_sha256": "8f725848ea4bbb8aeeff58c394f15419a8a31569f690144e0bd7f51e0bc0deea",
+      "source_sha256": "e6530c27f1e884d98237867665dfbea9790679db49800f6933cfc3a175141c72",
       "trusted": true
     },
     "src/sage/actions.py": {
@@ -50,14 +50,14 @@
     },
     "src/sage/contracts.py": {
       "statements": [
-        95,
-        95
+        101,
+        101
       ],
       "branches": [
         8,
         8
       ],
-      "source_sha256": "e433b39acea2971d7f25d71210f1cc053cb2b294ea211e89cd7583485ec2110c",
+      "source_sha256": "7098beef2afed420c4c66c648c026f249f88d6a7669e75e8bd2ea1cd5f817e47",
       "trusted": true
     },
     "src/sage/logging.py": {
@@ -122,14 +122,14 @@
     },
     "src/sage/providers/copilot.py": {
       "statements": [
-        236,
-        253
+        256,
+        273
       ],
       "branches": [
-        73,
-        82
+        79,
+        88
       ],
-      "source_sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5",
+      "source_sha256": "635ba4767235a53295d42dca5fd52b08b3c3c3bbb1f406f303ea0e726571dd0a",
       "trusted": true
     },
     "src/sage/providers/protected_auth.py": {
@@ -156,6 +156,18 @@
       "source_sha256": "50d4cd6b2a81c02984d1181741a0421846b99b44a6937e16ae3185b292c96f48",
       "trusted": true
     },
+    "src/sage/sdk_probe.py": {
+      "statements": [
+        142,
+        144
+      ],
+      "branches": [
+        42,
+        42
+      ],
+      "source_sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25",
+      "trusted": true
+    },
     "src/sage/service.py": {
       "statements": [
         407,
@@ -165,7 +177,7 @@
         116,
         126
       ],
-      "source_sha256": "7e6927b77373da6ad05eef53091bf0774e93076dbfd3a3627a529e4b7b7520db",
+      "source_sha256": "70936783b67a933ffcd567b8e951cdae06e0a93b410206fb9a7aef746ba503a6",
       "trusted": true
     },
     "src/sage/storage.py": {
@@ -332,10 +344,10 @@
         95
       ],
       "branches": [
-        42,
-        63
+        44,
+        65
       ],
-      "source_sha256": "58c71129476af61f796b08379c79ea335609d052e90dcd9e0c30cdaedaac39e9",
+      "source_sha256": "4661280480b59e0973ef393755cb4c1c030a63d86605028cce63b94df692efa2",
       "trusted": false
     },
     "desktop/renderer/host.ts": {
@@ -364,14 +376,14 @@
     },
     "desktop/shared/contracts.ts": {
       "statements": [
-        207,
-        212
+        211,
+        216
       ],
       "branches": [
         128,
         132
       ],
-      "source_sha256": "d527dfc795c4eed706b37371c506923f0a6d1152c4e75530106714170273799f",
+      "source_sha256": "9735c3e0c0da47de7fc1ce052bf37781ece3ae3014da463c41fa11e76580bfca",
       "trusted": true
     },
     "desktop/shared/external-url.ts": {

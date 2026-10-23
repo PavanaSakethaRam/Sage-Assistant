@@ -193,13 +193,21 @@ def main() -> int:
         default=None,
         help="Fixed managed gh2.103.0 deployment (not an RPC option)",
     )
-    parser.add_argument("--self-check", action="store_true", help="Fixed offline package evidence")
+    checks = parser.add_mutually_exclusive_group()
+    checks.add_argument("--self-check", action="store_true", help="Fixed offline package evidence")
+    checks.add_argument(
+        "--sdk-self-check", action="store_true", help="Fixed inert SDK construction"
+    )
     args = parser.parse_args()
-    if args.self_check:
+    if args.self_check or args.sdk_self_check:
         if args.root is not None or args.copilot_runtime is not None or args.gh_runtime is not None:
             parser.error("Self-check accepts no service options")
-        self_check()
-        return 0
+        if args.self_check:
+            self_check()
+            return 0
+        from sage.sdk_probe import sdk_self_check
+
+        return sdk_self_check()
     try:
         asyncio.run(_run(args.root, args.copilot_runtime, args.gh_runtime))
         return 0

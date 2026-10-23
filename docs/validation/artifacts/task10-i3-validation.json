@@ -1,0 +1,306 @@
+{
+  "source_ancestor": "0bd73be6072e65b0396291ab0942040a4ebc5e34",
+  "snapshot": "I3 working-tree source hashes are in coverage/static artifacts; graph has its own exact corpus manifest",
+  "aggregate": {
+    "python": {
+      "passed": 525,
+      "live_skipped": 1,
+      "exit_code": 0
+    },
+    "javascript_initial": {
+      "passed": 153,
+      "failed": 1,
+      "reason": "native host-smoke SIGABRT in ordinary sandbox"
+    },
+    "e2e_initial": {
+      "failed_launches": 5,
+      "reason": "ordinary sandbox native launch blocked"
+    },
+    "javascript_native_rerun": {
+      "passed": 154,
+      "exit_code": 0
+    },
+    "e2e_native_rerun": {
+      "passed": 5,
+      "exit_code": 0
+    },
+    "dependent_integer_coverage": {
+      "exit_code": 0,
+      "counts": {
+        "javascript_maintained": {
+          "branches": [
+            668,
+            780
+          ],
+          "statements": [
+            1072,
+            1157
+          ]
+        },
+        "javascript_trusted": {
+          "branches": [
+            482,
+            531
+          ],
+          "statements": [
+            736,
+            784
+          ]
+        },
+        "python_maintained": {
+          "branches": [
+            520,
+            558
+          ],
+          "statements": [
+            1825,
+            1886
+          ]
+        },
+        "python_trusted": {
+          "branches": [
+            520,
+            558
+          ],
+          "statements": [
+            1825,
+            1886
+          ]
+        }
+      }
+    },
+    "other_initial_commands_exit_0": [
+      "typecheck",
+      "lint",
+      "mypy",
+      "ruff check",
+      "ruff format",
+      "prettier",
+      "complete security wrapper"
+    ],
+    "security_payload_recovery": "Existing security wrapper rerun once after Vitest removed original unsaved report; recovered report preserved. No second full aggregate."
+  },
+  "package": {
+    "zip_bytes": 214591149,
+    "zip_sha256": "d30f7a6e98b8e02d6a44fa540664c41070b4dacf005ceb74dae0fb5c5228135a",
+    "core_sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+    "full_app_entries": 1956,
+    "symlinks": 14,
+    "selected_entries": 1138,
+    "native_files": 27,
+    "native_signatures_pass": 22,
+    "outer_signature_exit": 1,
+    "frozen_CA_count": 128,
+    "javascript_license_files": 88,
+    "asar_sha256": "8519973acb62d024c838d7705174df1c49a503e6517cc047971ab7b92470c518",
+    "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
+  },
+  "local_evidence_log_hashes": [
+    {
+      "local_historical_name": "task-10-i3-final-core-build.log",
+      "sha256": "4f8781c25bcb8382682b58cb552606699c36fd4451a2fa185008d4f9304e1d5b"
+    },
+    {
+      "local_historical_name": "task-10-i3-final-frozen-probes.json",
+      "sha256": "f8b769463778dcb33252fd218e609462ac35774ad141b6db3601cde0e20fc3e7"
+    },
+    {
+      "local_historical_name": "task-10-i3-focused-python.log",
+      "sha256": "fdf0eeafca492c2ae5e488d77cd6a52eda8d6c7b38cfb18033d1a598e42c4fdc"
+    },
+    {
+      "local_historical_name": "task-10-i3-focused-js.log",
+      "sha256": "ae54c1875176fbce1cdfd744b9de1b258cb6379e1517001065abd9d0eebd7a1f"
+    },
+    {
+      "local_historical_name": "task-10-i3-final-verify.log",
+      "sha256": "dc6de9487d37adabf5d376af493d230eb01476551d2c32ace681958db7937610"
+    },
+    {
+      "local_historical_name": "task-10-i3-native-coverage.log",
+      "sha256": "d312e0793a81a7855bd160d674a20c5df9c2bc0915b5a8b4b6f8cb3f905da537"
+    },
+    {
+      "local_historical_name": "task-10-i3-native-e2e.log",
+      "sha256": "79dfa3d1aea86da97315013118ecd04fbb71e5bcdabaa5d823301bcb713d9cc8"
+    },
+    {
+      "local_historical_name": "task-10-i3-final-security.log",
+      "sha256": "558a0dbb9b949bef0f80d1e0cb781557f5fe9689ba3ea2aca7a0cc29713dfed7"
+    },
+    {
+      "local_historical_name": "task-10-i3-final-coverage.json",
+      "sha256": "b31e230707e976940d5867638fce06a3a5939a72817f466761e6bf862cf819e4"
+    },
+    {
+      "local_historical_name": "task-10-i3-package-check.log",
+      "sha256": "841a82f0dba1747176397d65b6f3c59047c4e1420a260f6cfec6ded2c46bc9e0"
+    },
+    {
+      "local_historical_name": "task-10-i3-package-smoke.log",
+      "sha256": "6f93e6deaa3e0e584a8fec1a7c51081a538bcc7329643e36bcdf1981281c281a"
+    },
+    {
+      "local_historical_name": "task-10-i3-packaged-sdk-proof.json",
+      "sha256": "07c291fc7db8670461ced5db10f9c7b4ded501e2e8443e640d10ab302385197e"
+    },
+    {
+      "local_historical_name": "task-10-i3-asar-enforcement.json",
+      "sha256": "061ce2a749aeec29496d7ca88c2907744848fd19469556bd79dac886c73626a1"
+    },
+    {
+      "local_historical_name": "task-10-i3-metadata-red.log",
+      "sha256": "e3bc4aae38a193816dad2bb1380f36e253430a9370fe6dcd7e9950d763b8ccb0"
+    },
+    {
+      "local_historical_name": "task-10-i3-metadata-green.log",
+      "sha256": "9c4d11ea24cfe00b8c17eebd8104df920d7aeae1e59e5b5d8b9138d7ae9e7ff8"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-python-coverage.log",
+      "sha256": "21b97fa13f14707623497ba511c9d4bf3e04564a11097bdba256d9b48254d139"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-frozen-probes.json",
+      "sha256": "03dcb7976f75bb81c6abccd322fd3844689dad8910cc156f90c8e3ea93632810"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-package-check.log",
+      "sha256": "841a82f0dba1747176397d65b6f3c59047c4e1420a260f6cfec6ded2c46bc9e0"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-package-smoke.log",
+      "sha256": "6f93e6deaa3e0e584a8fec1a7c51081a538bcc7329643e36bcdf1981281c281a"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-core-build.log",
+      "sha256": "8a224ba688cb78d08dbaff00ea6075f48c2b76988762485cedd8795a234ed24f"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-static.json",
+      "sha256": "ae5ac37c879a1c6c0a4822a330ca5e64bb76f5f3614f3cb33b165c911b32eecc"
+    },
+    {
+      "local_historical_name": "task-10-i3-tightened-coverage.json",
+      "sha256": "612c469f715b251bf2bcbcec73e33582ba4621f639be972a4159ec7cdb126a3c"
+    }
+  ],
+  "limits": [
+    "logs are local evidence, not distributable attachments",
+    "no new native main-UI/live validation",
+    "no OS sandbox/supply-chain proof claim",
+    "prior failed live counts remain unknown",
+    "review outcomes remain controller-owned"
+  ],
+  "followup_ruling43": {
+    "reason": "Guard must lexically deny before metadata and reject symlinks without following target; no permission expansion",
+    "focused_python_passed": 174,
+    "python_coverage_suite": {
+      "passed": 526,
+      "live_skipped": 1,
+      "exit_code": 0
+    },
+    "integer_coverage": {
+      "javascript_maintained": {
+        "branches": [
+          668,
+          780
+        ],
+        "statements": [
+          1072,
+          1157
+        ]
+      },
+      "javascript_trusted": {
+        "branches": [
+          482,
+          531
+        ],
+        "statements": [
+          736,
+          784
+        ]
+      },
+      "python_maintained": {
+        "branches": [
+          526,
+          564
+        ],
+        "statements": [
+          1832,
+          1895
+        ]
+      },
+      "python_trusted": {
+        "branches": [
+          526,
+          564
+        ],
+        "statements": [
+          1832,
+          1895
+        ]
+      }
+    },
+    "guard_coverage": {
+      "statements": [
+        142,
+        144
+      ],
+      "branches": [
+        42,
+        42
+      ]
+    },
+    "static": "Only sdk_probe.py and its test rescanned; unchanged JS/E2E/dependency audits/full aggregate not repeated",
+    "bandit_retained": {
+      "files": 54,
+      "findings": 717,
+      "LOW": 708,
+      "MEDIUM": 9,
+      "HIGH": 0
+    }
+  },
+  "initial_I3_package": {
+    "zip_bytes": 214590879,
+    "zip_sha256": "fa6fb35e0c8d9b8f5852bd59beb3b4d56eafb2755cdf5548509825f4171789ea",
+    "core_sha256": "24d9d6acab1315970b0c73333bf4186595cf9db7e2b3764da6191d86fba746de",
+    "full_app_entries": 1956,
+    "symlinks": 14,
+    "selected_entries": 1138,
+    "native_files": 27,
+    "native_signatures_pass": 22,
+    "outer_signature_exit": 1,
+    "frozen_CA_count": 128,
+    "javascript_license_files": 88,
+    "asar_sha256": "8519973acb62d024c838d7705174df1c49a503e6517cc047971ab7b92470c518",
+    "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
+  },
+  "initial_I3_focused": {
+    "javascript": 51,
+    "final_probe_module_cases": 45,
+    "final_probe_module_statements": [
+      135,
+      135
+    ],
+    "final_probe_module_branches": [
+      36,
+      36
+    ],
+    "python_before_final_frozen_build": 173
+  },
+  "focused": {
+    "python_before_final_frozen_build": 174,
+    "javascript_retained": 51,
+    "final_probe_module_cases": 46,
+    "final_probe_module_statements": [
+      142,
+      144
+    ],
+    "final_probe_module_branches": [
+      42,
+      42
+    ],
+    "coverage_source": "Latest source-aware full Python coverage; focused174 includes46 probe cases"
+  }
+}

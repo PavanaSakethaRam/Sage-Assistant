@@ -38,6 +38,7 @@ export function fixture(
           version: null,
           destination: null,
           explanation: "Local inference is not installed.",
+          diagnostic: null,
         },
         {
           provider: "copilot",
@@ -46,6 +47,7 @@ export function fixture(
           version: "1.0.102",
           destination: "GitHub Copilot cloud",
           explanation: "Choose an account, then explicitly test.",
+          diagnostic: null,
         },
         {
           provider: "api",
@@ -54,6 +56,7 @@ export function fixture(
           version: null,
           destination: null,
           explanation: "API adapter unavailable.",
+          diagnostic: null,
         },
       ],
     },

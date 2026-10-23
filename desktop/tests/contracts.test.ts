@@ -159,6 +159,7 @@ describe("closed renderer contracts", () => {
         version: "sdk:1.0.25/runtime:1.0.102",
         destination: "GitHub Copilot cloud",
         explanation: "explicit_connection_check_succeeded",
+        diagnostic: null,
       };
       const response = {
         version: 1,
@@ -169,6 +170,39 @@ describe("closed renderer contracts", () => {
       expect(parseResponse(response, method)).toEqual(response);
     },
   );
+  it.each([
+    "token_source",
+    "session_storage",
+    "sdk_import",
+    "sdk_construct",
+    "runtime_start",
+    "runtime_status",
+    "session_create",
+    "response_wait",
+  ])("accepts only closed provider diagnostic metadata at %s", (stage) => {
+    const response = {
+      version: 1,
+      id: "r",
+      kind: "response",
+      result: {
+        ...fixtures.ProviderReadiness,
+        diagnostic: { stage, category: "unexpected_error" },
+      },
+    };
+    expect(parseResponse(response, "connection.test")).toEqual(response);
+    for (const diagnostic of [
+      { stage: "raw error", category: "unexpected_error" },
+      { stage, category: "raw error" },
+      { stage, category: "io_error", message: "private" },
+    ]) {
+      expect(() =>
+        parseResponse(
+          { ...response, result: { ...response.result, diagnostic } },
+          "connection.test",
+        ),
+      ).toThrow();
+    }
+  });
   it("accepts every existing method with defaults and validates all shared result shapes", () => {
     for (const method of [
       "settings.get",

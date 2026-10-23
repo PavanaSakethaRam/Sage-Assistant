@@ -18,7 +18,10 @@ from pydantic import Field, ValidationError
 from sage.config import Settings
 from sage.contracts import (
     Contract,
+    FailureCategory,
+    FailureStage,
     NoteContent,
+    ProviderDiagnostic,
     ProviderReadiness,
     ReasoningRequest,
     ReasoningResult,
@@ -31,6 +34,41 @@ if TYPE_CHECKING:
 SDK_VERSION = "1.0.25"
 RUNTIME_VERSION = "1.0.102"
 CHECK_PROMPT = 'Return exactly {"text":"Sage connection check","proposal":null}.'
+
+
+def failure_category(exc: Exception) -> FailureCategory:
+    if isinstance(exc, ImportError):
+        return "dependency_error"
+    if isinstance(exc, (TypeError, ValueError)):
+        return "contract_error"
+    if isinstance(exc, OSError):
+        return "io_error"
+    return "unexpected_error"
+
+
+def construct_client(factory: Callable[..., Any], connection: Any, runtime: str, base: str) -> Any:
+    """The same public, explicit stdio options for the provider and inert SDK probe."""
+    return factory(
+        connection=connection.for_stdio(path=runtime),
+        mode="empty",
+        base_directory=base,
+        working_directory=base,
+        log_level="none",
+        use_logged_in_user=False,
+        builtin_plugin_directories=[],
+        env={
+            "COPILOT_SKIP_CLI_DOWNLOAD": "1",
+            "COPILOT_DISABLE_KEYTAR": "1",
+            "COPILOT_GITHUB_TELEMETRY_DISABLED": "true",
+            "COPILOT_OTEL_ENABLED": "false",
+            "COPILOT_RUNTIME_PROCESS_FILE_LOGGING": "0",
+        },
+        session_fs={
+            "initial_working_directory": "/sage/work",
+            "session_state_path": "/sage/state",
+            "conventions": "posix",
+        },
+    )
 
 
 class _Incompatible(Exception):
@@ -92,6 +130,7 @@ class CopilotReasoner:
         self._checked = False
         self._closed = False
         self._fault: str | None = None
+        self._diagnostic: ProviderDiagnostic | None = None
 
     def readiness(self) -> ProviderReadiness:
         status: Any = "not_configured"
@@ -118,6 +157,7 @@ class CopilotReasoner:
             version=f"sdk:{SDK_VERSION}/runtime:{RUNTIME_VERSION}",
             destination="GitHub Copilot cloud",
             explanation=explanation,
+            diagnostic=self._diagnostic if explanation == "runtime_error" else None,
         )
 
     def _runtime_present(self) -> bool:
@@ -158,6 +198,7 @@ class CopilotReasoner:
         cleanup_failed = False
         cancellation: asyncio.CancelledError | None = None
         token: str | None = None
+        stage: FailureStage = "token_source"
         try:
             async with asyncio.timeout(remaining):
                 token = await self._token_source(request.request_id, request.deadline)
@@ -169,36 +210,23 @@ class CopilotReasoner:
                 raise TimeoutError
             if not token or not token.startswith(("gho_", "ghu_")):
                 raise PermissionError
+            stage = "session_storage"
             path = self.sessions.create(request.request_id)
             assert self.runtime_path is not None
             sdk_logger = logging.getLogger("copilot")
             sdk_logger.handlers = [logging.NullHandler()]
             sdk_logger.propagate = False
             sdk_logger.setLevel(logging.CRITICAL + 1)
+            stage = "sdk_import"
             from copilot import CopilotClient, RuntimeConnection
             from copilot.generated.rpc import PermissionDecisionReject
 
-            client_factory = self._client_factory or CopilotClient
-            client = client_factory(
-                connection=RuntimeConnection.for_stdio(path=str(self.runtime_path)),
-                mode="empty",
-                base_directory=str(path),
-                working_directory=str(path),
-                log_level="none",
-                use_logged_in_user=False,
-                builtin_plugin_directories=[],
-                env={
-                    "COPILOT_SKIP_CLI_DOWNLOAD": "1",
-                    "COPILOT_DISABLE_KEYTAR": "1",
-                    "COPILOT_GITHUB_TELEMETRY_DISABLED": "true",
-                    "COPILOT_OTEL_ENABLED": "false",
-                    "COPILOT_RUNTIME_PROCESS_FILE_LOGGING": "0",
-                },
-                session_fs={
-                    "initial_working_directory": "/sage/work",
-                    "session_state_path": "/sage/state",
-                    "conventions": "posix",
-                },
+            stage = "sdk_construct"
+            client = construct_client(
+                self._client_factory or CopilotClient,
+                RuntimeConnection,
+                str(self.runtime_path),
+                str(path),
             )
 
             def deny(*args: Any) -> PermissionDecisionReject:
@@ -207,12 +235,15 @@ class CopilotReasoner:
 
             remaining = min(remaining, (request.deadline - self._clock()).total_seconds())
             async with asyncio.timeout(remaining):
+                stage = "runtime_start"
                 await client.start()
+                stage = "runtime_status"
                 status = await client.get_status()
                 if status.version != RUNTIME_VERSION or status.protocol_version != 3:
                     raise _Incompatible
                 if running.cancelled:
                     raise _Cancelled
+                stage = "session_create"
                 running.session = await client.create_session(
                     github_token=token,
                     model=request.model,
@@ -262,6 +293,7 @@ class CopilotReasoner:
                     ensure_ascii=False,
                     separators=(",", ":"),
                 )
+                stage = "response_wait"
                 event = await running.session.send_and_wait(
                     prompt, response_schema=_Output.model_json_schema(), timeout=remaining
                 )
@@ -300,7 +332,13 @@ class CopilotReasoner:
             quota = "429" in message or "quota" in message
             auth = any(part in message for part in ("401", "403", "unauthorized", "authentication"))
             code = "auth_required" if auth else "quota_exhausted" if quota else "runtime_error"
-            result = self._error(request, code)
+            result = self._error(
+                request,
+                code,
+                ProviderDiagnostic(stage=stage, category=failure_category(exc))
+                if code == "runtime_error"
+                else None,
+            )
         finally:
             token = None
             cleanup_task = asyncio.create_task(
@@ -367,9 +405,12 @@ class CopilotReasoner:
                 failed = True
         return failed
 
-    def _error(self, request: ReasoningRequest, code: str) -> ReasoningResult:
+    def _error(
+        self, request: ReasoningRequest, code: str, diagnostic: ProviderDiagnostic | None = None
+    ) -> ReasoningResult:
         self._checked = False
         self._fault = code
+        self._diagnostic = diagnostic
         return ReasoningResult(request_id=request.request_id, status="error", text=code)
 
     async def cancel(self, request_id: str) -> None:
@@ -401,6 +442,7 @@ class CopilotReasoner:
             and result.proposal is None
         ):
             self._fault = None
+            self._diagnostic = None
             self._checked = True
         elif result.status == "completed":
             self._error(

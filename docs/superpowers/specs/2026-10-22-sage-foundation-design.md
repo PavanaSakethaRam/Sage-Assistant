@@ -62,7 +62,7 @@ Use closed enums and validated models rather than arbitrary tool names:
 
 | Contract | Required meaning |
 |---|---|
-| `ProviderReadiness` | `unavailable`, `not_configured`, `auth_required`, `incompatible`, `ready`, or `error`; evidence/version/destination and explanation accompany status |
+| `ProviderReadiness` | `unavailable`, `not_configured`, `auth_required`, `incompatible`, `ready`, or `error`; evidence/version/destination and explanation accompany status; unexpected provider errors may carry only closed stage/category metadata, never raw exception content |
 | `ReasoningRequest` | request/task IDs, bounded user text, explicitly attached context, selected backend/model, deadline and cancellation identity |
 | `ReasoningResult` | text and optionally a validated note proposal; usage may be unknown; completion/error/cancellation is explicit |
 | `ActionProposal` | fixed tool ID `notes.create`, fully validated title/body, revision and scope; no model-supplied approval |
@@ -137,3 +137,6 @@ Foundation is complete only when:
 7. README/support matrix describes this foundation accurately and preserves the remaining delivery slices as outstanding work.
 
 This document fixes behavior and verification requirements. File-by-file tasks, dependency pins, command sequencing and execution assignment belong in the implementation plan after written-spec review. No product code or dependencies were changed to write this spec.
+
+
+Implementation evidence clarification (23 October 2026): one explicitly approved fixed native connection Test on an earlier local package failed `runtime_error`; protected-read/identity/model counts are unknown. Disconnect and Quit were acknowledged; a Local transition after that attempt was not established, and no retry was performed. Later guarded public SDK import/construction and frozen local note/restart checks are separate offline evidence for a rebuilt package. They do not satisfy the authenticated session acceptance requirement above. Capability guard scope, exact artifact identities and remaining Windows/signing/legal/history gates are recorded in [foundation results](../../validation/foundation-results.md).

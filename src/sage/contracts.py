@@ -66,6 +66,24 @@ class NoteContent(Contract):
     body: Body
 
 
+FailureStage = Literal[
+    "token_source",
+    "session_storage",
+    "sdk_import",
+    "sdk_construct",
+    "runtime_start",
+    "runtime_status",
+    "session_create",
+    "response_wait",
+]
+FailureCategory = Literal["dependency_error", "contract_error", "io_error", "unexpected_error"]
+
+
+class ProviderDiagnostic(Contract):
+    stage: FailureStage
+    category: FailureCategory
+
+
 class ProviderReadiness(Contract):
     provider: Backend
     status: Literal[
@@ -75,6 +93,7 @@ class ProviderReadiness(Contract):
     version: str | None = None
     destination: str | None = None
     explanation: str
+    diagnostic: ProviderDiagnostic | None = None
 
 
 class ReasoningRequest(Contract):
