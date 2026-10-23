@@ -41,19 +41,41 @@ def test_exact_zip_inventory_accepts_windows_file_and_directory_metadata(tmp_pat
     assert verify(appdir, archive) == 2
 
 
-def test_exact_zip_inventory_accepts_windows_creator_with_posix_stat_mode(tmp_path: Path) -> None:
+@pytest.mark.parametrize("file_bits,directory_bits", [(0o666, 0o777), (0o644, 0o755)])
+def test_exact_zip_inventory_accepts_windows_creator_with_posix_stat_mode(
+    tmp_path: Path, file_bits: int, directory_bits: int
+) -> None:
     appdir, archive = package(tmp_path)
     with zipfile.ZipFile(archive, "w") as zipped:
         for name, body, mode in (
-            (".hidden", b"dot file", stat.S_IFREG | 0o666),
-            ("nested/", b"", stat.S_IFDIR | 0o777),
-            ("nested/body.txt", b"nested body", stat.S_IFREG | 0o666),
+            (".hidden", b"dot file", stat.S_IFREG | file_bits),
+            ("nested/", b"", stat.S_IFDIR | directory_bits),
+            ("nested/body.txt", b"nested body", stat.S_IFREG | file_bits),
         ):
             info = zipfile.ZipInfo(name)
             info.create_system = 0
             info.external_attr = mode << 16
             zipped.writestr(info, body)
     assert verify(appdir, archive) == 2
+
+
+@pytest.mark.parametrize("name", ["nested/body.txt", "nested/"])
+@pytest.mark.parametrize("ambiguous_bit", [0x200, 0x400, 0x800])
+def test_zip_inventory_rejects_windows_creator_ambiguous_special_mode(
+    tmp_path: Path, name: str, ambiguous_bit: int
+) -> None:
+    appdir, archive = package(tmp_path)
+    with zipfile.ZipFile(archive, "w") as zipped:
+        zipped.write(appdir / ".hidden", ".hidden")
+        if name == "nested/":
+            zipped.write(appdir / "nested" / "body.txt", "nested/body.txt")
+        info = zipfile.ZipInfo(name)
+        info.create_system = 0
+        file_type = stat.S_IFDIR if name.endswith("/") else stat.S_IFREG
+        info.external_attr = (file_type | ambiguous_bit) << 16
+        zipped.writestr(info, b"" if name.endswith("/") else b"nested body")
+    with pytest.raises(ZipInventoryError, match="unsupported_entry_type"):
+        verify(appdir, archive)
 
 
 @pytest.mark.parametrize("name", ["nested/body.txt", "nested/"])

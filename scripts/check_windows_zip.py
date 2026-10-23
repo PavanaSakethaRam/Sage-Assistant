@@ -28,15 +28,21 @@ def digest(stream: Readable) -> str:
 def check_entry_type(info: zipfile.ZipInfo) -> None:
     """Admit only regular files and directories, including Windows ZIP metadata."""
     directory = info.is_dir()
-    file_type = stat.S_IFMT(info.external_attr >> 16)
+    upper_mode = info.external_attr >> 16
+    file_type = stat.S_IFMT(upper_mode)
     allowed = (0, stat.S_IFDIR) if directory else (0, stat.S_IFREG)
     # CPython sets create_system=0 on Windows but still writes st_mode to the
-    # upper word. Treat that word as DOS attributes only without a POSIX type.
+    # upper word. Admit only its type and ordinary permission bits: special
+    # mode bits overlap Windows attributes such as the reparse-point flag.
+    invalid_windows_mode = (
+        info.create_system == 0 and file_type != 0 and bool(upper_mode & ~(file_type | 0o777))
+    )
     dos_attributes = info.external_attr & 0xFFFF
     if info.create_system == 0 and file_type == 0:
-        dos_attributes |= info.external_attr >> 16
+        dos_attributes |= upper_mode
     if (
         file_type not in allowed
+        or invalid_windows_mode
         or dos_attributes & (0x08 | 0x40 | 0x400)  # volume, device, reparse point
         or (not directory and dos_attributes & 0x10)
         or (directory and info.file_size != 0)
