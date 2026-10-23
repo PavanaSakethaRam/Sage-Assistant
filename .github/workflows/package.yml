@@ -59,6 +59,9 @@ jobs:
         run: uv run --locked --no-sync python -m scripts.stage_package
       - name: Unreleased portable ZIP (no installer)
         run: npm run make
+      - name: Actual Windows ZIP content inventory
+        if: runner.os == 'Windows'
+        run: uv run --locked --no-sync python scripts/check_windows_zip.py
       - name: Actual ASAR, fuse and external inventory checks
         shell: pwsh
         run: |

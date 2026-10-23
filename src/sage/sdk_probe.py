@@ -1,7 +1,8 @@
 """Fixed public SDK import/constructor probe; Python capability guard, not an OS sandbox.
 
-Only trusted import-resource reads are admitted. The short-lived process never
-starts/stops a client, discovers a runtime, creates a session, or opens a Store.
+Trusted import-resource reads and one local public time-zone key open are admitted.
+The short-lived process never starts/stops a client, discovers a runtime,
+creates a session, or opens a Store.
 The guard is for observing accidental constructor/import side effects of pinned
 code, not for executing hostile Python or native code.
 """
@@ -13,7 +14,8 @@ import stat
 import struct
 import sys
 import sysconfig
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
@@ -74,6 +76,185 @@ class CapabilityGuard:
         self._stat = os.stat
         self._lstat = os.lstat
         self._readlink = os.readlink
+        self._installed = False
+        self._registry: Any = None
+        self._registry_phase = "inactive"
+        self._registry_token = ""
+        self._registry_root: Any = None
+        self._registry_result: Any = None
+        self._registry_root_bits: int | None = None
+        self._registry_result_raw: int | None = None
+
+    @staticmethod
+    def _registry_bits(value: Any) -> int | None:
+        # CPython's winreg audit uses signed pointer integers, while its
+        # predefined HKEY constants use unsigned pointer integers.
+        return value & ((1 << (struct.calcsize("P") * 8)) - 1) if type(value) is int else None
+
+    def _registry_handle_bits(self, handle: Any) -> int | None:
+        if type(handle) is not self._registry.HKEYType:
+            return None
+        try:
+            return self._registry_bits(int(handle))
+        except (TypeError, ValueError, OverflowError):
+            return None
+
+    def _registry_audit(self, event: str, args: tuple[Any, ...]) -> None:
+        if self.denied is not None:
+            self.deny("blocked_storage")
+        registry = self._registry
+        if (
+            event == "winreg.ConnectRegistry"
+            and self._registry_phase == "connecting"
+            and self._registry_token == "connect"
+            and len(args) == 2
+            and args[0] is None
+            and self._registry_bits(args[1]) is not None
+            and self._registry_bits(args[1]) == self._registry_bits(registry.HKEY_LOCAL_MACHINE)
+        ):
+            self._registry_phase = "connected_audit"
+            return
+        if (
+            event == "winreg.OpenKey"
+            and self._registry_phase == "opening"
+            and self._registry_token == "open"
+            and len(args) == 3
+            and self._registry_bits(args[0]) == self._registry_root_bits
+            and self._registry_root_bits is not None
+            and args[1] == r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"
+            and args[2] == registry.KEY_READ
+        ):
+            self._registry_phase = "open_audit"
+            return
+        if (
+            event == "winreg.OpenKey/result"
+            and self._registry_phase == "open_audit"
+            and self._registry_token == "open"
+            and len(args) == 1
+            and self._registry_bits(args[0]) not in (None, 0)
+        ):
+            self._registry_result_raw = args[0]
+            self._registry_phase = "result_audit"
+            return
+        self.deny("blocked_storage")
+
+    @contextmanager
+    def sdk_import_scope(self) -> Iterator[None]:
+        """One pinned dateutil time-zone handle open, with actual handle provenance."""
+        if not self._installed:
+            raise RuntimeError("Guard not installed")
+        registry = self._registry
+        if registry is None:
+            yield
+            return
+        original_connect = registry.ConnectRegistry
+        original_open = registry.OpenKey
+        self._registry_phase = "connect_ready"
+
+        def connect(computer_name: Any, key: Any) -> Any:
+            if (
+                self.denied is not None
+                or self._registry_phase != "connect_ready"
+                or computer_name is not None
+                or type(key) is not int
+                or self._registry_bits(key) != self._registry_bits(registry.HKEY_LOCAL_MACHINE)
+            ):
+                self.deny("blocked_storage")
+            self._registry_phase = "connecting"
+            self._registry_token = "connect"
+            handle = None
+            try:
+                handle = original_connect(computer_name, key)
+                bits = self._registry_handle_bits(handle)
+                if self._registry_phase != "connected_audit" or bits in (None, 0):
+                    self.deny("blocked_storage")
+                self._registry_root = handle
+                self._registry_root_bits = bits
+                self._registry_phase = "open_ready"
+                return handle
+            except BaseException:
+                self.denied = self.denied or "blocked_storage"
+                self._registry_phase = "failed"
+                if handle is not None and type(handle) is registry.HKEYType:
+                    handle.Close()
+                raise
+            finally:
+                self._registry_token = ""
+
+        def open_key(
+            key: Any, sub_key: Any, reserved: int = 0, access: Any = registry.KEY_READ
+        ) -> Any:
+            if (
+                self.denied is not None
+                or self._registry_phase != "open_ready"
+                or key is not self._registry_root
+                or sub_key != r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"
+                or reserved != 0
+                or access != registry.KEY_READ
+            ):
+                self.deny("blocked_storage")
+            self._registry_phase = "opening"
+            self._registry_token = "open"
+            handle = None
+            try:
+                handle = original_open(key, sub_key, reserved, access)
+                raw = self._registry_result_raw
+                bits = self._registry_handle_bits(handle)
+                if (
+                    self._registry_phase != "result_audit"
+                    or raw is None
+                    or bits is None
+                    or bits != self._registry_bits(raw)
+                ):
+                    self.deny("blocked_storage")
+                self._registry_result = handle
+                self._registry_phase = "complete"
+                return handle
+            except BaseException:
+                self.denied = self.denied or "blocked_storage"
+                self._registry_phase = "failed"
+                raw = self._registry_result_raw
+                self._registry_result_raw = None
+                # OpenKey/result is emitted after the OS creates the handle,
+                # before PyHKEY is returned. Close that owned handle if the
+                # builtin or result validation fails after the audit event.
+                try:
+                    if raw is not None:
+                        registry.CloseKey(raw)
+                finally:
+                    if (
+                        handle is not None
+                        and type(handle) is registry.HKEYType
+                        and self._registry_handle_bits(handle) != self._registry_bits(raw)
+                    ):
+                        handle.Close()
+                raise
+            finally:
+                self._registry_token = ""
+
+        registry.ConnectRegistry = connect
+        registry.OpenKey = open_key
+        try:
+            yield
+        finally:
+            registry.ConnectRegistry = original_connect
+            registry.OpenKey = original_open
+            # The pinned dependency closes both. Closing again is idempotent and
+            # covers an exception or a caught denial before its own close calls.
+            try:
+                try:
+                    if self._registry_result is not None:
+                        self._registry_result.Close()
+                finally:
+                    if self._registry_root is not None:
+                        self._registry_root.Close()
+            finally:
+                self._registry_result = None
+                self._registry_result_raw = None
+                self._registry_root = None
+                self._registry_root_bits = None
+                self._registry_phase = "inactive"
+                self._registry_token = ""
 
     def deny(self, category: Category) -> Any:
         self.denied = self.denied or category
@@ -140,7 +321,9 @@ class CapabilityGuard:
             self.deny("blocked_process")
         elif event in {"ctypes.dlopen", "ctypes.dlsym", "ctypes.call_function"}:
             self.deny("blocked_native")
-        elif event.startswith(("sqlite3.", "winreg.")) or event in {
+        elif event.startswith("winreg."):
+            self._registry_audit(event, args)
+        elif event.startswith("sqlite3.") or event in {
             "os.remove",
             "os.rename",
             "os.rmdir",
@@ -163,11 +346,17 @@ class CapabilityGuard:
     def install(self) -> None:
         import ctypes  # noqa: F401 -- trusted stdlib bootstrap before denying native loads
 
+        if os.name == "nt":
+            import winreg  # stdlib bootstrap; no registry operation before the audit hook
+
+            self._registry = winreg
+
         sys.dont_write_bytecode = True
         # metadata.version searches sys.path, including cwd in an ordinary launch.
         # Only the already-derived trusted import roots belong in this diagnostic.
         sys.path[:] = self.roots
         sys.addaudithook(self.audit)
+        self._installed = True
 
         # stat/lstat/access/readlink do not emit CPython audit events.
         def metadata(original: Callable[..., Any]) -> Callable[..., Any]:
@@ -221,8 +410,9 @@ def probe(guard: CapabilityGuard | None = None) -> dict[str, Any]:
         result["sdk"] = SDK_VERSION
         guard.install()
         result["stage"] = "sdk_import"
-        from copilot import CopilotClient, RuntimeConnection
-        from copilot.generated.rpc import PermissionDecisionReject  # noqa: F401
+        with guard.sdk_import_scope():
+            from copilot import CopilotClient, RuntimeConnection
+            from copilot.generated.rpc import PermissionDecisionReject  # noqa: F401
 
         if guard.denied is not None:
             guard.deny(guard.denied)

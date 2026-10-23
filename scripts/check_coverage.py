@@ -8,6 +8,10 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class CoverageThresholdError(ValueError):
+    """A fixed scope and metric label; never include report data in diagnostics."""
+
+
 def count(value: Any) -> int:
     if type(value) is not int or value < 0:
         raise ValueError("invalid coverage count")
@@ -68,9 +72,11 @@ def check(python: Path, javascript: Path) -> dict[str, object]:
             ("trusted", trusted, (90, 85)),
         ]:
             sums = [tuple(sum(entries[n][i][j] for n in names) for j in (0, 1)) for i in (0, 1)]
-            for (c, t), threshold in zip(sums, thresholds, strict=True):
+            for metric, (c, t), threshold in zip(
+                ("statements", "branches"), sums, thresholds, strict=True
+            ):
                 if not t or c * 100 < t * threshold:
-                    raise ValueError(f"{lang} {scope} below {threshold}%: {c}/{t}")
+                    raise CoverageThresholdError(f"{lang}_{scope}_{metric}")
             # Do not hide an entirely unexecuted trusted module in aggregate numbers.
             for n in trusted:
                 c, t = entries[n][0]
@@ -90,7 +96,8 @@ def main() -> int:
         return 0
     except (OSError, ValueError, KeyError, TypeError, IndexError) as error:
         # No source text or artifact contents are echoed.
-        print(f"coverage gate failed: {type(error).__name__}")
+        label = str(error) if isinstance(error, CoverageThresholdError) else type(error).__name__
+        print(f"coverage gate failed: {label}")
         return 1
 
 

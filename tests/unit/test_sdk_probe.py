@@ -8,6 +8,7 @@ import sys
 from collections.abc import Callable
 from contextlib import suppress
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -52,7 +53,7 @@ def test_real_pinned_sdk_constructs_without_runtime_or_store(tmp_path: Path) -> 
             timeout=20,
             check=False,
         )
-        allowed = {"stage", "category", "event", "path_class"}
+        allowed = {"stage", "category", "event", "path_class", "registry_event", "registry_shape"}
         fixed_events = {
             "import",
             "open",
@@ -93,6 +94,10 @@ def test_real_pinned_sdk_constructs_without_runtime_or_store(tmp_path: Path) -> 
                 }
                 or labels["event"] not in fixed_events
                 or labels["path_class"] not in fixed_paths
+                or labels["registry_event"]
+                not in {"none", "ConnectRegistry", "OpenKey", "OpenKey/result", "other"}
+                or labels["registry_shape"]
+                not in {"none", "local_hklm", "timezone_key", "result", "other"}
             ):
                 labels = {"diagnostic": "unavailable"}
         except (UnicodeError, json.JSONDecodeError):
@@ -139,11 +144,14 @@ def test_probe_accepts_no_parameters(options: list[str]) -> None:
     [
         ("import socket; socket.socket()", "blocked_network"),
         ("import subprocess; subprocess.Popen(['synthetic-not-executable'])", "blocked_process"),
-        ("import sqlite3; sqlite3.connect(':memory:')", "blocked_storage"),
+        ("sqlite3.connect(':memory:')", "blocked_storage"),
         ("open('/synthetic-write', 'w')", "blocked_storage"),
         ("open('/synthetic-config', 'rb')", "blocked_storage"),
         ("import os; os.stat('/synthetic-config')", "blocked_storage"),
-        ("import ctypes; ctypes.CDLL(None)", "blocked_native"),
+        (
+            "ctypes.WinDLL('kernel32') if sys.platform == 'win32' else ctypes.CDLL(None)",
+            "blocked_native",
+        ),
         ("print('synthetic-private-marker')", "blocked_output"),
     ],
 )
@@ -151,7 +159,9 @@ def test_installed_guard_denies_and_latches_even_if_caught(operation: str, categ
     # This literal test program is not part of the production CLI or shipped wheel.
     program = (
         "from sage.sdk_probe import CapabilityGuard; import sys\n"
-        "sink=sys.stdout; guard=CapabilityGuard(); guard.install()\n"
+        + ("import sqlite3\n" if operation.startswith("sqlite3.") else "")
+        + ("import ctypes\n" if operation.startswith("ctypes.") else "")
+        + "sink=sys.stdout; guard=CapabilityGuard(); guard.install()\n"
         "try:\n " + operation + "\nexcept BaseException: pass\n"
         "sink.write(guard.denied or 'MISSED'); sink.flush()\n"
     )
@@ -163,6 +173,214 @@ def test_installed_guard_denies_and_latches_even_if_caught(operation: str, categ
         check=False,
     )
     assert child.returncode == 0 and child.stdout == category.encode() and child.stderr == b""
+
+
+def test_registry_bootstrap_performs_no_registry_operation() -> None:
+    program = (
+        "import sys; from sage.sdk_probe import CapabilityGuard\n"
+        "events=[]; sys.addaudithook(lambda event,args: events.append(event) "
+        "if event.startswith('winreg.') else None)\n"
+        "sink=sys.stdout; guard=CapabilityGuard(); guard.install()\n"
+        "sink.write('none' if not events else 'registry_operation'); sink.flush()\n"
+    )
+    child = subprocess.run(
+        [sys.executable, "-B", "-c", program],
+        env=isolated_python_env(),
+        capture_output=True,
+        timeout=10,
+        check=False,
+    )
+    assert child.returncode == 0 and child.stdout == b"none" and child.stderr == b""
+
+
+def registry_guard() -> tuple[CapabilityGuard, SimpleNamespace, Any, Any]:
+    class Handle:
+        def __init__(self, value: int) -> None:
+            self.value = value
+            self.closed = False
+
+        def __int__(self) -> int:
+            return self.value
+
+        def Close(self) -> None:
+            self.closed = True
+
+    guard = CapabilityGuard()
+    pointer_bits = struct.calcsize("P") * 8
+    pointer_mask = (1 << pointer_bits) - 1
+    root, opened = (
+        Handle((1 << (pointer_bits - 1)) | 0x123),
+        Handle((1 << (pointer_bits - 1)) | 0x456),
+    )
+
+    def signed(value: int) -> int:
+        value &= pointer_mask
+        return value - (1 << pointer_bits) if value >> (pointer_bits - 1) else value
+
+    def connect(computer: object, key: Any) -> Handle:
+        guard.audit("winreg.ConnectRegistry", (computer, signed(int(key))))
+        return root
+
+    def open_key(key: Any, sub_key: object, reserved: int, access: int) -> Handle:
+        guard.audit("winreg.OpenKey", (signed(int(key)), sub_key, access))
+        guard.audit("winreg.OpenKey/result", (signed(int(opened)),))
+        return opened
+
+    def close_key(raw: int) -> None:
+        if signed(int(opened)) == raw:
+            opened.Close()
+        elif signed(int(root)) == raw:
+            root.Close()
+        else:
+            raise AssertionError("unproven handle was closed")
+
+    registry = SimpleNamespace(
+        HKEY_LOCAL_MACHINE=0x80000002,
+        HKEYType=Handle,
+        KEY_READ=0x20019,
+        ConnectRegistry=connect,
+        OpenKey=open_key,
+        CloseKey=close_key,
+    )
+    guard._registry = registry
+    guard._installed = True
+    return guard, registry, root, opened
+
+
+def test_registry_exception_binds_actual_handles_and_restores_functions() -> None:
+    guard, registry, root, opened = registry_guard()
+    original_connect, original_open = registry.ConnectRegistry, registry.OpenKey
+    key = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"
+    with guard.sdk_import_scope():
+        connected = registry.ConnectRegistry(None, registry.HKEY_LOCAL_MACHINE)
+        assert connected is root
+        assert registry.OpenKey(connected, key) is opened
+        assert guard.denied is None
+        with pytest.raises(PermissionError):
+            registry.OpenKey(connected, key)
+    assert guard.denied == "blocked_storage"
+    assert root.closed and opened.closed
+    assert registry.ConnectRegistry is original_connect
+    assert registry.OpenKey is original_open
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        "remote",
+        "wrong_hive",
+        "open_before_connect",
+        "wrong_root",
+        "wrong_key",
+        "write",
+        "alias_connect",
+        "alias_open",
+        "audit",
+        "direct_open_audit",
+        "direct_result_audit",
+        "value_query",
+    ],
+)
+def test_registry_exception_denies_unproven_or_out_of_scope_operations(operation: str) -> None:
+    guard, registry, root, opened = registry_guard()
+    key = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"
+    alias_connect = registry.ConnectRegistry
+    alias_open = registry.OpenKey
+    with guard.sdk_import_scope(), pytest.raises(PermissionError):
+        if operation == "remote":
+            registry.ConnectRegistry("remote", registry.HKEY_LOCAL_MACHINE)
+        elif operation == "wrong_hive":
+            registry.ConnectRegistry(None, 0x80000001)
+        elif operation == "open_before_connect":
+            registry.OpenKey(root, key)
+        elif operation == "audit":
+            guard.audit("winreg.ConnectRegistry", (None, registry.HKEY_LOCAL_MACHINE))
+        elif operation == "direct_open_audit":
+            guard.audit("winreg.OpenKey", (int(root), key, registry.KEY_READ))
+        elif operation == "direct_result_audit":
+            guard.audit("winreg.OpenKey/result", (int(opened),))
+        elif operation == "value_query":
+            guard.audit("winreg.QueryValue", (root, key, "name"))
+        elif operation == "alias_connect":
+            alias_connect(None, registry.HKEY_LOCAL_MACHINE)
+        else:
+            connected = registry.ConnectRegistry(None, registry.HKEY_LOCAL_MACHINE)
+            if operation == "alias_open":
+                alias_open(connected, key, 0, registry.KEY_READ)
+            elif operation == "wrong_root":
+                registry.OpenKey(opened, key)
+            elif operation == "wrong_key":
+                registry.OpenKey(connected, "other")
+            else:
+                registry.OpenKey(connected, key, 0, registry.KEY_READ | 0x2)
+    assert guard.denied == "blocked_storage"
+    assert root.closed == (
+        operation
+        not in {
+            "remote",
+            "wrong_hive",
+            "open_before_connect",
+            "alias_connect",
+            "audit",
+            "direct_open_audit",
+            "direct_result_audit",
+            "value_query",
+        }
+    )
+
+
+def test_registry_exception_rejects_mismatched_audit_result_and_closes_handles() -> None:
+    guard, registry, root, opened = registry_guard()
+    original_open = registry.OpenKey
+    other = registry.HKEYType(0x789)
+
+    def mismatched(key: object, sub_key: object, reserved: int, access: int) -> object:
+        original_open(key, sub_key, reserved, access)
+        return other
+
+    registry.OpenKey = mismatched
+    with guard.sdk_import_scope():
+        connected = registry.ConnectRegistry(None, registry.HKEY_LOCAL_MACHINE)
+        with pytest.raises(PermissionError):
+            registry.OpenKey(connected, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones")
+    assert guard.denied == "blocked_storage"
+    assert root.closed and opened.closed and other.closed
+
+
+def test_registry_exception_restores_and_closes_after_open_failure() -> None:
+    guard, registry, root, _ = registry_guard()
+    original_connect = registry.ConnectRegistry
+
+    def failing_open(key: Any, sub_key: object, reserved: int, access: int) -> None:
+        guard.audit("winreg.OpenKey", (int(key), sub_key, access))
+        raise OSError("synthetic private detail")
+
+    registry.OpenKey = failing_open
+    with pytest.raises(OSError, match="synthetic private detail"), guard.sdk_import_scope():
+        connected = registry.ConnectRegistry(None, registry.HKEY_LOCAL_MACHINE)
+        registry.OpenKey(connected, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones")
+    assert root.closed
+    assert guard.denied == "blocked_storage"
+    assert registry.ConnectRegistry is original_connect
+    assert registry.OpenKey is failing_open
+    assert guard._registry_phase == "inactive" and guard._registry_token == ""
+
+
+def test_registry_result_handle_is_closed_if_builtin_fails_after_result_audit() -> None:
+    guard, registry, root, opened = registry_guard()
+
+    def failing_after_result(key: Any, sub_key: object, reserved: int, access: int) -> None:
+        guard.audit("winreg.OpenKey", (int(key), sub_key, access))
+        guard.audit("winreg.OpenKey/result", (int(opened) - (1 << (struct.calcsize("P") * 8)),))
+        raise OSError("synthetic post-result failure")
+
+    registry.OpenKey = failing_after_result
+    with pytest.raises(OSError, match="synthetic post-result failure"), guard.sdk_import_scope():
+        connected = registry.ConnectRegistry(None, registry.HKEY_LOCAL_MACHINE)
+        registry.OpenKey(connected, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones")
+    assert root.closed and opened.closed
+    assert guard.denied == "blocked_storage"
+    assert guard._registry_result_raw is None and guard._registry_phase == "inactive"
 
 
 def test_guard_resource_reads_are_confined_and_writes_never_allowed(tmp_path: Path) -> None:
@@ -336,7 +554,7 @@ def test_unknown_probe_metadata_fails_closed(change: dict[str, Any]) -> None:
 
 def test_probe_never_hides_a_swallowed_denial(monkeypatch: pytest.MonkeyPatch) -> None:
     guard = CapabilityGuard()
-    monkeypatch.setattr(guard, "install", lambda: None)
+    monkeypatch.setattr(guard, "install", lambda: setattr(guard, "_installed", True))
 
     def swallowed(*args: Any) -> object:
         with suppress(PermissionError):
@@ -404,7 +622,7 @@ def test_fixed_probe_classifies_constructor_failures_without_exception_content(
     category: str,
 ) -> None:
     guard = CapabilityGuard()
-    monkeypatch.setattr(guard, "install", lambda: None)
+    monkeypatch.setattr(guard, "install", lambda: setattr(guard, "_installed", True))
 
     def fail(*args: Any) -> Any:
         raise error
@@ -420,7 +638,7 @@ def test_probe_mismatch_and_import_denial_stop_before_construction(
     import builtins
 
     guard = CapabilityGuard()
-    monkeypatch.setattr(guard, "install", lambda: None)
+    monkeypatch.setattr(guard, "install", lambda: setattr(guard, "_installed", True))
     with monkeypatch.context() as patch:
         patch.setattr("importlib.metadata.version", lambda _: "synthetic-unsupported-version")
         assert probe(guard)["stage"] == "guard"

@@ -18,8 +18,25 @@ import {
 } from "../main/core-process";
 import type { CoreOptions } from "../main/core-process";
 import type { CoreRequest } from "../shared/contracts";
-// Script-executable adversarial children require POSIX; Windows launch is a native gate.
-const subprocessIt = it.skipIf(process.platform === "win32");
+// A test-only spawn seam runs only registered owned scripts through Node on
+// Windows. All production launch options and unregistered executables pass through.
+const syntheticExecutables = vi.hoisted(() => new Set<string>());
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>();
+  const intercepted = (
+    file: string,
+    args: readonly string[],
+    options: import("node:child_process").SpawnOptions,
+  ) =>
+    syntheticExecutables.has(file) && process.platform === "win32"
+      ? actual.spawn(process.execPath, [file, ...args], options)
+      : actual.spawn(file, args, options);
+  return {
+    ...actual,
+    spawn: intercepted as unknown as typeof actual.spawn,
+  };
+});
+const subprocessIt = it;
 const owned: ReturnType<typeof startCore>[] = [];
 const roots: string[] = [];
 afterEach(async () => {
@@ -27,6 +44,7 @@ afterEach(async () => {
   await Promise.all(
     roots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
   );
+  syntheticExecutables.clear();
 });
 const request = (
   id: string,
@@ -61,6 +79,7 @@ async function fake(mode = "normal") {
  `.replace("MODE", JSON.stringify(mode))}`,
   );
   await chmod(executable, 0o700);
+  syntheticExecutables.add(executable);
   const core = startCore({ executable, dataDir: root });
   owned.push(core);
   return core;
@@ -423,7 +442,7 @@ subprocessIt(
   },
 );
 
-subprocessIt(
+it.skipIf(process.platform === "win32")(
   "host waits for bounded core cleanup before killing a parent with owned helper descendants",
   async () => {
     const root = await realpath(

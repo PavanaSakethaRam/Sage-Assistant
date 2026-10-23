@@ -81,11 +81,18 @@ export async function launch(
             .trim()
             .split("\n")
             .map((line) => JSON.parse(line) as { event?: unknown });
-          fixtureStage = lines.some((line) => line.event === "started")
-            ? lines.some((line) => line.event === "stopped")
-              ? "core_stopped"
-              : "core_started"
-            : "no_core_event";
+          const started = lines.some((line) => line.event === "started");
+          const loopReady = lines.some((line) => line.event === "loop_ready");
+          const stopped = lines.some((line) => line.event === "stopped");
+          fixtureStage = !started
+            ? "no_core_event"
+            : stopped
+              ? loopReady
+                ? "core_stopped_after_loop"
+                : "core_stopped_before_loop"
+              : loopReady
+                ? "core_running_after_loop"
+                : "core_started_before_loop";
         } catch {
           // An import failure can happen before the synthetic core writes events.
         }

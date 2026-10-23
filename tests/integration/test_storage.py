@@ -2,6 +2,7 @@
 
 import sqlite3
 from collections.abc import Iterator
+from contextlib import closing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from time import monotonic
@@ -145,23 +146,26 @@ def test_defensive_failure_closes_before_startup_sql(
     real_connect = sqlite3.connect
 
     class RefusingConnection(sqlite3.Connection):
-        def setconfig(self, op: int, enable: bool = True) -> None:
+        def setconfig(self, op: int, enable: bool = True) -> bool:
             if failure_mode == "raises":
                 raise sqlite3.NotSupportedError("private-marker")
+            return False
 
         def getconfig(self, op: int) -> bool:
             return False
 
-        def execute(self, sql: str, parameters: object = ()) -> sqlite3.Cursor:
-            statements.append(sql)
-            return super().execute(sql, parameters)
-
-        def close(self) -> None:
-            opened_connections.append(self)
-            super().close()
-
-    def connect(*args: object, **kwargs: object) -> sqlite3.Connection:
-        return real_connect(*args, **kwargs, factory=RefusingConnection)
+    def connect(
+        path: Path,
+        *,
+        timeout: float,
+        isolation_level: Literal["DEFERRED", "EXCLUSIVE", "IMMEDIATE"] | None,
+    ) -> sqlite3.Connection:
+        connection = real_connect(
+            path, timeout=timeout, isolation_level=isolation_level, factory=RefusingConnection
+        )
+        connection.set_trace_callback(statements.append)
+        opened_connections.append(connection)
+        return connection
 
     monkeypatch.setattr(sqlite3, "connect", connect)
     with pytest.raises(StorageError, match="secure") as error:
@@ -171,7 +175,7 @@ def test_defensive_failure_closes_before_startup_sql(
     assert len(opened_connections) == 1
     with pytest.raises(sqlite3.ProgrammingError):
         opened_connections[0].execute("SELECT 1")
-    with real_connect(path) as connection:
+    with closing(real_connect(path)) as connection:
         if existing:
             assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
             assert connection.execute("SELECT body FROM notes").fetchone()[0] == BODY

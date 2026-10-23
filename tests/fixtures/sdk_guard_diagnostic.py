@@ -31,6 +31,8 @@ class DiagnosticGuard(CapabilityGuard):
         self.path_class = "none"
         self.first_denial: dict[str, str] | None = None
         self.in_audit = False
+        self.registry_event = "none"
+        self.registry_shape = "none"
 
     def classify(self, path: Any) -> str:
         if not isinstance(path, (str, bytes, os.PathLike)):
@@ -48,6 +50,35 @@ class DiagnosticGuard(CapabilityGuard):
         return "outside"
 
     def audit(self, event: str, args: tuple[Any, ...]) -> None:
+        self.registry_event = "none"
+        self.registry_shape = "none"
+        if event.startswith("winreg."):
+            self.registry_event = (
+                event.split(".", 1)[1]
+                if event in {"winreg.ConnectRegistry", "winreg.OpenKey", "winreg.OpenKey/result"}
+                else "other"
+            )
+            self.registry_shape = "other"
+            if self._registry is not None:
+                if (
+                    event == "winreg.ConnectRegistry"
+                    and len(args) == 2
+                    and args[0] is None
+                    and self._registry_bits(args[1])
+                    == self._registry_bits(self._registry.HKEY_LOCAL_MACHINE)
+                ):
+                    self.registry_shape = "local_hklm"
+                elif (
+                    event == "winreg.OpenKey"
+                    and len(args) == 3
+                    and self._registry_root_bits is not None
+                    and self._registry_bits(args[0]) == self._registry_root_bits
+                    and args[1] == r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"
+                    and args[2] == self._registry.KEY_READ
+                ):
+                    self.registry_shape = "timezone_key"
+                elif event == "winreg.OpenKey/result" and len(args) == 1:
+                    self.registry_shape = "result"
         if event in EVENTS:
             self.current_event = event
         elif event.startswith(("socket.", "subprocess.", "sqlite3.", "winreg.", "ctypes.")):
@@ -78,6 +109,8 @@ class DiagnosticGuard(CapabilityGuard):
             self.first_denial = {
                 "event": self.current_event,
                 "path_class": self.path_class,
+                "registry_event": self.registry_event,
+                "registry_shape": self.registry_shape,
             }
         return super().deny(category)
 
@@ -90,6 +123,8 @@ record = {
     "category": result["category"],
     "event": (guard.first_denial or {}).get("event", "none"),
     "path_class": (guard.first_denial or {}).get("path_class", "none"),
+    "registry_event": (guard.first_denial or {}).get("registry_event", "none"),
+    "registry_shape": (guard.first_denial or {}).get("registry_shape", "none"),
 }
 sink.write(json.dumps(record, separators=(",", ":")) + "\n")
 sink.flush()

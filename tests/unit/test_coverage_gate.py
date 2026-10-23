@@ -57,6 +57,17 @@ def test_exact_thresholds_pass(tmp_path: Path) -> None:
     assert run(p, j).returncode == 0
 
 
+def test_trusted_javascript_failure_reports_closed_scope_and_metric(tmp_path: Path) -> None:
+    p, j = reports(tmp_path)
+    report = json.loads(j.read_text())
+    report["desktop/main/core-process.ts"]["statements"]["covered"] = 1
+    j.write_text(json.dumps(report))
+    result = run(p, j)
+    assert result.returncode == 1
+    assert result.stdout.strip() == "coverage gate failed: javascript_trusted_statements"
+    assert result.stderr == ""
+
+
 @pytest.mark.parametrize(
     ("statements", "branches"),
     [

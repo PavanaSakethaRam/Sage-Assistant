@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import { parseRequest } from "../shared/contracts";
 it("accepts only closed explicit account actions and rejects renderer controls", () => {
   for (const method of ["copilot.chooseAccount", "copilot.disconnect"]) {
@@ -51,10 +51,27 @@ import {
   EXECUTABLE_SIZES,
 } from "../main/copilot-account";
 const roots: string[] = [];
+const syntheticExecutables = vi.hoisted(() => new Set<string>());
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>();
+  const intercepted = (
+    file: string,
+    args: readonly string[],
+    options: import("node:child_process").SpawnOptions,
+  ) =>
+    syntheticExecutables.has(file) && process.platform === "win32"
+      ? actual.spawn(process.execPath, [file, ...args], options)
+      : actual.spawn(file, args, options);
+  return {
+    ...actual,
+    spawn: intercepted as unknown as typeof actual.spawn,
+  };
+});
 afterEach(async () => {
   await Promise.all(
     roots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
   );
+  syntheticExecutables.clear();
 });
 it("uses OS defaults without inherited custom GH/XDG configuration", () => {
   expect(defaultGhConfig("darwin", "/profile", "/app-data")).toBe(
@@ -90,7 +107,7 @@ it("closes the private selection and acknowledgement schemas", () => {
   });
   expect(() => parseSelectionAck({ generation: 1, status: "ready" })).toThrow();
 });
-const subprocessIt = it.skipIf(process.platform === "win32");
+const subprocessIt = it;
 async function fixture(
   output: string,
   code = 0,
@@ -108,6 +125,7 @@ async function fixture(
   const script = `#!${process.execPath}\nconst fs=require('node:fs');fs.writeFileSync(${JSON.stringify(record)},JSON.stringify({args:process.argv.slice(2),env:process.env}));process.stdout.write(${JSON.stringify(output)});process.stderr.write(${JSON.stringify(stderr)});process.exitCode=${code};if(${linger}){process.on("SIGTERM",()=>{});setInterval(()=>{},1000);}`;
   await writeFile(executable, script);
   await chmod(executable, 0o700);
+  syntheticExecutables.add(executable);
   const key = `${process.platform}-${process.arch}`;
   const before = EXECUTABLE_HASHES[key];
   const beforeSize = EXECUTABLE_SIZES[key];
@@ -164,7 +182,7 @@ subprocessIt(
         "github.com",
       ]);
       expect(observed.env.GH_CONFIG_DIR).toMatch(/synthetic-config$/);
-      expect(observed.env.XDG_DATA_HOME).toMatch(/owned\/data$/);
+      expect(observed.env.XDG_DATA_HOME).toMatch(/owned[\\/]data$/);
       for (const key of [
         "PATH",
         "HOME",
@@ -388,7 +406,12 @@ subprocessIt(
       expect(await f.broker.choose()).toEqual({ status: "unavailable" });
       expect(f.confirmed).toEqual([]);
       await rm(data, { recursive: true });
-      await symlink(join(f.root, "synthetic-target"), data);
+      await mkdir(join(f.root, "synthetic-target"));
+      await symlink(
+        join(f.root, "synthetic-target"),
+        data,
+        process.platform === "win32" ? "junction" : "dir",
+      );
       expect(await f.broker.choose()).toEqual({ status: "unavailable" });
       expect(f.confirmed).toEqual([]);
     } finally {
@@ -426,9 +449,15 @@ subprocessIt(
       GH_TOKEN: process.env.GH_TOKEN,
       HTTPS_PROXY: process.env.HTTPS_PROXY,
     };
+    const systemRoot =
+      process.platform === "win32"
+        ? process.env.SystemRoot
+        : "synthetic-system";
+    const windir =
+      process.platform === "win32" ? process.env.WINDIR : "synthetic-windir";
     Object.assign(process.env, {
-      SystemRoot: "synthetic-system",
-      WINDIR: "synthetic-windir",
+      SystemRoot: systemRoot,
+      WINDIR: windir,
       GH_TOKEN: "gho_hostile",
       HTTPS_PROXY: "https://hostile.invalid",
     });
@@ -436,8 +465,8 @@ subprocessIt(
     try {
       expect(await f.broker.choose()).toEqual({ status: "selected" });
       const env = JSON.parse(await readFile(f.record, "utf8")).env;
-      expect(env.SystemRoot).toBe("synthetic-system");
-      expect(env.WINDIR).toBe("synthetic-windir");
+      expect(env.SystemRoot).toBe(systemRoot);
+      expect(env.WINDIR).toBe(windir);
       expect(env.GH_TOKEN).toBeUndefined();
       expect(env.HTTPS_PROXY).toBeUndefined();
     } finally {

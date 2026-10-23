@@ -25,11 +25,6 @@ def no_egress(*args, **kwargs):
     raise AssertionError("deterministic core egress blocked")
 
 
-socket.socket.connect = no_egress
-socket.socket.connect_ex = no_egress
-socket.create_connection = no_egress
-
-
 class FakeReasoner:
     def __init__(self, *args, **kwargs):
         self.release = asyncio.Event()
@@ -107,12 +102,31 @@ def scripts():
 storage._migration_scripts = scripts
 entry.CopilotReasoner = FakeReasoner
 entry.ProtectedSource = no_egress
-# Any attempted native helper/process is a test failure. asyncio pipe setup is retained.
-sys.addaudithook(
-    lambda name, args: (
-        no_egress() if name in {"subprocess.Popen", "os.system", "os.posix_spawn"} else None
-    )
-)
+
+
+# asyncio.run constructs the Windows Proactor self-pipe before running this
+# coroutine. Deny application egress as soon as the loop exists, before _run.
+original_asyncio_run = asyncio.run
+
+
+def guarded_run(coroutine):
+    async def guarded():
+        event("loop_ready")
+        socket.socket.connect = no_egress
+        socket.socket.connect_ex = no_egress
+        socket.create_connection = no_egress
+        # Any attempted native helper/process is a test failure.
+        sys.addaudithook(
+            lambda name, args: (
+                no_egress() if name in {"subprocess.Popen", "os.system", "os.posix_spawn"} else None
+            )
+        )
+        return await coroutine
+
+    return original_asyncio_run(guarded())
+
+
+entry.asyncio.run = guarded_run
 event("started")
 try:
     raise SystemExit(entry.main())

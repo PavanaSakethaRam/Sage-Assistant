@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import type { ForgeConfig } from "@electron-forge/shared-types";
-import { MakerZIP } from "@electron-forge/maker-zip";
+import { WindowsSafeMakerZIP } from "./scripts/windows-zip-maker";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseVersion, FuseV1Options } from "@electron/fuses";
@@ -15,7 +15,7 @@ const config: ForgeConfig = {
       ".runtime/package/notices",
     ],
   },
-  makers: [new MakerZIP({}, ["darwin", "win32"])],
+  makers: [new WindowsSafeMakerZIP({}, ["darwin", "win32"])],
   plugins: [
     new VitePlugin({
       build: [
