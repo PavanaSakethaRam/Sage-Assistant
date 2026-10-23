@@ -1,0 +1,79 @@
+{
+  "NoteContent": {
+    "title": "  Café é 😀  ",
+    "body": "\tFirst line\n**Literal** body\r\n"
+  },
+  "ProviderReadiness": {
+    "provider": "copilot",
+    "status": "not_configured",
+    "evidence": [],
+    "version": null,
+    "destination": null,
+    "explanation": "Explicit setup required",
+    "diagnostic": null
+  },
+  "ReasoningRequest": {
+    "request_id": "request-1",
+    "task_id": "task-1",
+    "user_text": "Draft a note",
+    "attached_context": ["Explicit context only"],
+    "backend": "copilot",
+    "model": null,
+    "deadline": "2026-10-22T19:00:00Z",
+    "cancellation_id": "cancel-1"
+  },
+  "ReasoningResult": {
+    "request_id": "request-1",
+    "status": "completed",
+    "text": "Review this note",
+    "proposal": {
+      "title": "  Café é 😀  ",
+      "body": "\tFirst line\n**Literal** body\r\n"
+    },
+    "usage": null
+  },
+  "ActionProposal": {
+    "id": "proposal-1",
+    "task_id": "task-1",
+    "tool": "notes.create",
+    "arguments": {
+      "title": "  Café é 😀  ",
+      "body": "\tFirst line\n**Literal** body\r\n"
+    },
+    "revision": 1,
+    "scope": "notes"
+  },
+  "Approval": {
+    "id": "approval-1",
+    "task_id": "task-1",
+    "proposal_id": "proposal-1",
+    "tool": "notes.create",
+    "arguments": {
+      "title": "  Café é 😀  ",
+      "body": "\tFirst line\n**Literal** body\r\n"
+    },
+    "arguments_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "revision": 1,
+    "scope": "notes",
+    "policy_version": "1",
+    "issued_at": "2026-10-22T18:00:00Z",
+    "expires_at": "2026-10-22T18:05:00Z",
+    "decision": "approved",
+    "boot_id": "session-1"
+  },
+  "ActionResult": {
+    "operation_id": "operation-1",
+    "status": "succeeded",
+    "note_id": "note-1",
+    "diagnostic": null,
+    "task_id": "task-1"
+  },
+  "Note": {
+    "id": "note-1",
+    "title": "  Café é 😀  ",
+    "body": "\tFirst line\n**Literal** body\r\n",
+    "created_at": "2026-10-22T18:00:00Z",
+    "updated_at": "2026-10-22T18:00:00Z",
+    "task_id": null
+  }
+}

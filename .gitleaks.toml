@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated dependencies, builds, reports and owned tooling only"
+paths = [
+  '''(^|/)\.git/''', '''(^|/)\.venv/''', '''(^|/)node_modules/''',
+  '''(^|/)\.vite/''', '''(^|/)\.runtime/''', '''(^|/)\.cache/''',
+  '''(^|/)out/''', '''(^|/)dist/''', '''(^|/)coverage/''',
+  '''(^|/)__pycache__/''', '''(^|/)\.pytest_cache/''',
+  '''(^|/)\.mypy_cache/''', '''(^|/)\.ruff_cache/''',
+  '''(^|/)htmlcov/''', '''(^|/)test-results/''', '''(^|/)playwright-report/''',
+  '''(^|/)\.superpowers/''', '''(^|/)graphify-out/''',
+]
