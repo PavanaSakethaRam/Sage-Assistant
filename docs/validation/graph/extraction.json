@@ -1,6 +1,49 @@
 {
   "nodes": [
     {
+      "id": "desktop_main_child_env",
+      "label": "child-env.ts",
+      "file_type": "code",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "desktop_main_child_env_blockedwindowsdefaults",
+      "label": "blockedWindowsDefaults",
+      "file_type": "code",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L2",
+      "_origin": "ast"
+    },
+    {
+      "id": "desktop_main_child_env_namedvalue",
+      "label": "namedValue()",
+      "file_type": "code",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L12",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "desktop_main_child_env_replace",
+      "label": "replace()",
+      "file_type": "code",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L23",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "desktop_main_child_env_isolatedchildenv",
+      "label": "isolatedChildEnv()",
+      "file_type": "code",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L29",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
       "id": "desktop_main_copilot_account",
       "label": "copilot-account.ts",
       "file_type": "code",
@@ -13,7 +56,7 @@
       "label": "SelectedAccount",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -23,7 +66,7 @@
       "label": "SelectionFrame",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -33,7 +76,7 @@
       "label": "SelectionAck",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -43,7 +86,7 @@
       "label": "EXECUTABLE_HASHES",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L19",
+      "source_location": "L20",
       "_origin": "ast"
     },
     {
@@ -51,7 +94,7 @@
       "label": "EXECUTABLE_SIZES",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast"
     },
     {
@@ -59,7 +102,7 @@
       "label": "closed()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L36",
+      "source_location": "L37",
       "_callable": true,
       "_origin": "ast"
     },
@@ -68,7 +111,7 @@
       "label": "generation()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "_callable": true,
       "_origin": "ast"
     },
@@ -77,7 +120,7 @@
       "label": "parseSelection()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "_callable": true,
       "_origin": "ast"
     },
@@ -86,7 +129,7 @@
       "label": "parseSelectionAck()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "_callable": true,
       "_origin": "ast"
     },
@@ -95,7 +138,7 @@
       "label": "defaultGhConfig()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "_callable": true,
       "_origin": "ast"
     },
@@ -104,7 +147,7 @@
       "label": "noSymlinks()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "_callable": true,
       "_origin": "ast"
     },
@@ -113,7 +156,7 @@
       "label": "metadata()",
       "file_type": "code",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "_callable": true,
       "_origin": "ast"
     },
@@ -185,7 +228,7 @@
       "label": "launchCore()",
       "file_type": "code",
       "source_file": "desktop/main/core-launch.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1383,11 +1426,29 @@
       "_origin": "ast"
     },
     {
+      "id": "scripts_check_coverage_coveragethresholderror",
+      "label": "CoverageThresholdError",
+      "file_type": "code",
+      "source_file": "scripts/check_coverage.py",
+      "source_location": "L11",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_coverage_py_valueerror",
+      "label": "ValueError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
       "id": "scripts_check_coverage_count",
       "label": "count()",
       "file_type": "code",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L11",
+      "source_location": "L15",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1404,7 +1465,7 @@
       "label": "pair()",
       "file_type": "code",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L17",
+      "source_location": "L21",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1413,7 +1474,7 @@
       "label": "check()",
       "file_type": "code",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L24",
+      "source_location": "L28",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1430,7 +1491,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L83",
+      "source_location": "L89",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1443,6 +1504,14 @@
       "_origin": "ast"
     },
     {
+      "id": "scripts_check_coverage_rationale_12",
+      "label": "A fixed scope and metric label; never include report data in diagnostics.",
+      "file_type": "rationale",
+      "source_file": "scripts/check_coverage.py",
+      "source_location": "L12",
+      "_origin": "ast"
+    },
+    {
       "id": "scripts_check_package",
       "label": "check_package.ts",
       "file_type": "code",
@@ -1451,11 +1520,29 @@
       "_origin": "ast"
     },
     {
+      "id": "scripts_check_package_canonicalarchiveentry",
+      "label": "canonicalArchiveEntry()",
+      "file_type": "code",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L14",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_package_validaterawarchiveheader",
+      "label": "validateRawArchiveHeader()",
+      "file_type": "code",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L23",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
       "id": "scripts_check_package_validatearchive",
       "label": "validateArchive()",
       "file_type": "code",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L8",
+      "source_location": "L48",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1464,7 +1551,250 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L50",
+      "source_location": "L98",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip",
+      "label": "check_windows_zip.py",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_zipinventoryerror",
+      "label": "ZipInventoryError",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L13",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_py_valueerror",
+      "label": "ValueError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_readable",
+      "label": "Readable",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L17",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_py_protocol",
+      "label": "Protocol",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_readable_read",
+      "label": ".read()",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L18",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_digest",
+      "label": "digest()",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_check_entry_type",
+      "label": "check_entry_type()",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L28",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "zipinfo",
+      "label": "ZipInfo",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_verify",
+      "label": "verify()",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L53",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_py_path",
+      "label": "Path",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L95",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_rationale_1",
+      "label": "Check the actual Windows portable ZIP against the packaged application tree.",
+      "file_type": "rationale",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_rationale_14",
+      "label": "Fixed diagnostic label without artifact paths or contents.",
+      "file_type": "rationale",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L14",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_check_windows_zip_rationale_29",
+      "label": "Admit only regular files and directories, including Windows ZIP metadata.",
+      "file_type": "rationale",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L29",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe",
+      "label": "frozen_probe.mjs",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_invalidframe",
+      "label": "invalidFrame()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L7",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_decodeframe",
+      "label": "decodeFrame()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L11",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_decodeframe_check",
+      "label": "check()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L43",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_keys",
+      "label": "keys()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L64",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_nonempty",
+      "label": "nonempty()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L74",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_count",
+      "label": "count()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L78",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_validatemetadata",
+      "label": "validateMetadata()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L82",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_validatesdk",
+      "label": "validateSdk()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L157",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_sdkstages",
+      "label": "sdkStages",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L180",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_sdkcategories",
+      "label": "sdkCategories",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L181",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_sdkfailurediagnostic",
+      "label": "sdkFailureDiagnostic()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L193",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_frozen_probe_runprobe",
+      "label": "runProbe()",
+      "file_type": "code",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L222",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1529,7 +1859,7 @@
     },
     {
       "id": "scripts_package_manifest_rationale_1",
-      "label": "Fail-closed external-resource inventory. Diagnostics never contain file\u2026",
+      "label": "Fail-closed external-resource inventory. Diagnostics never contain file…",
       "file_type": "rationale",
       "source_file": "scripts/package_manifest.py",
       "source_location": "L1",
@@ -1604,7 +1934,7 @@
     },
     {
       "id": "scripts_provision_package_rationale_1",
-      "label": "Explicit build-time native provisioning; no native execution or account/config\u2026",
+      "label": "Explicit build-time native provisioning; no native execution or account/config…",
       "file_type": "rationale",
       "source_file": "scripts/provision_package.py",
       "source_location": "L1",
@@ -1623,7 +1953,7 @@
       "label": "deadline()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L7",
+      "source_location": "L14",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1632,7 +1962,7 @@
       "label": "fail()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L24",
+      "source_location": "L31",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1641,7 +1971,7 @@
       "label": "launch()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L33",
+      "source_location": "L40",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1650,7 +1980,7 @@
       "label": "finish()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L66",
+      "source_location": "L65",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1659,7 +1989,7 @@
       "label": "request()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L118",
+      "source_location": "L117",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1668,7 +1998,7 @@
       "label": "close()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L144",
+      "source_location": "L143",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1677,7 +2007,7 @@
       "label": "cleanup()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L155",
+      "source_location": "L154",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1686,7 +2016,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L174",
+      "source_location": "L173",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1897,9 +2227,71 @@
     },
     {
       "id": "scripts_verify_security_rationale_1",
-      "label": "Complete locked dependency/static/secret scans; persist only allowlisted\u2026",
+      "label": "Complete locked dependency/static/secret scans; persist only allowlisted…",
       "file_type": "rationale",
       "source_file": "scripts/verify_security.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip_maker",
+      "label": "windows-zip-maker.ts",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip_maker_script",
+      "label": "script",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L11",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip_maker_launch",
+      "label": "Launch",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L12",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip_maker_createwindowszip",
+      "label": "createWindowsZip()",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L18",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip_maker_windowssafemakerzip",
+      "label": "WindowsSafeMakerZIP",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L59",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip_maker_windowssafemakerzip_make",
+      "label": ".make()",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L60",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_windows_zip",
+      "label": "windows-zip.ps1",
+      "file_type": "code",
+      "source_file": "scripts/windows-zip.ps1",
       "source_location": "L1",
       "_origin": "ast"
     },
@@ -1932,7 +2324,7 @@
       "label": "WindowsPipe",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L20",
+      "source_location": "L21",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -1942,7 +2334,7 @@
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L27",
+      "source_location": "L28",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1951,7 +2343,7 @@
       "label": ".fileno()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L41",
+      "source_location": "L42",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1960,7 +2352,7 @@
       "label": ".close()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L46",
+      "source_location": "L47",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1969,7 +2361,7 @@
       "label": "_run()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L52",
+      "source_location": "L53",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1986,7 +2378,7 @@
       "label": "backend()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L65",
+      "source_location": "L66",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1995,7 +2387,7 @@
       "label": "self_check()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L120",
+      "source_location": "L121",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2004,7 +2396,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L169",
+      "source_location": "L170",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2013,7 +2405,7 @@
       "label": "absolute_path()",
       "file_type": "code",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L178",
+      "source_location": "L179",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2026,19 +2418,19 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_main_rationale_21",
-      "label": "Own one CRT duplicate while exposing its overlapped OS handle to Proactor. The\u2026",
+      "id": "src_sage_main_rationale_22",
+      "label": "Own one CRT duplicate while exposing its overlapped OS handle to Proactor. The…",
       "file_type": "rationale",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_main_rationale_121",
+      "id": "src_sage_main_rationale_122",
       "label": "One fixed offline evidence frame; no service/storage/provider initialization.",
       "file_type": "rationale",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L121",
+      "source_location": "L122",
       "_origin": "ast"
     },
     {
@@ -2273,7 +2665,7 @@
     },
     {
       "id": "src_sage_actions_rationale_50",
-      "label": "One explicitly owned service per thread, with a trusted process boot identity.\u2026",
+      "label": "One explicitly owned service per thread, with a trusted process boot identity.…",
       "file_type": "rationale",
       "source_file": "src/sage/actions.py",
       "source_location": "L50",
@@ -2620,7 +3012,7 @@
       "label": "AppPaths",
       "file_type": "code",
       "source_file": "src/sage/paths.py",
-      "source_location": "L10",
+      "source_location": "L8",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -2630,7 +3022,7 @@
       "label": ".database()",
       "file_type": "code",
       "source_file": "src/sage/paths.py",
-      "source_location": "L16",
+      "source_location": "L14",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2647,7 +3039,7 @@
       "label": "app_paths()",
       "file_type": "code",
       "source_file": "src/sage/paths.py",
-      "source_location": "L20",
+      "source_location": "L18",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2660,11 +3052,11 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_paths_rationale_21",
+      "id": "src_sage_paths_rationale_19",
       "label": "The override is trusted startup/test input, never renderer or model data.",
       "file_type": "rationale",
       "source_file": "src/sage/paths.py",
-      "source_location": "L21",
+      "source_location": "L19",
       "_origin": "ast"
     },
     {
@@ -2686,7 +3078,7 @@
       "_origin": "ast"
     },
     {
-      "id": "valueerror",
+      "id": "src_sage_protocol_py_valueerror",
       "label": "ValueError",
       "file_type": "code",
       "source_file": "",
@@ -3125,7 +3517,7 @@
     },
     {
       "id": "src_sage_providers_copilot_rationale_1",
-      "label": "Public pinned SDK, fixed text-only policy, explicit runtime and disposable\u2026",
+      "label": "Public pinned SDK, fixed text-only policy, explicit runtime and disposable…",
       "file_type": "rationale",
       "source_file": "src/sage/providers/copilot.py",
       "source_location": "L1",
@@ -3141,7 +3533,7 @@
     },
     {
       "id": "src_sage_providers_copilot_rationale_107",
-      "label": "No ambient account reads; token_source is a trusted host-owned capability. It\u2026",
+      "label": "No ambient account reads; token_source is a trusted host-owned capability. It…",
       "file_type": "rationale",
       "source_file": "src/sage/providers/copilot.py",
       "source_location": "L107",
@@ -3255,7 +3647,7 @@
       "label": "run_helper()",
       "file_type": "code",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L127",
+      "source_location": "L131",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3272,7 +3664,7 @@
       "label": "_identity_body()",
       "file_type": "code",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L193",
+      "source_location": "L197",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3281,7 +3673,7 @@
       "label": "ProtectedSource",
       "file_type": "code",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L234",
+      "source_location": "L238",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -3291,7 +3683,7 @@
       "label": ".__post_init__()",
       "file_type": "code",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L241",
+      "source_location": "L245",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3300,7 +3692,7 @@
       "label": ".__call__()",
       "file_type": "code",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L245",
+      "source_location": "L249",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3309,7 +3701,7 @@
       "label": "._identity()",
       "file_type": "code",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L286",
+      "source_location": "L290",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3338,19 +3730,19 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_providers_protected_auth_rationale_130",
-      "label": "Trusted fixed invocation, bounded pipe readers, owned process group, no\u2026",
+      "id": "src_sage_providers_protected_auth_rationale_134",
+      "label": "Trusted fixed invocation, bounded pipe readers, owned process group, no…",
       "file_type": "rationale",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L130",
+      "source_location": "L134",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_providers_protected_auth_rationale_235",
-      "label": "Immutable selected login, fresh protected credential for each disposable\u2026",
+      "id": "src_sage_providers_protected_auth_rationale_239",
+      "label": "Immutable selected login, fresh protected credential for each disposable…",
       "file_type": "rationale",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L235",
+      "source_location": "L239",
       "_origin": "ast"
     },
     {
@@ -3596,7 +3988,7 @@
       "label": "ProbeResult",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L39",
+      "source_location": "L41",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -3606,7 +3998,7 @@
       "label": "CapabilityGuard",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L49",
+      "source_location": "L51",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -3616,7 +4008,7 @@
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L57",
+      "source_location": "L59",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3629,11 +4021,73 @@
       "_origin": "ast"
     },
     {
+      "id": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "label": "._registry_bits()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L89",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_py_any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_registry_handle_bits",
+      "label": "._registry_handle_bits()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L94",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_registry_audit",
+      "label": "._registry_audit()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L102",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "label": ".sdk_import_scope()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L142",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_connect",
+      "label": "connect()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L154",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_open_key",
+      "label": "open_key()",
+      "file_type": "code",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L184",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
       "id": "src_sage_sdk_probe_capabilityguard_deny",
       "label": ".deny()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L78",
+      "source_location": "L259",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3646,19 +4100,11 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_sdk_probe_py_any",
-      "label": "Any",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast"
-    },
-    {
       "id": "src_sage_sdk_probe_capabilityguard_read",
       "label": ".read()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L82",
+      "source_location": "L263",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3667,7 +4113,7 @@
       "label": ".audit()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L111",
+      "source_location": "L292",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3676,7 +4122,7 @@
       "label": ".install()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L163",
+      "source_location": "L346",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3685,7 +4131,7 @@
       "label": "metadata()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L173",
+      "source_location": "L362",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3694,7 +4140,7 @@
       "label": "checked()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L174",
+      "source_location": "L363",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3703,7 +4149,7 @@
       "label": "_Silent",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L194",
+      "source_location": "L383",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast"
@@ -3713,7 +4159,7 @@
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L195",
+      "source_location": "L384",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3722,7 +4168,7 @@
       "label": ".write()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L199",
+      "source_location": "L388",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3731,7 +4177,7 @@
       "label": ".flush()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L202",
+      "source_location": "L391",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3740,7 +4186,7 @@
       "label": "probe()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L206",
+      "source_location": "L395",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3749,7 +4195,7 @@
       "label": "decode_result()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L246",
+      "source_location": "L436",
       "_callable": true,
       "_origin": "ast"
     },
@@ -3758,24 +4204,32 @@
       "label": "sdk_self_check()",
       "file_type": "code",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L261",
+      "source_location": "L451",
       "_callable": true,
       "_origin": "ast"
     },
     {
       "id": "src_sage_sdk_probe_rationale_1",
-      "label": "Fixed public SDK import/constructor probe; Python capability guard, not an OS\u2026",
+      "label": "Fixed public SDK import/constructor probe; Python capability guard, not an OS…",
       "file_type": "rationale",
       "source_file": "src/sage/sdk_probe.py",
       "source_location": "L1",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_sdk_probe_rationale_50",
-      "label": "Deny audited capabilities plus unaudited Python metadata/output entry points.\u2026",
+      "id": "src_sage_sdk_probe_rationale_52",
+      "label": "Deny audited capabilities plus unaudited Python metadata/output entry points.…",
       "file_type": "rationale",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L50",
+      "source_location": "L52",
+      "_origin": "ast"
+    },
+    {
+      "id": "src_sage_sdk_probe_rationale_143",
+      "label": "One pinned dateutil time-zone handle open, with actual handle provenance.",
+      "file_type": "rationale",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L143",
       "_origin": "ast"
     },
     {
@@ -4172,7 +4626,7 @@
     },
     {
       "id": "src_sage_service_rationale_492",
-      "label": "One connection, at most eight requests; cancellation invalidates late output.\u2026",
+      "label": "One connection, at most eight requests; cancellation invalidates late output.…",
       "file_type": "rationale",
       "source_file": "src/sage/service.py",
       "source_location": "L492",
@@ -4298,7 +4752,7 @@
       "label": "._migrate()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L82",
+      "source_location": "L89",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4307,7 +4761,7 @@
       "label": ".transaction()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L99",
+      "source_location": "L106",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4316,7 +4770,7 @@
       "label": ".list_notes()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L121",
+      "source_location": "L128",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4325,7 +4779,7 @@
       "label": ".search_notes()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L131",
+      "source_location": "L138",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4334,7 +4788,7 @@
       "label": ".cleanup()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L148",
+      "source_location": "L155",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4351,7 +4805,7 @@
       "label": ".close()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L167",
+      "source_location": "L174",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4360,7 +4814,7 @@
       "label": ".get_note()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L171",
+      "source_location": "L178",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4369,7 +4823,7 @@
       "label": ".note_summaries()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L176",
+      "source_location": "L183",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4378,7 +4832,7 @@
       "label": ".task_summaries()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L201",
+      "source_location": "L208",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4387,7 +4841,7 @@
       "label": ".task_detail()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L214",
+      "source_location": "L221",
       "_callable": true,
       "_origin": "ast"
     },
@@ -4396,13 +4850,13 @@
       "label": ".interrupt_inference()",
       "file_type": "code",
       "source_file": "src/sage/storage.py",
-      "source_location": "L242",
+      "source_location": "L249",
       "_callable": true,
       "_origin": "ast"
     },
     {
       "id": "src_sage_storage_rationale_1",
-      "label": "Explicitly owned SQLite state; transactions confer no action authority. Trusted\u2026",
+      "label": "Explicitly owned SQLite state; transactions confer no action authority. Trusted…",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
       "source_location": "L1",
@@ -4441,67 +4895,67 @@
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_100",
+      "id": "src_sage_storage_rationale_107",
       "label": "Bound lock waits, commit atomically, and roll back failed effects.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L100",
+      "source_location": "L107",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_122",
+      "id": "src_sage_storage_rationale_129",
       "label": "Read saved content without normalization, in stable creation order.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L122",
+      "source_location": "L129",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_132",
+      "id": "src_sage_storage_rationale_139",
       "label": "Treat all input as a literal FTS phrase, never SQL/FTS operators.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L132",
+      "source_location": "L139",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_149",
+      "id": "src_sage_storage_rationale_156",
       "label": "Scrub expired drafts and age metadata; never delete saved notes/files.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L149",
+      "source_location": "L156",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_168",
+      "id": "src_sage_storage_rationale_175",
       "label": "Release the connection; repeated shutdown is harmless.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L168",
+      "source_location": "L175",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_179",
+      "id": "src_sage_storage_rationale_186",
       "label": "Select bounded metadata only; never load all saved bodies for a page.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L179",
+      "source_location": "L186",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_215",
+      "id": "src_sage_storage_rationale_222",
       "label": "Current retained preview only; approvals never leave the trusted domain.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L215",
+      "source_location": "L222",
       "_origin": "ast"
     },
     {
-      "id": "src_sage_storage_rationale_243",
+      "id": "src_sage_storage_rationale_250",
       "label": "Mark only actual in-flight inference; never replay or change note tasks.",
       "file_type": "rationale",
       "source_file": "src/sage/storage.py",
-      "source_location": "L243",
+      "source_location": "L250",
       "_origin": "ast"
     },
     {
@@ -4533,7 +4987,7 @@
       "label": "Sage Assistant README",
       "file_type": "document",
       "source_file": "Readme.md",
-      "source_location": null,
+      "source_location": "L1",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4545,7 +4999,7 @@
       "label": "Implemented reviewed local notes",
       "file_type": "concept",
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L3-L11",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4554,10 +5008,10 @@
     },
     {
       "id": "readme_development_support_limits",
-      "label": "Development support limits",
+      "label": "Development and release support limits",
       "file_type": "concept",
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L5-L20",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4569,7 +5023,7 @@
       "label": "Earlier approved connection Test failed runtime_error",
       "file_type": "concept",
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L22",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4581,7 +5035,7 @@
       "label": "Security architecture and evidence boundaries",
       "file_type": "document",
       "source_file": "docs/security.md",
-      "source_location": null,
+      "source_location": "L1-L3",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4593,7 +5047,7 @@
       "label": "Renderer-to-SQLite authority and trust path",
       "file_type": "rationale",
       "source_file": "docs/security.md",
-      "source_location": "Authority and trust path",
+      "source_location": "L5-L15",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4606,7 +5060,7 @@
       "label": "Selected Copilot account path",
       "file_type": "concept",
       "source_file": "docs/security.md",
-      "source_location": "Separate selected-account path",
+      "source_location": "L25-L43",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4618,7 +5072,7 @@
       "label": "Local AI only routing",
       "file_type": "concept",
       "source_file": "docs/security.md",
-      "source_location": "Local mode and cloud data",
+      "source_location": "L17-L23",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4630,7 +5084,7 @@
       "label": "Local retention and cleanup",
       "file_type": "concept",
       "source_file": "docs/security.md",
-      "source_location": "Retention, cleanup and diagnostics",
+      "source_location": "L45-L53",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4642,7 +5096,7 @@
       "label": "Open security and release gates",
       "file_type": "concept",
       "source_file": "docs/security.md",
-      "source_location": "Open evidence and ownership",
+      "source_location": "L55-L65",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4654,7 +5108,7 @@
       "label": "Guarded offline SDK self-check boundary",
       "file_type": "concept",
       "source_file": "docs/security.md",
-      "source_location": "Package integrity and TLS policy",
+      "source_location": "L79",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4666,7 +5120,7 @@
       "label": "Closed provider stage and category diagnostics",
       "file_type": "concept",
       "source_file": "docs/security.md",
-      "source_location": "Package integrity and TLS policy",
+      "source_location": "L81",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4678,7 +5132,7 @@
       "label": "Foundation verification",
       "file_type": "document",
       "source_file": "docs/testing.md",
-      "source_location": null,
+      "source_location": "L1-L14",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4690,7 +5144,7 @@
       "label": "Integer coverage contract",
       "file_type": "concept",
       "source_file": "docs/testing.md",
-      "source_location": "Numeric coverage contract",
+      "source_location": "L16-L22",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4702,7 +5156,7 @@
       "label": "Synthetic real-host Electron E2E",
       "file_type": "concept",
       "source_file": "docs/testing.md",
-      "source_location": "Real-host E2E boundary",
+      "source_location": "L24-L36",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4714,7 +5168,7 @@
       "label": "Portable ZIP package checks",
       "file_type": "concept",
       "source_file": "docs/testing.md",
-      "source_location": "Native package checks",
+      "source_location": "L73-L95",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4726,7 +5180,7 @@
       "label": "Fixed guarded SDK probe verification",
       "file_type": "concept",
       "source_file": "docs/testing.md",
-      "source_location": "Native package checks",
+      "source_location": "L97-L105",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4738,7 +5192,7 @@
       "label": "Foundation evidence, 2026-10-23",
       "file_type": "document",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": null,
+      "source_location": "L1-L5",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4747,10 +5201,10 @@
     },
     {
       "id": "docs_validation_foundation_results_local_macos_arm64_checks",
-      "label": "Combined local macOS arm64 verification evidence",
+      "label": "Historical local macOS arm64 verification evidence",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L5-L31",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4762,7 +5216,7 @@
       "label": "Earlier artifact passed native UI note and restart check",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L23",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4771,10 +5225,10 @@
     },
     {
       "id": "docs_validation_foundation_results_outer_signature_failure",
-      "label": "Fresh host and outer signature verification failed",
+      "label": "Local final-wave host and outer signature verification failed",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L22",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4783,10 +5237,10 @@
     },
     {
       "id": "docs_validation_foundation_results_live_copilot_skipped",
-      "label": "Live Copilot check skipped on rebuilt final-wave package",
+      "label": "Live Copilot check skipped on local final-wave package",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L26",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4798,7 +5252,7 @@
       "label": "Foundation and release acceptance incomplete",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": null,
+      "source_location": "L3",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4807,10 +5261,10 @@
     },
     {
       "id": "docs_validation_foundation_results_offline_sdk_probe",
-      "label": "Final-wave frozen SDK import and construction probe passed offline",
+      "label": "Local final-wave frozen SDK import and construction probe passed offline",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L13-L14",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4822,7 +5276,7 @@
       "label": "One approved Test failed runtime_error on prior package with stage counts unknown",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L25",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4831,10 +5285,10 @@
     },
     {
       "id": "docs_validation_foundation_results_separate_artifact_snapshots",
-      "label": "Distinct new offline and prior failed-live artifact snapshots",
+      "label": "Distinct local offline and prior failed-live artifact snapshots",
       "file_type": "concept",
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Separate artifact snapshots",
+      "source_location": "L43-L51",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4846,7 +5300,7 @@
       "label": "Sage foundation and controlled provider connection specification",
       "file_type": "document",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": null,
+      "source_location": "L1-L3",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4858,7 +5312,7 @@
       "label": "Specified reviewed-note authority",
       "file_type": "rationale",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": "Contracts and security invariants",
+      "source_location": "L59-L78",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4871,7 +5325,7 @@
       "label": "Specified restricted Copilot connection",
       "file_type": "concept",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": "Copilot and routing",
+      "source_location": "L80-L94",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4883,7 +5337,7 @@
       "label": "Specified foundation acceptance criteria",
       "file_type": "concept",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": "Acceptance and handoff",
+      "source_location": "L127-L139",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4895,7 +5349,7 @@
       "label": "Sage delivery scope",
       "file_type": "document",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "source_location": null,
+      "source_location": "L1-L3",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4907,7 +5361,7 @@
       "label": "Five planned delivery slices",
       "file_type": "concept",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "source_location": "Separate delivery slices",
+      "source_location": "L22-L32",
       "source_url": null,
       "captured_at": null,
       "author": null,
@@ -4919,16 +5373,163 @@
       "label": "Evidence-based validation promise",
       "file_type": "rationale",
       "source_file": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "source_location": "Validation promise",
+      "source_location": "L42-L46",
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
       "rationale": "Release claims require observed effects, refusal paths and version-specific evidence because tests cannot establish perfect coverage or the absence of all vulnerabilities.",
       "_origin": "semantic"
+    },
+    {
+      "id": "readme_hosted_windows_support_evidence",
+      "label": "Hosted Windows support evidence",
+      "file_type": "concept",
+      "source_file": "Readme.md",
+      "source_location": "L17-L19",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_security_windows_child_environment_policy",
+      "label": "Windows child environment policy",
+      "file_type": "concept",
+      "source_file": "docs/security.md",
+      "source_location": "L11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_security_windows_time_zone_metadata_exception",
+      "label": "Windows time-zone metadata exception",
+      "file_type": "rationale",
+      "source_file": "docs/security.md",
+      "source_location": "L79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The pinned dateutil import needs public local OS time-zone metadata; a single read-only, wrapper-bound key open permits that import while keeping credential and other registry operations denied.",
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_testing_windows_child_environment_policy",
+      "label": "Windows child environment policy",
+      "file_type": "concept",
+      "source_file": "docs/testing.md",
+      "source_location": "L26",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_testing_windows_time_zone_sdk_probe",
+      "label": "Windows time-zone SDK probe",
+      "file_type": "concept",
+      "source_file": "docs/testing.md",
+      "source_location": "L97",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_testing_hosted_platform_verification",
+      "label": "Hosted platform verification",
+      "file_type": "concept",
+      "source_file": "docs/testing.md",
+      "source_location": "L59-L91",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
+    },
+    {
+      "id": "docs_validation_foundation_results_hosted_platform_verification",
+      "label": "Hosted platform verification",
+      "file_type": "concept",
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "L3-L28",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "_origin": "semantic"
     }
   ],
   "edges": [
+    {
+      "source": "desktop_main_child_env",
+      "target": "desktop_main_child_env_blockedwindowsdefaults",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_child_env",
+      "target": "desktop_main_child_env_namedvalue",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_child_env",
+      "target": "desktop_main_child_env_replace",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_child_env",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_child_env_isolatedchildenv",
+      "target": "desktop_main_child_env_namedvalue",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_child_env_isolatedchildenv",
+      "target": "desktop_main_child_env_replace",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/child-env.ts",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
     {
       "source": "desktop_main_copilot_account",
       "target": "ref_node_child_process",
@@ -4975,8 +5576,9 @@
     },
     {
       "source": "desktop_main_copilot_account",
-      "target": "desktop_main_copilot_account_selectedaccount",
-      "relation": "contains",
+      "target": "desktop_main_child_env",
+      "relation": "imports_from",
+      "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
       "source_location": "L6",
@@ -4985,7 +5587,18 @@
     },
     {
       "source": "desktop_main_copilot_account",
-      "target": "desktop_main_copilot_account_selectionframe",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/copilot-account.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_copilot_account",
+      "target": "desktop_main_copilot_account_selectedaccount",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
@@ -4995,11 +5608,21 @@
     },
     {
       "source": "desktop_main_copilot_account",
+      "target": "desktop_main_copilot_account_selectionframe",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/copilot-account.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_copilot_account",
       "target": "desktop_main_copilot_account_selectionack",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5009,7 +5632,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5019,7 +5642,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5029,7 +5652,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5039,7 +5662,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5049,7 +5672,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5059,7 +5682,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5069,7 +5692,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5079,7 +5702,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5089,7 +5712,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L112",
+      "source_location": "L113",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5160,7 +5783,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5171,7 +5794,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L70",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5182,7 +5805,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L83",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5193,7 +5816,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L84",
+      "source_location": "L85",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5204,7 +5827,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/copilot-account.ts",
-      "source_location": "L124",
+      "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5266,12 +5889,34 @@
     },
     {
       "source": "desktop_main_core_launch",
-      "target": "desktop_main_core_process",
+      "target": "desktop_main_child_env",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/core-launch.ts",
       "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_core_launch",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/core-launch.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_core_launch",
+      "target": "desktop_main_core_process",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/core-launch.ts",
+      "source_location": "L7",
       "weight": 1.0,
       "type_only": true,
       "_origin": "ast"
@@ -5283,7 +5928,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/core-launch.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -5293,7 +5938,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "desktop/main/core-launch.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9346,8 +9991,19 @@
     },
     {
       "source": "forge_config",
-      "target": "ref_electron_forge_maker_zip",
+      "target": "scripts_windows_zip_maker",
       "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "forge.config.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "forge_config",
+      "target": "scripts_windows_zip_maker_windowssafemakerzip",
+      "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "forge.config.ts",
@@ -9573,11 +10229,31 @@
     },
     {
       "source": "scripts_check_coverage",
-      "target": "scripts_check_coverage_count",
+      "target": "scripts_check_coverage_coveragethresholderror",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
       "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_coverage_coveragethresholderror",
+      "target": "scripts_check_coverage_py_valueerror",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_coverage.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_coverage",
+      "target": "scripts_check_coverage_count",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_coverage.py",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9588,7 +10264,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L11",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9598,7 +10274,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9609,7 +10285,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9619,7 +10295,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L24",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9630,7 +10306,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L24",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9640,7 +10316,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L83",
+      "source_location": "L89",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9651,7 +10327,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L18",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9662,7 +10338,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L52",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_coverage_check",
+      "target": "scripts_check_coverage_coveragethresholderror",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_coverage.py",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9673,7 +10360,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
-      "source_location": "L89",
+      "source_location": "L95",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9684,6 +10371,16 @@
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_coverage.py",
       "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_coverage_rationale_12",
+      "target": "scripts_check_coverage_coveragethresholderror",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_coverage.py",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9705,7 +10402,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9716,7 +10413,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L4",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9727,7 +10424,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L5",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9738,7 +10435,27 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L6",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_package",
+      "target": "scripts_check_package_canonicalarchiveentry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_package",
+      "target": "scripts_check_package_validaterawarchiveheader",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9748,7 +10465,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L8",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9758,7 +10475,40 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_package_validaterawarchiveheader",
+      "target": "scripts_check_package_canonicalarchiveentry",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_package_validatearchive",
+      "target": "scripts_check_package_validaterawarchiveheader",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_package.ts",
       "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_package_validatearchive",
+      "target": "scripts_check_package_canonicalarchiveentry",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9769,7 +10519,545 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L57",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_package_main",
+      "target": "scripts_check_package_canonicalarchiveentry",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_package.ts",
+      "source_location": "L107",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "hashlib",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "stat",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "zipfile",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "scripts_check_windows_zip_zipinventoryerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_zipinventoryerror",
+      "target": "scripts_check_windows_zip_py_valueerror",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "scripts_check_windows_zip_readable",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_readable",
+      "target": "scripts_check_windows_zip_py_protocol",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_readable",
+      "target": "scripts_check_windows_zip_readable_read",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "scripts_check_windows_zip_digest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_digest",
+      "target": "scripts_check_windows_zip_readable",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "scripts_check_windows_zip_check_entry_type",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_check_entry_type",
+      "target": "zipinfo",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "scripts_check_windows_zip_verify",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_verify",
+      "target": "scripts_check_windows_zip_py_path",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip",
+      "target": "scripts_check_windows_zip_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_check_entry_type",
+      "target": "scripts_check_windows_zip_zipinventoryerror",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_verify",
+      "target": "scripts_check_windows_zip_zipinventoryerror",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_verify",
+      "target": "scripts_check_windows_zip_check_entry_type",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_verify",
+      "target": "scripts_check_windows_zip_digest",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_main",
+      "target": "scripts_check_windows_zip_verify",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_rationale_1",
+      "target": "scripts_check_windows_zip",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_rationale_14",
+      "target": "scripts_check_windows_zip_zipinventoryerror",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_check_windows_zip_rationale_29",
+      "target": "scripts_check_windows_zip_check_entry_type",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/check_windows_zip.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "ref_node_child_process",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_invalidframe",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_decodeframe",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_decodeframe",
+      "target": "scripts_frozen_probe_decodeframe_check",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_keys",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_nonempty",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_count",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_validatemetadata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_validatesdk",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_sdkstages",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L180",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_sdkcategories",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L181",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_sdkfailurediagnostic",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L193",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe",
+      "target": "scripts_frozen_probe_runprobe",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L222",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_decodeframe",
+      "target": "scripts_frozen_probe_invalidframe",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_decodeframe",
+      "target": "scripts_frozen_probe_decodeframe_check",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_decodeframe_check",
+      "target": "scripts_frozen_probe_invalidframe",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_decodeframe_check",
+      "target": "scripts_frozen_probe_decodeframe_check",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_validatemetadata",
+      "target": "scripts_frozen_probe_keys",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_validatemetadata",
+      "target": "scripts_frozen_probe_nonempty",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_validatemetadata",
+      "target": "scripts_frozen_probe_count",
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_validatesdk",
+      "target": "scripts_frozen_probe_keys",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L159",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_sdkfailurediagnostic",
+      "target": "scripts_frozen_probe_decodeframe",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_sdkfailurediagnostic",
+      "target": "scripts_frozen_probe_keys",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L197",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_frozen_probe_runprobe",
+      "target": "scripts_frozen_probe_sdkfailurediagnostic",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/frozen_probe.mjs",
+      "source_location": "L271",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10259,11 +11547,88 @@
     },
     {
       "source": "scripts_smoke_package",
+      "target": "desktop_main_child_env",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_frozen_probe",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_frozen_probe_decodeframe",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_frozen_probe_runprobe",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_frozen_probe_validatemetadata",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_frozen_probe_validatesdk",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
       "target": "scripts_smoke_package_deadline",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L7",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10273,7 +11638,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L24",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10283,7 +11648,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L33",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10293,7 +11658,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L66",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10303,7 +11668,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L118",
+      "source_location": "L117",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10313,7 +11678,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L144",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10323,7 +11688,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L155",
+      "source_location": "L154",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10333,7 +11698,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L174",
+      "source_location": "L173",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10345,7 +11710,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L72",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10356,7 +11721,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L74",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10367,7 +11732,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L75",
+      "source_location": "L74",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10378,7 +11743,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L123",
+      "source_location": "L122",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10389,7 +11754,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L146",
+      "source_location": "L145",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10400,7 +11765,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L149",
+      "source_location": "L148",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10411,7 +11776,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L157",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10422,7 +11787,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L167",
+      "source_location": "L166",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10433,7 +11798,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L188",
+      "source_location": "L206",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10444,7 +11809,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L189",
+      "source_location": "L207",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10455,7 +11820,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L201",
+      "source_location": "L219",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10466,7 +11831,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L227",
+      "source_location": "L251",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11278,6 +12643,111 @@
       "_origin": "ast"
     },
     {
+      "source": "scripts_windows_zip_maker",
+      "target": "ref_node_child_process",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "ref_node_path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "ref_node_url",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "ref_electron_forge_maker_zip",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "scripts_windows_zip_maker_script",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "scripts_windows_zip_maker_launch",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "scripts_windows_zip_maker_createwindowszip",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker",
+      "target": "scripts_windows_zip_maker_windowssafemakerzip",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker_windowssafemakerzip",
+      "target": "scripts_windows_zip_maker_windowssafemakerzip_make",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_windows_zip_maker_windowssafemakerzip_make",
+      "target": "scripts_windows_zip_maker_createwindowszip",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/windows-zip-maker.ts",
+      "source_location": "L73",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "src_sage_init_rationale_1",
       "target": "src_sage_init",
       "relation": "rationale_for",
@@ -11355,18 +12825,18 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_logging",
+      "target": "typing",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L10",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_paths",
+      "target": "src_sage_logging",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11377,7 +12847,7 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_protocol",
+      "target": "src_sage_paths",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11388,7 +12858,7 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_providers_copilot",
+      "target": "src_sage_protocol",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11399,7 +12869,7 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_providers_protected_auth",
+      "target": "src_sage_providers_copilot",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11410,7 +12880,7 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_providers_session_store",
+      "target": "src_sage_providers_protected_auth",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11421,7 +12891,7 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_service",
+      "target": "src_sage_providers_session_store",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11432,7 +12902,7 @@
     },
     {
       "source": "src_sage_main",
-      "target": "src_sage_storage",
+      "target": "src_sage_service",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -11443,11 +12913,22 @@
     },
     {
       "source": "src_sage_main",
+      "target": "src_sage_storage",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/__main__.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_main",
       "target": "src_sage_main_windowspipe",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11457,7 +12938,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11467,7 +12948,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L41",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11477,7 +12958,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L46",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11487,7 +12968,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11498,7 +12979,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11508,7 +12989,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11518,7 +12999,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L120",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11528,7 +13009,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L169",
+      "source_location": "L170",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11538,7 +13019,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L178",
+      "source_location": "L179",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11549,7 +13030,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11561,7 +13042,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L80",
+      "source_location": "L81",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11572,7 +13053,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L81",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11583,7 +13064,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L89",
+      "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11595,7 +13076,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L186",
+      "source_location": "L187",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11606,7 +13087,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L206",
+      "source_location": "L207",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11617,7 +13098,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L212",
+      "source_location": "L213",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11632,22 +13113,22 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_main_rationale_21",
+      "source": "src_sage_main_rationale_22",
       "target": "src_sage_main_windowspipe",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_main_rationale_121",
+      "source": "src_sage_main_rationale_122",
       "target": "src_sage_main_self_check",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L121",
+      "source_location": "L122",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13380,22 +14861,11 @@
     },
     {
       "source": "src_sage_paths",
-      "target": "platformdirs",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/sage/paths.py",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "src_sage_paths",
       "target": "src_sage_paths_apppaths",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L10",
+      "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13405,7 +14875,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L16",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13416,7 +14886,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L16",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13426,7 +14896,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L20",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13437,7 +14907,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L20",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13448,7 +14918,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L20",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13459,7 +14929,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L23",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13474,12 +14944,12 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_paths_rationale_21",
+      "source": "src_sage_paths_rationale_19",
       "target": "src_sage_paths_app_paths",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/paths.py",
-      "source_location": "L21",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -13550,7 +15020,7 @@
     },
     {
       "source": "src_sage_protocol_protocolerror",
-      "target": "valueerror",
+      "target": "src_sage_protocol_py_valueerror",
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/protocol.py",
@@ -15114,7 +16584,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L127",
+      "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15125,7 +16595,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L127",
+      "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15136,7 +16606,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L127",
+      "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15146,7 +16616,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L193",
+      "source_location": "L197",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15157,7 +16627,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L193",
+      "source_location": "L197",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15167,7 +16637,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L234",
+      "source_location": "L238",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15177,7 +16647,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L241",
+      "source_location": "L245",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15187,7 +16657,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L245",
+      "source_location": "L249",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15198,7 +16668,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L245",
+      "source_location": "L249",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15208,7 +16678,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L286",
+      "source_location": "L290",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15219,7 +16689,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L286",
+      "source_location": "L290",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15241,7 +16711,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L121",
+      "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15252,7 +16722,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L134",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15263,7 +16733,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L140",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15274,7 +16744,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L169",
+      "source_location": "L173",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15285,7 +16755,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L179",
+      "source_location": "L183",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15296,7 +16766,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L251",
+      "source_location": "L255",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15307,7 +16777,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L270",
+      "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15318,7 +16788,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L296",
+      "source_location": "L300",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15329,7 +16799,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L310",
+      "source_location": "L314",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15364,22 +16834,22 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_providers_protected_auth_rationale_130",
+      "source": "src_sage_providers_protected_auth_rationale_134",
       "target": "src_sage_providers_protected_auth_run_helper",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L130",
+      "source_location": "L134",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_providers_protected_auth_rationale_235",
+      "source": "src_sage_providers_protected_auth_rationale_239",
       "target": "src_sage_providers_protected_auth_protectedsource",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L235",
+      "source_location": "L239",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15973,7 +17443,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L9",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15984,7 +17454,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -15995,7 +17465,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16006,7 +17476,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16017,7 +17487,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16028,7 +17498,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16039,7 +17509,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16050,24 +17520,13 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L16",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "src_sage_sdk_probe",
-      "target": "pathlib",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/sage/sdk_probe.py",
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
       "source": "src_sage_sdk_probe",
-      "target": "typing",
+      "target": "contextlib",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -16078,7 +17537,18 @@
     },
     {
       "source": "src_sage_sdk_probe",
-      "target": "pydantic",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
+      "target": "typing",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -16089,7 +17559,7 @@
     },
     {
       "source": "src_sage_sdk_probe",
-      "target": "src_sage_contracts",
+      "target": "pydantic",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -16100,12 +17570,23 @@
     },
     {
       "source": "src_sage_sdk_probe",
+      "target": "src_sage_contracts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe",
       "target": "src_sage_providers_copilot",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16115,7 +17596,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16125,7 +17606,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16135,7 +17616,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L49",
+      "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16145,7 +17626,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L57",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16156,7 +17637,100 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L57",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_handle_bits",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L94",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_registry_handle_bits",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L94",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_audit",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_registry_audit",
+      "target": "src_sage_sdk_probe_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard",
+      "target": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L142",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "target": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_connect",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "target": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_open_key",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L184",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16166,7 +17740,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L78",
+      "source_location": "L259",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16177,7 +17751,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L78",
+      "source_location": "L259",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16188,7 +17762,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L78",
+      "source_location": "L259",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16198,7 +17772,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L82",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16209,7 +17783,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L82",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16219,7 +17793,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L111",
+      "source_location": "L292",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16230,7 +17804,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L111",
+      "source_location": "L292",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16240,7 +17814,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L163",
+      "source_location": "L346",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16250,7 +17824,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L173",
+      "source_location": "L362",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16260,7 +17834,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L174",
+      "source_location": "L363",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16270,7 +17844,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L194",
+      "source_location": "L383",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16280,7 +17854,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L195",
+      "source_location": "L384",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16291,7 +17865,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L195",
+      "source_location": "L384",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16301,7 +17875,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L199",
+      "source_location": "L388",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16312,7 +17886,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L199",
+      "source_location": "L388",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16323,7 +17897,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L199",
+      "source_location": "L388",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16333,7 +17907,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L202",
+      "source_location": "L391",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16343,7 +17917,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L206",
+      "source_location": "L395",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16354,7 +17928,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L206",
+      "source_location": "L395",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16365,7 +17939,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L206",
+      "source_location": "L395",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16375,7 +17949,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L246",
+      "source_location": "L436",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16386,7 +17960,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L246",
+      "source_location": "L436",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16396,7 +17970,130 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L261",
+      "source_location": "L451",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_registry_handle_bits",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_registry_audit",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_registry_audit",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L112",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "target": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_connect",
+      "relation": "indirect_call",
+      "context": "assignment",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L235",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "target": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_open_key",
+      "relation": "indirect_call",
+      "context": "assignment",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L236",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_connect",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L160",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_connect",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L162",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_connect",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_handle_bits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L168",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_open_key",
+      "target": "src_sage_sdk_probe_capabilityguard_deny",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_open_key",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_handle_bits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L202",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_sdk_import_scope_open_key",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_bits",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L207",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16407,7 +18104,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L84",
+      "source_location": "L265",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16418,7 +18115,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L117",
+      "source_location": "L298",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16429,7 +18126,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L125",
+      "source_location": "L306",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_capabilityguard_audit",
+      "target": "src_sage_sdk_probe_capabilityguard_registry_audit",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L325",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16440,7 +18148,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L182",
+      "source_location": "L371",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16451,7 +18159,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L186",
+      "source_location": "L375",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16462,7 +18170,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L191",
+      "source_location": "L380",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16474,7 +18182,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L180",
+      "source_location": "L369",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16485,7 +18193,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L176",
+      "source_location": "L365",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16496,7 +18204,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L177",
+      "source_location": "L366",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16507,7 +18215,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L216",
+      "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16518,7 +18226,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L264",
+      "source_location": "L454",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16529,7 +18237,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L266",
+      "source_location": "L456",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -16544,12 +18252,22 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_sdk_probe_rationale_50",
+      "source": "src_sage_sdk_probe_rationale_52",
       "target": "src_sage_sdk_probe_capabilityguard",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L50",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "src_sage_sdk_probe_rationale_143",
+      "target": "src_sage_sdk_probe_capabilityguard_sdk_import_scope",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/sage/sdk_probe.py",
+      "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17807,7 +19525,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L82",
+      "source_location": "L89",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17817,7 +19535,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L99",
+      "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17828,7 +19546,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L99",
+      "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17838,7 +19556,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L121",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17849,7 +19567,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L121",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17859,7 +19577,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L131",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17870,7 +19588,7 @@
       "context": "generic_arg",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L131",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17880,7 +19598,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L148",
+      "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17891,7 +19609,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L148",
+      "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17901,7 +19619,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L167",
+      "source_location": "L174",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17911,7 +19629,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L171",
+      "source_location": "L178",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17922,7 +19640,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L171",
+      "source_location": "L178",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17932,7 +19650,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L176",
+      "source_location": "L183",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17942,7 +19660,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L201",
+      "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17952,7 +19670,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L214",
+      "source_location": "L221",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17962,7 +19680,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L242",
+      "source_location": "L249",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17973,7 +19691,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L242",
+      "source_location": "L249",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17984,7 +19702,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L79",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -17995,7 +19713,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L84",
+      "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18006,7 +19724,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L85",
+      "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18017,7 +19735,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L88",
+      "source_location": "L95",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18028,7 +19746,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L90",
+      "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18039,7 +19757,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L96",
+      "source_location": "L103",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18050,7 +19768,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L104",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18061,7 +19779,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L125",
+      "source_location": "L132",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18072,7 +19790,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L129",
+      "source_location": "L136",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18083,7 +19801,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L138",
+      "source_location": "L145",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18094,7 +19812,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L146",
+      "source_location": "L153",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18105,7 +19823,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L155",
+      "source_location": "L162",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18116,7 +19834,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L172",
+      "source_location": "L179",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18127,7 +19845,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L174",
+      "source_location": "L181",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18138,7 +19856,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L182",
+      "source_location": "L189",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18149,7 +19867,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L204",
+      "source_location": "L211",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18160,7 +19878,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L218",
+      "source_location": "L225",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18171,7 +19889,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L246",
+      "source_location": "L253",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18226,82 +19944,82 @@
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_100",
+      "source": "src_sage_storage_rationale_107",
       "target": "src_sage_storage_store_transaction",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L100",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_122",
+      "source": "src_sage_storage_rationale_129",
       "target": "src_sage_storage_store_list_notes",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L122",
+      "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_132",
+      "source": "src_sage_storage_rationale_139",
       "target": "src_sage_storage_store_search_notes",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L132",
+      "source_location": "L139",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_149",
+      "source": "src_sage_storage_rationale_156",
       "target": "src_sage_storage_store_cleanup",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L149",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_168",
+      "source": "src_sage_storage_rationale_175",
       "target": "src_sage_storage_store_close",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L168",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_179",
+      "source": "src_sage_storage_rationale_186",
       "target": "src_sage_storage_store_note_summaries",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L179",
+      "source_location": "L186",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_215",
+      "source": "src_sage_storage_rationale_222",
       "target": "src_sage_storage_store_task_detail",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L215",
+      "source_location": "L222",
       "weight": 1.0,
       "_origin": "ast"
     },
     {
-      "source": "src_sage_storage_rationale_243",
+      "source": "src_sage_storage_rationale_250",
       "target": "src_sage_storage_store_interrupt_inference",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L243",
+      "source_location": "L250",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18389,7 +20107,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18400,7 +20118,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18411,7 +20129,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18422,7 +20140,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18433,7 +20151,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18444,7 +20162,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18455,7 +20173,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18466,7 +20184,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18477,7 +20195,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18488,7 +20206,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18499,7 +20217,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L208",
+      "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18730,7 +20448,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L311",
+      "source_location": "L315",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18741,7 +20459,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L22",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18752,7 +20470,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18763,7 +20481,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -18774,7 +20492,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19005,7 +20723,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L216",
+      "source_location": "L223",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19016,7 +20734,29 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/storage.py",
-      "source_location": "L216",
+      "source_location": "L223",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_copilot_account_metadata",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/copilot-account.ts",
+      "source_location": "L161",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "desktop_main_core_launch_launchcore",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "desktop/main/core-launch.ts",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19285,6 +21025,61 @@
       "_origin": "ast"
     },
     {
+      "source": "scripts_smoke_package_main",
+      "target": "desktop_main_child_env_isolatedchildenv",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L184",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_frozen_probe_validatemetadata",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L190",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_frozen_probe_decodeframe",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L191",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_frozen_probe_runprobe",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L191",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_frozen_probe_validatesdk",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L193",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "desktop_main_core_process_coreprocess",
       "target": "desktop_main_copilot_account_selectionack",
       "relation": "references",
@@ -19434,7 +21229,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19445,7 +21240,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L62",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19456,7 +21251,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L68",
+      "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19467,7 +21262,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19478,7 +21273,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L80",
+      "source_location": "L81",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19489,7 +21284,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19500,7 +21295,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L102",
+      "source_location": "L103",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19511,7 +21306,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L130",
+      "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19522,7 +21317,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L210",
+      "source_location": "L211",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19533,7 +21328,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/__main__.py",
-      "source_location": "L215",
+      "source_location": "L216",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19566,7 +21361,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L235",
+      "source_location": "L425",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19577,7 +21372,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L238",
+      "source_location": "L428",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -19643,7 +21438,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19654,7 +21449,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19665,7 +21460,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L68",
+      "source_location": "L69",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19676,7 +21471,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L62",
+      "source_location": "L63",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19687,7 +21482,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L57",
+      "source_location": "L58",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -19698,7 +21493,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -20017,7 +21812,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L39",
+      "source_location": "L41",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -20314,7 +22109,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/storage.py",
-      "source_location": "L121",
+      "source_location": "L128",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -20325,7 +22120,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/storage.py",
-      "source_location": "L230",
+      "source_location": "L237",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -20336,7 +22131,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "src/sage/storage.py",
-      "source_location": "L236",
+      "source_location": "L243",
       "weight": 0.8,
       "_origin": "ast"
     },
@@ -20876,7 +22671,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L68",
+      "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20888,7 +22683,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -20996,7 +22791,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/providers/protected_auth.py",
-      "source_location": "L313",
+      "source_location": "L317",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -21008,7 +22803,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "src/sage/sdk_probe.py",
-      "source_location": "L250",
+      "source_location": "L440",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -21152,7 +22947,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/storage.py",
-      "source_location": "L230",
+      "source_location": "L237",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -21164,7 +22959,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/storage.py",
-      "source_location": "L236",
+      "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -21176,7 +22971,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/sage/__main__.py",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -21187,7 +22982,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L3-L11",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21198,7 +22993,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L5-L20",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21209,7 +23004,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21220,7 +23015,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21231,7 +23026,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Readme.md",
-      "source_location": "Verification",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21242,7 +23037,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "Readme.md",
-      "source_location": "Verification",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21253,7 +23048,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Authority and trust path",
+      "source_location": "L5-L15",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21264,7 +23059,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Separate selected-account path",
+      "source_location": "L25-L43",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21275,7 +23070,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Local mode and cloud data",
+      "source_location": "L17-L23",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21286,7 +23081,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Retention, cleanup and diagnostics",
+      "source_location": "L45-L53",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21297,7 +23092,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Open evidence and ownership",
+      "source_location": "L55-L65",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21308,7 +23103,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Package integrity and TLS policy",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21319,7 +23114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Package integrity and TLS policy",
+      "source_location": "L81",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21330,7 +23125,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/security.md",
-      "source_location": "Open evidence and ownership",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21341,7 +23136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/testing.md",
-      "source_location": "Numeric coverage contract",
+      "source_location": "L16-L22",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21352,7 +23147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/testing.md",
-      "source_location": "Real-host E2E boundary",
+      "source_location": "L24-L36",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21363,7 +23158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/testing.md",
-      "source_location": "Native package checks",
+      "source_location": "L73-L95",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21374,7 +23169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/testing.md",
-      "source_location": "Native package checks",
+      "source_location": "L97-L105",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21385,7 +23180,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/testing.md",
-      "source_location": "Native package checks",
+      "source_location": "L95",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21396,7 +23191,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L5-L31",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21407,7 +23202,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21418,7 +23213,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21429,7 +23224,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21440,7 +23235,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": null,
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21451,7 +23246,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L13-L14",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21462,7 +23257,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21473,7 +23268,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Separate artifact snapshots",
+      "source_location": "L43-L51",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21484,7 +23279,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": "Contracts and security invariants",
+      "source_location": "L59-L78",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21495,7 +23290,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": "Copilot and routing",
+      "source_location": "L80-L94",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21506,7 +23301,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": "Acceptance and handoff",
+      "source_location": "L127-L139",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21517,7 +23312,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-foundation-design.md",
-      "source_location": null,
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21528,7 +23323,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "source_location": "Separate delivery slices",
+      "source_location": "L22-L32",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21539,7 +23334,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "source_location": "Validation promise",
+      "source_location": "L42-L46",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21550,7 +23345,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-10-22-sage-delivery-scope.md",
-      "source_location": "Separate delivery slices",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21561,7 +23356,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/security.md",
-      "source_location": "Authority and trust path",
+      "source_location": "L7-L13",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21572,7 +23367,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/testing.md",
-      "source_location": "Numeric coverage contract",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21583,7 +23378,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21594,7 +23389,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Executed checks",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21605,7 +23400,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": null,
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21616,7 +23411,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/security.md",
-      "source_location": "Package integrity and TLS policy",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21627,7 +23422,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/testing.md",
-      "source_location": "Native package checks",
+      "source_location": "L97",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21638,7 +23433,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "Readme.md",
-      "source_location": "Current behavior and support",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21649,7 +23444,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Separate artifact snapshots",
+      "source_location": "L43-L49",
       "weight": 1.0,
       "_origin": "semantic"
     },
@@ -21660,7 +23455,150 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/validation/foundation-results.md",
-      "source_location": "Separate artifact snapshots",
+      "source_location": "L47-L51",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "readme_sage_assistant",
+      "target": "readme_hosted_windows_support_evidence",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Readme.md",
+      "source_location": "L17-L19",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_security_architecture_and_evidence_boundaries",
+      "target": "docs_security_windows_child_environment_policy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/security.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_security_architecture_and_evidence_boundaries",
+      "target": "docs_security_windows_time_zone_metadata_exception",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/security.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_guarded_sdk_self_check",
+      "target": "docs_security_windows_time_zone_metadata_exception",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/security.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_foundation_verification",
+      "target": "docs_testing_windows_child_environment_policy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/testing.md",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_foundation_verification",
+      "target": "docs_testing_windows_time_zone_sdk_probe",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/testing.md",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_foundation_verification",
+      "target": "docs_testing_hosted_platform_verification",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/testing.md",
+      "source_location": "L59-L91",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_guarded_sdk_probe",
+      "target": "docs_testing_windows_time_zone_sdk_probe",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/testing.md",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_validation_foundation_results_foundation_evidence_2026_10_23",
+      "target": "docs_validation_foundation_results_hosted_platform_verification",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/validation/foundation-results.md",
+      "source_location": "L3-L28",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "readme_hosted_windows_support_evidence",
+      "target": "docs_testing_hosted_platform_verification",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "Readme.md",
+      "source_location": "L17-L19",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_testing_hosted_platform_verification",
+      "target": "docs_validation_foundation_results_hosted_platform_verification",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/testing.md",
+      "source_location": "L59-L91",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_windows_child_environment_policy",
+      "target": "docs_testing_windows_child_environment_policy",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/security.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "docs_security_windows_time_zone_metadata_exception",
+      "target": "docs_testing_windows_time_zone_sdk_probe",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/security.md",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "semantic"
     }
@@ -21683,7 +23621,7 @@
     },
     {
       "id": "foundation_acceptance_evidence_gaps",
-      "label": "Specified foundation acceptance and reported open evidence gates",
+      "label": "Specified foundation acceptance and remaining provider, signing and release gaps",
       "nodes": [
         "docs_superpowers_specs_2026_10_22_sage_foundation_design_foundation_acceptance",
         "docs_validation_foundation_results_foundation_acceptance_incomplete",
@@ -21699,7 +23637,7 @@
     },
     {
       "id": "separate_sdk_evidence_snapshots",
-      "label": "Guarded offline SDK evidence and earlier failed live connection remain separate",
+      "label": "Guarded local offline SDK evidence and earlier failed live connection remain separate",
       "nodes": [
         "docs_security_guarded_sdk_self_check",
         "docs_testing_guarded_sdk_probe",
@@ -21712,5 +23650,7 @@
       "source_file": "docs/validation/foundation-results.md",
       "_origin": "semantic"
     }
-  ]
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
 }

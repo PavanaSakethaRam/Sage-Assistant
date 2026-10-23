@@ -1,26 +1,26 @@
 {
-  "node_count": 545,
+  "node_count": 604,
   "unverified_node_count": 0,
-  "raw_edge_count": 1555,
+  "raw_edge_count": 1686,
   "non_object_edges": 0,
   "missing_endpoint_edges": 0,
-  "dangling_endpoint_edges": 145,
-  "external_reference_edges": 48,
-  "self_loop_edges": 5,
-  "valid_candidate_edges": 1362,
+  "dangling_endpoint_edges": 152,
+  "external_reference_edges": 52,
+  "self_loop_edges": 6,
+  "valid_candidate_edges": 1482,
   "exact_duplicate_edges": 1,
-  "directed_unique_endpoint_pairs": 1287,
-  "directed_same_endpoint_collapsed_edges": 75,
-  "undirected_unique_endpoint_pairs": 1284,
-  "undirected_same_endpoint_collapsed_edges": 78,
-  "same_endpoint_group_count": 71,
-  "relation_variant_groups": 56,
+  "directed_unique_endpoint_pairs": 1404,
+  "directed_same_endpoint_collapsed_edges": 78,
+  "undirected_unique_endpoint_pairs": 1401,
+  "undirected_same_endpoint_collapsed_edges": 81,
+  "same_endpoint_group_count": 74,
+  "relation_variant_groups": 59,
   "source_file_variant_groups": 0,
   "source_location_variant_groups": 8,
   "context_variant_groups": 6,
   "post_build_graph_type": "Graph",
-  "post_build_node_count": 600,
-  "post_build_edge_count": 1476,
+  "post_build_node_count": 658,
+  "post_build_edge_count": 1604,
   "post_build_error": "",
   "producer_suppression": {
     "path": "<graphify-package>/extract.py",
@@ -115,9 +115,9 @@
         "scripts/smoke_package.mjs"
       ],
       "source_locations": [
-        "L66",
-        "L72",
-        "L75"
+        "L65",
+        "L71",
+        "L74"
       ],
       "contexts": [
         "",
@@ -138,9 +138,9 @@
         "src/sage/__main__.py"
       ],
       "source_locations": [
-        "L65",
-        "L80",
-        "L81"
+        "L66",
+        "L81",
+        "L82"
       ],
       "contexts": [
         "",
