@@ -14,9 +14,9 @@ This checkout is under development. It does not yet establish a production relea
 | Codex, OpenCode, Claude                                         | Unavailable; no adapters implemented                                                                                                                                      |
 | API key mode                                                    | Unavailable; no API adapter or key-entry/storage flow                                                                                                                     |
 | Desktop                                                         | Sandboxed Electron/React implementation; macOS arm64 host/core/preload and local package evidence; signing and clean-machine gates remain                                 |
-| Windows                                                         | Paths and overlapped pipe implementation exist; native execution and clean-machine verification outstanding                                                               |
+| Windows                                                         | Hosted Verify and Package passed on Windows at the tested source; clean-machine and authenticated native-provider verification remain open                                |
 | Linux                                                           | Development path candidates exist; no release support claim                                                                                                               |
-| Packaging                                                       | Portable ZIPs configured for macOS and Windows; local macOS core/package evidence; final release/platform/signing gates remain                                            |
+| Packaging                                                       | Hosted macOS/Windows portable package checks passed at the tested source; release, signing and clean-machine gates remain                                                 |
 | Voice, screen, browser, coding, organizer and social automation | Future slices; no maintained execution capability                                                                                                                         |
 
 The earlier local package received one explicitly approved synthetic connection test and returned `runtime_error`; protected-read, identity-request and model-call counts are unknown. Disconnect was acknowledged and the app quit; no retry was performed. The later rebuilt package passes guarded offline SDK import/construction and local note/restart checks, but has no live validation. [Exact snapshots and open gates](docs/validation/foundation-results.md) keep those results separate.
@@ -37,7 +37,7 @@ uv sync --frozen --all-groups --python 3.13.17
 npm ci --cache .cache/npm
 ```
 
-On Windows, set the equivalent environment variables in your shell; native Windows validation remains outstanding. `npm ci` uses the repository postinstall script to install Electron into the project cache. Do not install the retired dependency list or run historical launchers.
+On Windows, set the equivalent environment variables in your shell. Hosted Windows verification and packaging results are in the [2026-10-23 foundation CI record](docs/validation/2026-10-23-hosted-foundation-ci.md); clean-machine validation remains outstanding. `npm ci` uses the repository postinstall script to install Electron into the project cache. Do not install the retired dependency list or run historical launchers.
 
 ```sh
 # Inspect the maintained private core entrypoint.
@@ -69,7 +69,7 @@ npm run format:check
 npm run test:coverage
 ```
 
-The release-surface test builds and inspects a Python wheel and all three desktop bundles; it needs the locked Python development dependencies and `node_modules`. The native Electron smoke may need permission to start a local GUI process in a restricted runner. The complete maintained/trusted coverage gate and real Chromium E2E are implemented; final results and limits are recorded in [foundation results](docs/validation/foundation-results.md). The opt-in live Copilot fixture is separate and does not run during ordinary tests.
+The release-surface test builds and inspects a Python wheel and all three desktop bundles; it needs the locked Python development dependencies and `node_modules`. The native Electron smoke may need permission to start a local GUI process in a restricted runner. The complete maintained/trusted coverage gate and real Chromium E2E are implemented; tested-source hosted results are in the [foundation CI record](docs/validation/2026-10-23-hosted-foundation-ci.md), with earlier local results in [foundation results](docs/validation/foundation-results.md). The opt-in live Copilot fixture is separate and does not run during ordinary tests.
 
 Audit both complete maintained dependency graphs, including development/build dependencies:
 
@@ -85,6 +85,6 @@ Native binary provenance, redistribution rights and platform behavior need separ
 
 Settings, task metadata, retained draft content and saved notes live in the local SQLite store. Cancel/reject clears draft fields immediately; drafts age out after 24 hours and task metadata after 30 days during cleanup. Saved notes persist; no saved-note deletion UI/API is implemented. Storage is not encrypted or a forensic erasure mechanism. Model requests include only the current text and explicitly attached context, never an automatically loaded transcript or workspace. More detail is in [security.md](docs/security.md).
 
-Historical audit material describes the [original prototype at commit c7943bd](https://github.com/PavanaSakethaRam/Sage-Assistant/tree/c7943bd). The original local `graphify-out/` is an untracked historical prototype corpus and is preserved. A separate maintained-source graph is described in the [foundation results](docs/validation/foundation-results.md); neither graph certifies runtime behavior. Credentials exposed in repository history require owner triage and confirmation of revocation/rotation. Removing files does not revoke credentials or remove Git history; this work does neither.
+Historical audit material describes the [original prototype at commit c7943bd](https://github.com/PavanaSakethaRam/Sage-Assistant/tree/c7943bd). The original local `graphify-out/` is an untracked historical prototype corpus and is preserved. A separate maintained-source graph is described in the [foundation results](docs/validation/foundation-results.md); its [provenance](docs/validation/graph/provenance.json) records the exact source snapshot. Neither graph certifies runtime behavior. Credentials exposed in repository history require owner triage and confirmation of revocation/rotation. Removing files does not revoke credentials or remove Git history; this work does neither.
 
 No repository license grant is established by this README. Upstream dependency notices and native runtime inventories must be preserved; the SDK's MIT metadata does not settle separate Copilot native runtime terms. Final notices, [component terms/redistribution review](docs/validation/redistribution-evidence.md) and package provenance remain release gates.
