@@ -6,7 +6,9 @@ import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { build } from "vite";
 import electron from "electron";
+import { assertNativeElectronContext } from "../../e2e/native-context";
 it("loads the built CJS sandbox preload and serves validated IPC in a real Electron window", async () => {
+  assertNativeElectronContext();
   const root = await mkdtemp(join(tmpdir(), "sage-electron-test-"));
   try {
     await build({ logLevel: "silent", configFile: "vite.main.config.ts" });

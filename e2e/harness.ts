@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import type { CoreRequest } from "../desktop/shared/contracts";
+import { assertNativeElectronContext } from "./native-context";
 export type Host = {
   root: string;
   app: ElectronApplication;
@@ -24,6 +25,7 @@ export async function launch(
   existing?: string,
   allowUnavailable = false,
 ): Promise<Host> {
+  assertNativeElectronContext();
   const root = existing ?? (await mkdtemp(join(tmpdir(), "sage-e2e-")));
   let app: ElectronApplication | undefined;
   try {

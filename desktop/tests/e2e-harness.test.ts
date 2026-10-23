@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { access, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -9,7 +9,9 @@ vi.mock("@playwright/test", async (load) => {
 import { _electron } from "@playwright/test";
 import { launch } from "../../e2e/harness";
 const roots: string[] = [];
+beforeEach(() => vi.stubEnv("CODEX_SANDBOX", ""));
 afterEach(async () => {
+  vi.unstubAllEnvs();
   vi.resetAllMocks();
   await Promise.all(
     roots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
