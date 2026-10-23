@@ -1,9 +1,15 @@
-/** Actual frozen-core note/restart smoke, with no developer Python or PATH. */
+/** Actual frozen-core fixed probes and note/restart smoke. */
 import { spawn } from "node:child_process";
-import { mkdtemp, rm, mkdir } from "node:fs/promises";
+import { mkdtemp, rm, mkdir, readdir, lstat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { isolatedChildEnv } from "../desktop/main/child-env.ts";
+import {
+  decodeFrame,
+  runProbe,
+  validateMetadata,
+  validateSdk,
+} from "./frozen_probe.mjs";
 
 async function deadline(promise, milliseconds) {
   let timer;
@@ -31,22 +37,14 @@ function fail(session, message) {
   session.pending.clear();
 }
 
-function launch(resources, root, env) {
-  const child = spawn(
-    join(
-      resources,
-      "core",
-      process.platform === "win32" ? "sage-core.exe" : "sage-core",
-    ),
-    ["--root", root],
-    {
-      cwd: root,
-      env,
-      shell: false,
-      windowsHide: true,
-      stdio: ["overlapped", "overlapped", "overlapped"],
-    },
-  );
+function launch(executable, root, env) {
+  const child = spawn(executable, ["--root", root], {
+    cwd: root,
+    env,
+    shell: false,
+    windowsHide: true,
+    stdio: ["overlapped", "overlapped", "overlapped"],
+  });
   let resolveExit;
   const exited = new Promise((resolve) => {
     resolveExit = resolve;
@@ -174,6 +172,11 @@ async function cleanup(session) {
 
 async function main() {
   const resources = resolve(process.argv[2]);
+  const executable = join(
+    resources,
+    "core",
+    process.platform === "win32" ? "sage-core.exe" : "sage-core",
+  );
   const root = await mkdtemp(join(tmpdir(), "sage-package-"));
   let session;
   try {
@@ -184,7 +187,23 @@ async function main() {
       TMP: join(root, "tmp"),
       TEMP: join(root, "tmp"),
     });
-    session = launch(resources, root, env);
+    validateMetadata(
+      decodeFrame(await runProbe(executable, "--self-check", root, env)),
+    );
+    validateSdk(
+      decodeFrame(await runProbe(executable, "--sdk-self-check", root, env)),
+    );
+    const rootEntries = await readdir(root);
+    const tmpState = await lstat(join(root, "tmp"));
+    const tmpEntries = await readdir(join(root, "tmp"));
+    if (
+      rootEntries.length !== 1 ||
+      rootEntries[0] !== "tmp" ||
+      !tmpState.isDirectory() ||
+      tmpEntries.length
+    )
+      throw Error("Fixed probes changed owned root");
+    session = launch(executable, root, env);
     const settings = await request(session, "settings.get");
     if (settings.ai_mode !== "local") throw Error("Unexpected package default");
     const draft = await request(session, "notes.propose", {
@@ -198,7 +217,7 @@ async function main() {
     });
     if (saved.status !== "succeeded") throw Error("Package note save failed");
     await close(session);
-    session = launch(resources, root, env);
+    session = launch(executable, root, env);
     const note = await request(session, "notes.get", {
       note_id: saved.note_id,
     });
@@ -214,6 +233,12 @@ async function main() {
     console.log(
       JSON.stringify({
         status: "PASS",
+        offline_metadata_probe: true,
+        offline_sdk_construction_probe: true,
+        frozen: true,
+        python: "3.13.17",
+        sdk: "1.0.25",
+        certifi: "2026.10.19",
         frozen_note_restart: true,
         local_inference_unavailable: true,
         developer_python: false,
@@ -229,7 +254,8 @@ async function main() {
     }
   }
 }
-await main().catch(() => {
+await main().catch((error) => {
   console.error("FAIL package smoke");
+  if (error?.probeDiagnostic) console.error(error.probeDiagnostic);
   process.exitCode = 1;
 });

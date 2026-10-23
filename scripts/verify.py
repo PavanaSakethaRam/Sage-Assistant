@@ -20,7 +20,12 @@ def main() -> int:
     uv = [UV, "run", "--locked", "--no-sync"]
     commands = [
         uv + ["pytest", "--cov=sage", "--cov-branch", "--cov-report=json"],
-        ["node", "--test", "tests/fixtures/stderr_summary.test.mjs"],
+        [
+            "node",
+            "--test",
+            "tests/fixtures/stderr_summary.test.mjs",
+            "tests/fixtures/frozen_probe.test.mjs",
+        ],
         [NPM, "run", "test:coverage"],
         [NPM, "run", "test:e2e"],
         [

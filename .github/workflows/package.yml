@@ -68,7 +68,7 @@ jobs:
           $app = Get-ChildItem out -Directory -Filter 'Sage-*' | Select-Object -First 1
           $appPath = if ($IsMacOS) { Join-Path $app.FullName 'Sage.app' } else { $app.FullName }
           node scripts/check_package.ts $appPath build/resource-manifest.json
-      - name: Actual frozen note and restart smoke
+      - name: Actual frozen fixed probes and note/restart smoke
         shell: pwsh
         run: |
           $app = Get-ChildItem out -Directory -Filter 'Sage-*' | Select-Object -First 1
