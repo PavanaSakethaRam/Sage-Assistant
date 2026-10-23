@@ -66,6 +66,13 @@ class Store:
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
             connection = sqlite3.connect(path, timeout=_BUSY_TIMEOUT_SECONDS, isolation_level=None)
+            try:
+                # This connection must be hardened before migration or retention SQL.
+                connection.setconfig(sqlite3.SQLITE_DBCONFIG_DEFENSIVE, True)
+                if not connection.getconfig(sqlite3.SQLITE_DBCONFIG_DEFENSIVE):
+                    raise StorageError("Could not secure application storage")
+            except Exception:
+                raise StorageError("Could not secure application storage") from None
             connection.row_factory = sqlite3.Row
             connection.execute("PRAGMA foreign_keys=ON")
             store = cls(connection)

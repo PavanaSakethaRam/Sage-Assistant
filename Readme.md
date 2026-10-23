@@ -25,7 +25,7 @@ VS Code sign-in does not establish SDK authentication. Account selection is cons
 
 ## Locked development setup
 
-The maintained Python package is `src/sage`; the desktop is `desktop`. Use Python 3.13 and Node 26.10.0 (the manifest requires >=26.10.0 <27). Final local verification uses isolated CPython 3.13.17. `uv.lock` and `package-lock.json` pin the dependency graphs.
+The maintained Python package is `src/sage`; the desktop is `desktop`. Use Python 3.13 and Node 26.12.1 (the manifest requires >=26.12.1 <27). Final local verification uses isolated CPython 3.13.17. `uv.lock` and `package-lock.json` pin the dependency graphs.
 
 From the repository root, with uv and the stated Node version available, the following POSIX-shell commands keep downloaded Python and caches in the project:
 
@@ -79,7 +79,7 @@ PIP_CACHE_DIR="$PWD/.cache/pip" uv run --frozen pip-audit --requirement .cache/s
 npm audit --json --cache .cache/npm
 ```
 
-Native binary provenance, redistribution rights and platform behavior need separate evidence; dependency audits do not establish them. `npm run verify` aggregates deterministic checks and complete dependency/static/redacting scans. See [testing](docs/testing.md) and [foundation results](docs/validation/foundation-results.md).
+Native binary provenance, redistribution rights and platform behavior need separate evidence; dependency audits do not establish them. The [current native advisory triage](docs/validation/2026-10-23-native-advisory-triage.md) records the version gaps and remaining gates. `npm run verify` aggregates deterministic checks and complete dependency/static/redacting scans. See [testing](docs/testing.md) and [foundation results](docs/validation/foundation-results.md).
 
 ## Data, history and licensing
 

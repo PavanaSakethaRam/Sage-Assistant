@@ -101,6 +101,89 @@ def test_fresh_store_and_exact_note_restart(tmp_path: Path) -> None:
         restarted.close()
 
 
+def test_store_defensive_rejects_schema_write_and_preserves_fts(tmp_path: Path) -> None:
+    path = tmp_path / "sage.sqlite3"
+    opened = Store.open(path)
+    try:
+        with opened.transaction() as connection:
+            assert connection.getconfig(sqlite3.SQLITE_DBCONFIG_DEFENSIVE)
+            # An inert schema update succeeds with writable_schema enabled on
+            # an unprotected connection; DEFENSIVE must reject the operation.
+            connection.execute("PRAGMA writable_schema=ON")
+            assert connection.execute("PRAGMA writable_schema").fetchone()[0] == 0
+            with pytest.raises(sqlite3.DatabaseError):
+                connection.execute("UPDATE sqlite_schema SET name=name WHERE name='notes'")
+            seed_note(connection)
+        assert [note.id for note in opened.search_notes("quoted")] == ["saved"]
+    finally:
+        opened.close()
+    restarted = Store.open(path)
+    try:
+        assert [note.id for note in restarted.search_notes("quoted")] == ["saved"]
+        with restarted.transaction() as connection:
+            assert connection.getconfig(sqlite3.SQLITE_DBCONFIG_DEFENSIVE)
+    finally:
+        restarted.close()
+
+
+@pytest.mark.parametrize("failure_mode", ["raises", "stays_disabled"])
+@pytest.mark.parametrize("existing", [False, True])
+def test_defensive_failure_closes_before_startup_sql(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure_mode: str, existing: bool
+) -> None:
+    path = tmp_path / "sage.sqlite3"
+    if existing:
+        prepared = Store.open(path)
+        try:
+            with prepared.transaction() as connection:
+                seed_note(connection)
+                seed_task(connection, "old", datetime(2000, 1, 1, tzinfo=UTC))
+        finally:
+            prepared.close()
+    statements: list[str] = []
+    opened_connections: list[sqlite3.Connection] = []
+    real_connect = sqlite3.connect
+
+    class RefusingConnection(sqlite3.Connection):
+        def setconfig(self, op: int, enable: bool = True) -> None:
+            if failure_mode == "raises":
+                raise sqlite3.NotSupportedError("private-marker")
+
+        def getconfig(self, op: int) -> bool:
+            return False
+
+        def execute(self, sql: str, parameters: object = ()) -> sqlite3.Cursor:
+            statements.append(sql)
+            return super().execute(sql, parameters)
+
+        def close(self) -> None:
+            opened_connections.append(self)
+            super().close()
+
+    def connect(*args: object, **kwargs: object) -> sqlite3.Connection:
+        return real_connect(*args, **kwargs, factory=RefusingConnection)
+
+    monkeypatch.setattr(sqlite3, "connect", connect)
+    with pytest.raises(StorageError, match="secure") as error:
+        Store.open(path)
+    assert "private-marker" not in str(error.value)
+    assert statements == []
+    assert len(opened_connections) == 1
+    with pytest.raises(sqlite3.ProgrammingError):
+        opened_connections[0].execute("SELECT 1")
+    with real_connect(path) as connection:
+        if existing:
+            assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
+            assert connection.execute("SELECT body FROM notes").fetchone()[0] == BODY
+            assert connection.execute("SELECT id FROM tasks").fetchone()[0] == "old"
+        else:
+            assert connection.execute("PRAGMA user_version").fetchone()[0] == 0
+            assert (
+                connection.execute("SELECT name FROM sqlite_schema WHERE type='table'").fetchall()
+                == []
+            )
+
+
 @pytest.mark.parametrize(
     "query,want",
     [
