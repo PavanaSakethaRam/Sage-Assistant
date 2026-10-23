@@ -48,6 +48,7 @@ subprocessTest.each([
     const root = await mkdtemp(join(tmpdir(), "sage-smoke-regression-"));
     const recordsPath = join(root, "children.jsonl");
     const reachedPath = join(root, "reached.txt");
+    const unexpectedPath = join(root, "unexpected-error.txt");
     const resources = join(root, "resources");
     const executable = join(resources, "core/sage-core");
     let smoke: ReturnType<typeof spawn> | undefined;
@@ -65,6 +66,7 @@ const phase = args[0] === '--self-check' ? 'metadata' : args[0] === '--sdk-self-
 const state = phase === 'rpc' ? args[1] : process.cwd();
 fs.appendFileSync(${JSON.stringify(recordsPath)}, JSON.stringify({pid: process.pid, root: state, cwd: process.cwd(), phase, args})+'\\n');
 const mode = ${JSON.stringify(mode)};
+process.on('uncaughtExceptionMonitor', () => fs.appendFileSync(${JSON.stringify(unexpectedPath)}, 'unexpected_error\\n'));
 function reached() { fs.appendFileSync(${JSON.stringify(reachedPath)}, mode+'\\n'); }
 function frame(value) { const body = Buffer.from(JSON.stringify(value)); const h = Buffer.alloc(4); h.writeUInt32BE(body.length); process.stdout.write(Buffer.concat([h,body])); }
 if (phase === 'metadata') frame({
@@ -83,6 +85,7 @@ else {
  else if (mode === 'oversized') { reached(); const h=Buffer.alloc(4);h.writeUInt32BE(1048577);process.stdout.write(h); }
  else if (mode === 'malformed') { reached(); process.stdout.write(Buffer.from([0,0,0,1,123])); }
  else if (mode === 'stream-end') { reached(); process.stdout.end(); }
+ else {
  let buffer=Buffer.alloc(0);
  process.stdin.on('data', chunk => {
   buffer=Buffer.concat([buffer,chunk]);
@@ -101,6 +104,7 @@ else {
    if(request.method==='app.shutdown' && mode==='success') { reached(); process.exit(0); }
   }
  });
+ }
  setInterval(()=>{},1000);
 }
 `,
@@ -170,6 +174,7 @@ else {
           expect(gone(record.pid), "synthetic child still alive").toBe(true);
           await expect(access(record.root)).rejects.toThrow();
         }
+        await expect(access(unexpectedPath)).rejects.toThrow();
       }
       expect(
         result.timedOut,
