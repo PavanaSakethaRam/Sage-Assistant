@@ -1,6 +1,6 @@
 # Sage VS Code development: first complete slice
 
-Date: 23 October 2026. Status: written specification for owner review; **not approved for implementation**. Architectural path under brainstorming. This document contains behavior and verification requirements, not an implementation plan. It supplements the [approved foundation](2026-10-22-sage-foundation-design.md) and [accepted delivery direction](2026-10-22-sage-delivery-scope.md) without claiming those approvals cover this new subsystem.
+Date: 23 October 2026. Owner approved this written specification on 24 October 2026 for implementation planning; **implementation awaits written-plan approval**. Architectural path under brainstorming. This document contains behavior and verification requirements, not an implementation plan. It supplements the [approved foundation](2026-10-22-sage-foundation-design.md) and [accepted delivery direction](2026-10-22-sage-delivery-scope.md) without claiming those approvals cover this new subsystem.
 
 ## Outcome and limits
 
