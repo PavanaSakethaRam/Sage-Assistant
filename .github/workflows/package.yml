@@ -1,0 +1,84 @@
+name: Package foundation (unreleased)
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'desktop/**'
+      - 'scripts/**'
+      - '*lock*'
+      - '*.spec'
+      - 'forge.config.ts'
+      - '.github/workflows/package.yml'
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
+      UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/.runtime/python
+      UV_PYTHON_BIN_DIR: ${{ github.workspace }}/.runtime/python-bin
+      npm_config_cache: ${{ github.workspace }}/.cache/npm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.10.0'
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: '0.13.5'
+          python-version: '3.13.17'
+          enable-cache: false
+      # One native command per step preserves failures on both bash and pwsh.
+      - name: Locked verification dependencies
+        run: uv sync --locked --all-groups --python 3.13.17
+      - name: Locked desktop dependencies
+        run: npm ci --include=dev
+      - name: Explicit verified native source staging (network)
+        run: uv run --locked --no-sync python scripts/provision_package.py
+      - name: Isolated runtime and freezer environment
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
+        run: uv sync --locked --no-dev --group build --python 3.13.17
+      - name: Native core
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
+        run: uv run --locked --no-sync python scripts/build_core.py --output .runtime/package/core
+      - name: Selected resources and notices
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
+        run: uv run --locked --no-sync python -m scripts.stage_package
+      - name: Unsigned local package
+        run: npm run make
+      - name: Actual ASAR, fuse and external inventory checks
+        shell: pwsh
+        run: |
+          $app = Get-ChildItem out -Directory -Filter 'Sage-*' | Select-Object -First 1
+          $appPath = if ($IsMacOS) { Join-Path $app.FullName 'Sage.app' } else { $app.FullName }
+          node scripts/check_package.ts $appPath build/resource-manifest.json
+      - name: Actual frozen note and restart smoke
+        shell: pwsh
+        run: |
+          $app = Get-ChildItem out -Directory -Filter 'Sage-*' | Select-Object -First 1
+          $resources = if ($IsMacOS) { Join-Path $app.FullName 'Sage.app/Contents/Resources' } else { Join-Path $app.FullName 'resources' }
+          node scripts/smoke_package.mjs $resources
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unreleased-native-${{ matrix.os }}
+          path: |
+            out/make/
+            build/resource-manifest.json
+            build/core-analysis.json
+            .runtime/native-source-inventory.json
+          if-no-files-found: error
+          retention-days: 7
+# No updater, publish, signing identity, notarization or account/model smoke.
+# Workflow source is not completed Windows/clean-machine evidence.

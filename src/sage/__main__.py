@@ -11,7 +11,7 @@ from sage.logging import diagnostic
 from sage.paths import app_paths
 from sage.protocol import SelectedAccount
 from sage.providers.copilot import CopilotReasoner
-from sage.providers.protected_auth import ProtectedSource
+from sage.providers.protected_auth import ProtectedSource, identity_context
 from sage.providers.session_store import SessionStore
 from sage.service import CoreService, run_service
 from sage.storage import Store
@@ -117,6 +117,55 @@ async def _run(
         diagnostic("core_stopped")
 
 
+def self_check() -> None:
+    """One fixed offline evidence frame; no service/storage/provider initialization."""
+    import importlib.metadata
+    import importlib.util
+    import json
+    import sqlite3
+    import ssl
+    import struct
+
+    ssl_spec = importlib.util.find_spec("_ssl")
+    context = identity_context()
+    paths = ssl.get_default_verify_paths()
+    data = {
+        "schema": 1,
+        "python": sys.version,
+        "openssl": ssl.OPENSSL_VERSION,
+        "sqlite": sqlite3.sqlite_version,
+        "sdk": importlib.metadata.version("github-copilot-sdk"),
+        "certifi": importlib.metadata.version("certifi"),
+        "frozen": bool(getattr(sys, "frozen", False)),
+        "ssl_module": ssl_spec.origin if ssl_spec is not None else "unavailable",
+        "bundle": str(Path(__file__).resolve().parent),
+        "trust": {
+            "verify_mode": int(context.verify_mode),
+            "check_hostname": context.check_hostname,
+            "verify_flags": int(context.verify_flags),
+            "store": context.cert_store_stats(),
+            "default_paths": paths._asdict(),
+            "cafile_exists": bool(paths.cafile and Path(paths.cafile).is_file()),
+            "capath_exists": bool(paths.capath and Path(paths.capath).is_dir()),
+        },
+        "environment_overrides": {
+            key: key in os.environ
+            for key in (
+                "SSL_CERT_FILE",
+                "SSL_CERT_DIR",
+                "SSLKEYLOGFILE",
+                "HTTPS_PROXY",
+                "ALL_PROXY",
+            )
+        },
+    }
+    encoded = json.dumps(data, separators=(",", ":")).encode("utf-8")
+    if len(encoded) > 16384:
+        raise ValueError("Self-check frame limit")
+    sys.stdout.buffer.write(struct.pack(">I", len(encoded)) + encoded)
+    sys.stdout.buffer.flush()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sage private core")
     parser.add_argument(
@@ -144,7 +193,13 @@ def main() -> int:
         default=None,
         help="Fixed managed gh2.103.0 deployment (not an RPC option)",
     )
+    parser.add_argument("--self-check", action="store_true", help="Fixed offline package evidence")
     args = parser.parse_args()
+    if args.self_check:
+        if args.root is not None or args.copilot_runtime is not None or args.gh_runtime is not None:
+            parser.error("Self-check accepts no service options")
+        self_check()
+        return 0
     try:
         asyncio.run(_run(args.root, args.copilot_runtime, args.gh_runtime))
         return 0

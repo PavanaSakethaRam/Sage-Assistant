@@ -25,6 +25,8 @@ dev = [
     "uv==0.13.5",
 ]
 
+build = ["pyinstaller==6.22.3", "pyinstaller-hooks-contrib==2026.9"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/sage"]
 

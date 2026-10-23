@@ -76,3 +76,18 @@ def test_advisory_severity_unknown_is_unresolved() -> None:
 )
 def test_python_missing_inventory_fails(data: object) -> None:
     assert load().python_result(0, data, {"example": "1"})["status"] == "incomplete"
+
+
+def test_large_real_bandit_scan_has_complete_json_and_retains_lower_findings(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "scanner-fixtures"
+    root.mkdir()
+    for index in range(51):
+        (root / f"sample_{index}.py").write_text("assert True\n")
+    code, data, _ = load().collect_bandit([str(root)])
+    assert code == 1
+    assert isinstance(data, dict) and data["errors"] == []
+    assert len(data["metrics"]) == 52  # every file plus _totals
+    assert len(data["results"]) == 51
+    assert {finding["test_id"] for finding in data["results"]} == {"B101"}

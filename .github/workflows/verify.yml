@@ -13,6 +13,7 @@ jobs:
     env:
       UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
       UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/.runtime/python
+      UV_PYTHON_BIN_DIR: ${{ github.workspace }}/.runtime/python-bin
       npm_config_cache: ${{ github.workspace }}/.cache/npm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,7 +27,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: '0.13.5'
-          python-version: '3.13.16'
+          python-version: '3.13.17'
           enable-cache: false
       - name: Provision locked dependencies and verified scanner (network)
         run: |

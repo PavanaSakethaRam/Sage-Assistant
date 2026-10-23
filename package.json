@@ -19,11 +19,13 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "format:check": "prettier --check desktop e2e scripts/*.mjs *.ts *.json *.mjs",
+    "format:check": "prettier --check desktop e2e \"scripts/*.{mjs,ts}\" *.ts *.json *.mjs",
     "postinstall": "node scripts/install-electron.mjs",
     "test:e2e": "node e2e/build.ts && playwright test",
     "verify": "node scripts/verify.mjs",
-    "verify:deterministic": "node scripts/verify.mjs --deterministic"
+    "verify:deterministic": "node scripts/verify.mjs --deterministic",
+    "check:package": "node scripts/check_package.ts",
+    "smoke:package": "node scripts/smoke_package.mjs"
   },
   "devDependencies": {
     "@electron-forge/cli": "8.0.1",
@@ -32,6 +34,7 @@
     "@electron-forge/plugin-fuses": "8.0.1",
     "@electron-forge/plugin-vite": "8.0.1",
     "@electron-forge/shared-types": "8.0.1",
+    "@electron/asar": "4.3.1",
     "@electron/fuses": "2.1.3",
     "@playwright/test": "1.64.1",
     "@testing-library/dom": "10.4.2",

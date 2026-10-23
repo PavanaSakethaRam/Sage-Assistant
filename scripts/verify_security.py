@@ -19,7 +19,9 @@ NPM = "npm.cmd" if os.name == "nt" else "npm"
 GITLEAKS = ROOT / ".cache/tooling" / ("gitleaks.exe" if os.name == "nt" else "gitleaks")
 
 
-def execute(args: list[str], cwd: Path = ROOT) -> tuple[int, Any, str]:
+def execute(
+    args: list[str], cwd: Path = ROOT, environment: dict[str, str] | None = None
+) -> tuple[int, Any, str]:
     try:
         result = subprocess.run(
             args,
@@ -32,6 +34,7 @@ def execute(args: list[str], cwd: Path = ROOT) -> tuple[int, Any, str]:
                 **os.environ,
                 "UV_CACHE_DIR": str(ROOT / ".cache/uv"),
                 "npm_config_cache": str(ROOT / ".cache/npm"),
+                **(environment or {}),
             },
         )
         try:
@@ -41,6 +44,32 @@ def execute(args: list[str], cwd: Path = ROOT) -> tuple[int, Any, str]:
         return result.returncode, data, result.stderr
     except (OSError, subprocess.TimeoutExpired):
         return -1, None, "execution_failed"
+
+
+def collect_bandit(targets: list[str]) -> tuple[int, Any, str]:
+    # Stevedore uses HOME on macOS and LOCALAPPDATA on Windows. Only this
+    # scanner child gets an owned home; no user cache/configuration is touched.
+    tool_home = ROOT / ".cache/bandit-home"
+    tool_home.mkdir(parents=True, exist_ok=True)
+    return execute(
+        [
+            sys.executable,
+            "-m",
+            "bandit",
+            "--recursive",
+            *targets,
+            "--format",
+            "json",
+            "--ignore-nosec",
+            "--quiet",
+        ],
+        environment={
+            "HOME": str(tool_home),
+            "USERPROFILE": str(tool_home),
+            "LOCALAPPDATA": str(tool_home / "local"),
+            "XDG_CACHE_HOME": str(tool_home / "cache"),
+        },
+    )
 
 
 def secret_result(code: int, data: Any, diagnostics: str) -> dict[str, Any]:
@@ -190,7 +219,7 @@ def scan(base: str, head: str) -> dict[str, Any]:
             from packaging.markers import Marker
             from packaging.utils import canonicalize_name
 
-            inventory = {}
+            inventory: dict[str, str] = {}
             for line in requirements.read_text().splitlines():
                 if not line or line[0].isspace() or line.startswith("#"):
                     continue
@@ -244,18 +273,7 @@ def scan(base: str, head: str) -> dict[str, Any]:
         )
         results["node"] = npm_result(npm[0], npm[1])
         targets = ["src", "tests", "scripts", "e2e", "desktop/tests/fixtures"]
-        bandit = execute(
-            [
-                sys.executable,
-                "-m",
-                "bandit",
-                "--recursive",
-                *targets,
-                "--format",
-                "json",
-                "--ignore-nosec",
-            ]
-        )
+        bandit = collect_bandit(targets)
         data = bandit[1]
         expected = {
             p.relative_to(ROOT).as_posix() for t in targets for p in (ROOT / t).rglob("*.py")
@@ -336,10 +354,10 @@ def scan(base: str, head: str) -> dict[str, Any]:
         ):
             results["secrets"] = {"status": "incomplete", "reason": "verified scanner missing"}
         else:
-            version = subprocess.run(
+            scanner_version = subprocess.run(
                 [str(GITLEAKS), "version"], capture_output=True, text=True, check=False
             )
-            if version.returncode or version.stdout.strip() != "8.30.1":
+            if scanner_version.returncode or scanner_version.stdout.strip() != "8.30.1":
                 raise ValueError("Gitleaks version mismatch")
             flags = [
                 "--config",

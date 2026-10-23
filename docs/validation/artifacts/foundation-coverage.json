@@ -1,0 +1,390 @@
+{
+  "python": {
+    "src/sage/__init__.py": {
+      "statements": [
+        0,
+        0
+      ],
+      "branches": [
+        0,
+        0
+      ],
+      "source_sha256": "fa35376eb1f2487dab70dc08150de6f16fb02f143f0cef6f2cd67475cc83ab59",
+      "trusted": true
+    },
+    "src/sage/__main__.py": {
+      "statements": [
+        113,
+        120
+      ],
+      "branches": [
+        21,
+        26
+      ],
+      "source_sha256": "8f725848ea4bbb8aeeff58c394f15419a8a31569f690144e0bd7f51e0bc0deea",
+      "trusted": true
+    },
+    "src/sage/actions.py": {
+      "statements": [
+        210,
+        211
+      ],
+      "branches": [
+        67,
+        68
+      ],
+      "source_sha256": "c34ab2afb75354bc8c774518988dda55f1db0980e4dd87e30122273ae69b23af",
+      "trusted": true
+    },
+    "src/sage/config.py": {
+      "statements": [
+        16,
+        16
+      ],
+      "branches": [
+        6,
+        6
+      ],
+      "source_sha256": "e4a7fdc2a409a92bdd929e8d13485127b143e58b583a93bdf1525e974f3af15c",
+      "trusted": true
+    },
+    "src/sage/contracts.py": {
+      "statements": [
+        95,
+        95
+      ],
+      "branches": [
+        8,
+        8
+      ],
+      "source_sha256": "e433b39acea2971d7f25d71210f1cc053cb2b294ea211e89cd7583485ec2110c",
+      "trusted": true
+    },
+    "src/sage/logging.py": {
+      "statements": [
+        5,
+        5
+      ],
+      "branches": [
+        0,
+        0
+      ],
+      "source_sha256": "a303ab95adf1c2c036ff116024f1004914456d8d1e97f44f13107e1d1b4f23f2",
+      "trusted": true
+    },
+    "src/sage/paths.py": {
+      "statements": [
+        15,
+        15
+      ],
+      "branches": [
+        2,
+        2
+      ],
+      "source_sha256": "982bfa32268543a2f747f0f328ff446b2eb0c8a098ef3879581207b4aa3c516d",
+      "trusted": true
+    },
+    "src/sage/protocol.py": {
+      "statements": [
+        101,
+        101
+      ],
+      "branches": [
+        20,
+        20
+      ],
+      "source_sha256": "b90d14ba5d94399df7d47617b87aab78b18a998954a8cb89a8f8e660c593ca0c",
+      "trusted": true
+    },
+    "src/sage/providers/__init__.py": {
+      "statements": [
+        0,
+        0
+      ],
+      "branches": [
+        0,
+        0
+      ],
+      "source_sha256": "02ac95c950bad8a0db5f3560dce59b486c134eaad0261c9f81f78145eb357685",
+      "trusted": true
+    },
+    "src/sage/providers/base.py": {
+      "statements": [
+        3,
+        3
+      ],
+      "branches": [
+        0,
+        0
+      ],
+      "source_sha256": "e73dbe433075e7f9508c292837593a1e198f0fd213d489fe5104de612e929077",
+      "trusted": true
+    },
+    "src/sage/providers/copilot.py": {
+      "statements": [
+        236,
+        253
+      ],
+      "branches": [
+        73,
+        82
+      ],
+      "source_sha256": "7f875487081c92ba4e1fd87eae4cb3a66720105eb3790ba29a0a73af529032f5",
+      "trusted": true
+    },
+    "src/sage/providers/protected_auth.py": {
+      "statements": [
+        190,
+        201
+      ],
+      "branches": [
+        69,
+        78
+      ],
+      "source_sha256": "201d23587b5c72a075b4e0a7d4dfbc25def6f969ff165867b34402f2d2a027c1",
+      "trusted": true
+    },
+    "src/sage/providers/session_store.py": {
+      "statements": [
+        129,
+        130
+      ],
+      "branches": [
+        59,
+        60
+      ],
+      "source_sha256": "50d4cd6b2a81c02984d1181741a0421846b99b44a6937e16ae3185b292c96f48",
+      "trusted": true
+    },
+    "src/sage/service.py": {
+      "statements": [
+        407,
+        426
+      ],
+      "branches": [
+        116,
+        126
+      ],
+      "source_sha256": "7e6927b77373da6ad05eef53091bf0774e93076dbfd3a3627a529e4b7b7520db",
+      "trusted": true
+    },
+    "src/sage/storage.py": {
+      "statements": [
+        138,
+        144
+      ],
+      "branches": [
+        34,
+        38
+      ],
+      "source_sha256": "814ead488bb4412e4582fea81b92d4691b9c58d3e342c74706bc40d866d2cdd6",
+      "trusted": true
+    }
+  },
+  "javascript": {
+    "desktop/main/copilot-account.ts": {
+      "statements": [
+        167,
+        178
+      ],
+      "branches": [
+        104,
+        118
+      ],
+      "source_sha256": "6bbec10f3d727ed31cfdcb17c7f058003c758b3ef9c95de9ab0f386e6f2e0a60",
+      "trusted": true
+    },
+    "desktop/main/core-launch.ts": {
+      "statements": [
+        9,
+        10
+      ],
+      "branches": [
+        6,
+        8
+      ],
+      "source_sha256": "9d0f764a5ccdcac682dcf5cdd1d5473ef5b42cbb6263e52949dacdfa3e7d597d",
+      "trusted": true
+    },
+    "desktop/main/core-process.ts": {
+      "statements": [
+        203,
+        229
+      ],
+      "branches": [
+        147,
+        171
+      ],
+      "source_sha256": "709f35c5009cb35e00cc3a0bef6d89d1c772d607156369bf1152fd12ab5bce16",
+      "trusted": true
+    },
+    "desktop/main/index.ts": {
+      "statements": [
+        45,
+        46
+      ],
+      "branches": [
+        9,
+        10
+      ],
+      "source_sha256": "bb74921e8323287873034e02fb89e8538047e2e2ff15bced5b5d781fd5f51662",
+      "trusted": true
+    },
+    "desktop/main/ipc.ts": {
+      "statements": [
+        23,
+        24
+      ],
+      "branches": [
+        15,
+        16
+      ],
+      "source_sha256": "c8d6294cb4f1828fa889d94838659027932606dc636b8a6395edd4dae0707e55",
+      "trusted": true
+    },
+    "desktop/main/security.ts": {
+      "statements": [
+        33,
+        35
+      ],
+      "branches": [
+        39,
+        41
+      ],
+      "source_sha256": "9ab883acdfd2b4ec1f293d16af3748fd0e0731bed34b67541a590127d34d2731",
+      "trusted": true
+    },
+    "desktop/preload/index.ts": {
+      "statements": [
+        15,
+        15
+      ],
+      "branches": [
+        6,
+        6
+      ],
+      "source_sha256": "1a20b1f89d1fa1b44f8639968f1e72e1e37e6f84ac610618dd994c6b8db3aa1c",
+      "trusted": true
+    },
+    "desktop/renderer/App.tsx": {
+      "statements": [
+        74,
+        92
+      ],
+      "branches": [
+        43,
+        62
+      ],
+      "source_sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8",
+      "trusted": false
+    },
+    "desktop/renderer/Conversation.tsx": {
+      "statements": [
+        58,
+        65
+      ],
+      "branches": [
+        39,
+        51
+      ],
+      "source_sha256": "2efd02bc71b8a657f0c3d5b5085bdb561988830fc788cf1057695d591d535895",
+      "trusted": false
+    },
+    "desktop/renderer/NoteReview.tsx": {
+      "statements": [
+        77,
+        78
+      ],
+      "branches": [
+        50,
+        56
+      ],
+      "source_sha256": "4996ff6dfd6677b2c4e4e6a2d7f21650b87ae9ad9eb92765a333d0a13a106f89",
+      "trusted": false
+    },
+    "desktop/renderer/Notes.tsx": {
+      "statements": [
+        37,
+        42
+      ],
+      "branches": [
+        10,
+        15
+      ],
+      "source_sha256": "961cf9dbec30cb0c33aa5208cd1c4d581d45eef5773e006482fe8551eb8972bb",
+      "trusted": false
+    },
+    "desktop/renderer/SafeMarkdown.tsx": {
+      "statements": [
+        10,
+        11
+      ],
+      "branches": [
+        11,
+        11
+      ],
+      "source_sha256": "7192865ca4943a08994658fa2b4f0d3cfc4c5295bb4a779c00467092c5933ad3",
+      "trusted": true
+    },
+    "desktop/renderer/Setup.tsx": {
+      "statements": [
+        90,
+        95
+      ],
+      "branches": [
+        42,
+        63
+      ],
+      "source_sha256": "58c71129476af61f796b08379c79ea335609d052e90dcd9e0c30cdaedaac39e9",
+      "trusted": false
+    },
+    "desktop/renderer/host.ts": {
+      "statements": [
+        14,
+        14
+      ],
+      "branches": [
+        6,
+        7
+      ],
+      "source_sha256": "c1b2464779f7ada711c0e1f26a5f8c7000b91711907188594c18cff3221accd7",
+      "trusted": true
+    },
+    "desktop/renderer/main.tsx": {
+      "statements": [
+        0,
+        1
+      ],
+      "branches": [
+        0,
+        0
+      ],
+      "source_sha256": "853c30b1221cc02d3acf08a0890cbe6b3ad6c14163d73eadbdee201a85cfbbef",
+      "trusted": false
+    },
+    "desktop/shared/contracts.ts": {
+      "statements": [
+        207,
+        212
+      ],
+      "branches": [
+        128,
+        132
+      ],
+      "source_sha256": "d527dfc795c4eed706b37371c506923f0a6d1152c4e75530106714170273799f",
+      "trusted": true
+    },
+    "desktop/shared/external-url.ts": {
+      "statements": [
+        6,
+        6
+      ],
+      "branches": [
+        11,
+        11
+      ],
+      "source_sha256": "504833c92d2e50b05b2111f220da0015381e3867ac29993ec979859795956d6f",
+      "trusted": true
+    }
+  }
+}

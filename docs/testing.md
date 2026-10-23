@@ -1,9 +1,9 @@
 # Foundation verification
 
-Provision in the checkout with Node 26.10.0 and Python 3.13.16:
+Provision in the checkout with Node 26.10.0 and Python 3.13.17:
 
 ```sh
-uv sync --locked --all-groups
+uv sync --locked --all-groups --python 3.13.17
 npm ci --include=dev
 uv run --locked --no-sync python scripts/provision_gitleaks.py
 npm run verify
@@ -55,16 +55,41 @@ Existing tests are retained and mapped instead of duplicated:
 | Accessible setup/readiness, keyboard review/edit/cancel, full literal preview, truthful saved/failed/interrupted UI, stale cancellation identity | existing desktop setup/conversation/note-review/notes/safe-markdown tests including Task 7 fixes; actual-host E2E |
 | Inert imports/no ambient side effects | `tests/unit/test_imports.py` fresh-process audit guard |
 | Static/security/redaction/completeness and rounding | `tests/unit/test_coverage_gate.py`, `tests/unit/test_security_gate.py`, `tests/security/test_release_surface.py`, aggregate tooling |
-| Native platform/protected package and live provider | Current native macOS host smoke/E2E only. Windows workflow is prepared, not executed evidence. Clean Windows/macOS protected package, real credential store/native SDK/live-provider checks remain explicit later gates. |
+| Native platform/protected package and live provider | Local macOS extracted production-fuse/frozen-core evidence is recorded in foundation results. Windows workflow is source, not execution. Clean-machine, real credential-store/native SDK/live-provider checks remain explicit gates. |
 
 ## Security reports and policy
 
 `scripts/verify_security.py` exports all Python dependency groups with hashes from `uv.lock`, verifies the selected platform's package versions against the lock and installed environment, and runs strict hash-requiring pip-audit with resolution disabled. It audits the complete npm lock tree including development/optional/peer build dependencies. Missing JSON, tool/network failures, skipped/missing inventory and unknown Python advisory severity fail closed. No advisory is silently assigned a low severity.
 
-Bandit scans all maintained Python under src/tests/scripts/e2e/desktop fixtures with `--ignore-nosec`; ESLint's installed security rules scan all maintained JS/TS, including host/preload. Reports retain all lower static findings and security hotspots with their original rules/locations. Bandit High findings block. Lower Bandit severities and ESLint heuristic hotspots are visible review work under the approved no-untriaged-High/Critical threshold; a passing scan is not a zero-findings claim or an owner-accepted exception. A known reachable High/Critical cannot be waived by this script. Actual exceptions require finding-specific applicability, owner acceptance and expiry; none is supplied by default.
+Bandit scans all maintained Python under src/tests/scripts/e2e/desktop fixtures with `--ignore-nosec` and `--quiet`; informational progress is disabled so the JSON remains parseable above 50 files, while all metrics and lower findings remain. Its scanner-only home/cache roots are project-owned. ESLint's installed security rules scan all maintained JS/TS, including host/preload. Reports retain all lower static findings and security hotspots with their original rules/locations. Bandit High findings block. Lower Bandit severities and ESLint heuristic hotspots are visible review work under the approved no-untriaged-High/Critical threshold; a passing scan is not a zero-findings claim or an owner-accepted exception. A known reachable High/Critical cannot be waived by this script. Actual exceptions require finding-specific applicability, owner acceptance and expiry; none is supplied by default.
 
 Gitleaks scans the current tree including untracked maintained source and tests, the validated committed base..head range, and the complete staged contents of every added/changed index file when present. Staged full-file scanning is stronger than added-lines-only scanning; deletions are not restored. Its explicit allowlist contains only dependency/build/generated/cache/report trees. Inline allow comments are disabled, an owned empty ignore directory prevents implicit `.gitleaksignore`/baseline suppression, and a runtime-constructed synthetic token proves detection plus redaction. No maintained test/source tree is excluded. Raw scanner output/diagnostics stay in memory; only allowlisted metadata is written to `coverage/security.json`. Values, matches, source snippets, author/email/message fields and raw errors are never persisted. Findings or incomplete scans return nonzero.
 
 Gitleaks' default rule set differs from the earlier bounded literal-credential scanner. The existing Task 8 synthetic environment-secret test remains unchanged and its earlier bounded finding remains separately recorded; formal current-tree cleanliness does not erase that result. Generated Python bytecode is excluded explicitly, after the initial formal scan detected compiled synthetic fixtures. Known historical exposure in deleted original root `test.py` is reported separately and remains unresolved; no original literals/history are fetched or printed, and deletion/current-tree cleanliness does not prove revocation.
 
 The PR workflow uses verified immutable official action commits, read-only contents permission, no persisted checkout credentials or repository secrets, and no publishing/dispatch. macOS/Windows artifacts include only explicit sanitized security/verification/coverage reports. Source workflow configuration is not Windows execution evidence. Native binary integrity/signatures/licenses and embedded binary vulnerabilities require the separate package inventory; pip/npm audits do not certify them.
+
+
+## Native package checks
+
+The application-directory core is built natively with CPython 3.13.17, PyInstaller 6.22.3 and hooks-contrib 2026.9. Use a separate project-owned build environment containing only runtime dependencies and the `build` group; a development environment can cause optional test/lint modules to enter PyInstaller analysis. The archive module allowlist fails on unexpected modules instead of silently shipping them.
+
+Provisioning is an explicit network build step, never launch behavior. In a fresh checkout, `python scripts/provision_package.py` uses the pinned SDK's supported `python -m copilot download-runtime` route and checksum-pinned official gh ZIPs. It preserves the whole selected native platform tree and applicable notices, plus source inventory. Existing staging is never replaced implicitly. The selected resources are copied unchanged outside PyInstaller and ASAR. Upstream bundled plugins/assets are retained for byte integrity; empty-mode session policy disables ambient execution.
+
+For example, POSIX shells can create the clean environment with:
+
+```sh
+UV_PROJECT_ENVIRONMENT="$PWD/.runtime/build-venv" uv sync --locked --no-dev --group build --python 3.13.17
+.runtime/build-venv/bin/python scripts/build_core.py --output .runtime/package/core
+.runtime/build-venv/bin/python -m scripts.stage_package
+```
+
+Keep UV runtime/bin/cache variables project-scoped as in the development setup; Windows uses `.runtime/build-venv/Scripts/python.exe` and its shell's environment-variable syntax. Native platform workflow source prepares these steps but is not completed platform evidence.
+
+Build with `python scripts/build_core.py --output .runtime/package/core`, then `python -m scripts.stage_package` from the repository root with the clean build interpreter. Stage additionally needs the locked `node_modules` tree for host notices and npm's production dependency BOM. The output directory must be new. Run `npm run make` to create the OS-native local artifact; this has no updater or publish step, signing identity discovery, or notarization configuration. Windows must build and test on Windows. No registry, system PATH, loader state or global configuration workaround is introduced.
+
+Run `node scripts/check_package.ts APP_PATH build/resource-manifest.json` against the actual app directory, then `node scripts/smoke_package.mjs RESOURCES_PATH`. The former inspects the actual ASAR for private test composition/credential patterns, reads production fuses, and compares every selected external file's path/type/size/SHA-256/mode/link against staging. It permits only the known host `app.asar`/`electron.icns` resources outside that baseline; ASAR content is inspected separately. The latter uses Node overlapped pipes to launch the actual frozen core with an allowlisted environment, no PATH/developer Python, and an owned temporary root; it saves a synthetic local note, restarts, verifies exact persistence and checks truthful local-inference unavailability. It makes zero cloud calls. Repeat both after ZIP extraction, and compare signatures/whole-container inventory separately. These checks are not a Windows or clean-machine certificate.
+
+The trusted core-only `--self-check` accepts no service options and emits exactly one bounded length-prefixed JSON frame then exits. It records runtime/SDK metadata and the same identity-context factory's offline TLS store/default-path/verification properties without storage, accounts, helpers, native runtime or network. Invoke it with the host's fresh child environment; local diagnostic paths remain local evidence. CA count does not prove an authenticated endpoint handshake. Python identity TLS and Copilot/gh/Electron native trust are separate domains.
+
+Packaging negative regressions cover missing executable, source tampering, unexpected native/private files, changed modes and escaping/nonportable links, optional developer modules, and actual ASAR test/credential injection. The fixed native resources and final archive remain subject to signature, license, native vulnerability and actual platform checks. No owner signing credentials were sought. [Foundation results](validation/foundation-results.md) records PASS/FAIL/SKIP and remaining gates.

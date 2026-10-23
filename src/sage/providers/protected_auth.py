@@ -32,6 +32,11 @@ LOGIN = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?", re.ASCII)
 TOKEN = re.compile(r"gh[ou]_[A-Za-z0-9]{1,251}", re.ASCII)
 
 
+def identity_context() -> ssl.SSLContext:
+    """Default platform trust for the fixed protected identity socket."""
+    return ssl.create_default_context()
+
+
 def platform_key() -> str:
     machine = platform.machine().lower()
     return f"{sys.platform}-" + {
@@ -288,7 +293,7 @@ class ProtectedSource:
                 reader, writer = await asyncio.open_connection(
                     "api.github.com",
                     443,
-                    ssl=ssl.create_default_context(),
+                    ssl=identity_context(),
                     server_hostname="api.github.com",
                     limit=8192,
                 )
