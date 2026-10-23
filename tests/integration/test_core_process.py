@@ -42,6 +42,7 @@ def test_process_shutdown_releases_resources(tmp_path: Path) -> None:
         assert report["code"] == 0
         assert report["trailingBytes"] == 0
         assert report["hasTraceback"] is False
+        assert report["hasBody"] is False
         assert [frame["id"] for frame in frames] == ["p", "shutdown"]
         assert all(frame["kind"] == "response" for frame in frames)
         database = tmp_path / "data" / "sage.sqlite3"

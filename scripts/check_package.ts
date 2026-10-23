@@ -1,5 +1,11 @@
 /** Inspect the actual ASAR, production fuse wire, and external resource baseline. */
-import { extractFile, listPackage, statFile, uncache } from "@electron/asar";
+import {
+  extractFile,
+  getRawHeader,
+  listPackage,
+  statFile,
+  uncache,
+} from "@electron/asar";
 import { getCurrentFuseWire, FuseV1Options } from "@electron/fuses";
 import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
@@ -14,8 +20,35 @@ export function canonicalArchiveEntry(
   return platform === "win32" ? name.replaceAll("\\", "/") : name;
 }
 
+export function validateRawArchiveHeader(header: unknown): Set<string> {
+  const names = new Set<string>();
+  const walk = (node: unknown, parents: string[]): void => {
+    if (typeof node !== "object" || node === null || !("files" in node))
+      throw Error("Unsafe application archive");
+    const files = node.files;
+    if (typeof files !== "object" || files === null || Array.isArray(files))
+      throw Error("Unsafe application archive");
+    for (const [part, entry] of Object.entries(files)) {
+      // Check header components before path.join can flatten Windows aliases.
+      if (!part || part === "." || part === ".." || /[\\/\0]/u.test(part))
+        throw Error("Unsafe application archive");
+      const path = `/${[...parents, part].join("/")}`;
+      const canonical = canonicalArchiveEntry(path);
+      if (names.has(canonical)) throw Error("Unsafe application archive");
+      names.add(canonical);
+      if (typeof entry !== "object" || entry === null)
+        throw Error("Unsafe application archive");
+      if ("files" in entry) walk(entry, [...parents, part]);
+    }
+  };
+  walk(header, []);
+  return names;
+}
+
 export function validateArchive(archive: string): void {
   uncache(archive);
+  const headerNames = validateRawArchiveHeader(getRawHeader(archive).header);
+  const listedNames = new Set<string>();
   const directories = new Set([
     "/.vite",
     "/.vite/build",
@@ -31,6 +64,9 @@ export function validateArchive(archive: string): void {
   ]);
   for (const rawName of listPackage(archive, { isPack: false })) {
     const name = canonicalArchiveEntry(rawName);
+    if (!headerNames.has(name) || listedNames.has(name))
+      throw Error("Unsafe application archive");
+    listedNames.add(name);
     const entry = statFile(archive, rawName.slice(1), false);
     if ("link" in entry || entry.unpacked)
       throw Error("Unsafe application archive");
@@ -56,6 +92,8 @@ export function validateArchive(archive: string): void {
     )
       throw Error("Unsafe application archive");
   }
+  if (listedNames.size !== headerNames.size)
+    throw Error("Unsafe application archive");
 }
 async function main(): Promise<void> {
   const app = resolve(process.argv[2]);

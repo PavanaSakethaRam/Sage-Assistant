@@ -17,11 +17,20 @@ def checkout_with_autocrlf(tmp_path: Path, path: Path, source: bytes) -> tuple[b
     repo.mkdir()
     template = tmp_path / "empty-git-template"
     template.mkdir()
-    environment = os.environ.copy()
+    home = tmp_path / "git-home"
+    home.mkdir()
+    xdg = tmp_path / "git-xdg"
+    xdg.mkdir()
+    environment = {
+        key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")
+    }
     environment.update(
         GIT_CONFIG_GLOBAL=os.devnull,
         GIT_CONFIG_NOSYSTEM="1",
         GIT_TEMPLATE_DIR=str(template),
+        HOME=str(home),
+        USERPROFILE=str(home),
+        XDG_CONFIG_HOME=str(xdg),
     )
 
     def git(*args: str) -> bytes:
@@ -70,3 +79,55 @@ def test_vendor_notice_survives_git_autocrlf_checkout(tmp_path: Path) -> None:
 def test_formatted_sources_keep_lf_in_windows_checkout(tmp_path: Path, path: str) -> None:
     staged, checked_out = checkout_with_autocrlf(tmp_path, Path(path), b"synthetic\n")
     assert staged == checked_out == b"synthetic\n"
+
+
+def test_checkout_ignores_inherited_git_overrides_and_preserves_owned_sentinel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sentinel = tmp_path / "owned-sentinel"
+    sentinel.mkdir()
+    template = tmp_path / "sentinel-template"
+    template.mkdir()
+    home = tmp_path / "sentinel-home"
+    home.mkdir()
+    xdg = tmp_path / "sentinel-xdg"
+    xdg.mkdir()
+    clean_env = {
+        key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")
+    }
+    clean_env.update(
+        GIT_CONFIG_GLOBAL=os.devnull,
+        GIT_CONFIG_NOSYSTEM="1",
+        GIT_TEMPLATE_DIR=str(template),
+        HOME=str(home),
+        USERPROFILE=str(home),
+        XDG_CONFIG_HOME=str(xdg),
+    )
+    subprocess.run(["git", "-C", str(sentinel), "init", "--quiet"], env=clean_env, check=True)
+    marker = sentinel / "owner.txt"
+    marker.write_text("owned sentinel\n")
+    subprocess.run(
+        ["git", "-C", str(sentinel), "add", "--", "owner.txt"],
+        env=clean_env,
+        check=True,
+    )
+    protected = [marker, sentinel / ".git/config", sentinel / ".git/index"]
+    before = [hashlib.sha256(path.read_bytes()).hexdigest() for path in protected]
+    for key, value in {
+        "GIT_DIR": str(sentinel / ".git"),
+        "GIT_COMMON_DIR": str(sentinel / ".git"),
+        "GIT_WORK_TREE": str(sentinel),
+        "GIT_INDEX_FILE": str(sentinel / ".git/index"),
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "core.autocrlf",
+        "GIT_CONFIG_VALUE_0": "false",
+    }.items():
+        monkeypatch.setenv(key, value)
+    (tmp_path / "target").mkdir()
+    try:
+        staged, checked_out = checkout_with_autocrlf(
+            tmp_path / "target", Path("desktop/main/index.ts"), b"synthetic\n"
+        )
+        assert staged == checked_out == b"synthetic\n"
+    finally:
+        assert [hashlib.sha256(path.read_bytes()).hexdigest() for path in protected] == before

@@ -45,6 +45,33 @@ test("ASAR entries use one portable spelling for admission checks", async () => 
   );
 });
 
+test("crafted ASAR header cannot alias an allowlisted file or traverse", async () => {
+  const { validateRawArchiveHeader } =
+    await import("../../scripts/check_package");
+  const header = {
+    files: {
+      ".vite": {
+        files: { build: { files: { "main.cjs": { offset: "0", size: 0 } } } },
+      },
+    },
+  };
+  expect(() => validateRawArchiveHeader(header)).not.toThrow();
+  for (const hidden of [
+    ".vite\\build\\main.cjs",
+    ".vite/build/main.cjs",
+    "..",
+    ".",
+  ]) {
+    const crafted = structuredClone(header) as {
+      files: Record<string, unknown>;
+    };
+    crafted.files[hidden] = { offset: "0", size: 0, private: "__sageE2E" };
+    expect(() => validateRawArchiveHeader(crafted)).toThrow(
+      "Unsafe application archive",
+    );
+  }
+});
+
 test("actual ASAR inspection rejects private test composition and credential patterns", async () => {
   const { validateArchive } = await import("../../scripts/check_package");
   const root = await mkdtemp(join(tmpdir(), "sage-asar-negative-"));

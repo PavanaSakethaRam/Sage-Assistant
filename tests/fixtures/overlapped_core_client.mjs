@@ -1,6 +1,7 @@
 // Windows integration fixture: Node gives the child the same overlapped stdio
 // handles as the desktop host. Only synthetic, fixed requests are sent.
 import { spawn } from "node:child_process";
+import { createStderrSummary } from "./stderr_summary.mjs";
 
 const [python, source, root, scenario] = process.argv.slice(2);
 if (
@@ -33,7 +34,7 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 }
 const deadline = setTimeout(stop, 10_000);
 let bytes = Buffer.alloc(0);
-let stderr = Buffer.alloc(0);
+const stderrSummary = createStderrSummary();
 const frames = [];
 let wake;
 child.stdout.on("data", (part) => {
@@ -47,7 +48,7 @@ child.stdout.on("data", (part) => {
   }
 });
 child.stderr.on("data", (part) => {
-  stderr = Buffer.concat([stderr, part]).subarray(0, 8192);
+  stderrSummary.push(part);
 });
 function nextFrame(count) {
   if (frames.length >= count) return Promise.resolve();
@@ -91,25 +92,12 @@ try {
     await nextFrame(1);
   }
   const code = await closed;
-  const diagnostic = stderr.toString("utf8");
   process.stdout.write(
     JSON.stringify({
       code,
       frames,
       trailingBytes: bytes.length,
-      hasTraceback: diagnostic.includes("Traceback"),
-      hasSecret: diagnostic.includes("SYNTHETIC_SECRET"),
-      diagnostics: diagnostic
-        .split(/\r?\n/)
-        .filter((line) =>
-          [
-            "core_started",
-            "core_stopped",
-            "startup_failed",
-            "transport_failed",
-            "invalid_frame",
-          ].includes(line),
-        ),
+      ...stderrSummary.result(),
     }),
   );
 } catch (error) {
