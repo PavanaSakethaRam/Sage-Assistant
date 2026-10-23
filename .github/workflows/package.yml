@@ -70,7 +70,9 @@ jobs:
           $app = Get-ChildItem out -Directory -Filter 'Sage-*' | Select-Object -First 1
           $resources = if ($IsMacOS) { Join-Path $app.FullName 'Sage.app/Contents/Resources' } else { Join-Path $app.FullName 'resources' }
           node scripts/smoke_package.mjs $resources
+      # Uploading bundled binaries is an explicit opt-in pending redistribution review.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ vars.SAGE_UPLOAD_UNRELEASED_ZIPS == 'true' }}
         with:
           name: unreleased-portable-zip-${{ matrix.os }}
           path: |
