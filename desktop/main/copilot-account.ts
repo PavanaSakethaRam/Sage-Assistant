@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { lstat, mkdir, readFile, readdir } from "node:fs/promises";
 import { dirname, isAbsolute, join } from "node:path";
+import { isolatedChildEnv } from "./child-env";
 export type SelectedAccount = { host: "github.com"; login: string };
 export type SelectionFrame = {
   version: 1;
@@ -157,8 +158,7 @@ async function metadata(
       env[key] = path;
     }
     env.TMP = env.TEMP = env.TMPDIR;
-    for (const key of ["SystemRoot", "WINDIR"])
-      if (process.env[key]) env[key] = process.env[key];
+    const childEnv = isolatedChildEnv(env);
     if (signal.aborted) return null;
     return await new Promise<string | null>((resolve) => {
       const child = spawn(
@@ -166,7 +166,7 @@ async function metadata(
         ["config", "get", "user", "--host", "github.com"],
         {
           cwd: root,
-          env,
+          env: childEnv,
           shell: false,
           windowsHide: true,
           detached: process.platform !== "win32",

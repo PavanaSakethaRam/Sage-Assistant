@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { mkdtemp, rm, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { isolatedChildEnv } from "../desktop/main/child-env.ts";
 
 async function deadline(promise, milliseconds) {
   let timer;
@@ -177,14 +178,12 @@ async function main() {
   let session;
   try {
     await mkdir(join(root, "tmp"));
-    const env = {
+    const env = isolatedChildEnv({
       LANG: "C.UTF-8",
       TMPDIR: join(root, "tmp"),
       TMP: join(root, "tmp"),
       TEMP: join(root, "tmp"),
-    };
-    for (const key of ["SystemRoot", "WINDIR"])
-      if (process.env[key]) env[key] = process.env[key];
+    });
     session = launch(resources, root, env);
     const settings = await request(session, "settings.get");
     if (settings.ai_mode !== "local") throw Error("Unexpected package default");

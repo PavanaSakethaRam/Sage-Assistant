@@ -183,8 +183,10 @@ subprocessIt(
       ]);
       expect(observed.env.GH_CONFIG_DIR).toMatch(/synthetic-config$/);
       expect(observed.env.XDG_DATA_HOME).toMatch(/owned[\\/]data$/);
+      expect(observed.env.PATH).toBe(
+        process.platform === "win32" ? "" : undefined,
+      );
       for (const key of [
-        "PATH",
         "HOME",
         "GITHUB_TOKEN",
         "GH_TOKEN",
@@ -197,6 +199,39 @@ subprocessIt(
       expect(await f.broker.disconnect()).toEqual({ status: "cleared" });
     } finally {
       f.restore();
+    }
+  },
+);
+subprocessIt(
+  "real metadata child has no inherited Windows identity or lookup defaults",
+  async () => {
+    const blocked = [
+      "PATH",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOGONSERVER",
+      "USERDOMAIN",
+      "USERNAME",
+      "USERPROFILE",
+    ] as const;
+    const before = Object.fromEntries(
+      blocked.map((key) => [key, process.env[key]]),
+    );
+    const f = await fixture("synthetic-user\n");
+    try {
+      for (const key of blocked) process.env[key] = `synthetic-parent-${key}`;
+      expect(await f.broker.choose()).toEqual({ status: "selected" });
+      const env = JSON.parse(await readFile(f.record, "utf8")).env;
+      for (const key of blocked)
+        expect(env[key]).toBe(process.platform === "win32" ? "" : undefined);
+      expect(env.TEMP).toMatch(/owned[\\/]tmp$/);
+    } finally {
+      f.restore();
+      for (const key of blocked) {
+        const value = before[key];
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
     }
   },
 );

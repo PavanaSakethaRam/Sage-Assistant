@@ -71,7 +71,7 @@ async function fake(mode = "normal") {
  if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',diagnostic:null,explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
  if(mode==='saturated-selection'&&r.kind==='request'&&r.method==='settings.get'){held.push(r);fs.writeFileSync(root+'/held',String(held.length));continue;}
  if(r.kind==='host_copilot_selection'){if(mode==='control-overlap'&&r.account){fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');heldSelection=r;fs.writeFileSync(root+'/selection-held','1');continue;}if(mode==='control-overlap'&&heldSelection){send({version:1,id:heldSelection.id,kind:'response',result:{generation:heldSelection.generation,status:'selected'}});heldSelection=undefined;}if(mode==='saturated-selection'){selected=r.account;fs.writeFileSync(root+'/selected',JSON.stringify(selected));if(!selected){fs.writeFileSync(root+'/disposed',String(held.length));for(const old of held.splice(0))send({version:1,id:old.id,kind:'error',code:'cancelled'});}}fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');result={generation:mode==='selection-mismatch'?r.generation+1:r.generation,status:r.account?'selected':'cleared'};}
- if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME)) result.ai_mode='bad';
+ if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME||process.env.HOMEDRIVE||process.env.HOMEPATH||process.env.LOGONSERVER||process.env.USERDOMAIN||process.env.USERNAME||process.env.USERPROFILE)) result.ai_mode='bad';
  const answer={version:['protocol','stubborn'].includes(mode)?2:1,id:r.id,kind:'response',result};
  if(mode==='late'&&r.id==='slow') setTimeout(()=>send(answer),70);else send(answer);
  if(r.method==='app.shutdown') {process.stdin.pause();process.exit(0);}
@@ -164,8 +164,22 @@ it("derives deployment solely from trusted project/resources locations", () => {
 subprocessIt(
   "correlates concurrent IDs, disallows reuse and strips ambient credentials/environment",
   async () => {
-    const before = process.env.GITHUB_TOKEN;
+    const blocked = [
+      "GITHUB_TOKEN",
+      "PATH",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOGONSERVER",
+      "USERDOMAIN",
+      "USERNAME",
+      "USERPROFILE",
+    ] as const;
+    const before = Object.fromEntries(
+      blocked.map((key) => [key, process.env[key]]),
+    );
     process.env.GITHUB_TOKEN = "SYNTHETIC_SECRET";
+    for (const key of blocked)
+      if (key !== "GITHUB_TOKEN") process.env[key] = `synthetic-parent-${key}`;
     try {
       const core = await fake("environment");
       const out = await Promise.all([
@@ -179,8 +193,11 @@ subprocessIt(
         code: "duplicate_id",
       });
     } finally {
-      if (before === undefined) delete process.env.GITHUB_TOKEN;
-      else process.env.GITHUB_TOKEN = before;
+      for (const key of blocked) {
+        const value = before[key];
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
     }
   },
 );

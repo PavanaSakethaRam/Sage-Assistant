@@ -3,6 +3,7 @@ import { spawn, type ChildProcessByStdio } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { Readable, Writable } from "node:stream";
+import { isolatedChildEnv } from "./child-env";
 import type { CoreOptions } from "./core-process";
 export function launchCore(
   options: CoreOptions,
@@ -10,14 +11,12 @@ export function launchCore(
   mkdirSync(options.dataDir, { recursive: true, mode: 0o700 });
   const temporary = join(options.dataDir, "tmp");
   mkdirSync(temporary, { recursive: true, mode: 0o700 });
-  const env: NodeJS.ProcessEnv = {
+  const env = isolatedChildEnv({
     LANG: "C.UTF-8",
     TMPDIR: temporary,
     TMP: temporary,
     TEMP: temporary,
-  };
-  for (const key of ["SystemRoot", "WINDIR"])
-    if (process.env[key]) env[key] = process.env[key];
+  });
   const args = [
     ...(options.pythonModule ? ["-I", "-m", "sage"] : []),
     "--root",

@@ -30,10 +30,10 @@ def check_entry_type(info: zipfile.ZipInfo) -> None:
     directory = info.is_dir()
     file_type = stat.S_IFMT(info.external_attr >> 16)
     allowed = (0, stat.S_IFDIR) if directory else (0, stat.S_IFREG)
-    # DOS attributes are commonly in the low bits; Windows ZIP creators may
-    # also place them in the upper word used for POSIX modes elsewhere.
+    # CPython sets create_system=0 on Windows but still writes st_mode to the
+    # upper word. Treat that word as DOS attributes only without a POSIX type.
     dos_attributes = info.external_attr & 0xFFFF
-    if info.create_system == 0:
+    if info.create_system == 0 and file_type == 0:
         dos_attributes |= info.external_attr >> 16
     if (
         file_type not in allowed

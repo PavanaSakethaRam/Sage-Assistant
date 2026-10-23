@@ -41,6 +41,21 @@ def test_exact_zip_inventory_accepts_windows_file_and_directory_metadata(tmp_pat
     assert verify(appdir, archive) == 2
 
 
+def test_exact_zip_inventory_accepts_windows_creator_with_posix_stat_mode(tmp_path: Path) -> None:
+    appdir, archive = package(tmp_path)
+    with zipfile.ZipFile(archive, "w") as zipped:
+        for name, body, mode in (
+            (".hidden", b"dot file", stat.S_IFREG | 0o666),
+            ("nested/", b"", stat.S_IFDIR | 0o777),
+            ("nested/body.txt", b"nested body", stat.S_IFREG | 0o666),
+        ):
+            info = zipfile.ZipInfo(name)
+            info.create_system = 0
+            info.external_attr = mode << 16
+            zipped.writestr(info, body)
+    assert verify(appdir, archive) == 2
+
+
 @pytest.mark.parametrize("name", ["nested/body.txt", "nested/"])
 def test_zip_inventory_rejects_archive_symlink_even_when_bytes_match(
     tmp_path: Path, name: str
