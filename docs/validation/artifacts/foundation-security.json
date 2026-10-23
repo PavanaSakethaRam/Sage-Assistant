@@ -6230,7 +6230,7 @@
   },
   "eslint": {
     "status": "pass",
-    "files": 54,
+    "files": 55,
     "findings": [
       {
         "rule": "security/detect-unsafe-regex",
@@ -6723,67 +6723,123 @@
         "source_sha256": "037eb7f4de77d4ed33e0dabb96593e887c47107ecb1647b9bde2ce9ab0f2d625"
       },
       {
-        "rule": "security/detect-object-injection",
-        "path": "scripts/check_package.ts",
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package-smoke.test.ts",
         "line": 49,
         "triage": "hotspot_requires_review",
-        "source_sha256": "f6ee0675339a53448fb85db9b497a4adb7a0789e0ed57e99acd8f916b31e544a"
+        "source_sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package-smoke.test.ts",
+        "line": 51,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package-smoke.test.ts",
+        "line": 87,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package-smoke.test.ts",
+        "line": 116,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package-smoke.test.ts",
+        "line": 132,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package-smoke.test.ts",
+        "line": 143,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package.test.ts",
+        "line": 20,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package.test.ts",
+        "line": 21,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package.test.ts",
+        "line": 44,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package.test.ts",
+        "line": 68,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "desktop/tests/package.test.ts",
+        "line": 69,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
       },
       {
         "rule": "security/detect-object-injection",
         "path": "scripts/check_package.ts",
-        "line": 54,
+        "line": 73,
         "triage": "hotspot_requires_review",
-        "source_sha256": "f6ee0675339a53448fb85db9b497a4adb7a0789e0ed57e99acd8f916b31e544a"
+        "source_sha256": "4eeb7c24e18731b07953f0c68a00233b9ba369290ea6ab2694c29223d723f338"
+      },
+      {
+        "rule": "security/detect-object-injection",
+        "path": "scripts/check_package.ts",
+        "line": 78,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "4eeb7c24e18731b07953f0c68a00233b9ba369290ea6ab2694c29223d723f338"
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
         "path": "scripts/smoke_package.mjs",
-        "line": 9,
+        "line": 179,
         "triage": "hotspot_requires_review",
-        "source_sha256": "104483b022fa7e92736b53029d247fe49811b13856accce1f8ee866a32bbcc89"
+        "source_sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
       },
       {
         "rule": "security/detect-object-injection",
         "path": "scripts/smoke_package.mjs",
-        "line": 17,
+        "line": 187,
         "triage": "hotspot_requires_review",
-        "source_sha256": "104483b022fa7e92736b53029d247fe49811b13856accce1f8ee866a32bbcc89"
+        "source_sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
       },
       {
         "rule": "security/detect-object-injection",
         "path": "scripts/smoke_package.mjs",
-        "line": 17,
+        "line": 187,
         "triage": "hotspot_requires_review",
-        "source_sha256": "104483b022fa7e92736b53029d247fe49811b13856accce1f8ee866a32bbcc89"
+        "source_sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
       },
       {
         "rule": "security/detect-object-injection",
         "path": "scripts/smoke_package.mjs",
-        "line": 17,
+        "line": 187,
         "triage": "hotspot_requires_review",
-        "source_sha256": "104483b022fa7e92736b53029d247fe49811b13856accce1f8ee866a32bbcc89"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "desktop/tests/package.test.ts",
-        "line": 23,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "desktop/tests/package.test.ts",
-        "line": 24,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "desktop/tests/package.test.ts",
-        "line": 28,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
+        "source_sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
       }
     ]
   },
@@ -6823,11 +6879,11 @@
     "status": "pass",
     "path": "desktop/tests/package.test.ts",
     "change": "ASAR cleanup preserved; added portable ZIP-only release-maker regression",
-    "focused_test": "2 passed",
+    "focused_test": "Task10 I1/I2 follow-up recorded separately; prior aggregate preserved",
     "typescript": "pass",
     "eslint": "pass",
     "prettier": "pass",
-    "source_sha256": "1cf6caa339e601f011ef0326053578ff815cb3cb5800cd6dd25abdc1a74d04ed"
+    "source_sha256": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6"
   },
   "portable_zip_policy": {
     "focused_package_tests": 2,
@@ -6836,5 +6892,20 @@
     "production_dependency_entries_unchanged": 88,
     "removed_build_packages": 32,
     "lock_sha256": "d6bdf7a1f2895c14b5a24d8e4c9c1fc2dfccc35e1aeca8e276cfbbdd646ac344"
+  },
+  "task10_review_fix": {
+    "base": "12f8eeb56c68c2b44c6936147e97e4fa22e36332",
+    "scope": [
+      "Task10I1 closed ASAR admission",
+      "Task10I2 awaited smoke failure and bounded cleanup"
+    ],
+    "static_collection": "Four affected files only; prior unchanged findings retained",
+    "affected_sources": {
+      "scripts/check_package.ts": "4eeb7c24e18731b07953f0c68a00233b9ba369290ea6ab2694c29223d723f338",
+      "scripts/smoke_package.mjs": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2",
+      "desktop/tests/package.test.ts": "3ba21dacf9889d9fba882bf699a558fc868e1aa554f8363f4424c20d94d42fe6",
+      "desktop/tests/package-smoke.test.ts": "a22b67da327a61c7bfe2e526ee75b72acef6245b0a02d813897e3778ac0193c8"
+    },
+    "broad_aggregate_or_audit_rerun": false
   }
 }

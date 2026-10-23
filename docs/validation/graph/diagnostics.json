@@ -1,26 +1,26 @@
 {
-  "node_count": 509,
+  "node_count": 511,
   "unverified_node_count": 0,
-  "raw_edge_count": 1450,
+  "raw_edge_count": 1462,
   "non_object_edges": 0,
   "missing_endpoint_edges": 0,
   "dangling_endpoint_edges": 134,
-  "external_reference_edges": 49,
+  "external_reference_edges": 48,
   "self_loop_edges": 5,
-  "valid_candidate_edges": 1267,
+  "valid_candidate_edges": 1280,
   "exact_duplicate_edges": 1,
-  "directed_unique_endpoint_pairs": 1201,
-  "directed_same_endpoint_collapsed_edges": 66,
-  "undirected_unique_endpoint_pairs": 1198,
-  "undirected_same_endpoint_collapsed_edges": 69,
-  "same_endpoint_group_count": 64,
-  "relation_variant_groups": 51,
+  "directed_unique_endpoint_pairs": 1212,
+  "directed_same_endpoint_collapsed_edges": 68,
+  "undirected_unique_endpoint_pairs": 1209,
+  "undirected_same_endpoint_collapsed_edges": 71,
+  "same_endpoint_group_count": 65,
+  "relation_variant_groups": 52,
   "source_file_variant_groups": 0,
   "source_location_variant_groups": 8,
   "context_variant_groups": 4,
   "post_build_graph_type": "Graph",
-  "post_build_node_count": 564,
-  "post_build_edge_count": 1380,
+  "post_build_node_count": 565,
+  "post_build_edge_count": 1390,
   "post_build_error": "",
   "producer_suppression": {
     "path": "<graphify-package>/extract.py",
@@ -103,6 +103,29 @@
   },
   "examples": [
     {
+      "source": "scripts_smoke_package_launch",
+      "target": "scripts_smoke_package_launch_finish",
+      "edge_count": 3,
+      "relations": [
+        "calls",
+        "contains",
+        "indirect_call"
+      ],
+      "source_files": [
+        "scripts/smoke_package.mjs"
+      ],
+      "source_locations": [
+        "L66",
+        "L72",
+        "L75"
+      ],
+      "contexts": [
+        "",
+        "argument",
+        "call"
+      ]
+    },
+    {
       "source": "src_sage_main_run",
       "target": "src_sage_main_run_backend",
       "edge_count": 3,
@@ -182,25 +205,6 @@
       ],
       "contexts": [
         "import"
-      ]
-    },
-    {
-      "source": "desktop_main_security",
-      "target": "desktop_shared_external_url",
-      "edge_count": 2,
-      "relations": [
-        "imports_from",
-        "re_exports"
-      ],
-      "source_files": [
-        "desktop/main/security.ts"
-      ],
-      "source_locations": [
-        "L106"
-      ],
-      "contexts": [
-        "export",
-        "re-export"
       ]
     }
   ]

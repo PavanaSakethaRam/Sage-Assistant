@@ -1,5 +1,5 @@
 /** Inspect the actual ASAR, production fuse wire, and external resource baseline. */
-import { extractFile, listPackage, uncache } from "@electron/asar";
+import { extractFile, listPackage, statFile, uncache } from "@electron/asar";
 import { getCurrentFuseWire, FuseV1Options } from "@electron/fuses";
 import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
@@ -7,10 +7,34 @@ import { fileURLToPath } from "node:url";
 
 export function validateArchive(archive: string): void {
   uncache(archive);
+  const directories = new Set([
+    "/.vite",
+    "/.vite/build",
+    "/.vite/renderer",
+    "/.vite/renderer/main_window",
+    "/.vite/renderer/main_window/assets",
+  ]);
+  const entries = new Set([
+    "/package.json",
+    "/.vite/build/main.cjs",
+    "/.vite/build/preload.cjs",
+    "/.vite/renderer/main_window/index.html",
+  ]);
   for (const name of listPackage(archive, { isPack: false })) {
-    if (name !== "/package.json" && !name.startsWith("/.vite"))
+    const entry = statFile(archive, name.slice(1), false);
+    if ("link" in entry || entry.unpacked)
       throw Error("Unsafe application archive");
-    if (!/\.(cjs|js|html|css|json)$/.test(name)) continue;
+    if ("files" in entry) {
+      if (!directories.has(name)) throw Error("Unsafe application archive");
+      continue;
+    }
+    if (
+      !entries.has(name) &&
+      !/^\/\.vite\/renderer\/main_window\/assets\/index-[A-Za-z0-9_-]{8}\.(?:js|css)$/.test(
+        name,
+      )
+    )
+      throw Error("Unsafe application archive");
     const content = extractFile(archive, name.slice(1)).toString("utf8");
     if (
       /__sageE2E|FakeReasoner|e2e\/fixtures|events\.jsonl|full\.once|egress_probe/.test(

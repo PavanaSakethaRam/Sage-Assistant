@@ -1464,7 +1464,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L26",
+      "source_location": "L50",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1619,27 +1619,21 @@
       "_origin": "ast"
     },
     {
-      "id": "scripts_smoke_package_resources",
-      "label": "resources",
+      "id": "scripts_smoke_package_deadline",
+      "label": "deadline()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
       "source_location": "L7",
+      "_callable": true,
       "_origin": "ast"
     },
     {
-      "id": "scripts_smoke_package_env",
-      "label": "env",
+      "id": "scripts_smoke_package_fail",
+      "label": "fail()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L10",
-      "_origin": "ast"
-    },
-    {
-      "id": "scripts_smoke_package_pending",
-      "label": "pending",
-      "file_type": "code",
-      "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L20",
+      "source_location": "L24",
+      "_callable": true,
       "_origin": "ast"
     },
     {
@@ -1647,7 +1641,16 @@
       "label": "launch()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L21",
+      "source_location": "L33",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_smoke_package_launch_finish",
+      "label": "finish()",
+      "file_type": "code",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L66",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1656,7 +1659,7 @@
       "label": "request()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L52",
+      "source_location": "L118",
       "_callable": true,
       "_origin": "ast"
     },
@@ -1665,7 +1668,25 @@
       "label": "close()",
       "file_type": "code",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L71",
+      "source_location": "L144",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_smoke_package_cleanup",
+      "label": "cleanup()",
+      "file_type": "code",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L155",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_smoke_package_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L174",
       "_callable": true,
       "_origin": "ast"
     },
@@ -9414,7 +9435,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L26",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9425,7 +9446,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check_package.ts",
-      "source_location": "L33",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9915,18 +9936,7 @@
     },
     {
       "source": "scripts_smoke_package",
-      "target": "ref_node_events",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "scripts_smoke_package",
-      "target": "scripts_smoke_package_resources",
+      "target": "scripts_smoke_package_deadline",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
@@ -9936,21 +9946,11 @@
     },
     {
       "source": "scripts_smoke_package",
-      "target": "scripts_smoke_package_env",
+      "target": "scripts_smoke_package_fail",
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L10",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "scripts_smoke_package",
-      "target": "scripts_smoke_package_pending",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L20",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9960,7 +9960,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L21",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_launch",
+      "target": "scripts_smoke_package_launch_finish",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9970,7 +9980,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L52",
+      "source_location": "L118",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9980,7 +9990,72 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L71",
+      "source_location": "L144",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_smoke_package_cleanup",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L155",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package",
+      "target": "scripts_smoke_package_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_launch",
+      "target": "scripts_smoke_package_launch_finish",
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_launch",
+      "target": "scripts_smoke_package_fail",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_launch",
+      "target": "scripts_smoke_package_launch_finish",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_request",
+      "target": "scripts_smoke_package_fail",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9991,7 +10066,84 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "scripts/smoke_package.mjs",
-      "source_location": "L73",
+      "source_location": "L146",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_close",
+      "target": "scripts_smoke_package_deadline",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L149",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_cleanup",
+      "target": "scripts_smoke_package_fail",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_cleanup",
+      "target": "scripts_smoke_package_deadline",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L167",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_smoke_package_launch",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L188",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_smoke_package_request",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L189",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_smoke_package_close",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L201",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_smoke_package_main",
+      "target": "scripts_smoke_package_cleanup",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/smoke_package.mjs",
+      "source_location": "L227",
       "weight": 1.0,
       "_origin": "ast"
     },

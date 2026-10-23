@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "b3080e0e1da3d0740d9dc06ef0e0941e6959e593",
-  "snapshot": "Exact selected source/document SHA256 snapshot after portable ZIP policy and native UI evidence; source_commit is ancestor and working-tree delta is included by hashes",
+  "snapshot": "Exact selected source SHA256 snapshot after Task10 I1/I2 tooling fixes; six retained documents remain the frozen reviewed snapshot; source_commit is ancestor and code working-tree delta is included by hashes",
   "files": [
     {
       "path": "Readme.md",
@@ -112,7 +112,7 @@
     },
     {
       "path": "scripts/check_package.ts",
-      "sha256": "f6ee0675339a53448fb85db9b497a4adb7a0789e0ed57e99acd8f916b31e544a"
+      "sha256": "4eeb7c24e18731b07953f0c68a00233b9ba369290ea6ab2694c29223d723f338"
     },
     {
       "path": "scripts/install-electron.mjs",
@@ -132,7 +132,7 @@
     },
     {
       "path": "scripts/smoke_package.mjs",
-      "sha256": "104483b022fa7e92736b53029d247fe49811b13856accce1f8ee866a32bbcc89"
+      "sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
     },
     {
       "path": "scripts/stage_package.py",
@@ -223,19 +223,16 @@
       "sha256": "2966b6d02368b46c8a604c6e466e75e0387b9c45d12d86a72d0e1c3107b4396c"
     }
   ],
-  "source_commit": "a8763a03634cd5585c2ae30897c570a58c35d127",
+  "source_commit": "12f8eeb56c68c2b44c6936147e97e4fa22e36332",
   "working_tree_selected_delta": [
-    "Readme.md",
-    "docs/security.md",
-    "docs/testing.md",
-    "docs/validation/foundation-results.md",
-    "forge.config.ts"
+    "scripts/check_package.ts",
+    "scripts/smoke_package.mjs"
   ],
   "tool": "graphifyy 0.9.75 existing local installation",
   "code": {
     "files": 49,
-    "nodes": 483,
-    "edges": 1418,
+    "nodes": 485,
+    "edges": 1430,
     "failed_sources": [],
     "extracted_sources": [
       "desktop/main/copilot-account.ts",
@@ -290,6 +287,8 @@
     ]
   },
   "semantic": {
+    "retained_fragment_unchanged": true,
+    "new_semantic_extraction_performed": false,
     "status": "Host extraction complete against all six frozen document hashes",
     "fragment_sha256": "99d0c7e97bdbd4f637d334904b3c530663e2d9db131ba64bc2a496c754678e9e",
     "prompt_sha256": "32d7decad42d58129c6694ea4e4ce1f72a531bc5161827d2095787e9448735e9",
@@ -304,11 +303,11 @@
   },
   "projection": {
     "directed": false,
-    "nodes": 564,
-    "edges": 1380,
-    "communities": 32
+    "nodes": 565,
+    "edges": 1390,
+    "communities": 20
   },
-  "original_exported_edges": 1449,
+  "original_exported_edges": 1461,
   "unresolved_export_edges": [
     {
       "source": "src_sage_providers_copilot",
@@ -322,7 +321,7 @@
       "_origin": "ast"
     }
   ],
-  "total_words": 33875,
+  "total_words": 34285,
   "exclusions": [
     "nonstandard extension root spec, SQL, JSON and YAML data/configuration (identified by exact corpus scope)",
     "tests and e2e",

@@ -5,6 +5,23 @@ import { createPackage } from "@electron/asar";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { expect, test } from "vitest";
 
+async function productionLayout(root: string) {
+  const files = {
+    "package.json": '{"name":"synthetic"}',
+    ".vite/build/main.cjs": "module.exports = {};",
+    ".vite/build/preload.cjs": "module.exports = {};",
+    ".vite/renderer/main_window/index.html": "<!doctype html><html></html>",
+    ".vite/renderer/main_window/assets/index-Abc12345.js":
+      "console.log('synthetic');",
+    ".vite/renderer/main_window/assets/index-Abc12345.css":
+      "body { margin: 0; }",
+  };
+  for (const [name, content] of Object.entries(files)) {
+    await mkdir(join(root, name, ".."), { recursive: true });
+    await writeFile(join(root, name), content);
+  }
+}
+
 test("release makers produce only portable ZIPs on macOS and Windows", async () => {
   const { default: config } = await import("../../forge.config");
   expect(config.makers).toHaveLength(1);
@@ -20,8 +37,7 @@ test("actual ASAR inspection rejects private test composition and credential pat
   const root = await mkdtemp(join(tmpdir(), "sage-asar-negative-"));
   const archive = root + ".asar";
   try {
-    await mkdir(join(root, ".vite/build"), { recursive: true });
-    await writeFile(join(root, "package.json"), '{"name":"synthetic"}');
+    await productionLayout(root);
     await createPackage(root, archive);
     expect(() => validateArchive(archive)).not.toThrow();
     for (const content of ["__sageE2E", "gho_" + "SYNTHETIC".repeat(5)]) {
@@ -31,6 +47,46 @@ test("actual ASAR inspection rejects private test composition and credential pat
         "Unsafe application archive",
       );
     }
+  } finally {
+    await Promise.all([
+      rm(root, { recursive: true, force: true }),
+      rm(archive, { force: true }),
+    ]);
+  }
+});
+
+test.each([
+  ".vite/prompts/private.txt",
+  ".vite/extra.node",
+  ".vite-private/credentials.txt",
+])("actual ASAR admission rejects %s", async (name) => {
+  const { validateArchive } = await import("../../scripts/check_package");
+  const root = await mkdtemp(join(tmpdir(), "sage-asar-admission-"));
+  const archive = root + ".asar";
+  try {
+    await productionLayout(root);
+    await mkdir(join(root, name, ".."), { recursive: true });
+    await writeFile(join(root, name), "Harmless synthetic payload");
+    await createPackage(root, archive);
+    expect(() => validateArchive(archive)).toThrow(
+      "Unsafe application archive",
+    );
+  } finally {
+    await Promise.all([
+      rm(root, { recursive: true, force: true }),
+      rm(archive, { force: true }),
+    ]);
+  }
+});
+
+test("actual ASAR accepts the supported production bundle and static asset layout", async () => {
+  const { validateArchive } = await import("../../scripts/check_package");
+  const root = await mkdtemp(join(tmpdir(), "sage-asar-production-"));
+  const archive = root + ".asar";
+  try {
+    await productionLayout(root);
+    await createPackage(root, archive);
+    expect(() => validateArchive(archive)).not.toThrow();
   } finally {
     await Promise.all([
       rm(root, { recursive: true, force: true }),
