@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import stat
 import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Protocol
@@ -22,6 +23,25 @@ def digest(stream: Readable) -> str:
     while chunk := stream.read(1024 * 1024):
         value.update(chunk)
     return value.hexdigest()
+
+
+def check_entry_type(info: zipfile.ZipInfo) -> None:
+    """Admit only regular files and directories, including Windows ZIP metadata."""
+    directory = info.is_dir()
+    file_type = stat.S_IFMT(info.external_attr >> 16)
+    allowed = (0, stat.S_IFDIR) if directory else (0, stat.S_IFREG)
+    # DOS attributes are commonly in the low bits; Windows ZIP creators may
+    # also place them in the upper word used for POSIX modes elsewhere.
+    dos_attributes = info.external_attr & 0xFFFF
+    if info.create_system == 0:
+        dos_attributes |= info.external_attr >> 16
+    if (
+        file_type not in allowed
+        or dos_attributes & (0x08 | 0x40 | 0x400)  # volume, device, reparse point
+        or (not directory and dos_attributes & 0x10)
+        or (directory and info.file_size != 0)
+    ):
+        raise ZipInventoryError("unsupported_entry_type")
 
 
 def verify(appdir: Path, archive: Path) -> int:
@@ -49,6 +69,7 @@ def verify(appdir: Path, archive: Path) -> int:
                 or str(PurePosixPath(name)) != name.rstrip("/")
             ):
                 raise ZipInventoryError("unsafe_entry")
+            check_entry_type(info)
             if info.is_dir():
                 continue
             if name in entries:
