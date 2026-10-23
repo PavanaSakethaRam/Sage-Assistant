@@ -8,9 +8,9 @@
     "arch": "arm64"
   },
   "artifact": {
-    "zip_bytes": 214591149,
-    "zip_sha256": "d30f7a6e98b8e02d6a44fa540664c41070b4dacf005ceb74dae0fb5c5228135a",
-    "core_sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+    "zip_bytes": 214591228,
+    "zip_sha256": "0b221e6271cec8519a3c6c4853eeb405e87364df9a0abd3463af2a7e1072af88",
+    "core_sha256": "38646554b33338737cdf5be87e8ded1d1fe06b74fa3be93d1211fecae1918f3c",
     "full_app_entries": 1956,
     "symlinks": 14,
     "selected_entries": 1138,
@@ -23,8 +23,8 @@
     "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
   },
   "local_build_outputs": {
-    "zip": "out/task10-sdk-final-v2/make/zip/darwin/arm64/Sage-darwin-arm64-0.1.0.zip",
-    "extracted_app": ".runtime/task10-sdk-final-v2/Sage.app",
+    "zip": "out/task10-sdk-final-v3/make/zip/darwin/arm64/Sage-darwin-arm64-0.1.0.zip",
+    "extracted_app": ".runtime/task10-sdk-final-v3/Sage.app",
     "not_distributed": true
   },
   "python_provenance": {
@@ -119,15 +119,17 @@
     "owned_temporary_empty": true,
     "allowlisted_environment": true,
     "no_home_path_ca_proxy_keylog_overrides": true,
-    "core_sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+    "core_sha256": "38646554b33338737cdf5be87e8ded1d1fe06b74fa3be93d1211fecae1918f3c",
     "production_probe_source_code_matches_PYZ": true,
-    "production_probe_source_sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25",
+    "production_probe_source_sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e",
     "frozen_modules": 534,
     "no_test_module_root": true,
     "trace_instrumentation_absent": true,
     "cloud_calls_in_this_offline_probe": 0,
     "lexical_admission_precedes_metadata": true,
-    "symlinks_rejected_without_target_traversal": true
+    "symlinks_rejected_without_target_traversal": true,
+    "filename_bearing_import_denied_before_loader": true,
+    "no_native_extension_allowlist_or_suffix_trust": true
   },
   "signature_inventory": {
     "native_files": [
@@ -999,27 +1001,27 @@
       {
         "path": "Contents/Resources/core/sage-core",
         "file": "Mach-O 64-bit executable arm64",
-        "sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+        "sha256": "38646554b33338737cdf5be87e8ded1d1fe06b74fa3be93d1211fecae1918f3c",
         "signature_verify_exit": 0,
         "signature_details": [
           "Executable=<app>/Contents/Resources/core/sage-core",
-          "Identifier=sage-core-555549443cb3aa4f612a3594aeeeb65120b2ccc3",
+          "Identifier=sage-core-555549446e68d060c2e53be1dce8a8ee0bf46468",
           "Format=Mach-O thin (arm64)",
           "CodeDirectory v=20400 size=11723 flags=0x2(adhoc) hashes=360+2 location=embedded",
           "VersionPlatform=1",
           "VersionMin=720896",
           "VersionSDK=983040",
           "Hash type=sha256 size=32",
-          "CandidateCDHash sha256=84d054adf18b0df54360130c980dd67ddef16b31",
-          "CandidateCDHashFull sha256=84d054adf18b0df54360130c980dd67ddef16b316d2de9605a5829d07da40a5d",
+          "CandidateCDHash sha256=619e93952cd7d63672a7ec86443d446ddb5628dc",
+          "CandidateCDHashFull sha256=619e93952cd7d63672a7ec86443d446ddb5628dc908e494e692eb5c2bcde197d",
           "Hash choices=sha256",
-          "CMSDigest=84d054adf18b0df54360130c980dd67ddef16b316d2de9605a5829d07da40a5d",
+          "CMSDigest=619e93952cd7d63672a7ec86443d446ddb5628dc908e494e692eb5c2bcde197d",
           "CMSDigestType=2",
           "Executable Segment base=0",
           "Executable Segment limit=49152",
           "Executable Segment flags=0x1",
           "Page size=16384",
-          "CDHash=84d054adf18b0df54360130c980dd67ddef16b31",
+          "CDHash=619e93952cd7d63672a7ec86443d446ddb5628dc",
           "Signature=adhoc",
           "Info.plist=not bound",
           "TeamIdentifier=not set",
@@ -1106,8 +1108,13 @@
     "disposable_copy_only": true,
     "stderr_bytes": 281,
     "stdout_bytes": 0,
-    "scope": "Actual disposable probe on prior I3 ASAR/main/framework; all three are byte-identical in new v2. No unchanged GUI enforcement repeat.",
+    "scope": "Actual disposable probe on initial I3 ASAR/main/framework; all three are directly byte-identical in new v3. No unchanged GUI enforcement repeat.",
     "v2_critical_components_equal_to_tested_payload": {
+      "Contents/Resources/app.asar": true,
+      "Contents/MacOS/Sage": true,
+      "Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework": true
+    },
+    "v3_critical_components_equal_to_tested_payload": {
       "Contents/Resources/app.asar": true,
       "Contents/MacOS/Sage": true,
       "Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework": true
@@ -1162,5 +1169,23 @@
       "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
     },
     "scope": "Earlier offline-only I3 artifact; superseded by tightened guard v2, preserved locally"
+  },
+  "prior_I3_before_filename_import_fix": {
+    "artifact": {
+      "zip_bytes": 214591149,
+      "zip_sha256": "d30f7a6e98b8e02d6a44fa540664c41070b4dacf005ceb74dae0fb5c5228135a",
+      "core_sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+      "full_app_entries": 1956,
+      "symlinks": 14,
+      "selected_entries": 1138,
+      "native_files": 27,
+      "native_signatures_pass": 22,
+      "outer_signature_exit": 1,
+      "frozen_CA_count": 128,
+      "javascript_license_files": 88,
+      "asar_sha256": "8519973acb62d024c838d7705174df1c49a503e6517cc047971ab7b92470c518",
+      "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
+    },
+    "scope": "Earlier v2 offline snapshot before filename-bearing import boundary; preserved locally"
   }
 }

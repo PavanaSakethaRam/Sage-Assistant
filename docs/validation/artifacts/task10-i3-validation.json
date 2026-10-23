@@ -81,9 +81,9 @@
     "security_payload_recovery": "Existing security wrapper rerun once after Vitest removed original unsaved report; recovered report preserved. No second full aggregate."
   },
   "package": {
-    "zip_bytes": 214591149,
-    "zip_sha256": "d30f7a6e98b8e02d6a44fa540664c41070b4dacf005ceb74dae0fb5c5228135a",
-    "core_sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+    "zip_bytes": 214591228,
+    "zip_sha256": "0b221e6271cec8519a3c6c4853eeb405e87364df9a0abd3463af2a7e1072af88",
+    "core_sha256": "38646554b33338737cdf5be87e8ded1d1fe06b74fa3be93d1211fecae1918f3c",
     "full_app_entries": 1956,
     "symlinks": 14,
     "selected_entries": 1138,
@@ -183,6 +183,46 @@
     {
       "local_historical_name": "task-10-i3-tightened-coverage.json",
       "sha256": "612c469f715b251bf2bcbcec73e33582ba4621f639be972a4159ec7cdb126a3c"
+    },
+    {
+      "local_historical_name": "task-10-fix3-red.log",
+      "sha256": "b387d7b54b3d1132ae61a90e7c654a2444f391b0e9e562705f71539cca8a4480"
+    },
+    {
+      "local_historical_name": "task-10-fix3-green.log",
+      "sha256": "f697cbbb791006784d35d2d7e66ba591e70eaca7207cea3ebc03a348b675077e"
+    },
+    {
+      "local_historical_name": "task-10-fix3-python-coverage.log",
+      "sha256": "54c8b8c379682089e43fc3ec1a26fb55a7136925f100754a0b162c1c272a43c3"
+    },
+    {
+      "local_historical_name": "task-10-fix3-coverage.json",
+      "sha256": "6c32d9308699fb728e22c7cf01b42bb307072bb10b850cd7407a32166c0d1577"
+    },
+    {
+      "local_historical_name": "task-10-fix3-static.json",
+      "sha256": "0c94fcf205f9a625cd425dde41094ccd88506456d2046f0e2ce4e357032b62d0"
+    },
+    {
+      "local_historical_name": "task-10-fix3-core-build.log",
+      "sha256": "792e6b7d83697c59d124dffd6fb484d9fec77d62fda010f987f0e6acba3b1816"
+    },
+    {
+      "local_historical_name": "task-10-fix3-frozen-probes.json",
+      "sha256": "7145eb9d31167beda7b9ba8dfe03affc6c113811d684712af94224785ff929a0"
+    },
+    {
+      "local_historical_name": "task-10-fix3-package-check.log",
+      "sha256": "841a82f0dba1747176397d65b6f3c59047c4e1420a260f6cfec6ded2c46bc9e0"
+    },
+    {
+      "local_historical_name": "task-10-fix3-package-smoke.log",
+      "sha256": "6f93e6deaa3e0e584a8fec1a7c51081a538bcc7329643e36bcdf1981281c281a"
+    },
+    {
+      "local_historical_name": "task-10-fix3-packaged-sdk-proof.json",
+      "sha256": "96c0cc08bb6859e82f097cf7e679ee459941ee0324bef692ef27ecdecfd447c3"
     }
   ],
   "limits": [
@@ -289,7 +329,114 @@
     ],
     "python_before_final_frozen_build": 173
   },
-  "focused": {
+  "fix_round3": {
+    "base": "5e7d40dd1fcab36c172ec4487ef86fc30bfdaec2",
+    "scope": "Important I3 filename-bearing import boundary only; Minor M2 deferred to final triage",
+    "red": {
+      "failed": 5,
+      "passed": 1,
+      "native_extension_load_attempted": false
+    },
+    "focused_python_passed": 181,
+    "python_coverage_suite": {
+      "passed": 534,
+      "live_skipped": 1,
+      "exit_code": 0
+    },
+    "counts": {
+      "javascript_maintained": {
+        "branches": [
+          668,
+          780
+        ],
+        "statements": [
+          1072,
+          1157
+        ]
+      },
+      "javascript_trusted": {
+        "branches": [
+          482,
+          531
+        ],
+        "statements": [
+          736,
+          784
+        ]
+      },
+      "python_maintained": {
+        "branches": [
+          529,
+          568
+        ],
+        "statements": [
+          1835,
+          1898
+        ]
+      },
+      "python_trusted": {
+        "branches": [
+          529,
+          568
+        ],
+        "statements": [
+          1835,
+          1898
+        ]
+      }
+    },
+    "probe_module_cases": 54,
+    "probe_module_coverage": {
+      "statements": [
+        145,
+        147
+      ],
+      "branches": [
+        45,
+        46
+      ]
+    },
+    "malformed_import_audit_case": "Added after focused181 and covered by full Python source-aware run",
+    "static": "Only two changed Python files rescanned; retained723findings714LOW9MED0HIGH; unchanged ESLint87",
+    "retained_unchanged": [
+      "JS154",
+      "nativeE2E5",
+      "dependency audits",
+      "full aggregate"
+    ],
+    "no_native_allowlist_or_exception": true,
+    "latest_package": {
+      "zip_bytes": 214591228,
+      "zip_sha256": "0b221e6271cec8519a3c6c4853eeb405e87364df9a0abd3463af2a7e1072af88",
+      "core_sha256": "38646554b33338737cdf5be87e8ded1d1fe06b74fa3be93d1211fecae1918f3c",
+      "full_app_entries": 1956,
+      "symlinks": 14,
+      "selected_entries": 1138,
+      "native_files": 27,
+      "native_signatures_pass": 22,
+      "outer_signature_exit": 1,
+      "frozen_CA_count": 128,
+      "javascript_license_files": 88,
+      "asar_sha256": "8519973acb62d024c838d7705174df1c49a503e6517cc047971ab7b92470c518",
+      "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
+    }
+  },
+  "ruling43_package": {
+    "zip_bytes": 214591149,
+    "zip_sha256": "d30f7a6e98b8e02d6a44fa540664c41070b4dacf005ceb74dae0fb5c5228135a",
+    "core_sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+    "full_app_entries": 1956,
+    "symlinks": 14,
+    "selected_entries": 1138,
+    "native_files": 27,
+    "native_signatures_pass": 22,
+    "outer_signature_exit": 1,
+    "frozen_CA_count": 128,
+    "javascript_license_files": 88,
+    "asar_sha256": "8519973acb62d024c838d7705174df1c49a503e6517cc047971ab7b92470c518",
+    "main_sha256": "ad5542c6d81f6892a7aa36ec0a32748addf56a01ea464e0d4976c9841adf740d"
+  },
+  "ruling43_focused": {
     "python_before_final_frozen_build": 174,
     "javascript_retained": 51,
     "final_probe_module_cases": 46,
@@ -302,5 +449,19 @@
       42
     ],
     "coverage_source": "Latest source-aware full Python coverage; focused174 includes46 probe cases"
+  },
+  "focused": {
+    "before_final_malformed_import_audit_case": 181,
+    "javascript_retained": 51,
+    "final_probe_module_cases": 54,
+    "final_probe_module_statements": [
+      145,
+      147
+    ],
+    "final_probe_module_branches": [
+      45,
+      46
+    ],
+    "coverage_source": "Latest 534-pass source-aware Python coverage includes final malformed-import audit case"
   }
 }

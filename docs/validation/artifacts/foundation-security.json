@@ -6303,7 +6303,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B603",
@@ -6312,7 +6312,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
@@ -6321,7 +6321,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
@@ -6330,7 +6330,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
@@ -6339,7 +6339,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B603",
@@ -6348,7 +6348,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
@@ -6357,7 +6357,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B603",
@@ -6366,7 +6366,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
@@ -6375,7 +6375,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
@@ -6384,160 +6384,214 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 134,
+        "line": 138,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      },
+      {
+        "rule": "B603",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 151,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 171,
+        "line": 158,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      },
+      {
+        "rule": "B603",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 170,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 173,
+        "line": 177,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 217,
+        "line": 178,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 218,
+        "line": 195,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 240,
+        "line": 232,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 241,
+        "line": 234,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 242,
+        "line": 278,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 243,
+        "line": 279,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 258,
+        "line": 301,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 283,
+        "line": 302,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 295,
+        "line": 303,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 308,
+        "line": 304,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 329,
+        "line": 319,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 331,
+        "line": 344,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 340,
+        "line": 356,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "rule": "B101",
         "path": "tests/unit/test_sdk_probe.py",
-        "line": 358,
+        "line": 369,
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 390,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 392,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 401,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 420,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       }
     ],
     "source_hashes": [
@@ -6639,7 +6693,7 @@
       },
       {
         "path": "src/sage/sdk_probe.py",
-        "sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25"
+        "sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e"
       },
       {
         "path": "src/sage/service.py",
@@ -6751,7 +6805,7 @@
       },
       {
         "path": "tests/unit/test_sdk_probe.py",
-        "sha256": "7c270d4e9d7c283a8e0dd90a552a6563a4718725ca2b230f8c21073b87eee3cc"
+        "sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
       },
       {
         "path": "tests/unit/test_security_gate.py",
@@ -7634,7 +7688,7 @@
     "original_payload_not_reconstructed": true,
     "native_GUI_retry_scope": "Only test:coverage, test:e2e and dependent integer checker; initial sandbox native launch failures retained",
     "committed_diff_limit": "base equals head here; fresh I3 delivery/index/range scans recorded separately",
-    "source_hash_binding": "Initial complete source snapshot bound after recovered scan; two subsequent changed Python files and their findings/hashes are refreshed under task10_I3_lexical_metadata_fix. Other scanned sources unchanged."
+    "source_hash_binding": "Initial complete scan retained; the two subsequently changed Python files/findings/hashes were refreshed under task10_I3_lexical_metadata_fix, then latest task10_fix3_import_boundary. Other scanned sources unchanged."
   },
   "task10_I3_lexical_metadata_fix": {
     "scope": "Only two changed Python files rescanned after concrete guard admission correction; unchanged JS/E2E/dependency audits and other static results retained",
@@ -7656,5 +7710,25 @@
     "no_high_findings": true,
     "ruling": "43",
     "baseline_full_recovered_scan": "task10_I3_recovery"
+  },
+  "task10_fix3_import_boundary": {
+    "base": "5e7d40dd1fcab36c172ec4487ef86fc30bfdaec2",
+    "scope": "Only two changed Python files rescanned; unchanged JS/E2E/dependency advisories/full aggregate not repeated",
+    "files": [
+      "src/sage/sdk_probe.py",
+      "tests/unit/test_sdk_probe.py"
+    ],
+    "targeted_findings": 33,
+    "source_hashes": [
+      {
+        "path": "src/sage/sdk_probe.py",
+        "sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e"
+      },
+      {
+        "path": "tests/unit/test_sdk_probe.py",
+        "sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+      }
+    ],
+    "no_high_findings": true
   }
 }

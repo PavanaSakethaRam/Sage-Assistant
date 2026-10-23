@@ -105,7 +105,7 @@ def test_guard_resource_reads_are_confined_and_writes_never_allowed(tmp_path: Pa
     guard = CapabilityGuard(roots=(resource.parent,))
     guard.audit("open", (str(resource), "r", 0))
     guard.audit("os.listdir", (str(resource.parent),))
-    guard.audit("import", ("trusted", str(resource), None))
+    guard.audit("import", ("trusted", None, None, None, None))
     for args in [
         (str(resource), "w", 0),
         (str(outside), "r", 0),
@@ -115,6 +115,67 @@ def test_guard_resource_reads_are_confined_and_writes_never_allowed(tmp_path: Pa
         with pytest.raises(PermissionError):
             guard.audit("open", args)
     assert guard.denied == "blocked_storage"
+
+
+@pytest.mark.parametrize("kind", ["outside", "container", "trusted", "trusted_named_py"])
+def test_filename_import_never_inherits_resource_read_permission(tmp_path: Path, kind: str) -> None:
+    trusted = tmp_path / "trusted"
+    trusted.mkdir()
+    container = tmp_path / "sage-core"
+    container.touch()
+    guard = CapabilityGuard(roots=(trusted,))
+    guard.container = str(container)
+    filename = {
+        "outside": tmp_path / "outside.so",
+        "container": container,
+        "trusted": trusted / "inert.so",
+        "trusted_named_py": trusted / "inert.py",
+    }[kind]
+    if kind == "container":
+        guard.audit("open", (str(filename), "r", 0))
+    with pytest.raises(PermissionError):
+        guard.audit("import", ("synthetic_inert", str(filename), None, None, None))
+    assert guard.denied == "blocked_native"
+
+
+@pytest.mark.parametrize("filename", ["/synthetic-outside.so", "/synthetic-read-container"])
+def test_installed_import_event_denial_uses_inert_sys_audit_only(filename: str) -> None:
+    program = (
+        "from sage.sdk_probe import CapabilityGuard; import sys\n"
+        "sink=sys.stdout; guard=CapabilityGuard(); guard.container='/synthetic-read-container'\n"
+        "guard.install()\n"
+        "try: sys.audit('import','synthetic_inert',sys.argv[1],None,None,None)\n"
+        "except PermissionError: pass\n"
+        "sink.write(guard.denied or 'MISSED'); sink.flush()\n"
+    )
+    child = subprocess.run(
+        [sys.executable, "-B", "-c", program, filename],
+        env={"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())},
+        capture_output=True,
+        timeout=10,
+        check=False,
+    )
+    assert child.returncode == 0 and child.stdout == b"blocked_native" and child.stderr == b""
+
+
+def test_installed_guard_preserves_genuine_trusted_pure_python_import(tmp_path: Path) -> None:
+    resource = tmp_path / "sage_probe_resource.py"
+    resource.write_text("answer = 42\n")
+    program = (
+        "from sage.sdk_probe import CapabilityGuard; import sys; from pathlib import Path\n"
+        "sink=sys.stdout; guard=CapabilityGuard(roots=(Path(sys.argv[1]),)); guard.install()\n"
+        "import sage_probe_resource\n"
+        "sink.write(str(sage_probe_resource.answer)+':'+str(guard.denied)); sink.flush()\n"
+    )
+    child = subprocess.run(
+        [sys.executable, "-B", "-c", program, str(tmp_path)],
+        env={"PATH": os.defpath, "PYTHONPATH": str(Path("src").resolve())},
+        capture_output=True,
+        timeout=10,
+        check=False,
+    )
+    assert child.returncode == 0 and child.stdout == b"42:None" and child.stderr == b""
+    assert list(tmp_path.iterdir()) == [resource]
 
 
 def test_frozen_pyz_container_exact_read_does_not_admit_neighbors_writes_or_execution(
@@ -346,6 +407,7 @@ def test_probe_cli_dispatch_has_no_service_initialization(monkeypatch: pytest.Mo
         ("socket.connect", (), "blocked_network"),
         ("os.exec", (), "blocked_process"),
         ("ctypes.dlopen", (), "blocked_native"),
+        ("import", (), "blocked_native"),
         ("sqlite3.connect", (), "blocked_storage"),
         ("os.mkdir", (), "blocked_storage"),
         ("open", ("/private", None, os.O_CREAT), "blocked_storage"),

@@ -158,14 +158,14 @@
     },
     "src/sage/sdk_probe.py": {
       "statements": [
-        142,
-        144
+        145,
+        147
       ],
       "branches": [
-        42,
-        42
+        45,
+        46
       ],
-      "source_sha256": "178ac2f256f7bf7cd70a2483558849bf8eea3fed13042a81c5fcac2008594b25",
+      "source_sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e",
       "trusted": true
     },
     "src/sage/service.py": {

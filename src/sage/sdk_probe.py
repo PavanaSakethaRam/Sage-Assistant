@@ -109,7 +109,13 @@ class CapabilityGuard:
                 self.deny("blocked_storage")
 
     def audit(self, event: str, args: tuple[Any, ...]) -> None:
-        if event == "open":
+        if event == "import":
+            # CPython supplies a filename before dynamic extension loading.
+            # Python/PYZ resource reads use their existing read-only admission;
+            # neither that grant nor a filename suffix grants native execution.
+            if len(args) < 2 or args[1] is not None:
+                self.deny("blocked_native")
+        elif event == "open":
             mode, flags = args[1:3]
             if (isinstance(mode, str) and any(c in mode for c in "wax+")) or (
                 isinstance(flags, int)

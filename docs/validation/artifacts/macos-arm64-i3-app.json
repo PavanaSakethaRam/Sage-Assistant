@@ -3392,7 +3392,7 @@
   "Contents/Resources/core/_internal/base_library.zip": {
     "type": "file",
     "bytes": 1409453,
-    "sha256": "a07ec40c0256068c26c8513e139eef96706e67dda21a279044c02ef776ca90e2",
+    "sha256": "48d4f6391dd6c7a786312e788754a44b7514b7a9c89dd6b874f3a14363f6a80f",
     "mode": 420
   },
   "Contents/Resources/core/_internal/certifi": {
@@ -7843,8 +7843,8 @@
   },
   "Contents/Resources/core/sage-core": {
     "type": "file",
-    "bytes": 5897904,
-    "sha256": "eafcc4fb2ab6fb0098458d2514f5504a686a9b23d3299f7b69553815c794ad2e",
+    "bytes": 5897984,
+    "sha256": "38646554b33338737cdf5be87e8ded1d1fe06b74fa3be93d1211fecae1918f3c",
     "mode": 493
   },
   "Contents/Resources/cs.lproj": {
@@ -10442,7 +10442,7 @@
   "Contents/Resources/notices/javascript-sbom.cdx.json": {
     "type": "file",
     "bytes": 90347,
-    "sha256": "414451fa249ef93d422181e2d4699abe84d35e7a1c788f2e06f4cc5b0236c15f",
+    "sha256": "6edd93ddb288606c9ac3670e03e7526b0a545f9b89b02991023e0247523c6c6e",
     "mode": 420
   },
   "Contents/Resources/notices/native-sbom.json": {
