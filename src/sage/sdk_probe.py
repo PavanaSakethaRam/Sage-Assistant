@@ -248,9 +248,10 @@ def decode_result(frame: bytes) -> dict[str, Any]:
         raise ValueError("Invalid SDK probe frame")
     try:
         value = ProbeResult.model_validate(json.loads(frame[4:], object_pairs_hook=_unique_object))
-        if (value.status == "pass" and (value.stage != "complete" or value.category != "none")) or (
-            value.status == "fail" and (value.stage == "complete" or value.category == "none")
-        ):
+        if (
+            value.status == "pass"
+            and (value.stage != "complete" or value.category != "none" or value.sdk != SDK_VERSION)
+        ) or (value.status == "fail" and (value.stage == "complete" or value.category == "none")):
             raise ValueError
         return value.model_dump(by_alias=True)
     except (ValidationError, ValueError, RecursionError) as exc:

@@ -34,8 +34,36 @@ test("real host reviews, edits, saves once, cancels and reads exact content afte
       host.page.getByText(/Pending draft · revision 2/),
     ).toBeVisible();
     await host.page
+      .getByRole("button", { name: "Refresh history", exact: true })
+      .click();
+    await host.page.getByRole("button", { name: / · pending$/ }).click();
+    await host.page
+      .getByRole("button", { name: "Open retained draft", exact: true })
+      .click();
+    await expect(
+      host.page.getByRole("button", { name: "Save note", exact: true }),
+    ).toBeDisabled();
+    await host.page
+      .getByRole("button", { name: "Review again", exact: true })
+      .click();
+    await host.page
       .getByRole("button", { name: "Save note", exact: true })
       .click();
+    await expect(
+      host.page.getByRole("article", { name: "Task details" }),
+    ).toContainText("Recorded outcome: succeeded · saved note");
+    await expect(
+      host.page.getByRole("button", {
+        name: "Open retained draft",
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await expect(
+      host.page.getByRole("button", { name: "Cancel task", exact: true }),
+    ).toHaveCount(0);
+    await expect(host.page.getByLabel("Saved note receipt")).toContainText(
+      "saved note",
+    );
     await expect(
       host.page.getByLabel("Saved body", { exact: true }),
     ).toHaveText("Edited\t**literal**\nsecond line", { useInnerText: false });

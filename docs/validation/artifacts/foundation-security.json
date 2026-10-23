@@ -6303,7 +6303,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B603",
@@ -6312,7 +6312,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6321,7 +6321,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6330,7 +6330,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6339,7 +6339,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B603",
@@ -6348,7 +6348,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6357,7 +6357,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B603",
@@ -6366,7 +6366,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6375,7 +6375,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6384,7 +6384,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6393,7 +6393,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B603",
@@ -6402,7 +6402,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6411,7 +6411,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B603",
@@ -6420,7 +6420,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6429,7 +6429,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6438,7 +6438,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6447,7 +6447,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6456,7 +6456,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6465,7 +6465,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6474,7 +6474,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6483,7 +6483,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6492,7 +6492,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6501,7 +6501,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6510,7 +6510,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6519,7 +6519,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6528,7 +6528,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6537,7 +6537,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6546,7 +6546,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6555,7 +6555,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6564,7 +6564,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6573,7 +6573,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6582,7 +6582,7 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "rule": "B101",
@@ -6591,7 +6591,16 @@
         "severity": "LOW",
         "confidence": "HIGH",
         "triage": "untriaged",
-        "source_sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
+      },
+      {
+        "rule": "B101",
+        "path": "tests/unit/test_sdk_probe.py",
+        "line": 444,
+        "severity": "LOW",
+        "confidence": "HIGH",
+        "triage": "untriaged",
+        "source_sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       }
     ],
     "source_hashes": [
@@ -6693,7 +6702,7 @@
       },
       {
         "path": "src/sage/sdk_probe.py",
-        "sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e"
+        "sha256": "8abb49e0ac2dddbdc05951dfdae8cf4eb6743826a21e779c81c0a3c017ce6c2c"
       },
       {
         "path": "src/sage/service.py",
@@ -6805,7 +6814,7 @@
       },
       {
         "path": "tests/unit/test_sdk_probe.py",
-        "sha256": "71de4924269fdbc180b0cf8df8ba423d1bf390e6bf79d66085cbb80b55870952"
+        "sha256": "c518cd01ddad725166e065b4b6ce0da352761fd6c4ad265055f6df91a531535d"
       },
       {
         "path": "tests/unit/test_security_gate.py",
@@ -6815,7 +6824,7 @@
   },
   "eslint": {
     "status": "pass",
-    "files": 55,
+    "files": 56,
     "findings": [
       {
         "rule": "security/detect-unsafe-regex",
@@ -6928,34 +6937,6 @@
         "line": 20,
         "triage": "hotspot_requires_review",
         "source_sha256": "9d0f764a5ccdcac682dcf5cdd1d5473ef5b42cbb6263e52949dacdfa3e7d597d"
-      },
-      {
-        "rule": "security/detect-possible-timing-attacks",
-        "path": "desktop/renderer/App.tsx",
-        "line": 112,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
-      },
-      {
-        "rule": "security/detect-possible-timing-attacks",
-        "path": "desktop/renderer/App.tsx",
-        "line": 117,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
-      },
-      {
-        "rule": "security/detect-possible-timing-attacks",
-        "path": "desktop/renderer/App.tsx",
-        "line": 128,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
-      },
-      {
-        "rule": "security/detect-possible-timing-attacks",
-        "path": "desktop/renderer/App.tsx",
-        "line": 135,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
       },
       {
         "rule": "security/detect-object-injection",
@@ -7358,20 +7339,6 @@
       },
       {
         "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/harness.ts",
-        "line": 25,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
-        "path": "e2e/harness.ts",
-        "line": 134,
-        "triage": "hotspot_requires_review",
-        "source_sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
-      },
-      {
-        "rule": "security/detect-non-literal-fs-filename",
         "path": "e2e/recovery.spec.ts",
         "line": 26,
         "triage": "hotspot_requires_review",
@@ -7425,6 +7392,48 @@
         "line": 187,
         "triage": "hotspot_requires_review",
         "source_sha256": "e48d43269dfb82e797f7c4e718cea67865fac74568ece8615159315df526f9b2"
+      },
+      {
+        "rule": "security/detect-possible-timing-attacks",
+        "path": "desktop/renderer/App.tsx",
+        "line": 132,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5"
+      },
+      {
+        "rule": "security/detect-possible-timing-attacks",
+        "path": "desktop/renderer/App.tsx",
+        "line": 137,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5"
+      },
+      {
+        "rule": "security/detect-possible-timing-attacks",
+        "path": "desktop/renderer/App.tsx",
+        "line": 148,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5"
+      },
+      {
+        "rule": "security/detect-possible-timing-attacks",
+        "path": "desktop/renderer/App.tsx",
+        "line": 155,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/harness.ts",
+        "line": 27,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "9926cff7e4f800a29733c7aff539e479cc3df0ae7b8ffa75bb953d5c6dc814b1"
+      },
+      {
+        "rule": "security/detect-non-literal-fs-filename",
+        "path": "e2e/harness.ts",
+        "line": 147,
+        "triage": "hotspot_requires_review",
+        "source_sha256": "9926cff7e4f800a29733c7aff539e479cc3df0ae7b8ffa75bb953d5c6dc814b1"
       }
     ],
     "source_hashes": [
@@ -7458,7 +7467,7 @@
       },
       {
         "path": "desktop/renderer/App.tsx",
-        "sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8"
+        "sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5"
       },
       {
         "path": "desktop/renderer/Conversation.tsx",
@@ -7517,6 +7526,10 @@
         "sha256": "5e83ca087b8bde1c98355f4fbe0d95f101e8c38f0eedc5791e426dc9c9ab40ec"
       },
       {
+        "path": "desktop/tests/e2e-harness.test.ts",
+        "sha256": "6380551e7dead8ae81a67e81b5670a8161858432ca21f29e5ced3d573bccd1a4"
+      },
+      {
         "path": "desktop/tests/fixtures/host-smoke.ts",
         "sha256": "dff005afcbb18e8a0a2d2d9e8ad428b7e6284e92020c781b55fc6b0cc40d17dc"
       },
@@ -7534,7 +7547,7 @@
       },
       {
         "path": "desktop/tests/notes.test.tsx",
-        "sha256": "4cf1b0f98532c9df17e93c50e4f683ff629fe419f52fdd527af5c38be10f092a"
+        "sha256": "13a735336262bf2e6b828c514fbaacb9e68ce4a4a5108b73faf4997ee1e7625d"
       },
       {
         "path": "desktop/tests/package-smoke.test.ts",
@@ -7586,11 +7599,11 @@
       },
       {
         "path": "e2e/foundation.spec.ts",
-        "sha256": "68c9c38a7f8fae728d71e5b477c5b78c6514552303bb50278ee159791ee66583"
+        "sha256": "0072f48573411caa5b09b75c94b8c0b553572a0db640307c4614c794d9a291a2"
       },
       {
         "path": "e2e/harness.ts",
-        "sha256": "be5198459be42f78659948e6a578b01a27ecb78d1560c8d20ce4ad87c2e7a3de"
+        "sha256": "9926cff7e4f800a29733c7aff539e479cc3df0ae7b8ffa75bb953d5c6dc814b1"
       },
       {
         "path": "e2e/recovery.spec.ts",
@@ -7730,5 +7743,27 @@
       }
     ],
     "no_high_findings": true
+  },
+  "final_review_fix": {
+    "base": "d015992026d8db395b7e6234e1e739a30f608585",
+    "scope": "Affected 2 Python and 5 JS/TS files rescanned; all unchanged source/finding hashes checked. Dependency advisory audits retained unchanged; full aggregate not repeated.",
+    "python_files": [
+      "src/sage/sdk_probe.py",
+      "tests/unit/test_sdk_probe.py"
+    ],
+    "javascript_files": [
+      "desktop/renderer/App.tsx",
+      "desktop/tests/e2e-harness.test.ts",
+      "desktop/tests/notes.test.tsx",
+      "e2e/foundation.spec.ts",
+      "e2e/harness.ts"
+    ],
+    "targeted_bandit_findings": 34,
+    "targeted_eslint_hotspots": 6,
+    "bandit_severity_counts": {
+      "LOW": 715,
+      "MEDIUM": 9
+    },
+    "retained_dependency_audits": true
   }
 }

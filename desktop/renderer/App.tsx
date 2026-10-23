@@ -29,11 +29,14 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     }),
     [offset, setOffset] = useState(0),
     [task, setTask] = useState<Results["tasks.get"] | null>(null),
-    [status, setStatus] = useState("");
+    [status, setStatus] = useState(""),
+    [savedReceipt, setSavedReceipt] = useState("");
   const generation = useRef(0),
     taskGeneration = useRef(0),
     alive = useRef(true),
-    cancelledTasks = useRef(new Map<string, ActionResult>());
+    terminalOutcomes = useRef(
+      new Map<string, ActionResult & { status: "succeeded" | "cancelled" }>(),
+    );
   const updateSettings = useCallback(
     (s: Settings | null) => setSettings(s),
     [],
@@ -49,8 +52,11 @@ export function App({ api = window.sage }: { api?: SageApi }) {
           setTasks({
             ...p,
             items: p.items.map((item) =>
-              cancelledTasks.current.has(item.id)
-                ? { ...item, status: "cancelled" }
+              terminalOutcomes.current.has(item.id)
+                ? {
+                    ...item,
+                    status: terminalOutcomes.current.get(item.id)!.status,
+                  }
                 : item,
             ),
           });
@@ -70,38 +76,52 @@ export function App({ api = window.sage }: { api?: SageApi }) {
       taskGeneration.current++;
     };
   }, []);
-  function cancelledTask(value: Results["tasks.get"]): Results["tasks.get"] {
-    const outcome = cancelledTasks.current.get(value.id);
+  function reconciledTask(value: Results["tasks.get"]): Results["tasks.get"] {
+    const outcome = terminalOutcomes.current.get(value.id);
     return outcome
       ? {
           ...value,
-          status: "cancelled",
+          status: outcome.status,
           proposal: null,
           review_required: false,
           outcome,
         }
       : value;
   }
-  function purgeCancelledTask(task_id: string, outcome: ActionResult) {
-    if (!alive.current) return;
+  function reconcileOutcome(
+    task_id: string,
+    outcome: ActionResult,
+    proposal_id?: string,
+  ) {
+    if (
+      !alive.current ||
+      (outcome.status !== "succeeded" && outcome.status !== "cancelled")
+    )
+      return;
+    const terminal = { ...outcome, status: outcome.status };
     // The acknowledgement fences this identity, independently of selected detail.
-    cancelledTasks.current.set(task_id, outcome);
+    terminalOutcomes.current.set(task_id, terminal);
     setDraft((current) =>
-      current?.proposal?.task_id === task_id ? null : current,
+      current?.proposal?.task_id === task_id &&
+      (!proposal_id || current.proposal.id === proposal_id)
+        ? outcome.status === "cancelled"
+          ? null
+          : { ...current, proposal: null }
+        : current,
     );
     setTask((current) =>
-      current?.id === task_id ? cancelledTask(current) : current,
+      current?.id === task_id ? reconciledTask(current) : current,
     );
     setTasks((page) => ({
       ...page,
       items: page.items.map((item) =>
-        item.id === task_id ? { ...item, status: "cancelled" } : item,
+        item.id === task_id ? { ...item, status: terminal.status } : item,
       ),
     }));
     setRefresh((v) => v + 1);
   }
   function openDraft(proposal: Proposal | null, reviewRequired = false) {
-    if (proposal && cancelledTasks.current.has(proposal.task_id)) return;
+    if (proposal && terminalOutcomes.current.has(proposal.task_id)) return;
     dirty();
     setDraft({ proposal, reviewRequired, key: generation.current });
   }
@@ -110,7 +130,7 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     try {
       const t = await call(api, "tasks.get", { task_id });
       if (token === taskGeneration.current) {
-        setTask(cancelledTask(t));
+        setTask(reconciledTask(t));
         setStatus("");
       }
     } catch (e) {
@@ -123,7 +143,7 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     try {
       const result = await call(api, "tasks.cancel", { task_id });
       if (!alive.current) return;
-      if (result.status === "cancelled") purgeCancelledTask(task_id, result);
+      if (result.status === "cancelled") reconcileOutcome(task_id, result);
       else setRefresh((v) => v + 1);
       if (token === taskGeneration.current) {
         if (result.status !== "cancelled") setTask(null);
@@ -175,22 +195,31 @@ export function App({ api = window.sage }: { api?: SageApi }) {
               proposal={draft.proposal}
               reviewRequired={draft.reviewRequired}
               onChange={dirty}
-              onSaved={() => setRefresh((v) => v + 1)}
               onProposal={(proposal) => {
                 setDraft((current) =>
                   current?.key === draft.key
-                    ? cancelledTasks.current.has(proposal.task_id)
+                    ? terminalOutcomes.current.has(proposal.task_id)
                       ? null
                       : { ...current, proposal }
                     : current,
                 );
               }}
               onOutcome={(result, identity) => {
+                if (result.task_id !== identity.task_id) return;
                 if (result.status === "cancelled")
-                  purgeCancelledTask(identity.task_id, result);
+                  reconcileOutcome(identity.task_id, result, identity.id);
+                else if (result.status === "succeeded" && result.note_id) {
+                  reconcileOutcome(identity.task_id, result, identity.id);
+                  setSavedReceipt(
+                    `Task succeeded · saved note ${result.note_id}`,
+                  );
+                }
               }}
             />
           )}
+          <p role="status" aria-label="Saved note receipt">
+            {savedReceipt}
+          </p>
           <Notes api={api} refresh={refresh} />
         </div>
       </div>

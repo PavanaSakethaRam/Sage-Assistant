@@ -22,52 +22,65 @@ export const python = resolve(
 );
 export async function launch(existing?: string): Promise<Host> {
   const root = existing ?? (await mkdtemp(join(tmpdir(), "sage-e2e-")));
-  await mkdir(join(root, "userData"), { recursive: true });
-  const env: Record<string, string> = {
-    HOME: join(root, "home"),
-    TMPDIR: root,
-    TMP: root,
-    TEMP: root,
-    ...(process.env.SystemRoot ? { SystemRoot: process.env.SystemRoot } : {}),
-    ...(process.env.WINDIR ? { WINDIR: process.env.WINDIR } : {}),
-  };
-  const app = await _electron
-    .launch({
+  let app: ElectronApplication | undefined;
+  try {
+    await mkdir(join(root, "userData"), { recursive: true });
+    const env: Record<string, string> = {
+      HOME: join(root, "home"),
+      TMPDIR: root,
+      TMP: root,
+      TEMP: root,
+      ...(process.env.SystemRoot ? { SystemRoot: process.env.SystemRoot } : {}),
+      ...(process.env.WINDIR ? { WINDIR: process.env.WINDIR } : {}),
+    };
+    app = await _electron.launch({
       args: [resolve(".cache/e2e/bootstrap.cjs"), root, resolve(".cache/e2e")],
       cwd: resolve("."),
       env,
       chromiumSandbox: true,
       bypassCSP: false,
       timeout: 20000,
-    })
-    .catch(async () => {
-      if (!existing) await rm(root, { recursive: true, force: true });
-      throw new Error("Owned Electron test launch failed");
     });
-  const page = await app.firstWindow();
-  await page.waitForLoadState("domcontentloaded");
-  expect(await app.evaluate(({ app }) => app.getPath("userData"))).toBe(
-    join(root, "userData"),
-  );
-  const host: Host = {
-    root,
-    app,
-    page,
-    closed: false,
-    rpc: (method, params) =>
-      page.evaluate(
-        async ({ method, params }) =>
-          window.sage.request({
-            version: 1,
-            id: crypto.randomUUID(),
-            kind: "request",
-            method,
-            params,
-          } as CoreRequest),
-        { method, params },
-      ),
-  };
-  return host;
+    const page = await app.firstWindow();
+    await page.waitForLoadState("domcontentloaded");
+    expect(await app.evaluate(({ app }) => app.getPath("userData"))).toBe(
+      join(root, "userData"),
+    );
+    const host: Host = {
+      root,
+      app,
+      page,
+      closed: false,
+      rpc: (method, params) =>
+        page.evaluate(
+          async ({ method, params }) =>
+            window.sage.request({
+              version: 1,
+              id: crypto.randomUUID(),
+              kind: "request",
+              method,
+              params,
+            } as CoreRequest),
+          { method, params },
+        ),
+    };
+    return host;
+  } catch (error) {
+    // A failed initialization still owns the acquired app and any new root.
+    try {
+      await app?.close();
+    } catch {
+      // Preserve the original initialization error.
+    }
+    if (!existing) {
+      try {
+        await rm(root, { recursive: true, force: true });
+      } catch {
+        // Preserve the original initialization error.
+      }
+    }
+    throw error;
+  }
 }
 export async function close(host: Host, remove = true) {
   if (!host.closed) {

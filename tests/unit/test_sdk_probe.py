@@ -425,6 +425,7 @@ def test_audited_capabilities_are_closed(event: str, args: tuple[Any, ...], cate
     [
         b'{"schema":1,"schema":1}',
         b"[" * 1000 + b"]" * 1000,
+        b'{"schema":1,"status":"pass","stage":"complete","category":"none","sdk":"unavailable","python":"3.13.17","frozen":false}',
         b'{"schema":1,"status":"pass","stage":"sdk_import","category":"none","sdk":"1.0.25","python":"3.13.17","frozen":false}',
         b'{"schema":1,"status":"fail","stage":"complete","category":"io_error","sdk":"1.0.25","python":"3.13.17","frozen":false}',
         b'{"schema":1,"status":"fail","stage":"sdk_import","category":"none","sdk":"1.0.25","python":"3.13.17","frozen":false}',
@@ -433,3 +434,11 @@ def test_audited_capabilities_are_closed(event: str, args: tuple[Any, ...], cate
 def test_duplicate_deep_or_inconsistent_probe_results_fail_closed(payload: bytes) -> None:
     with pytest.raises(ValueError):
         decode_result(struct.pack(">I", len(payload)) + payload)
+
+
+def test_failed_probe_may_report_unavailable_sdk() -> None:
+    payload = (
+        b'{"schema":1,"status":"fail","stage":"guard","category":"dependency_error",'
+        b'"sdk":"unavailable","python":"3.13.17","frozen":false}'
+    )
+    assert decode_result(struct.pack(">I", len(payload)) + payload)["sdk"] == "unavailable"

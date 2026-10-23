@@ -465,3 +465,128 @@ it("does not invalidate newer unrelated inference when an older task cancellatio
     "Unrelated task two body",
   );
 });
+
+const savedOutcome = {
+  task_id: "task_1",
+  operation_id: "op_1",
+  status: "succeeded",
+  note_id: "note_1",
+  diagnostic: null,
+};
+it.each(["new local edits", "another retained draft"])(
+  "acknowledges a committed save after replacement by %s",
+  async (replacement) => {
+    const decision = deferred<unknown>();
+    let committed = false;
+    const { api } = taskFixture({
+      "notes.decide": () => decision.promise,
+      "notes.list": () => ({
+        items: committed
+          ? [
+              {
+                id: "note_1",
+                title: "Committed note",
+                task_id: "task_1",
+                created_at: date,
+                updated_at: date,
+              },
+            ]
+          : [],
+        next_offset: null,
+      }),
+    });
+    render(<App api={api} />);
+    await openFirstDraft();
+    await userEvent.click(screen.getByRole("button", { name: "Save note" }));
+    if (replacement === "new local edits") {
+      await userEvent.click(screen.getByRole("button", { name: "New note" }));
+      await userEvent.type(
+        screen.getByRole("textbox", { name: "Note title" }),
+        "Keep replacement",
+      );
+      await userEvent.type(
+        screen.getByRole("textbox", { name: "Note body" }),
+        "Keep replacement body",
+      );
+    } else {
+      await userEvent.click(
+        screen.getByRole("button", { name: "task_2 · pending" }),
+      );
+      await screen.findByRole("heading", { name: "task_2 · pending" });
+      await userEvent.click(
+        screen.getByRole("button", { name: "Open retained draft" }),
+      );
+    }
+    committed = true;
+    decision.resolve(savedOutcome);
+    await screen.findByRole("button", { name: "Committed note" });
+    await screen.findByRole("button", { name: "task_1 · succeeded" });
+    expect(screen.getByLabelText("Saved note receipt")).toHaveTextContent(
+      "saved note note_1",
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "task_2 · pending" }),
+    );
+    await screen.findByRole("heading", { name: "task_2 · pending" });
+    expect(screen.getByLabelText("Saved note receipt")).toHaveTextContent(
+      "saved note note_1",
+    );
+    if (replacement === "new local edits") {
+      expect(screen.getByRole("textbox", { name: "Note title" })).toHaveValue(
+        "Keep replacement",
+      );
+      expect(screen.getByRole("textbox", { name: "Note body" })).toHaveValue(
+        "Keep replacement body",
+      );
+    } else
+      expect(screen.getByLabelText("Literal note body").textContent).toBe(
+        "Unrelated task two body",
+      );
+  },
+);
+it("reconciles the selected retained task after save without reopening consumed review", async () => {
+  const { api } = taskFixture();
+  render(<App api={api} />);
+  await openFirstDraft();
+  await userEvent.click(screen.getByRole("button", { name: "Save note" }));
+  await screen.findByRole("heading", { name: "task_1 · succeeded" });
+  expect(
+    screen.queryByRole("button", { name: "Open retained draft" }),
+  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Cancel task" })).toBeNull();
+  expect(await screen.findByLabelText("Saved body")).toHaveTextContent(
+    "Full body",
+  );
+  expect(
+    screen.getByText("Recorded outcome: succeeded · saved note note_1"),
+  ).toBeInTheDocument();
+});
+it("fences an older pending task detail after successful save", async () => {
+  const stale = deferred<unknown>();
+  let reads = 0;
+  const pending = {
+    id: "task_1",
+    status: "pending",
+    created_at: date,
+    updated_at: date,
+    proposal,
+    review_required: false,
+    outcome: null,
+  };
+  const { api } = taskFixture({
+    "tasks.get": () => (reads++ === 0 ? pending : stale.promise),
+  });
+  render(<App api={api} />);
+  await openFirstDraft();
+  await userEvent.click(
+    screen.getByRole("button", { name: "task_1 · pending" }),
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Save note" }));
+  await screen.findByLabelText("Saved body");
+  stale.resolve(pending);
+  await screen.findByRole("heading", { name: "task_1 · succeeded" });
+  expect(
+    screen.queryByRole("button", { name: "Open retained draft" }),
+  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Cancel task" })).toBeNull();
+});

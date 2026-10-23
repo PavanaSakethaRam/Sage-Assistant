@@ -165,7 +165,7 @@
         45,
         46
       ],
-      "source_sha256": "98d0e6d7d115e4ff12ef0aef555f96cb4add5d9cd906da2a6a665203a89d196e",
+      "source_sha256": "8abb49e0ac2dddbdc05951dfdae8cf4eb6743826a21e779c81c0a3c017ce6c2c",
       "trusted": true
     },
     "src/sage/service.py": {
@@ -280,14 +280,14 @@
     },
     "desktop/renderer/App.tsx": {
       "statements": [
-        74,
-        92
+        80,
+        97
       ],
       "branches": [
-        43,
-        62
+        57,
+        76
       ],
-      "source_sha256": "29291b6cac87d414f4391c366283f3fa51e8b49e279debeb00bf71814d581ff8",
+      "source_sha256": "596ad49d6dc6bfb943bac19e6d421c38d48a435940fbc84da534551a293fc3f5",
       "trusted": false
     },
     "desktop/renderer/Conversation.tsx": {
