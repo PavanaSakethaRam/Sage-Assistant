@@ -74,8 +74,7 @@ test("fixed frames accept exact metadata and SDK contracts", () => {
   assert.deepEqual(validateSdk(decodeFrame(frame(sdk))), sdk);
 });
 
-test("frame rejects lengths, trailing bytes, invalid UTF-8, duplicate, deep and nonfinite JSON", () => {
-  const deep = `${"[".repeat(40)}0${"]".repeat(40)}`;
+test("frame rejects lengths, trailing bytes, invalid UTF-8, duplicate and nonfinite JSON", () => {
   for (const bytes of [
     Buffer.alloc(3),
     Buffer.from([0, 0, 0, 0]),
@@ -84,10 +83,17 @@ test("frame rejects lengths, trailing bytes, invalid UTF-8, duplicate, deep and 
     Buffer.from([0, 0, 0, 1, 0xff]),
     rawFrame('{"schema":1,"schema":1}'),
     rawFrame('{"\\u0073chema":1,"schema":1}'),
-    rawFrame(deep),
     rawFrame('{"n":1e999}'),
   ])
     assert.throws(() => decodeFrame(bytes), /Invalid fixed probe frame/);
+});
+
+test("depth limit distinguishes a deep object value from an ordinary shallow object", () => {
+  assert.deepEqual(decodeFrame(rawFrame('{"nested":[[0]]}')), {
+    nested: [[0]],
+  });
+  const deep = `{"nested":${"[".repeat(40)}0${"]".repeat(40)}}`;
+  assert.throws(() => decodeFrame(rawFrame(deep)), /Invalid fixed probe frame/);
 });
 
 test("metadata rejects extra, type, version, frozen and override drift", () => {
