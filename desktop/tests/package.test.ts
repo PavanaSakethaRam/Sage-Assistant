@@ -130,7 +130,7 @@ test.skipIf(process.platform !== "win32")(
             "import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); print(json.dumps({n:z.read(n).decode('utf-8') for n in z.namelist() if not n.endswith('/')}))",
             archive,
           ],
-          { encoding: "utf8" },
+          { encoding: "utf8", timeout: 10_000 },
         ),
       ) as Record<string, string>;
       expect(entries[".hidden"]).toBe("dot file");
@@ -154,13 +154,15 @@ test.skipIf(process.platform !== "win32")(
           "import sys,zipfile; print(zipfile.ZipFile(sys.argv[1]).read('nested/body.txt').decode())",
           archive,
         ],
-        { encoding: "utf8" },
+        { encoding: "utf8", timeout: 10_000 },
       );
       expect(replaced.trim()).toBe("replacement");
     } finally {
       await rm(root, { recursive: true, force: true });
     }
   },
+  // Two 120s production ZIP deadlines + two 10s inspections + 10s cleanup margin.
+  270_000,
 );
 
 test.skipIf(process.platform !== "darwin")(
