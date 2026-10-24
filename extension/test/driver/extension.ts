@@ -353,8 +353,49 @@ async function run(): Promise<void> {
           await runNativeEnvironmentFixture(fixture);
         }
         stage = "create-result";
-        let resultInspected = false;
+        let resultInspected = false,
+          nodePickerChecked = false;
         while (Date.now() < end + 30000) {
+          if (config.selectedCase === "test-runner" && !nodePickerChecked) {
+            const selected = vscode.window.activeTextEditor?.document;
+            if (
+              selected?.uri.scheme === "sage-diff" &&
+              selected
+                .getText()
+                .startsWith("Fixed focus test preview (local only)\n")
+            ) {
+              const text = selected.getText(),
+                from = text.indexOf("{"),
+                to = text.indexOf("\nLatest permitted start:");
+              assert.ok(from >= 0 && to > from);
+              const { parseTestRecipe } =
+                await import("../../../desktop/shared/coding-contracts");
+              const recipe = parseTestRecipe(JSON.parse(text.slice(from, to)));
+              const canonical = vscode.Uri.file(recipe.executable).toString();
+              assert.equal(
+                recipe.executable,
+                "/private/tmp/sage-task1-node.alAwYF/node",
+              );
+              assert.equal(
+                canonical,
+                "file:///private/tmp/sage-task1-node.alAwYF/node",
+              );
+              assert.equal(
+                recipe.executable_hash,
+                "06eb3f5762c2b6890e99d03f931bf01d9b20fd341dec1a8c1ef5c1809e66102b",
+              );
+              assert.equal(selected.isDirty, false);
+              nodePickerChecked = true;
+              await emitReceipt(join(fixture, "node-picker-checked.json"), {
+                canonical_uri: canonical,
+                returned_recipe_path_matches: true,
+                executable_hash_matches: true,
+                read_from:
+                  "actual local transient test preview after public picker",
+                product_bundled: config.packaged,
+              });
+            }
+          }
           if (config.selectedCase === "test-runner" && !resultInspected) {
             try {
               await readFile(join(fixture, "test-result-ready.json"));

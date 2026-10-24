@@ -58,6 +58,23 @@ export async function testThroughWorkbench(
   await chooser.waitFor();
   await chooser.fill("/private/tmp/sage-task1-node.alAwYF/node");
   await chooser.press("Enter");
+  const pickerDeadline = Date.now() + 20000;
+  while (Date.now() < pickerDeadline) {
+    try {
+      await readFile(join(fixture, "node-picker-checked.json"));
+      break;
+    } catch {
+      await new Promise((r) => setTimeout(r, 25));
+    }
+  }
+  const returned = JSON.parse(
+    await readFile(join(fixture, "node-picker-checked.json"), "utf8"),
+  );
+  assert.equal(
+    returned.canonical_uri,
+    "file:///private/tmp/sage-task1-node.alAwYF/node",
+  );
+  assert.equal(returned.returned_recipe_path_matches, true);
   await select("Run fixed tests");
   await page
     .getByRole("button", { name: "Run fixed tests", exact: true })
