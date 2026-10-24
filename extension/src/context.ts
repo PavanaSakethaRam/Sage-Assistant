@@ -82,6 +82,18 @@ function invalid(): never {
 function digest(bytes: Buffer | string): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
+/** Refuse invalid UTF-16 before Node can normalize it during UTF-8 encoding. */
+export function matchesUtf8Text(
+  text: string,
+  hash: string,
+  length: number,
+): boolean {
+  return (
+    !/[\uD800-\uDFFF]/u.test(text) &&
+    digest(text) === hash &&
+    Buffer.byteLength(text) === length
+  );
+}
 function sameStat(a: BigIntStats, b: BigIntStats): boolean {
   return (
     a.isFile() &&
@@ -786,8 +798,7 @@ export function replacementState(context: CodeContext) {
       !vscode.workspace.textDocuments.includes(document) ||
       localPath(document.uri.toString()) !== path ||
       document.version !== version ||
-      digest(document.getText()) !== hash ||
-      Buffer.byteLength(document.getText()) !== length ||
+      !matchesUtf8Text(document.getText(), hash, length) ||
       document.isDirty !== dirty ||
       document.eol !== vscode.EndOfLine.LF ||
       document.encoding !== "utf8"
@@ -815,8 +826,7 @@ export function replacementState(context: CodeContext) {
       vscode.workspace.textDocuments.includes(d) &&
       d.isDirty === dirty &&
       d.version === file.version &&
-      digest(d.getText()) === file.hash &&
-      Buffer.byteLength(d.getText()) === file.length &&
+      matchesUtf8Text(d.getText(), file.hash, file.length) &&
       d.eol === vscode.EndOfLine.LF &&
       d.encoding === "utf8" &&
       current.hash === file.diskHash &&

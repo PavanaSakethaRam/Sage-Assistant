@@ -7,7 +7,7 @@ import type {
   CodeReceipt,
   CodeIntent,
 } from "../../desktop/shared/coding-contracts";
-import { replacementState, validateContext } from "./context";
+import { replacementState, validateContext, matchesUtf8Text } from "./context";
 import { consumeLocalReview, type LocalReview } from "./review";
 export async function replaceFocusFile(
   context: CodeContext,
@@ -85,9 +85,7 @@ export async function replaceFocusFile(
       !document.isClosed && vscode.workspace.textDocuments.includes(document),
     exact =
       live &&
-      createHash("sha256").update(document.getText()).digest("hex") ===
-        expected &&
-      Buffer.byteLength(document.getText()) === expectedLength &&
+      matchesUtf8Text(document.getText(), expected, expectedLength) &&
       document.eol === vscode.EndOfLine.LF &&
       document.encoding === "utf8",
     oldDisk =

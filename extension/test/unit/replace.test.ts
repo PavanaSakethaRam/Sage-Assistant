@@ -230,7 +230,12 @@ afterEach(async () => {
     roots.splice(0).map((p) => rm(p, { force: true, recursive: true })),
   );
 });
-async function fixture(additional = false, ageMs = 0) {
+async function fixture(
+  additional = false,
+  ageMs = 0,
+  baseline = "// human baseline 😀\n",
+  readOnly = "read only source\n",
+) {
   const root = await realpath(await mkdtemp("/private/tmp/sage-create-"));
   roots.push(root);
   const workspace = {
@@ -251,9 +256,8 @@ async function fixture(additional = false, ageMs = 0) {
     revision: 1,
     policy_version: "code-v1" as const,
   };
-  await writeFile(join(root, "focus.js"), "// human baseline 😀\n");
-  if (additional)
-    await writeFile(join(root, "README.md"), "read only source\n");
+  await writeFile(join(root, "focus.js"), baseline);
+  if (additional) await writeFile(join(root, "README.md"), readOnly);
   const context = await captureContext({
     pair: {
       ...workspace,
@@ -790,3 +794,82 @@ it("original capture timer revokes source while native-save promise remains held
     f.sent.some((row) => (row as { kind: string }).kind === "journal.observed"),
   ).toBe(false);
 });
+
+// Constructor-only substitutions hold the expected version fixed to isolate text validity.
+it.each([
+  ["high", "\ud800"],
+  ["low", "\udfff"],
+])(
+  "lone %s surrogate cannot pass the pre-save approved UTF8 text check",
+  async (_label, invalid) => {
+    const f = await fixture(false, 0, "\ufffd\n");
+    approve();
+    ui.afterEdit = async () => {
+      ui.documents[0].text = f.proposal.files[0].text.replace(
+        "\ufffd",
+        invalid,
+      );
+    };
+    await f.review.show(f.context, f.proposal).catch(() => {});
+    expect(ui.saves).toBe(0);
+    expect(f.receipts[0].status).toBe("needs_review");
+    expect(ui.documents[0].text.charCodeAt(0)).toBe(invalid.charCodeAt(0));
+    expect(await readFile(join(f.root, "focus.js"), "utf8")).toBe(f.sourceText);
+    expect(() => contextOffer(f.context)).toThrow();
+  },
+);
+it.each([
+  ["high", true, "\ud800"],
+  ["low", true, "\udfff"],
+  ["high", false, "\ud800"],
+  ["low", false, "\udfff"],
+] as const)(
+  "lone %s surrogate during save %s cannot become an exact saved/unsaved observation",
+  async (_label, saved, invalid) => {
+    const f = await fixture(false, 0, "\ufffd\n");
+    approve();
+    ui.saveResult = saved;
+    ui.duringSave = async () => {
+      ui.documents[0].text = f.proposal.files[0].text.replace(
+        "\ufffd",
+        invalid,
+      );
+    };
+    await f.review.show(f.context, f.proposal).catch(() => {});
+    expect(f.receipts[0].status).toBe("needs_review");
+    expect(ui.saves).toBe(1);
+    expect(ui.documents[0].text.charCodeAt(0)).toBe(invalid.charCodeAt(0));
+    expect(() => contextOffer(f.context)).toThrow();
+  },
+);
+it.each([
+  ["high", "\ud800"],
+  ["low", "\udfff"],
+])(
+  "lone %s surrogate in a selected read-only buffer prevents saving",
+  async (_label, invalid) => {
+    const f = await fixture(true, 0, "// target\n", "\ufffd\n");
+    approve();
+    ui.afterEdit = async () => {
+      ui.documents[1].text = invalid + "\n";
+    };
+    await f.review.show(f.context, f.proposal).catch(() => {});
+    expect(ui.saves).toBe(0);
+    expect(f.receipts[0].status).toBe("needs_review");
+    expect(ui.documents[1].text.charCodeAt(0)).toBe(invalid.charCodeAt(0));
+  },
+);
+
+it.each(["\ufffd\n", "😀\n"])(
+  "valid scalar baseline %s still saves exact approved UTF8 text",
+  async (baseline) => {
+    const f = await fixture(false, 0, baseline);
+    approve();
+    await f.review.show(f.context, f.proposal);
+    expect(f.receipts[0].status).toBe("applied_saved");
+    expect(ui.saves).toBe(1);
+    expect(await readFile(join(f.root, "focus.js"), "utf8")).toBe(
+      f.proposal.files[0].text,
+    );
+  },
+);
