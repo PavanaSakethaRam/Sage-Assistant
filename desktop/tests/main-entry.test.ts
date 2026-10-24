@@ -135,9 +135,14 @@ vi.mock("../main/copilot-account", async (original) => ({
   },
 }));
 beforeEach(() => {
+  vi.stubGlobal(
+    "SAGE_EDITOR_EXTENSION_MARKER",
+    "SAGE_EDITOR_EXTENSION_V1:bnVsbA==",
+  );
   state.dialog.mockImplementation(async () => ({ response: state.result }));
 });
 afterEach(() => {
+  vi.unstubAllGlobals();
   vi.resetModules();
   vi.clearAllMocks();
   state.handlers.clear();
@@ -155,7 +160,9 @@ it("binds real IPC and progress to the live owned main frame, then closes accoun
     id: request.id,
     result: { ai_mode: "assistant", reasoning_backend: "copilot" },
   }));
-  await import("../main/index");
+  expect((await import("../main/index")).editorExtensionMarker).toBe(
+    "SAGE_EDITOR_EXTENSION_V1:bnVsbA==",
+  );
   await vi.waitFor(() => expect(Window.latest.show).toHaveBeenCalledOnce());
   const window = Window.latest;
   expect(window.options).toMatchObject({
@@ -241,7 +248,9 @@ it("binds real IPC and progress to the live owned main frame, then closes accoun
 it("redacts a startup failure and still owns bounded shutdown", async () => {
   state.fail = true;
   const error = vi.spyOn(console, "error").mockImplementation(() => {});
-  await import("../main/index");
+  expect((await import("../main/index")).editorExtensionMarker).toBe(
+    "SAGE_EDITOR_EXTENSION_V1:bnVsbA==",
+  );
   await vi.waitFor(() => expect(state.quit).toHaveBeenCalled());
   expect(error).toHaveBeenCalledWith("desktop_startup_failed");
   expect(JSON.stringify(error.mock.calls)).not.toContain("private-content");
@@ -267,7 +276,9 @@ async function entry() {
     id: r.id,
     result: { ai_mode: "local", reasoning_backend: null },
   }));
-  await import("../main/index");
+  expect((await import("../main/index")).editorExtensionMarker).toBe(
+    "SAGE_EDITOR_EXTENSION_V1:bnVsbA==",
+  );
   await vi.waitFor(() => expect(Window.latest.show).toHaveBeenCalledOnce());
   const w = Window.latest;
   return (method: string, params = {}) =>

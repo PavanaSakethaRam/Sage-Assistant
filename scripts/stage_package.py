@@ -7,15 +7,139 @@ import os
 import shutil
 import sqlite3
 import ssl
+import stat
 import subprocess
 import sys
 import sysconfig
+import threading
+from io import BufferedReader
 from pathlib import Path
+from typing import cast
 
 from sage.providers.protected_auth import EXECUTABLE_HASHES, EXECUTABLE_SIZES, platform_key
 from scripts.package_manifest import inventory, validate_sources
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+MAX_EXTENSION_BYTES = 2_097_152
+
+
+def extension_bytes(path: Path) -> bytes:
+    if path != path.resolve() or any(part.is_symlink() for part in (path, *path.parents)):
+        raise ValueError("Unsafe extension path")
+    if not stat.S_ISREG(path.lstat().st_mode):
+        raise ValueError("Unsafe extension path")
+    with os.fdopen(os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)), "rb") as source:
+        before = os.fstat(source.fileno())
+        if not stat.S_ISREG(before.st_mode) or not 1 <= before.st_size <= MAX_EXTENSION_BYTES:
+            raise ValueError("Invalid extension size")
+        content = source.read(MAX_EXTENSION_BYTES + 1)
+        after = os.fstat(source.fileno())
+        current = path.lstat()
+
+    def identity(info: os.stat_result) -> tuple[int, int, int, int, int]:
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+    if (
+        len(content) != before.st_size
+        or identity(before) != identity(after)
+        or identity(before) != identity(current)
+    ):
+        raise ValueError("Extension changed during read")
+    return content
+
+
+def check_extension(root: Path) -> str:
+    # One closed checker process; cap combined output while it is running.
+    output = bytearray()
+    with subprocess.Popen(
+        [
+            "node",
+            str(root / "scripts/check_extension.mjs"),
+            str(root / ".cache/sage-editor-bridge.vsix"),
+        ],
+        cwd=root,
+        shell=False,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    ) as child:
+        assert child.stdout is not None
+
+        def drain() -> None:
+            assert child.stdout is not None
+            while chunk := cast(BufferedReader, child.stdout).read1(4096):
+                output.extend(chunk[: 16_385 - len(output)])
+                if len(output) > 16_384:
+                    child.kill()
+                    break
+
+        reader = threading.Thread(target=drain, daemon=True)
+        reader.start()
+        try:
+            code = child.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            child.kill()
+            child.wait(timeout=5)
+            raise ValueError("Extension checker timeout") from None
+        finally:
+            reader.join(timeout=5)
+        if reader.is_alive() or code != 0 or len(output) > 16_384:
+            raise ValueError("Extension checker failed")
+    result = json.loads(output.decode("utf-8", errors="strict"))
+    if (
+        not isinstance(result, dict)
+        or set(result) != {"status", "entries", "sha256", "bundleSha256"}
+        or result["status"] != "pass"
+        or not isinstance(result["entries"], list)
+        or not 1 <= len(result["entries"]) <= 16
+        or any(not isinstance(name, str) or not 1 <= len(name) <= 256 for name in result["entries"])
+        or any(
+            not isinstance(result[key], str)
+            or len(result[key]) != 64
+            or any(character not in "0123456789abcdef" for character in result[key])
+            for key in ("sha256", "bundleSha256")
+        )
+    ):
+        raise ValueError("Invalid extension checker record")
+    return str(result["sha256"])
+
+
+def stage_editor_extension(root: Path) -> None:
+    source = root / ".cache/sage-editor-bridge.vsix"
+    target_root = root / ".runtime/package/editor-extension"
+    descriptor = root / "build/editor-extension.json"
+    manifest = root / "build/resource-manifest.json"
+    if (
+        target_root.exists()
+        or target_root.is_symlink()
+        or descriptor.exists()
+        or descriptor.is_symlink()
+        or manifest.exists()
+        or manifest.is_symlink()
+    ):
+        raise ValueError("Extension stage already exists")
+    expected = check_extension(root)
+    content = extension_bytes(source)
+    if hashlib.sha256(content).hexdigest() != expected:
+        raise ValueError("Extension changed after strict check")
+    for directory in (target_root.parent, descriptor.parent):
+        if directory != directory.resolve() or not directory.is_dir():
+            raise ValueError("Unsafe extension stage")
+    target_root.mkdir()
+    target = target_root / "sage-editor-bridge.vsix"
+    with target.open("xb") as output:
+        output.write(content)
+    copied = extension_bytes(target)
+    digest = hashlib.sha256(copied).hexdigest()
+    if copied != content or digest != expected:
+        raise ValueError("Extension copy changed")
+    value = {"schema": 1, "platform": platform_key(), "bytes": len(copied), "sha256": digest}
+    if value["platform"] not in {"darwin-arm64", "win32-x64"}:
+        raise ValueError("Unsupported extension platform")
+    with descriptor.open("x", encoding="utf-8") as output:
+        output.write(json.dumps(value, separators=(",", ":")) + "\n")
 
 
 def verified_copy(source: Path, target: Path) -> None:
@@ -95,6 +219,7 @@ def electron_component_versions(root: Path) -> dict[str, str]:
 
 def main() -> int:
     package = ROOT / ".runtime/package"
+    stage_editor_extension(ROOT)
     core_baseline = json.loads((ROOT / "build/core-manifest.json").read_text())["entries"]
     actual_core = {
         name: row for name, row in inventory(package).items() if name.startswith("core/")

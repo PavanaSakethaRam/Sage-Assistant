@@ -199,3 +199,129 @@ def test_electron_bom_versions_come_from_the_pinned_vendor_runtime() -> None:
         "node": "24.22.0",
         "v8": "15.6.75.19-electron.0",
     }
+
+
+def test_extension_stage_measures_copied_bytes_before_inventory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import hashlib
+
+    from sage.providers.protected_auth import platform_key
+    from scripts import stage_package as stage
+
+    root = tmp_path.resolve()
+    (root / ".cache").mkdir()
+    (root / "build").mkdir()
+    (root / ".runtime/package/core").mkdir(parents=True)
+    core = root / ".runtime/package/core" / ("sage-core.exe" if os.name == "nt" else "sage-core")
+    core.write_bytes(b"inert core")
+    core.chmod(0o755)
+    source = root / ".cache/sage-editor-bridge.vsix"
+    source.write_bytes(b"owned synthetic archive")
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    monkeypatch.setattr(stage, "check_extension", lambda _: digest)
+    stage.stage_editor_extension(root)
+    target = root / ".runtime/package/editor-extension/sage-editor-bridge.vsix"
+    assert target.read_bytes() == source.read_bytes()
+    descriptor = json.loads((root / "build/editor-extension.json").read_text())
+    assert descriptor == {
+        "schema": 1,
+        "platform": platform_key(),
+        "bytes": target.stat().st_size,
+        "sha256": digest,
+    }
+    from scripts.package_manifest import inventory
+
+    assert (
+        inventory(root / ".runtime/package")["editor-extension/sage-editor-bridge.vsix"]["sha256"]
+        == digest
+    )
+    with pytest.raises(ValueError):
+        stage.stage_editor_extension(root)
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "checker",
+        "drift",
+        pytest.param(
+            "linked",
+            marks=pytest.mark.skipif(
+                os.name == "nt", reason="Symlink creation requires Windows privilege"
+            ),
+        ),
+        "oversize",
+        "copy-drift",
+    ],
+)
+def test_extension_staging_failure_never_records_descriptor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    import hashlib
+
+    from scripts import stage_package as stage
+
+    root = tmp_path.resolve()
+    (root / ".cache").mkdir()
+    (root / "build").mkdir()
+    (root / ".runtime/package").mkdir(parents=True)
+    source = root / ".cache/sage-editor-bridge.vsix"
+    source.write_bytes(b"owned synthetic archive")
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+
+    def check(_: Path) -> str:
+        if failure == "checker":
+            raise ValueError("Unsafe extension")
+        if failure == "drift":
+            source.write_bytes(b"changed after strict check")
+        return digest
+
+    monkeypatch.setattr(stage, "check_extension", check)
+    if failure == "copy-drift":
+        read = stage.extension_bytes
+        monkeypatch.setattr(
+            stage, "extension_bytes", lambda path: read(path) if path == source else b"copy drift"
+        )
+    if failure == "linked":
+        link = source.with_suffix(".link")
+        link.write_bytes(source.read_bytes())
+        source.unlink()
+        source.symlink_to(link)
+    if failure == "oversize":
+        source.write_bytes(b"x" * (2_097_152 + 1))
+    with pytest.raises(ValueError):
+        stage.stage_editor_extension(root)
+    assert not (root / "build/editor-extension.json").exists()
+    assert not (root / "build/resource-manifest.json").exists()
+
+
+@pytest.mark.parametrize("failure", ["none", "unknown", "status", "hash", "output", "exit"])
+def test_extension_checker_is_closed_and_output_bounded(tmp_path: Path, failure: str) -> None:
+    from scripts.stage_package import check_extension
+
+    root = tmp_path.resolve()
+    (root / "scripts").mkdir()
+    data: dict[str, object] = {
+        "status": "pass",
+        "entries": ["one"],
+        "sha256": "a" * 64,
+        "bundleSha256": "b" * 64,
+    }
+    if failure == "unknown":
+        data["extra"] = True
+    if failure == "status":
+        data["status"] = "fail"
+    if failure == "hash":
+        data["sha256"] = "A" * 64
+    script = "process.stdout.write(" + json.dumps(json.dumps(data)) + ");"
+    if failure == "output":
+        script = "process.stdout.write('x'.repeat(100000));"
+    if failure == "exit":
+        script += "process.exitCode=1;"
+    (root / "scripts/check_extension.mjs").write_text(script)
+    if failure == "none":
+        assert check_extension(root) == "a" * 64
+    else:
+        with pytest.raises(ValueError):
+            check_extension(root)

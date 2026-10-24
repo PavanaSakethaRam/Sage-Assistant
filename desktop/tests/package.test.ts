@@ -1,9 +1,9 @@
-import { mkdtemp, writeFile, rm, mkdir } from "node:fs/promises";
+import { mkdtemp, writeFile, rm, mkdir, realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createPackage } from "@electron/asar";
 import { MakerZIP } from "@electron-forge/maker-zip";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { EventEmitter } from "node:events";
 import type { ChildProcess } from "node:child_process";
 import { execFileSync } from "node:child_process";
@@ -312,5 +312,207 @@ test("actual ASAR accepts the supported production bundle and static asset layou
       rm(root, { recursive: true, force: true }),
       rm(archive, { force: true }),
     ]);
+  }
+});
+
+// Identity fixtures keep ASAR and fixed Python inventory real; fuses and ZIP are separate boundaries.
+vi.mock("@electron/fuses", async (original) => ({
+  ...(await original<object>()),
+  getCurrentFuseWire: async () => ({
+    0: 48,
+    1: 49,
+    2: 48,
+    3: 48,
+    4: 49,
+    5: 49,
+  }),
+}));
+vi.mock("../../scripts/check_extension.mjs", () => ({
+  validateVsix: async () => ({
+    entries: [],
+    sha256: fixtureDigest,
+    bundleSha256: "b".repeat(64),
+  }),
+}));
+const fixtureBytes = Buffer.from("owned synthetic VSIX");
+const fixtureDigest = (await import("node:crypto"))
+  .createHash("sha256")
+  .update(fixtureBytes)
+  .digest("hex");
+async function identityPackage(root: string) {
+  const app = join(
+    root,
+    process.platform === "darwin" ? "Sage.app" : "Sage-win32-x64",
+  );
+  const resources = join(
+    app,
+    process.platform === "darwin" ? "Contents/Resources" : "resources",
+  );
+  const source = join(root, "source");
+  const manifest = join(root, "resource-manifest.json");
+  const descriptor = {
+    schema: 1,
+    platform: process.platform === "darwin" ? "darwin-arm64" : "win32-x64",
+    bytes: fixtureBytes.length,
+    sha256: fixtureDigest,
+  };
+  const marker =
+    "SAGE_EDITOR_EXTENSION_V1:" +
+    Buffer.from(JSON.stringify(descriptor)).toString("base64");
+  await productionLayout(source);
+  await writeFile(
+    join(source, ".vite/build/main.cjs"),
+    `exports.editorExtensionMarker = "${marker}";`,
+  );
+  await mkdir(join(resources, "core"), { recursive: true });
+  const core = join(
+    resources,
+    "core",
+    process.platform === "win32" ? "sage-core.exe" : "sage-core",
+  );
+  await writeFile(core, "owned inert core", { mode: 0o755 });
+  await mkdir(join(resources, "editor-extension"));
+  await writeFile(
+    join(resources, "editor-extension/sage-editor-bridge.vsix"),
+    fixtureBytes,
+  );
+  execFileSync(
+    resolve(
+      process.platform === "win32"
+        ? ".venv/Scripts/python.exe"
+        : ".venv/bin/python",
+    ),
+    [
+      "scripts/package_manifest.py",
+      resources,
+      "--manifest",
+      manifest,
+      "--record",
+    ],
+    { stdio: "pipe" },
+  );
+  await writeFile(
+    join(root, "editor-extension.json"),
+    JSON.stringify(descriptor),
+  );
+  await createPackage(source, join(resources, "app.asar"));
+  return { app, manifest, resources, source, descriptor, marker };
+}
+test("loaded package baseline passes and missing extension descriptor is refused", async () => {
+  const { validatePackage } = await import("../../scripts/check_package");
+  const root = await realpath(
+    await mkdtemp(join(tmpdir(), "sage-identity-package-")),
+  );
+  try {
+    const fixture = await identityPackage(root);
+    await expect(
+      validatePackage(fixture.app, fixture.manifest),
+    ).resolves.toMatchObject({
+      sha256: fixtureDigest,
+      bytes: fixtureBytes.length,
+    });
+    await rm(join(root, "editor-extension.json"));
+    await expect(
+      validatePackage(fixture.app, fixture.manifest),
+    ).rejects.toThrow();
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+async function rejectPackageDrift(failure: string) {
+  const { validatePackage } = await import("../../scripts/check_package");
+  const { readFile, symlink, rename } = await import("node:fs/promises");
+  const root = await realpath(
+    await mkdtemp(join(tmpdir(), "sage-package-drift-")),
+  );
+  try {
+    const fixture = await identityPackage(root);
+    await expect(
+      validatePackage(fixture.app, fixture.manifest),
+    ).resolves.toMatchObject({ sha256: fixtureDigest });
+    if (failure.startsWith("main-")) {
+      const value =
+        failure === "main-missing"
+          ? "exports.empty = true;"
+          : failure === "main-null"
+            ? 'exports.marker="SAGE_EDITOR_EXTENSION_V1:bnVsbA==";'
+            : `exports.marker="${fixture.marker}"; exports.other="${fixture.marker}";`;
+      await writeFile(join(fixture.source, ".vite/build/main.cjs"), value);
+      await createPackage(fixture.source, join(fixture.resources, "app.asar"));
+    } else if (failure === "descriptor-drift")
+      await writeFile(
+        join(root, "editor-extension.json"),
+        JSON.stringify({ ...fixture.descriptor, sha256: "a".repeat(64) }),
+      );
+    else if (failure === "resource-drift")
+      await writeFile(
+        join(fixture.resources, "editor-extension/sage-editor-bridge.vsix"),
+        "modified",
+      );
+    else if (failure.startsWith("manifest-")) {
+      const data = JSON.parse(await readFile(fixture.manifest, "utf8"));
+      if (failure === "manifest-escape")
+        data.entries["../escape"] = Object.values(data.entries)[0];
+      else data.schema = true;
+      await writeFile(fixture.manifest, JSON.stringify(data));
+    } else if (failure === "linked-app") {
+      const link = join(root, "Linked.app");
+      await symlink(fixture.app, link, "dir");
+      await expect(validatePackage(link, fixture.manifest)).rejects.toThrow();
+      return;
+    } else if (failure === "linked-manifest") {
+      const link = join(root, "linked.json");
+      await symlink(fixture.manifest, link);
+      await expect(validatePackage(fixture.app, link)).rejects.toThrow();
+      return;
+    } else {
+      const moved = join(root, "moved-resources");
+      await rename(fixture.resources, moved);
+      await symlink(moved, fixture.resources, "dir");
+    }
+    await expect(
+      validatePackage(fixture.app, fixture.manifest),
+    ).rejects.toThrow();
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+test.each([
+  "main-missing",
+  "main-duplicate",
+  "main-null",
+  "descriptor-drift",
+  "resource-drift",
+  "manifest-escape",
+  "manifest-type",
+])(
+  "package identity refuses %s from a loaded valid baseline",
+  rejectPackageDrift,
+);
+test
+  .skipIf(process.platform === "win32")
+  .each(["linked-app", "linked-manifest", "linked-resources"])(
+  "package identity refuses %s from a loaded valid baseline",
+  rejectPackageDrift,
+);
+
+test("direct Node TS CLI rejects every incomplete or extra selector with fixed diagnostics", async () => {
+  const { spawnSync } = await import("node:child_process");
+  for (const args of [
+    [],
+    ["--vsix"],
+    ["--vsix", "private-archive", "extra"],
+    ["private-app"],
+    ["private-app", "private-manifest", "extra"],
+  ]) {
+    const result = spawnSync(
+      process.execPath,
+      ["scripts/check_package.ts", ...args],
+      { cwd: resolve("."), encoding: "utf8", timeout: 10000, shell: false },
+    );
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toBe("FAIL package checks\n");
   }
 });

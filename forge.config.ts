@@ -13,6 +13,7 @@ const config: ForgeConfig = {
       ".runtime/package/copilot",
       ".runtime/package/gh",
       ".runtime/package/notices",
+      ".runtime/package/editor-extension",
     ],
   },
   makers: [new WindowsSafeMakerZIP({}, ["darwin", "win32"])],

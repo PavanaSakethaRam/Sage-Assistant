@@ -29,6 +29,8 @@ import {
   type PairView,
   parseRendererEvent,
 } from "../shared/contracts";
+declare const SAGE_EDITOR_EXTENSION_MARKER: string;
+export const editorExtensionMarker = SAGE_EDITOR_EXTENSION_MARKER;
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 let core: CoreProcess | undefined;
 let window: BrowserWindow | undefined;

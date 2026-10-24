@@ -7,10 +7,17 @@ import {
   uncache,
 } from "@electron/asar";
 import { getCurrentFuseWire, FuseV1Options } from "@electron/fuses";
+import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateVsix } from "./check_extension.mjs";
+import {
+  compiledExtensionIdentity,
+  type ExtensionIdentity,
+  ordinaryPath,
+  readExtensionIdentity,
+} from "../desktop/main/extension-export.ts";
 export { validateVsix } from "./check_extension.mjs";
 
 export function canonicalArchiveEntry(
@@ -97,23 +104,64 @@ export function validateArchive(archive: string): void {
   if (listedNames.size !== headerNames.size)
     throw Error("Unsafe application archive");
 }
-async function main(): Promise<void> {
-  if (process.argv[2] === "--vsix") {
-    if (process.argv.length !== 4) throw Error("Invalid VSIX arguments");
-    console.log(
-      JSON.stringify({
-        status: "pass",
-        ...(await validateVsix(resolve(process.argv[3]))),
-      }),
-    );
-    return;
+export interface CheckedPackage extends ExtensionIdentity {
+  app: string;
+  resources: string;
+  archive: string;
+  core: string;
+  vsix: string;
+  bundleSha256: string;
+}
+export async function validatePackage(
+  app: string,
+  manifest: string,
+): Promise<CheckedPackage> {
+  ordinaryPath(app, true);
+  ordinaryPath(manifest, false);
+  const baseline: unknown = JSON.parse(readFileSync(manifest, "utf8"));
+  if (
+    typeof baseline !== "object" ||
+    baseline === null ||
+    Array.isArray(baseline) ||
+    Object.keys(baseline).sort().join(",") !== "entries,schema" ||
+    !("schema" in baseline) ||
+    baseline.schema !== 1 ||
+    !("entries" in baseline) ||
+    typeof baseline.entries !== "object" ||
+    baseline.entries === null ||
+    Array.isArray(baseline.entries)
+  )
+    throw Error("Invalid resource manifest");
+  for (const [name, row] of Object.entries(baseline.entries)) {
+    if (
+      !name ||
+      name.split("/").some((part) => !part || part === "." || part === "..") ||
+      /[\\\0:]/u.test(name) ||
+      typeof row !== "object" ||
+      row === null ||
+      Array.isArray(row) ||
+      !Number.isInteger(row.mode) ||
+      row.mode < 0 ||
+      row.mode > 0o7777 ||
+      (row.type === "file"
+        ? Object.keys(row).sort().join(",") !== "bytes,mode,sha256,type" ||
+          !Number.isInteger(row.bytes) ||
+          row.bytes < 0 ||
+          typeof row.sha256 !== "string" ||
+          !/^[0-9a-f]{64}$/u.test(row.sha256)
+        : row.type !== "symlink" ||
+          Object.keys(row).sort().join(",") !== "mode,target,type" ||
+          typeof row.target !== "string")
+    )
+      throw Error("Invalid resource manifest");
   }
-  const app = resolve(process.argv[2]);
   const resources =
     process.platform === "darwin"
       ? join(app, "Contents/Resources")
       : join(app, "resources");
   const archive = join(resources, "app.asar");
+  ordinaryPath(resources, true);
+  ordinaryPath(archive, false);
   validateArchive(archive);
   const entries = listPackage(archive, { isPack: false }).map((name) =>
     canonicalArchiveEntry(name),
@@ -138,24 +186,76 @@ async function main(): Promise<void> {
     FuseV1Options.OnlyLoadAppFromAsar,
   ])
     if (wire[option] !== 49) throw Error("Missing production fuse");
+  const project = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   const python = resolve(
+    project,
     ".venv",
     process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
   );
   const result = spawnSync(
     python,
     [
-      "scripts/package_manifest.py",
+      join(project, "scripts/package_manifest.py"),
       resources,
       "--manifest",
-      resolve(process.argv[3]),
+      manifest,
       "--packaged",
     ],
-    { stdio: "inherit", shell: false },
+    {
+      cwd: project,
+      stdio: "pipe",
+      shell: false,
+      timeout: 30_000,
+      maxBuffer: 16_384,
+    },
   );
   if (result.status !== 0) throw Error("External resource mismatch");
+  const identity = readExtensionIdentity(
+    join(dirname(manifest), "editor-extension.json"),
+    resources,
+  );
+  const compiled = compiledExtensionIdentity(
+    extractFile(archive, ".vite/build/main.cjs").toString("utf8"),
+  );
+  if (
+    identity === null ||
+    JSON.stringify(identity) !== JSON.stringify(compiled)
+  )
+    throw Error("Packaged extension identity mismatch");
+  const vsix = join(resources, "editor-extension/sage-editor-bridge.vsix");
+  const checked = await validateVsix(vsix);
+  if (checked.sha256 !== identity.sha256)
+    throw Error("Packaged extension changed");
+  return {
+    app,
+    resources,
+    archive,
+    core: join(
+      resources,
+      "core",
+      process.platform === "win32" ? "sage-core.exe" : "sage-core",
+    ),
+    vsix,
+    ...identity,
+    bundleSha256: checked.bundleSha256,
+  };
+}
+async function main(): Promise<void> {
+  if (process.argv[2] === "--vsix") {
+    if (process.argv.length !== 4) throw Error("Invalid VSIX arguments");
+    console.log(
+      JSON.stringify({
+        status: "pass",
+        ...(await validateVsix(resolve(process.argv[3]))),
+      }),
+    );
+    return;
+  }
+  if (process.argv.length !== 4) throw Error("Invalid package arguments");
+  await validatePackage(resolve(process.argv[2]), resolve(process.argv[3]));
   console.log("PASS actual ASAR, production fuses and resource baseline");
 }
+
 if (
   process.argv[1] &&
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)
