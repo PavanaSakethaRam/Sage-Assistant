@@ -1,5 +1,5 @@
 /** Deterministic owned-profile launcher. Never download, discover a real editor or weaken trust. */
-import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import {
   mkdtemp,
@@ -14,7 +14,7 @@ import { join, resolve } from "node:path";
 import { build } from "vite";
 import { chromium } from "@playwright/test";
 import { assertNativeElectronContext } from "../e2e/native-context.ts";
-import { validateVsix } from "./check_package.ts";
+import { extractVsix } from "./check_extension.mjs";
 import { rootProbeName } from "./build-root-probe.ts";
 import { revalidate, VERSION } from "./provision-vscode.ts";
 import { fileURLToPath } from "node:url";
@@ -278,36 +278,10 @@ async function lane(
     productPath: string | undefined;
   if (packaged) {
     const vsix = resolve(".cache/sage-editor-bridge.vsix");
-    await validateVsix(vsix);
-    const bytes = await readFile(vsix);
-    packageHash = createHash("sha256").update(bytes).digest("hex");
-    bundleHash = createHash("sha256")
-      .update(await readFile(resolve("extension/dist/extension.cjs")))
-      .digest("hex");
     productPath = join(extensions, "sage-local.sage-editor-bridge-0.1.0");
-    await mkdir(productPath);
-    const python = resolve(
-      ".venv",
-      process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
-    );
-    const extract = `import sys,zipfile,io,stat,pathlib
-root=pathlib.Path(sys.argv[1])
-allowed={'extension/package.json','extension/dist/extension.cjs','extension/readme.md','extension/LICENSE.txt','extension/THIRD_PARTY_NOTICES.md','extension/dist/${rootProbeName()}','extension.vsixmanifest','[Content_Types].xml'}
-with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
- items=z.infolist(); assert len(items)==8 and {i.filename for i in items}==allowed
- for i in items:
-  assert not stat.S_ISLNK(i.external_attr>>16) and i.file_size<=1048576 and not i.flag_bits&1
-  if not i.filename.startswith('extension/'): continue
-  target=root/i.filename[len('extension/'):]; target.parent.mkdir(parents=True,exist_ok=True)
-  with target.open('xb') as f: f.write(z.read(i))
-  if i.filename=='extension/dist/${rootProbeName()}': target.chmod(0o755)`;
-    const extracted = spawnSync(python, ["-c", extract, productPath], {
-      shell: false,
-      input: bytes,
-      timeout: 30_000,
-      maxBuffer: 262144,
-    });
-    if (extracted.status !== 0) throw Error("Owned package extraction failed");
+    const checked = await extractVsix(vsix, productPath);
+    packageHash = checked.sha256;
+    bundleHash = checked.bundleSha256;
     if (
       createHash("sha256")
         .update(await readFile(join(productPath, "dist/extension.cjs")))

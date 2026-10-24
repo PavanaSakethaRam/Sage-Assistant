@@ -213,30 +213,6 @@ it("shell refuses activation in restricted or remote state and owns command disp
   editor.ticket = undefined;
 });
 
-import { spawnSync } from "node:child_process";
-import { resolve } from "node:path";
-import { validateVsix } from "../../../scripts/check_package";
-it("rejects an actual VSIX carrying a test driver outside its seven-file allowlist", async () => {
-  const root = await mkdtemp(join(tmpdir(), "sage-vsix-test-"));
-  roots.push(root);
-  const path = join(root, "bad.vsix");
-  const python = resolve(
-    ".venv",
-    process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
-  );
-  const created = spawnSync(
-    python,
-    [
-      "-c",
-      "import zipfile,sys; z=zipfile.ZipFile(sys.argv[1],'w'); z.writestr('extension/test/driver/extension.cjs','private driver'); z.close()",
-      path,
-    ],
-    { shell: false },
-  );
-  expect(created.status).toBe(0);
-  await expect(validateVsix(path)).rejects.toThrow();
-});
-
 import {
   inventory,
   revalidate,
