@@ -344,15 +344,24 @@ class CoreService:
                     await self.coding.cancel_work(CodeJobId.model_validate(envelope.params).job_id)
                 ).model_dump(mode="json")
             elif envelope.method == "settings.update":
-                settings = Settings.model_validate(envelope.params)
                 async with self._selection_lock:
+                    current = self.get_settings()
+                    settings = Settings.model_validate(
+                        current.model_dump(mode="json") | envelope.params
+                    )
                     self._generation += 1
                     await self._cancel_inflight()
                     if settings.ai_mode != "assistant" and self._backend_factory is not None:
                         await self._replace_source(None)
-                    if settings != self.get_settings():
+                    if settings != current:
                         self.coding.interrupt()
-                    value = self._dispatch(envelope)
+                    with self.store.transaction() as db:
+                        db.execute(
+                            "INSERT INTO settings (id,data_json) VALUES (1,?) "
+                            "ON CONFLICT(id) DO UPDATE SET data_json=excluded.data_json",
+                            (settings.model_dump_json(),),
+                        )
+                    value = settings.model_dump(mode="json")
                     self._configure_coding()
             else:
                 if envelope.method == "app.shutdown":
@@ -539,15 +548,6 @@ class CoreService:
                 with self.store.transaction() as db:
                     row = db.execute("SELECT data_json FROM settings WHERE id=1").fetchone()
                 settings = Settings.model_validate_json(row[0]) if row else Settings()
-                return settings.model_dump(mode="json")
-            case "settings.update":
-                settings = Settings.model_validate(params)
-                with self.store.transaction() as db:
-                    db.execute(
-                        "INSERT INTO settings (id,data_json) VALUES (1,?) "
-                        "ON CONFLICT(id) DO UPDATE SET data_json=excluded.data_json",
-                        (settings.model_dump_json(),),
-                    )
                 return settings.model_dump(mode="json")
             case "readiness.list":
                 Empty.model_validate(params)

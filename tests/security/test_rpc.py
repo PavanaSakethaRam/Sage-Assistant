@@ -909,3 +909,51 @@ def test_failed_retention_blocks_expired_reads_revision_and_decision(tmp_path: P
         assert service.store.list_notes() == []
     finally:
         service.close()
+
+
+@pytest.mark.parametrize("coding_first", [False, True])
+def test_framed_setup_partial_settings_persist_without_reset(
+    tmp_path: Path, coding_first: bool
+) -> None:
+    async def run() -> None:
+        core = CoreService(Store.open(tmp_path / "settings.sqlite"))
+        incoming, outgoing = asyncio.StreamReader(), asyncio.StreamReader()
+
+        class FramedWriter(Writer):
+            def write(self, data: bytes) -> None:
+                super().write(data)
+                outgoing.feed_data(data)
+
+        running = asyncio.create_task(run_service(incoming, FramedWriter(), core))
+        patches: list[dict[str, object]] = [
+            {"ai_mode": "assistant", "reasoning_backend": "copilot"},
+            {"coding_backend": "copilot", "coding_model": None},
+        ]
+        try:
+            async with asyncio.timeout(2):
+                for index, patch in enumerate(reversed(patches) if coding_first else patches):
+                    incoming.feed_data(
+                        encode_frame(request(f"setup-{index}", "settings.update", **patch))
+                    )
+                    result(await read_frame(outgoing))
+                incoming.feed_data(encode_frame(request("get", "settings.get")))
+                expected = {
+                    "ai_mode": "assistant",
+                    "reasoning_backend": "copilot",
+                    "coding_backend": "copilot",
+                    "coding_model": None,
+                }
+                assert result(await read_frame(outgoing)) == expected
+                with core.store.transaction() as db:
+                    assert (
+                        json.loads(
+                            db.execute("SELECT data_json FROM settings WHERE id=1").fetchone()[0]
+                        )
+                        == expected
+                    )
+        finally:
+            incoming.feed_eof()
+            await running
+            await core.aclose()
+
+    asyncio.run(run())

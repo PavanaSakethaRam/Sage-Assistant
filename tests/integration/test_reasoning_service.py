@@ -91,7 +91,17 @@ def test_complete_reasoning_creates_review_only_and_rejects_duplicate(tmp_path: 
 
 
 @pytest.mark.parametrize(
-    "invalidate", ["cancel", "task_cancel", "deadline", "identity", "settings", "shutdown"]
+    "invalidate",
+    [
+        "cancel",
+        "task_cancel",
+        "deadline",
+        "identity",
+        "settings",
+        "coding_settings",
+        "empty_settings",
+        "shutdown",
+    ],
 )
 def test_late_result_has_no_proposal_side_effect(tmp_path: Path, invalidate: str) -> None:
     async def run() -> None:
@@ -127,7 +137,13 @@ def test_late_result_has_no_proposal_side_effect(tmp_path: Path, invalidate: str
         elif invalidate == "identity":
             backend.wrong_identity = True
         elif invalidate == "settings":
-            await service.dispatch(rpc("local", "settings.update", {}))
+            await service.dispatch(
+                rpc("local", "settings.update", {"ai_mode": "local", "reasoning_backend": None})
+            )
+        elif invalidate == "coding_settings":
+            await service.dispatch(rpc("coding", "settings.update", {"coding_backend": "copilot"}))
+        elif invalidate == "empty_settings":
+            await service.dispatch(rpc("empty", "settings.update", {}))
         elif invalidate == "shutdown":
             await service.dispatch(rpc("shutdown", "app.shutdown", {}))
         backend.finish.set()

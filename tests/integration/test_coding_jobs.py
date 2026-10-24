@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from contextlib import closing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Literal
 
 import pytest
 
@@ -623,7 +624,9 @@ def test_real_sqlite_full_rolls_back_grant_and_intent(
 )
 def test_replacement_preserves_selected_baseline_and_requires_replace_scope(
     state: tuple[Store, Clock, CodingJobs],
-    observed_status: str,
+    observed_status: Literal[
+        "applied_saved", "applied_unsaved", "needs_review", "needs_reconciliation"
+    ],
     cancelled: bool,
 ) -> None:
     store, clock, jobs = state

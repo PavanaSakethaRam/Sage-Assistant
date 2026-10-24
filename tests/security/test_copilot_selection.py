@@ -112,7 +112,7 @@ def test_selection_replaces_closes_old_backend_and_invalidates_readiness(tmp_pat
                 "kind": "request",
                 "id": "local",
                 "method": "settings.update",
-                "params": {"ai_mode": "local"},
+                "params": {"ai_mode": "local", "reasoning_backend": None},
             }
         )
         assert (
