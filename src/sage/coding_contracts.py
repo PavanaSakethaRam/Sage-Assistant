@@ -178,7 +178,7 @@ class CodeContext(Contract):
     files: Annotated[tuple[CodeFile, ...], BeforeValidator(_tuple)]
     diagnostics: Annotated[tuple[DiagnosticText, ...], BeforeValidator(_tuple)] = ()
     context_hash: Hash
-    target: FocusName | None = None
+    target: FocusName | None = Field(default=None, exclude_if=lambda value: value is None)
 
     @model_validator(mode="after")
     def check_snapshot(self) -> Self:
@@ -205,6 +205,8 @@ class CodeContext(Contract):
 
 def context_hash(context: CodeContext) -> str:
     material = context.model_dump(mode="json", exclude={"context_hash"})
+    # The absent create target has a fixed null slot in the canonical hash.
+    material["target"] = context.target
     material["lengths"] = {
         "root_uri": len(context.root_uri),
         "files": [{"name": len(file.name), "text": len(file.text)} for file in context.files],
@@ -237,7 +239,7 @@ class CodeModelRequest(CodeStart):
     mode: CodeMode
     files: Annotated[tuple[CodeSource, ...], BeforeValidator(_tuple)]
     diagnostics: Annotated[tuple[DiagnosticText, ...], BeforeValidator(_tuple)] = ()
-    target: FocusName | None = None
+    target: FocusName | None = Field(default=None, exclude_if=lambda value: value is None)
 
     @model_validator(mode="after")
     def check_request(self) -> Self:
@@ -377,7 +379,7 @@ class CodeJobView(Contract):
     expires_at: UtcDateTime
     diagnostic: SafeDiagnostic | None
     receipts: Annotated[tuple[CodeReceipt, ...], BeforeValidator(_tuple)]
-    target: FocusName | None = None
+    target: FocusName | None = Field(default=None, exclude_if=lambda value: value is None)
 
     @model_validator(mode="after")
     def check_metadata(self) -> Self:

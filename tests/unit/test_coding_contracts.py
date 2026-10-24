@@ -2,11 +2,13 @@
 
 import asyncio
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
+import sage.coding_contracts as coding
 from sage.coding_contracts import (
     CodeAck,
     CodeContext,
@@ -28,6 +30,7 @@ from sage.coding_contracts import (
 from sage.coding_contracts import (
     TestRecipe as CodingTestRecipe,
 )
+from sage.contracts import Contract
 from sage.protocol import ProtocolError, read_frame
 from tests.helpers.coding_fake import (
     BINDING,
@@ -262,3 +265,95 @@ def test_job_page_rejects_oversized_serialized_frame() -> None:
     view["receipts"] = [make_receipt() for _ in range(100)]
     with pytest.raises(ValidationError):
         CodeJobPage.model_validate({"items": [view] * 100, "next_offset": None})
+
+
+def test_create_values_serialize_without_a_target() -> None:
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
+    parsers: list[tuple[str, Callable[[object], Contract]]] = [
+        ("context", CodeContext.model_validate),
+        ("model_request", CodeModelRequest.model_validate),
+        ("job_view", CodeJobView.model_validate),
+    ]
+    for kind, parser in parsers:
+        value = next(
+            row["value"] for row in corpus["cases"] if row["kind"] == kind and row["valid"]
+        )
+        parsed = parser(value)
+        serialized = parsed.model_dump(mode="json")
+        assert "target" not in serialized
+        assert parser(serialized) == parsed
+
+
+def test_all_public_values_round_trip_through_json_mode_dump() -> None:
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
+
+    def parse(row: dict[str, object], value: object) -> Contract:
+        kind = row["kind"]
+        if kind == "proposal":
+            context = CodeContext.model_validate(row["context"])
+            return parse_code_proposal(value, context)
+        if kind == "receipt":
+            return parse_code_receipt(value)
+        if kind == "intent":
+            return parse_code_intent(value)
+        parsers: dict[str, Callable[[object], Contract]] = {
+            "context": CodeContext.model_validate,
+            "job_view": CodeJobView.model_validate,
+            "ack": CodeAck.model_validate,
+            "recipe": CodingTestRecipe.model_validate,
+            "start": CodeStart.model_validate,
+            "model_request": CodeModelRequest.model_validate,
+            "review": CodeReview.model_validate,
+            "grant": CodeGrant.model_validate,
+            "page": CodePage.model_validate,
+            "job_page": CodeJobPage.model_validate,
+        }
+        assert isinstance(kind, str)
+        return parsers[kind](value)
+
+    for row in corpus["cases"]:
+        if row["valid"]:
+            value = parse(row, row["value"])
+            assert parse(row, value.model_dump(mode="json")) == value, row["label"]
+
+    values: list[Contract] = [
+        coding.CodeBinding.model_validate(BINDING),
+        coding.CodeSource.model_validate(make_proposal()["files"][0]),
+        coding.CodeFile.model_validate(make_file()),
+        coding.CodeDraft.model_validate(
+            {
+                "job_id": "job-1",
+                "revision": 1,
+                "account_generation": 1,
+                "user_text": "Build Focus",
+                "backend": "copilot",
+            }
+        ),
+        coding.CodeHashRecord(
+            name="index.html", source_hash=None, proposed_hash=None, observed_hash=None
+        ),
+        coding.TestFileHash(name="index.html", hash=HASH),
+        coding.CodeGrantResult(
+            kind="grant",
+            grant=CodeGrant.model_validate(
+                next(
+                    row["value"]
+                    for row in corpus["cases"]
+                    if row["kind"] == "grant" and row["valid"]
+                )
+            ),
+        ),
+        coding.CodeJobResult(
+            kind="job",
+            job=CodeJobView.model_validate(
+                next(
+                    row["value"]
+                    for row in corpus["cases"]
+                    if row["kind"] == "job_view" and row["valid"]
+                )
+            ),
+        ),
+        coding.CodeReceiptResult(kind="receipt", receipt=parse_code_receipt(make_receipt())),
+    ]
+    for value in values:
+        assert TypeAdapter(type(value)).validate_python(value.model_dump(mode="json")) == value
