@@ -22,6 +22,7 @@ import {
 } from "../../src/context";
 import { rootIdentity } from "../../../desktop/shared/editor-bridge";
 const editor = vi.hoisted(() => ({
+  documents: new Map<string, unknown>(),
   encodeUris: false,
   version: 1,
   text: "",
@@ -158,7 +159,9 @@ vi.mock("vscode", () => {
       }) => {
         editor.opened.push(value.toString());
         editor.afterOpen?.();
-        return {
+        const old = editor.documents.get(value.toString());
+        if (old) return old;
+        const document = {
           uri: value,
           get version() {
             return editor.version;
@@ -176,6 +179,8 @@ vi.mock("vscode", () => {
                   .provideTextDocumentContent(value)
               : editor.text,
         };
+        editor.documents.set(value.toString(), document);
+        return document;
       },
     },
     languages: {
@@ -255,6 +260,7 @@ vi.mock("../../src/root-probe", () => ({
 }));
 const roots: string[] = [];
 afterEach(async () => {
+  editor.documents.clear();
   vi.useRealTimers();
   editor.text = "";
   editor.encodeUris = false;

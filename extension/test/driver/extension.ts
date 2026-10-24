@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import * as vscode from "vscode";
 import { readFile, writeFile, rename } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { runContextFixture } from "../integration/context";
 import { strict as assert } from "node:assert";
 async function emitReceipt(path: string, data: unknown): Promise<void> {
@@ -43,7 +44,17 @@ async function run(): Promise<void> {
   assert.equal(enabled, true);
   assert.equal(trusted, config.trusted);
   assert.equal(vscode.env.remoteName, undefined);
+  const workspaceDeadline = Date.now() + 20000;
+  while (
+    vscode.workspace.workspaceFolders === undefined &&
+    Date.now() < workspaceDeadline
+  )
+    await new Promise((r) => setTimeout(r, 20));
   assert.equal(vscode.workspace.workspaceFolders?.length, 1);
+  assert.equal(
+    vscode.workspace.workspaceFolders![0].uri.fsPath,
+    fileURLToPath(config.expectedRoot),
+  );
   const productState = () =>
     vscode.extensions.getExtension("sage-local.sage-editor-bridge")?.isActive ??
     false;
@@ -106,6 +117,120 @@ async function run(): Promise<void> {
         status: "ready",
       });
       await vscode.commands.executeCommand("sage.pairLocalEditor");
+      if (config.selectedCase === "replace") {
+        stage = "replace-capture";
+        const root = vscode.workspace.workspaceFolders![0].uri.fsPath;
+        const path = join(root, "focus.js");
+        await writeFile(
+          path,
+          (await readFile(join(config.fixtureSource, "focus.js"), "utf8")) +
+            "\n// human baseline 😀\n",
+        );
+        const doc = await vscode.workspace.openTextDocument(
+          vscode.Uri.file(path),
+        );
+        const editor = await vscode.window.showTextDocument(doc, {
+          preview: false,
+        });
+        const scenario = config.replaceScenario ?? "success";
+        const realNow = Date.now;
+        const listener = vscode.workspace.onWillSaveTextDocument((event) => {
+          if (event.document !== doc || scenario === "success") return;
+          if (scenario === "participant")
+            event.waitUntil(
+              Promise.resolve([
+                vscode.TextEdit.insert(
+                  new vscode.Position(0, 0),
+                  "// real participant\n",
+                ),
+              ]),
+            );
+          if (
+            scenario === "human-save" ||
+            scenario === "disconnect-save" ||
+            scenario === "expiry-save" ||
+            scenario === "external-save"
+          )
+            event.waitUntil(
+              (async () => {
+                editor.selection = new vscode.Selection(0, 0, 0, 0);
+                if (scenario === "expiry-save")
+                  Date.now = () => realNow() + 1800001;
+                await emitReceipt(join(fixture, "save-pending.json"), {
+                  scenario,
+                });
+                const deadline = realNow() + 10000;
+                while (realNow() < deadline) {
+                  try {
+                    await readFile(join(fixture, "save-release.json"));
+                    if (scenario === "expiry-save")
+                      await vscode.commands.executeCommand(
+                        "sage.cancelContext",
+                      );
+                    return [];
+                  } catch {
+                    await new Promise((r) => setTimeout(r, 10));
+                  }
+                }
+                throw Error("owned pending save release deadline");
+              })(),
+            );
+          if (scenario === "cancel-save")
+            event.waitUntil(
+              (async () => {
+                await vscode.commands.executeCommand("sage.cancelContext");
+                return [];
+              })(),
+            );
+        });
+        const savedListener = vscode.workspace.onDidSaveTextDocument(
+          (saved) => {
+            if (saved === doc)
+              void emitReceipt(join(fixture, "save-settled.json"), {
+                scenario,
+              });
+          },
+        );
+        await vscode.commands.executeCommand("sage.captureContext");
+        await vscode.commands.executeCommand("sage.sendContext");
+        const end = realNow() + 60000;
+        while (realNow() < end) {
+          try {
+            await readFile(join(fixture, "replace-finished.json"));
+            break;
+          } catch {
+            await new Promise((r) => setTimeout(r, 20));
+          }
+        }
+        const expected =
+          (await readFile(join(config.fixtureSource, "focus.js"), "utf8")) +
+          "\n// human baseline 😀\n\n// approved followup\n";
+        listener.dispose();
+        savedListener.dispose();
+        Date.now = realNow;
+        const wanted =
+          scenario === "auto-save"
+            ? expected.slice(0, -"\n// approved followup\n".length)
+            : scenario === "participant"
+              ? "// real participant\n" + expected
+              : scenario === "human-save"
+                ? "// pending human\n// " + expected
+                : expected;
+        assert.equal(doc.getText(), wanted);
+        assert.equal(doc.isDirty, scenario === "external-save");
+        assert.equal(
+          await readFile(path, "utf8"),
+          scenario === "external-save" ? "// external pending human\n" : wanted,
+        );
+        stage = "replace-native-races";
+        const { runReplacementEditorRaces } =
+          await import("../integration/replace");
+        if (scenario === "success")
+          await emitReceipt(
+            join(fixture, "replace-races.json"),
+            await runReplacementEditorRaces(product.extensionPath, fixture),
+          );
+      }
       if (config.selectedCase === "create") {
         stage = "create-capture";
         assert.deepEqual(

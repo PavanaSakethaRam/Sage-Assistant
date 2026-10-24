@@ -304,7 +304,9 @@ export function activate(context: vscode.ExtensionContext): void {
               .catch(() => {
                 void closeOperation(operation);
                 void vscode.window.showErrorMessage(
-                  "Sage stopped creation. Existing and partial files were preserved; capture fresh context before another attempt.",
+                  captured.mode === "replace_focus_file"
+                    ? "Sage stopped replacement. Current buffer and disk were preserved; a dispatched save may have completed. Capture fresh context before another attempt."
+                    : "Sage stopped creation. Existing and partial files were preserved; capture fresh context before another attempt.",
                 );
               });
           }

@@ -611,10 +611,22 @@ def test_real_sqlite_full_rolls_back_grant_and_intent(
         assert db.execute("SELECT count(*) FROM coding_effects").fetchone()[0] == 0
 
 
+@pytest.mark.parametrize(
+    "observed_status,cancelled",
+    [
+        ("applied_saved", False),
+        ("applied_unsaved", False),
+        ("needs_review", False),
+        ("needs_reconciliation", False),
+        ("applied_saved", True),
+    ],
+)
 def test_replacement_preserves_selected_baseline_and_requires_replace_scope(
     state: tuple[Store, Clock, CodingJobs],
+    observed_status: str,
+    cancelled: bool,
 ) -> None:
-    _, _, jobs = state
+    store, clock, jobs = state
     from tests.helpers.coding_fake import make_file
 
     old = "owned old source\n"
@@ -659,14 +671,41 @@ def test_replacement_preserves_selected_baseline_and_requires_replace_scope(
         expected_hash=literal_hash("Changed\n"),
     )
     jobs.begin(request)
+    if cancelled:
+        jobs.cancel(captured.binding.job_id)
     observed = CodeFileReceipt(
         **request.model_dump(),
-        status="applied_saved",
-        observed_hash=request.expected_hash,
-        observed_length=8,
+        status=observed_status,
+        observed_hash=request.expected_hash
+        if observed_status == "applied_saved"
+        else literal_hash(old),
+        observed_length=8 if observed_status == "applied_saved" else len(old.encode()),
     )
     jobs.observe(observed)
-    assert jobs.get("job-1").state == "applied_saved"
+    view = jobs.get("job-1")
+    assert view.state == ("cancelled" if cancelled else observed_status)
+    assert view.receipts[0] == observed
+    selected = recipe(clock)
+    from sage.coding_contracts import recipe_hash
+
+    selected = selected.model_copy(
+        update={
+            "file_hashes": tuple(
+                item.model_copy(update={"hash": request.expected_hash})
+                if item.name == "index.html"
+                else item
+                for item in selected.file_hashes
+            )
+        }
+    )
+    selected = selected.model_copy(update={"recipe_hash": recipe_hash(selected)})
+    if observed_status == "applied_saved" and not cancelled:
+        assert jobs.prepare_test(selected).state == "test_review"
+    else:
+        with pytest.raises(CodingError):
+            jobs.prepare_test(selected)
+    with store.transaction() as db:
+        assert db.execute("SELECT count(*) FROM tasks").fetchone()[0] == 0
 
 
 def test_disabled_local_capture_refuses_proposal_and_bad_hash_is_rejected(

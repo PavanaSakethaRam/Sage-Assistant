@@ -264,7 +264,7 @@ async function fixture() {
     sent: unknown[] = [];
   let observationLost = false,
     afterIntent: undefined | (() => Promise<void>),
-    afterObserved: undefined | (() => void),
+    afterObserved: undefined | (() => void | Promise<void>),
     grantAlter: undefined | ((g: Record<string, unknown>) => void);
   const bridge = {
     onData: (cb: (d: unknown) => void) => {
@@ -301,7 +301,7 @@ async function fixture() {
     },
     recordObserved: async (_j: unknown, r: CodeReceipt) => {
       receipts.push(r);
-      afterObserved?.();
+      await afterObserved?.();
       if (observationLost) throw Error("lost observation ACK");
       return {};
     },
@@ -337,7 +337,7 @@ async function fixture() {
     afterIntent: (fn: () => Promise<void>) => {
       afterIntent = fn;
     },
-    afterObserved: (fn: () => void) => {
+    afterObserved: (fn: () => void | Promise<void>) => {
       afterObserved = fn;
     },
     alterGrant: (fn: (g: Record<string, unknown>) => void) => {
@@ -497,7 +497,7 @@ it("source expiry while actual native diff is open prevents confirmation", async
   expect(ui.diffs).toHaveLength(1);
   expect(await readdir(f.root)).toEqual([]);
 });
-it("prefix modifications and extra entries after observed file stop next intent", async () => {
+it("prefix rewrite inside second intent callback stops its effect", async () => {
   const f = await fixture();
   approve();
   f.afterObserved(() => {
@@ -697,4 +697,20 @@ it("cancellation after actual wx retains one honest local observation with zero 
   expect(send).not.toHaveBeenCalled();
   expect(await readdir(f.root)).toEqual(["index.html"]);
   expect((await readFile(join(f.root, "index.html"))).length).toBe(0);
+});
+
+it("hidden entry after first observation stops before next intent and preserves both files", async () => {
+  const f = await fixture();
+  approve();
+  f.afterObserved(async () => {
+    if (f.receipts.length === 1)
+      await writeFile(join(f.root, ".human"), "human");
+  });
+  await expect(f.review.show(f.context, f.proposal)).rejects.toThrow();
+  expect(f.intents).toHaveLength(1);
+  expect(await readFile(join(f.root, "index.html"), "utf8")).toBe(
+    f.proposal.files[0].text,
+  );
+  expect(await readFile(join(f.root, ".human"), "utf8")).toBe("human");
+  expect((await readdir(f.root)).sort()).toEqual([".human", "index.html"]);
 });

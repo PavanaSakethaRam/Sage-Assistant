@@ -22,10 +22,33 @@ const activeChildren = new Set<ChildProcess>();
 const SUITE_LIMIT = 600_000,
   CASE_LIMIT = 120_000,
   OUTPUT_LIMIT = 262144;
+const REPLACE_SCENARIOS: readonly import("../extension/test/integration/replace").ReplaceScenario[] =
+  [
+    "success",
+    "participant",
+    "human-save",
+    "cancel-save",
+    "disconnect-save",
+    "expiry-save",
+    "external-save",
+    "auto-save",
+  ];
 export function selectedCase(
   args: string[],
-): "bridge" | "context" | "create" | "all" {
+): "bridge" | "context" | "create" | "replace" | "all" {
   if (args.length === 0) return "bridge";
+  if (args.length === 4) {
+    if (
+      args[0] !== "--case" ||
+      args[1] !== "replace" ||
+      args[2] !== "--scenario" ||
+      !REPLACE_SCENARIOS.includes(
+        args[3] as import("../extension/test/integration/replace").ReplaceScenario,
+      )
+    )
+      throw Error("Unknown editor test scenario");
+    return "replace";
+  }
   if (
     args.length !== 2 ||
     args[0] !== "--case" ||
@@ -44,6 +67,7 @@ export function selectedCase(
     args[1] !== "bridge" &&
     args[1] !== "context" &&
     args[1] !== "create" &&
+    args[1] !== "replace" &&
     args[1] !== "all"
   )
     throw Error("Editor case is not implemented in Task4");
@@ -156,8 +180,9 @@ async function lane(
   executable: string,
   trusted: boolean,
   packaged = false,
-  selectedCase: "bridge" | "context" | "create" | "all" = "bridge",
+  selectedCase: "bridge" | "context" | "create" | "replace" | "all" = "bridge",
   createScenario: import("../extension/test/integration/create").CreateScenario = "success",
+  replaceScenario: import("../extension/test/integration/replace").ReplaceScenario = "success",
 ): Promise<void> {
   const owned = await realpath(
     await mkdtemp(
@@ -212,7 +237,10 @@ async function lane(
       "workbench.enableExperiments": false,
       "extensions.ignoreRecommendations": true,
       "window.restoreWindows": "none",
-      "files.autoSave": "off",
+      "files.autoSave":
+        selectedCase === "replace" && replaceScenario === "auto-save"
+          ? "afterDelay"
+          : "off",
     }),
   );
   await seedTrust(shared, uri, trusted);
@@ -275,7 +303,9 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     productPath,
     selectedCase,
     createScenario,
+    replaceScenario,
     fixtureSource: resolve("tests/fixtures/focus-project"),
+    expectedRoot: uri,
   };
   await writeFile(join(fixture, "case.json"), JSON.stringify(config));
   const argv = [
@@ -395,40 +425,61 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
         pathToFileURL(resolve(".cache/vscode-tools/bridge.cjs")).href
       );
       host =
-        selectedCase === "create"
-          ? await integration.createThroughWorkbench(
+        selectedCase === "replace"
+          ? await integration.replaceThroughWorkbench(
               page,
               fixture,
               workspace,
-              createScenario,
+              replaceScenario,
             )
-          : await integration.pairThroughWorkbench(
-              page,
-              selectedCase !== "bridge",
-            );
-      if (selectedCase !== "bridge" && selectedCase !== "create")
+          : selectedCase === "create"
+            ? await integration.createThroughWorkbench(
+                page,
+                fixture,
+                workspace,
+                createScenario,
+              )
+            : await integration.pairThroughWorkbench(
+                page,
+                selectedCase !== "bridge",
+              );
+      if (
+        selectedCase !== "bridge" &&
+        selectedCase !== "create" &&
+        selectedCase !== "replace"
+      )
         await host!.exerciseContext();
       console.log(
         JSON.stringify({
           profile: owned,
           receipt: await receipt("initial"),
-          ...(selectedCase === "create"
+          ...(selectedCase === "replace"
             ? {
-                create_authority: await json(
-                  join(fixture, "create-authority.json"),
+                replace_authority: await json(
+                  join(fixture, "replace-authority.json"),
                 ),
-                diffs: await json(join(fixture, "diffs-checked.json")),
+                replace_races: await json(join(fixture, "replace-races.json")),
               }
-            : selectedCase !== "bridge"
+            : selectedCase === "create"
               ? {
-                  context_native: await json(
-                    join(fixture, "context-native.json"),
+                  create_authority: await json(
+                    join(fixture, "create-authority.json"),
                   ),
+                  diffs: await json(join(fixture, "diffs-checked.json")),
                 }
-              : {}),
+              : selectedCase !== "bridge"
+                ? {
+                    context_native: await json(
+                      join(fixture, "context-native.json"),
+                    ),
+                  }
+                : {}),
         }),
       );
-      if (!packaged) {
+      if (
+        !packaged &&
+        (selectedCase !== "replace" || replaceScenario === "success")
+      ) {
         await writeFile(
           join(fixture, "case.json"),
           JSON.stringify({ ...config, phase: "reload" }),
@@ -482,7 +533,7 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     await browser?.close();
     await stop(child);
     activeChildren.delete(child);
-    if (selectedCase !== "create")
+    if (selectedCase !== "create" && selectedCase !== "replace")
       await rm(owned, {
         recursive: true,
         force: true,
@@ -492,7 +543,12 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
   }
 }
 async function main(): Promise<void> {
-  const selected = selectedCase(process.argv.slice(2));
+  const args = process.argv.slice(2),
+    selected = selectedCase(args),
+    requestedScenario =
+      args.length === 4
+        ? (args[3] as import("../extension/test/integration/replace").ReplaceScenario)
+        : undefined;
   assertNativeElectronContext();
   const suiteTimer = setTimeout(() => {
     console.error("FAIL editor suite timeout");
@@ -542,21 +598,56 @@ async function main(): Promise<void> {
       },
     });
     try {
-      await lane(executable, true, false, selected);
-      await lane(await revalidate(), true, true, selected);
-      await lane(await revalidate(), false, true, selected);
-      if (selected === "create")
-        for (const scenario of [
-          "decline",
-          "collision",
-          "root-switch",
-          "cancel-prefix",
-          "ack-loss",
-          "expiry",
-        ] as const)
-          await lane(await revalidate(), true, false, "create", scenario);
+      if (requestedScenario)
+        await lane(
+          executable,
+          true,
+          false,
+          "replace",
+          "success",
+          requestedScenario,
+        );
+      else {
+        await lane(executable, true, false, selected);
+        if (selected !== "replace") {
+          await lane(await revalidate(), true, true, selected);
+          await lane(await revalidate(), false, true, selected);
+        }
+        if (selected === "replace")
+          for (const scenario of [
+            "participant",
+            "human-save",
+            "cancel-save",
+            "disconnect-save",
+            "expiry-save",
+            "external-save",
+            "auto-save",
+          ] as const)
+            await lane(
+              await revalidate(),
+              true,
+              false,
+              "replace",
+              "success",
+              scenario,
+            );
+        if (selected === "create")
+          for (const scenario of [
+            "decline",
+            "collision",
+            "root-switch",
+            "cancel-prefix",
+            "ack-loss",
+            "expiry",
+          ] as const)
+            await lane(await revalidate(), true, false, "create", scenario);
+      }
       console.log(
-        "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
+        selected === "replace"
+          ? requestedScenario
+            ? `PASS owned editor replacement scenario ${requestedScenario}`
+            : "PASS owned editor replacement, byte observations, native version races and persisted trust reload"
+          : "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
       );
     } finally {
       clearTimeout(suiteTimer);

@@ -228,9 +228,9 @@ it("fixed native case selection fails unknown or future cases instead of silentl
   expect(selectedCase([])).toBe("bridge");
   expect(selectedCase(["--case", "all"])).toBe("all");
   expect(selectedCase(["--case", "bridge"])).toBe("bridge");
+  expect(selectedCase(["--case", "replace"])).toBe("replace");
   for (const args of [
     ["--case", "arbitrary"],
-    ["--case", "replace"],
     ["--case", "bridge", "extra"],
     ["--other", "bridge"],
   ])

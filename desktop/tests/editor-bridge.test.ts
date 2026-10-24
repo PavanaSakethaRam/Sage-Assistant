@@ -1755,9 +1755,12 @@ it("routes authenticated coding controls once, polls source-free status and drop
   let release: (() => void) | undefined;
   let hold = false;
   let ready = false;
-  const template = corpus.cases.find(
-    (row) => row.kind === "job_view" && row.valid,
-  )!.value;
+  const template = {
+    ...corpus.cases.find((row) => row.kind === "job_view" && row.valid)!.value,
+    expires_at: new Date(capturedAt + 1800000)
+      .toISOString()
+      .replace(/\.\d{3}Z$/, "Z"),
+  };
   const selected: { binding?: BridgeData["binding"] } = {};
   let polls = 0;
   const observer = vi.fn();
@@ -1851,7 +1854,12 @@ it("routes only fixed review/test/journal/finish kinds and keeps fresh ack corre
   const selected: { binding?: BridgeData["binding"] } = {};
   const good = (kind: string) =>
     corpus.cases.find((row) => row.kind === kind && row.valid)!.value;
-  const template = good("job_view");
+  const template = {
+    ...good("job_view"),
+    expires_at: new Date(capturedAt + 1800000)
+      .toISOString()
+      .replace(/\.\d{3}Z$/, "Z"),
+  };
   const s = await setup(true, () => {}, {
     codingControl: async (input) => {
       controls.push(input.operation);
@@ -1986,9 +1994,12 @@ function pollOwnerHarness(
     },
     close: vi.fn(),
   };
-  const template = corpus.cases.find(
-    (row) => row.kind === "job_view" && row.valid,
-  )!.value;
+  const template = {
+    ...corpus.cases.find((row) => row.kind === "job_view" && row.valid)!.value,
+    expires_at: new Date(capturedAt + 1800000)
+      .toISOString()
+      .replace(/\.\d{3}Z$/, "Z"),
+  };
   const message = (id: string) => {
     const original = context(view) as Extract<
       BridgeData,

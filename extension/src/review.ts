@@ -1,5 +1,7 @@
-/** Native literal diff review owns the sole create gesture and opaque approval. */
+/** Native literal diff review owns the sole local file gesture and opaque approval. */
 import * as vscode from "vscode";
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { createHash, randomBytes } from "node:crypto";
 import {
   FOCUS_NAMES,
@@ -18,6 +20,7 @@ import { contextOffer, validateContext } from "./context";
 import type { ExtensionBridge } from "./bridge";
 import type { EffectJournal } from "./journal";
 import { createFocusProject } from "./create";
+import { replaceFocusFile } from "./replace";
 declare const localReview: unique symbol;
 export type LocalReview = { readonly [localReview]: never };
 type Authority = {
@@ -37,7 +40,7 @@ export function consumeLocalReview(
   const owned = approvals.get(token);
   approvals.delete(token);
   if (!owned || owned.context !== context || owned.proposal !== proposal)
-    throw Error("Local create confirmation required");
+    throw Error("Local file confirmation required");
   owned.check();
   return owned;
 }
@@ -114,20 +117,23 @@ export class ProposalReview {
         this.controller?.signal.aborted ||
         message.payload.kind !== "grant"
       )
-        throw Error("Unexpected create grant");
+        throw Error("Unexpected file grant");
       const grant = parseCodeGrant(message.payload.grant);
       this.options.guard();
       contextOffer(p.context);
       if (
         !sameBinding(grant.binding, p.context.binding) ||
         !sameBinding(message.binding, p.context.binding) ||
-        grant.scope !== "code.create" ||
+        grant.scope !==
+          (p.context.mode === "create_focus_project"
+            ? "code.create"
+            : "code.replace") ||
         grant.approved_hash !== p.hash ||
         grant.consumed_at ||
         Date.parse(grant.issued_at) > Date.now() ||
         Date.parse(grant.expires_at) <= Date.now()
       )
-        throw Error("Uncorrelated create grant");
+        throw Error("Uncorrelated file grant");
       p.resolve(
         Object.freeze({
           ...grant,
@@ -202,46 +208,55 @@ export class ProposalReview {
       check();
       await validateContext(context);
       check();
-      if (context.mode !== "create_focus_project")
-        throw Error("Creation review required");
+      const replacing = context.mode === "replace_focus_file",
+        scope = replacing
+          ? ("code.replace" as const)
+          : ("code.create" as const),
+        names = replacing ? [context.target!] : FOCUS_NAMES,
+        action = replacing ? "Apply and save this file" : "Create four files";
       const parsed = parseCodeProposal(input, context);
       const proposal: CodeProposal = Object.freeze({
         ...parsed,
         files: Object.freeze(parsed.files.map((f) => Object.freeze({ ...f }))),
       });
-      const hash = await proposalHash(proposal, context, "code.create");
+      const hash = await proposalHash(proposal, context, scope);
       check();
       const opened = new Set<string>(),
         diffId = randomBytes(16).toString("hex");
       while (true) {
         const choice = await this.choose(
           [
-            ...FOCUS_NAMES.map((name) => ({
+            ...names.map((name) => ({
               label: `Review ${name}`,
               description: opened.has(name)
                 ? "Opened"
-                : "Empty baseline → proposed text",
+                : replacing
+                  ? "Saved UTF-8/LF source → proposed UTF-8/LF text"
+                  : "Empty baseline → proposed text",
             })),
-            ...(opened.size === 4 ? [{ label: "Create four files" }] : []),
+            ...(opened.size === names.length ? [{ label: action }] : []),
             { label: "Decline" },
           ],
           check,
         );
         check();
         if (!choice || choice === "Decline") return;
-        const name = FOCUS_NAMES.find((n) => choice === `Review ${n}`);
+        const name = names.find((n) => choice === `Review ${n}`);
         if (name) {
           const file = proposal.files.find((f) => f.name === name)!,
             id = diffId,
             left = vscode.Uri.parse(`sage-diff:/${id}/empty/${name}`),
             right = vscode.Uri.parse(`sage-diff:/${id}/proposed/${name}`);
-          this.texts.set(left.toString(), "");
+          this.texts.set(
+            left.toString(),
+            replacing ? context.files.find((f) => f.name === name)!.text : "",
+          );
           this.texts.set(right.toString(), file.text);
           await vscode.commands.executeCommand(
             "vscode.diff",
             left,
             right,
-            `${name} · SHA256 ${createHash("sha256").update(file.text).digest("hex")}`,
+            `${name} · UTF-8/LF · ${replacing ? "source SHA256 " + context.files.find((f) => f.name === name)!.disk_hash + " · " : ""}SHA256 ${createHash("sha256").update(file.text).digest("hex")}`,
             { preview: false },
           );
           check();
@@ -257,29 +272,35 @@ export class ProposalReview {
           if (next !== "Continue review") return;
           continue;
         }
-        if (choice !== "Create four files" || opened.size !== 4)
-          throw Error("Review all four files first");
+        if (choice !== action || opened.size !== names.length)
+          throw Error("Review every proposed file first");
         await validateContext(context);
         check();
         const confirmation = await abortableChoice(
           vscode.window.showWarningMessage(
-            "Create four files on this local disk?",
+            replacing
+              ? "Apply and save this file on this local disk?"
+              : "Create four files on this local disk?",
             {
               modal: true,
-              detail: `Folder: ${context.root_uri}\n${FOCUS_NAMES.join("\n")}\nReview SHA256: ${hash}\nExclusive creation only. Partial files are preserved on failure; no rollback. Tests will not run.`,
+              detail: `Folder: ${context.root_uri}\n${names.join("\n")}\nReview SHA256: ${hash}\n${replacing ? "One editor replacement and one document save. Human changes stop automatic saving; no undo or rollback." : "Exclusive creation only. Partial files are preserved on failure; no rollback."} Tests will not run.`,
             },
-            "Create on local disk",
+            replacing ? "Apply and save this file" : "Create on local disk",
           ),
           controller.signal,
         );
         check();
-        if (confirmation !== "Create on local disk") return;
+        if (
+          confirmation !==
+          (replacing ? "Apply and save this file" : "Create on local disk")
+        )
+          return;
         await validateContext(context);
         check();
         const grant = await new Promise<CodeGrant>((resolve, reject) => {
           const timeout = setTimeout(() => {
             this.pending = undefined;
-            reject(Error("Create grant timeout"));
+            reject(Error("Review grant timeout"));
             void this.options.onFailure();
           }, 30000);
           this.pending = {
@@ -300,7 +321,7 @@ export class ProposalReview {
               binding: context.binding,
               payload: {
                 binding: context.binding,
-                scope: "code.create",
+                scope,
                 approved_hash: hash,
                 decision: "accept",
               },
@@ -326,15 +347,59 @@ export class ProposalReview {
               Date.now() >= Date.parse(grant.expires_at) ||
               performance.now() - grantStart >= grantRemaining
             )
-              throw Error("Create grant expired");
+              throw Error("Review grant expired");
           },
         });
-        await createFocusProject(context, proposal, token);
+        if (replacing) {
+          const receipt = await replaceFocusFile(context, proposal, token);
+          if (receipt.status !== "applied_saved") {
+            check();
+            const current = vscode.workspace.textDocuments.find(
+              (d) =>
+                d.uri.scheme === "file" &&
+                d.uri.fsPath ===
+                  join(fileURLToPath(context.root_uri), context.target!),
+            );
+            if (
+              current &&
+              !current.isClosed &&
+              [...current.getText()].length <= 32000
+            ) {
+              const left = vscode.Uri.parse(
+                  `sage-diff:/${diffId}/approved/${context.target}`,
+                ),
+                right = vscode.Uri.parse(
+                  `sage-diff:/${diffId}/current/${context.target}`,
+                );
+              this.texts.set(left.toString(), proposal.files[0].text);
+              this.texts.set(right.toString(), current.getText());
+              await vscode.commands.executeCommand(
+                "vscode.diff",
+                left,
+                right,
+                `${context.target} · approved text → current buffer · disk outcome ${receipt.status}`,
+                { preview: false },
+              );
+              check();
+              await abortableChoice(
+                vscode.window.showInformationMessage(
+                  `File ${receipt.status}. Inspect the current buffer difference; disk observations were recorded. Capture fresh context before another attempt. Tests have not run.`,
+                  "Continue review",
+                ),
+                controller.signal,
+              );
+              check();
+            }
+            throw Error("Replacement needs fresh review");
+          }
+        } else await createFocusProject(context, proposal, token);
         check();
         applied = true;
         this.options.onApplied?.();
         void vscode.window.showInformationMessage(
-          "Focus project files created and saved. Tests have not run.",
+          replacing
+            ? "Focus file saved. Tests have not run."
+            : "Focus project files created and saved. Tests have not run.",
         );
         return;
       }

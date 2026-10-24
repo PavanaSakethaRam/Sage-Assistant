@@ -27,7 +27,19 @@ class FixtureBackend:
             job_id=request.job_id,
             revision=request.revision,
             explanation="Deterministic owned focus fixture; no provider was contacted.",
-            files=[{"name": name, "text": (SOURCE / name).read_text()} for name in NAMES],
+            files=(
+                [
+                    {
+                        "name": request.target,
+                        "text": next(
+                            item.text for item in request.files if item.name == request.target
+                        )
+                        + "\n// approved followup\n",
+                    }
+                ]
+                if request.mode == "replace_focus_file"
+                else [{"name": name, "text": (SOURCE / name).read_text()} for name in NAMES]
+            ),
         )
 
     async def cancel(self, request_id):

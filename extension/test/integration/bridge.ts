@@ -187,3 +187,5 @@ export async function pairThroughWorkbench(
 }
 
 export { createThroughWorkbench } from "./create";
+
+export { replaceThroughWorkbench } from "./replace";
