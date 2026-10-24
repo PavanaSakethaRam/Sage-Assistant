@@ -1,6 +1,8 @@
 """A rounded percentage, omitted source, or weak branch gate must never pass."""
 
+import hashlib
 import json
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -30,6 +32,36 @@ def reports(
             "statements": {"covered": statements[0], "total": statements[1]},
             "branches": {"covered": branches[0], "total": branches[1]},
         }
+    native = {
+        "version": 1,
+        "platform": "darwin-arm64"
+        if sys.platform == "darwin" and platform.machine() == "arm64"
+        else "win32-x64"
+        if sys.platform == "win32" and platform.machine().lower() in {"amd64", "x86_64"}
+        else "unsupported",
+        "binary_sha256": "b" * 64,
+        "source_sha256": {
+            name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+            for name in manifest["native"]
+        },
+        "coverage": {
+            "data": [
+                {
+                    "files": [
+                        {
+                            "filename": name,
+                            "summary": {
+                                "regions": {"covered": 90, "count": 100},
+                                "branches": {"covered": 85, "count": 100},
+                            },
+                        }
+                        for name in manifest["native"]
+                    ]
+                }
+            ]
+        },
+    }
+    (tmp_path / "native.json").write_text(json.dumps(native))
     p, j = tmp_path / "python.json", tmp_path / "js.json"
     p.write_text(json.dumps({"files": py}))
     j.write_text(json.dumps(js))
@@ -45,6 +77,8 @@ def run(p: Path, j: Path) -> subprocess.CompletedProcess[str]:
             str(p),
             "--javascript",
             str(j),
+            "--native",
+            str(p.parent / "native.json"),
         ],
         capture_output=True,
         text=True,
@@ -204,3 +238,33 @@ def test_invalid_python_file_map_remains_a_static_failure(tmp_path: Path, files:
     assert result.returncode == 1
     assert result.stdout.startswith("coverage gate failed:")
     assert result.stderr == ""
+
+
+@pytest.mark.parametrize(
+    "damage",
+    ["missing", "hash", "source", "regions", "branches", "bool_count", "duplicate", "future"],
+)
+def test_native_source_provenance_and_integer_thresholds_fail_closed(
+    tmp_path: Path, damage: str
+) -> None:
+    p, j = reports(tmp_path)
+    path = tmp_path / "native.json"
+    packet = json.loads(path.read_text())
+    file = packet["coverage"]["data"][0]["files"][0]
+    if damage == "missing":
+        path.unlink()
+    else:
+        if damage == "hash":
+            packet["source_sha256"]["extension/native/root-probe.c"] = "a" * 64
+        elif damage == "source":
+            file["filename"] = "another.c"
+        elif damage in {"regions", "branches"}:
+            file["summary"][damage]["covered"] -= 1
+        elif damage == "bool_count":
+            file["summary"]["regions"]["covered"] = True
+        elif damage == "duplicate":
+            packet["coverage"]["data"][0]["files"].append(file)
+        else:
+            packet["version"] = 2
+        path.write_text(json.dumps(packet))
+    assert run(p, j).returncode == 1

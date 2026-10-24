@@ -29,7 +29,8 @@
     "build:extension": "vite build --config vite.extension.config.ts",
     "typecheck:extension": "tsc --noEmit -p extension/tsconfig.json",
     "test:extension": "node scripts/test-vscode.ts",
-    "package:extension": "npm run build:extension && cd extension && vsce package --no-dependencies --out ../.cache/sage-editor-bridge.vsix && cd .. && node scripts/check_package.ts --vsix .cache/sage-editor-bridge.vsix"
+    "package:extension": "npm run build:extension && cd extension && vsce package --no-dependencies --out ../.cache/sage-editor-bridge.vsix && cd .. && node scripts/check_package.ts --vsix .cache/sage-editor-bridge.vsix",
+    "test:native-coverage": "node scripts/build-root-probe.ts --test-coverage"
   },
   "devDependencies": {
     "@electron-forge/cli": "8.0.1",

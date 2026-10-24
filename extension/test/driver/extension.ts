@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import * as vscode from "vscode";
 import { readFile, writeFile, rename } from "node:fs/promises";
 import { join } from "node:path";
+import { runContextFixture } from "../integration/context";
 import { strict as assert } from "node:assert";
 async function emitReceipt(path: string, data: unknown): Promise<void> {
   await writeFile(path + ".pending", JSON.stringify(data), { flag: "wx" });
@@ -10,13 +11,15 @@ async function emitReceipt(path: string, data: unknown): Promise<void> {
 }
 let stage = "setup";
 export function activate(): void {
-  void run().catch(async () => {
+  void run().catch(async (error) => {
     const fixture = process.env.SAGE_OWNED_FIXTURE;
     if (fixture)
       await emitReceipt(join(fixture, "failure.json"), {
         status: "failed",
         pid: process.pid,
         stage,
+        error:
+          error instanceof Error ? error.message.slice(0, 2048) : "unknown",
         trusted: vscode.workspace.isTrusted,
         trust_enabled: vscode.workspace
           .getConfiguration("security.workspace.trust")
@@ -103,6 +106,63 @@ async function run(): Promise<void> {
         status: "ready",
       });
       await vscode.commands.executeCommand("sage.pairLocalEditor");
+      if (config.selectedCase === "context" || config.selectedCase === "all") {
+        stage = "context-preview";
+        const other = vscode.Uri.file(join(fixture, "unrelated.txt"));
+        await writeFile(other.fsPath, "owned unrelated tab");
+        await vscode.window.showTextDocument(
+          await vscode.workspace.openTextDocument(other),
+          { preview: false },
+        );
+        await writeFile(
+          join(vscode.workspace.workspaceFolders![0].uri.fsPath, "focus.js"),
+          "export const nativeMarker = '😀';\n",
+        );
+        await vscode.commands.executeCommand("sage.captureContext");
+        const preview = vscode.window.activeTextEditor?.document;
+        assert.ok(preview);
+        assert.equal(preview.uri.scheme, "sage-context");
+        assert.ok(
+          preview.getText().includes("Selected disclosure to local Sage"),
+        );
+        assert.equal(preview.isDirty, false);
+        await emitReceipt(join(fixture, "context-preview.json"), {
+          ...receipt,
+          preview_readonly: true,
+          preview_uri: preview.uri.toString(),
+        });
+        stage = "context-send";
+        await vscode.commands.executeCommand("sage.sendContext");
+        stage = "context-cancel";
+        await vscode.commands.executeCommand("sage.cancelContext");
+        assert.ok(
+          vscode.window.tabGroups.all
+            .flatMap((g) => g.tabs)
+            .some(
+              (t) =>
+                t.input instanceof vscode.TabInputText &&
+                t.input.uri.toString() === other.toString(),
+            ),
+        );
+        const cleared = await vscode.workspace.openTextDocument(preview.uri);
+        for (
+          let attempt = 0;
+          attempt < 100 &&
+          cleared.getText() !== "Disclosure expired or cancelled.";
+          attempt++
+        )
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        assert.equal(cleared.getText(), "Disclosure expired or cancelled.");
+        stage = "context-native-snapshot";
+        const proof = await runContextFixture(product.extensionPath, fixture);
+        await emitReceipt(join(fixture, "context-native.json"), {
+          ...receipt,
+          ...proof,
+          product_active: product.isActive,
+          preview_cleared: true,
+          unrelated_tab_preserved: true,
+        });
+      }
     }
   }
   await emitReceipt(join(fixture, `complete-${config.phase}.json`), {

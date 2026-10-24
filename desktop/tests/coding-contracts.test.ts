@@ -375,3 +375,16 @@ it("checks shared proposal vectors and literal source/order changes", async () =
     ).not.toBe(row.expected);
   }
 });
+
+it("matches independent literal Python journal projection and normalized receipt vectors", async () => {
+  const { intentProjection, receiptProjection, journalHash } =
+    await import("../../extension/src/journal");
+  for (const vector of corpus.journal_vectors) {
+    const value =
+      vector.kind === "intent"
+        ? intentProjection(parseCodeIntent(vector.input))
+        : receiptProjection(parseCodeReceipt(vector.input));
+    expect(value, vector.label).toEqual(vector.projection);
+    expect(journalHash(value), vector.label).toBe(vector.canonical_sha256);
+  }
+});

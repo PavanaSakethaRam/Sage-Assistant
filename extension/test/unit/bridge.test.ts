@@ -60,7 +60,23 @@ const editor = vi.hoisted(() => ({
   messageHeld: false,
   messages: [] as string[],
 }));
+vi.mock("../../src/root-probe", () => ({
+  probeRoot: async () => "darwin-unit-root",
+  validateRootSpelling: () => {},
+}));
 vi.mock("vscode", () => ({
+  EventEmitter: class {
+    event = () => ({ dispose() {} });
+    fire() {}
+    dispose() {}
+  },
+  Uri: {
+    file: (path: string) => ({
+      fsPath: path,
+      toString: () => pathToFileURL(path).href,
+    }),
+  },
+  TabInputText: class {},
   UIKind: { Desktop: 1 },
   env: {
     get remoteName() {
@@ -75,6 +91,7 @@ vi.mock("vscode", () => ({
     get workspaceFolders() {
       return [{ uri: { toString: () => editor.root } }];
     },
+    registerTextDocumentContentProvider: () => ({ dispose() {} }),
     onDidChangeWorkspaceFolders: (handler: () => void) => {
       editor.workspaceChanged = handler;
       return { dispose() {} };
@@ -91,6 +108,11 @@ vi.mock("vscode", () => ({
     },
   },
   window: {
+    tabGroups: {
+      all: [],
+      onDidChangeTabs: () => ({ dispose() {} }),
+      close: async () => true,
+    },
     showInputBox: async () => (editor.input ? editor.input() : editor.ticket),
     showWarningMessage: async () =>
       editor.confirmation ? editor.confirmation() : editor.choice,
@@ -111,6 +133,8 @@ it("shell refuses activation in restricted or remote state and owns command disp
   const subscriptions: { dispose(): void }[] = [];
   const shell = {
     subscriptions,
+    extensionPath: root,
+    globalStorageUri: { fsPath: root },
   } as unknown as import("vscode").ExtensionContext;
   editor.trusted = false;
   expect(() => activate(shell)).toThrow();
@@ -205,7 +229,7 @@ it("fixed native case selection fails unknown or future cases instead of silentl
   expect(selectedCase(["--case", "bridge"])).toBe("bridge");
   for (const args of [
     ["--case", "arbitrary"],
-    ["--case", "context"],
+    ["--case", "create"],
     ["--case", "bridge", "extra"],
     ["--other", "bridge"],
   ])
@@ -238,7 +262,11 @@ it("pairing command completes after consent without waiting for notification dis
   editor.messageHeld = true;
   const { activate, deactivate } = await import("../../src/extension");
   const subscriptions: { dispose(): void }[] = [];
-  activate({ subscriptions } as unknown as import("vscode").ExtensionContext);
+  activate({
+    subscriptions,
+    extensionPath: root,
+    globalStorageUri: { fsPath: root },
+  } as unknown as import("vscode").ExtensionContext);
   try {
     const completed = await Promise.race([
       editor.commands.get("sage.pairLocalEditor")!().then(() => true),
@@ -278,6 +306,8 @@ async function commandFixture() {
   const subscriptions: { dispose(): void }[] = [];
   shell.activate({
     subscriptions,
+    extensionPath: root,
+    globalStorageUri: { fsPath: root },
   } as unknown as import("vscode").ExtensionContext);
   const sockets = new Set<Socket>();
   const observe = (event: unknown) => {
@@ -523,6 +553,33 @@ it("closes the previous paired socket even when the next workspace guard fails",
     expect(editor.messages.at(-1)).toMatch(/could not pair/u);
   } finally {
     editor.trusted = true;
+    await fixture.cleanup();
+  }
+});
+
+it("registers explicit capture, send and cancellation controls without source release at readiness", async () => {
+  const fixture = await commandFixture();
+  try {
+    expect(editor.commands.has("sage.captureContext")).toBe(true);
+    expect(editor.commands.has("sage.sendContext")).toBe(true);
+    expect(editor.commands.has("sage.cancelContext")).toBe(true);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+it("rejects an original dot-segment folder URI before requesting a pairing ticket", async () => {
+  const fixture = await commandFixture();
+  let prompts = 0;
+  editor.root = editor.root.replace(/\/([^/]+)$/u, "/unused/../$1");
+  editor.input = async () => {
+    prompts++;
+    return undefined;
+  };
+  try {
+    await fixture.command();
+    expect(prompts).toBe(0);
+  } finally {
     await fixture.cleanup();
   }
 });

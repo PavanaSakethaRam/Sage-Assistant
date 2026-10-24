@@ -15,11 +15,12 @@ import {
   envelope,
   openEnvelope,
   parseBridgeData,
+  parseContextOffer,
+  type ContextOffer,
   type PairView,
   type BridgeData,
   type LocalWorkspace,
 } from "../shared/editor-bridge";
-import type { CodeContext } from "../shared/coding-contracts";
 const resources: { close(): Promise<void> }[] = [];
 const sockets: Socket[] = [];
 afterEach(async () => {
@@ -33,6 +34,7 @@ const workspace: LocalWorkspace = {
 };
 const wait = (ms = 20) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
+const capturedAt = Date.now();
 function context(view: PairView): BridgeData {
   const binding = {
     job_id: "job-1",
@@ -47,12 +49,16 @@ function context(view: PairView): BridgeData {
     kind: "context.offer",
     binding,
     payload: {
-      binding,
-      mode: "create_focus_project",
-      root_uri: workspace.root_uri,
-      root_file_id: workspace.root_file_id,
-      files: [],
-      context_hash: "a".repeat(64),
+      captured_at_ms: capturedAt,
+      expires_at_ms: capturedAt + 1800000,
+      context: {
+        binding,
+        mode: "create_focus_project",
+        root_uri: workspace.root_uri,
+        root_file_id: workspace.root_file_id,
+        files: [],
+        context_hash: "a".repeat(64),
+      },
     },
   };
 }
@@ -89,24 +95,27 @@ async function setup(
 }
 function selectedContext(view: PairView): BridgeData {
   const base = context(view);
-  const payload = base.payload as CodeContext;
+  const payload = base.payload as ContextOffer;
   return {
     kind: "context.offer",
     binding: base.binding,
     payload: {
       ...payload,
-      mode: "replace_focus_file",
-      target: "index.html",
-      files: [
-        {
-          name: "index.html",
-          text: "SYNTHETIC_SELECTED_SOURCE",
-          text_hash: "a".repeat(64),
-          disk_hash: "a".repeat(64),
-          document_version: 1,
-          file_id: "selected-file",
-        },
-      ],
+      context: {
+        ...payload.context,
+        mode: "replace_focus_file",
+        target: "index.html",
+        files: [
+          {
+            name: "index.html",
+            text: "SYNTHETIC_SELECTED_SOURCE",
+            text_hash: "a".repeat(64),
+            disk_hash: "a".repeat(64),
+            document_version: 1,
+            file_id: "selected-file",
+          },
+        ],
+      },
     },
   };
 }
@@ -281,10 +290,15 @@ it("awaits callbacks serially and closes on the ninth pending authenticated fram
   });
   await s.host.confirm(s.view.pair_id);
   const view = await s.pairing;
-  for (let i = 0; i < 8; i++) await s.client.send(context(view));
+  const queued: BridgeData = {
+    kind: "result.dismissed",
+    binding: context(view).binding,
+    payload: null,
+  };
+  for (let i = 0; i < 8; i++) await s.client.send(queued);
   await wait();
   expect(received).toHaveLength(1);
-  await s.client.send(context(view));
+  await s.client.send(queued);
   await wait();
   release();
   await wait();
@@ -468,13 +482,16 @@ it("validates exact pair identity, direction, nested binding and no wire native 
     { ...value, command: "execute" },
     {
       ...value,
-      payload: { ...(value.payload as CodeContext), read_path: "/private" },
+      payload: { ...(value.payload as ContextOffer), read_path: "/private" },
     },
     {
       ...value,
       payload: {
-        ...(value.payload as CodeContext),
-        binding: { ...value.binding, job_id: "wrong" },
+        ...(value.payload as ContextOffer),
+        context: {
+          ...(value.payload as ContextOffer).context,
+          binding: { ...value.binding, job_id: "wrong" },
+        },
       },
     },
   ])
@@ -498,7 +515,12 @@ it("validates exact pair identity, direction, nested binding and no wire native 
   };
   expect(() => parseBridgeData(proposal, "host", view)).toThrow();
   expect(
-    parseBridgeData(proposal, "host", view, value.payload as CodeContext),
+    parseBridgeData(
+      proposal,
+      "host",
+      view,
+      (value.payload as ContextOffer).context,
+    ),
   ).toEqual(proposal);
   expect(
     createHash("sha256").update(JSON.stringify(value)).digest("hex"),
@@ -686,7 +708,7 @@ it.each([
     frame = raw.data({
       ...context(raw.view),
       payload: {
-        ...(context(raw.view).payload as CodeContext),
+        ...(context(raw.view).payload as ContextOffer),
         read_path: "SYNTHETIC_FORBIDDEN",
       },
     });
@@ -1341,5 +1363,379 @@ it("send rejects when its completed write also observed local transport closure"
     await expect(session.send(context(view))).rejects.toThrow();
   } finally {
     write.mockRestore();
+  }
+});
+
+it("rejects renewed, future, expired and malformed transport-only capture leases", () => {
+  const view = {
+    ...workspace,
+    host_boot_id: "boot",
+    pair_id: "pair",
+    root_id: rootIdentity(workspace),
+    challenge: "x",
+    status: "paired" as const,
+  };
+  const value = context(view).payload as ContextOffer;
+  expect(parseContextOffer(value, capturedAt)).toEqual(value);
+  for (const changes of [
+    { captured_at_ms: capturedAt + 1 },
+    { expires_at_ms: capturedAt },
+    { expires_at_ms: capturedAt + 1800001 },
+    { captured_at_ms: -1 },
+    { expires_at_ms: 253402300800000 },
+    { extra: true },
+  ])
+    expect(() =>
+      parseContextOffer({ ...value, ...changes }, capturedAt),
+    ).toThrow();
+  expect(() => parseContextOffer(value, value.expires_at_ms)).toThrow();
+});
+
+it("records local intent before core acknowledgment and refuses repeat/reconciliation as effect authority", async () => {
+  const { EffectJournal, journalHash, intentProjection } =
+    await import("../../extension/src/journal");
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { pathToFileURL } = await import("node:url");
+  const root = await mkdtemp("/private/tmp/sage-bridge-journal-");
+  const journal = new EffectJournal(pathToFileURL(root));
+  let calls = 0;
+  const s = await setup(true, async (data) => {
+    if (data.kind !== "journal.intent") throw Error("Unexpected message");
+    calls++;
+    expect((await journal.get(data.payload.operation_id)).intents).toHaveLength(
+      1,
+    );
+    await s.host.send({
+      kind: "journal.ack",
+      binding: data.binding,
+      payload: {
+        operation_id: data.payload.operation_id,
+        effect_id: data.payload.effect_id,
+        status: "recorded",
+        recorded_hash: journalHash(intentProjection(data.payload)),
+      },
+    });
+  });
+  try {
+    await s.host.confirm(s.view.pair_id);
+    const view = await s.pairing;
+    const value = {
+      binding: context(view).binding,
+      operation_id: "intent-op",
+      effect_id: "intent-effect",
+      ordinal: 0,
+      scope: "code.create" as const,
+      target: "index.html" as const,
+      expected_hash: "a".repeat(64),
+    };
+    expect((await s.client.recordIntent(journal, value)).status).toBe(
+      "recorded",
+    );
+    expect(calls).toBe(1);
+    await expect(s.client.recordIntent(journal, value)).rejects.toThrow();
+    expect(calls).toBe(1);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+it("original source lease closes both peers even while the trusted callback remains held", async () => {
+  let release!: () => void, received!: () => void;
+  const held = new Promise<void>((r) => {
+      release = r;
+    }),
+    ready = new Promise<void>((r) => {
+      received = r;
+    });
+  const s = await setup(true, async () => {
+    received();
+    await held;
+  });
+  try {
+    await s.host.confirm(s.view.pair_id);
+    const view = await s.pairing;
+    const value = context(view);
+    const offer = value.payload as ContextOffer;
+    await s.client.send({
+      ...value,
+      payload: {
+        ...offer,
+        captured_at_ms: Date.now() - 100,
+        expires_at_ms: Date.now() + 50,
+      },
+    } as BridgeData);
+    await ready;
+    await wait(80);
+    await expect(
+      s.host.send({ kind: "revoke", binding: value.binding, payload: null }),
+    ).rejects.toThrow();
+    await expect(
+      s.client.send({
+        kind: "result.dismissed",
+        binding: value.binding,
+        payload: null,
+      }),
+    ).rejects.toThrow();
+  } finally {
+    release();
+  }
+});
+it("a repeated offer cannot renew cached source and rollback invalidates the pair", async () => {
+  const s = await setup();
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  const value = context(view);
+  await s.client.send(value);
+  await wait();
+  await expect(s.client.send(value)).rejects.toThrow();
+  const other = await setup();
+  await other.host.confirm(other.view.pair_id);
+  const paired = await other.pairing;
+  const now = Date.now();
+  const clock = vi.spyOn(Date, "now").mockReturnValue(now);
+  try {
+    const selected = context(paired);
+    await other.client.send(selected);
+    clock.mockReturnValue(now - 1);
+    await expect(
+      other.client.send({
+        kind: "result.dismissed",
+        binding: selected.binding,
+        payload: null,
+      }),
+    ).rejects.toThrow();
+  } finally {
+    clock.mockRestore();
+  }
+});
+it.each([
+  "duplicate",
+  "conflict",
+  "wrong-hash",
+  "wrong-effect",
+  "wrong-binding",
+])(
+  "rejects core %s acknowledgement and never retries durable intent",
+  async (mode) => {
+    const { EffectJournal, journalHash, intentProjection } =
+      await import("../../extension/src/journal");
+    const { mkdtemp, rm } = await import("node:fs/promises");
+    const { pathToFileURL } = await import("node:url");
+    const root = await mkdtemp("/private/tmp/sage-core-ack-");
+    const journal = new EffectJournal(pathToFileURL(root));
+    let calls = 0;
+    const s = await setup(true, async (data) => {
+      if (data.kind !== "journal.intent") throw Error("Unexpected");
+      calls++;
+      const status =
+        mode === "duplicate"
+          ? "duplicate"
+          : mode === "conflict"
+            ? "conflict"
+            : "recorded";
+      await s.host.send({
+        kind: "journal.ack",
+        binding:
+          mode === "wrong-binding"
+            ? { ...data.binding, job_id: "other" }
+            : data.binding,
+        payload: {
+          operation_id: data.payload.operation_id,
+          effect_id: mode === "wrong-effect" ? "other" : data.payload.effect_id,
+          status,
+          recorded_hash:
+            status === "conflict"
+              ? null
+              : mode === "wrong-hash"
+                ? "b".repeat(64)
+                : journalHash(intentProjection(data.payload)),
+        },
+      });
+    });
+    try {
+      await s.host.confirm(s.view.pair_id);
+      const view = await s.pairing;
+      await expect(
+        s.client.recordIntent(journal, {
+          binding: context(view).binding,
+          operation_id: "op",
+          effect_id: "effect",
+          ordinal: 0,
+          scope: "code.create",
+          target: "index.html",
+          expected_hash: "a".repeat(64),
+        }),
+      ).rejects.toThrow();
+      expect(calls).toBe(1);
+      expect((await journal.get("op")).intents).toHaveLength(1);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
+it("local journal failure sends zero core intent frames", async () => {
+  const { EffectJournal } = await import("../../extension/src/journal");
+  const { mkdtemp, rm, writeFile } = await import("node:fs/promises");
+  const { pathToFileURL } = await import("node:url");
+  const root = await mkdtemp("/private/tmp/sage-failed-local-");
+  let calls = 0;
+  const s = await setup(true, () => {
+    calls++;
+  });
+  try {
+    await s.host.confirm(s.view.pair_id);
+    const view = await s.pairing;
+    await writeFile(root + "/operation-op.json", "corrupt");
+    await expect(
+      s.client.recordIntent(new EffectJournal(pathToFileURL(root)), {
+        binding: context(view).binding,
+        operation_id: "op",
+        effect_id: "effect",
+        ordinal: 0,
+        scope: "code.create",
+        target: "index.html",
+        expected_hash: "a".repeat(64),
+      }),
+    ).rejects.toThrow();
+    expect(calls).toBe(0);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+it("owns acknowledgment recording before the first local durability await", async () => {
+  const { EffectJournal } = await import("../../extension/src/journal");
+  const { pathToFileURL } = await import("node:url");
+  const journal = new EffectJournal(
+    pathToFileURL("/private/tmp/sage-unused-journal"),
+  );
+  let release!: (value: import("../shared/coding-contracts").CodeAck) => void;
+  const held = new Promise<import("../shared/coding-contracts").CodeAck>(
+    (r) => {
+      release = r;
+    },
+  );
+  const local = vi.spyOn(journal, "intent").mockImplementation(() => held);
+  const s = await setup();
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  const value = {
+    binding: context(view).binding,
+    operation_id: "op",
+    effect_id: "effect",
+    ordinal: 0,
+    scope: "code.create" as const,
+    target: "index.html" as const,
+    expected_hash: "a".repeat(64),
+  };
+  const first = s.client.recordIntent(journal, value),
+    second = s.client.recordIntent(journal, {
+      ...value,
+      operation_id: "other",
+    });
+  first.catch(() => {});
+  second.catch(() => {});
+  try {
+    expect(local).toHaveBeenCalledTimes(1);
+  } finally {
+    await s.client.close();
+    release({
+      operation_id: "op",
+      effect_id: "effect",
+      status: "recorded",
+      recorded_hash: "a".repeat(64),
+    });
+    await Promise.allSettled([first, second]);
+  }
+});
+
+it("correlates a core acknowledgement by binding values rather than JSON key order", async () => {
+  const { EffectJournal, intentProjection, journalHash } =
+    await import("../../extension/src/journal");
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { pathToFileURL } = await import("node:url");
+  const root = await mkdtemp("/private/tmp/sage-ack-order-");
+  const journal = new EffectJournal(pathToFileURL(root));
+  const s = await setup(true, async (data) => {
+    if (data.kind !== "journal.intent") throw Error("Unexpected");
+    await s.host.send({
+      kind: "journal.ack",
+      binding: Object.fromEntries(
+        Object.entries(data.binding).reverse(),
+      ) as unknown as import("../shared/coding-contracts").CodeBinding,
+      payload: {
+        operation_id: data.payload.operation_id,
+        effect_id: data.payload.effect_id,
+        status: "recorded",
+        recorded_hash: journalHash(intentProjection(data.payload)),
+      },
+    });
+  });
+  try {
+    await s.host.confirm(s.view.pair_id);
+    const view = await s.pairing;
+    expect(
+      (
+        await s.client.recordIntent(journal, {
+          binding: context(view).binding,
+          operation_id: "op",
+          effect_id: "effect",
+          ordinal: 0,
+          scope: "code.create",
+          target: "index.html",
+          expected_hash: "a".repeat(64),
+        })
+      ).status,
+    ).toBe("recorded");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+it("durably records observation before dispatching it to the core consumer", async () => {
+  const { EffectJournal, receiptProjection, journalHash } =
+    await import("../../extension/src/journal");
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { pathToFileURL } = await import("node:url");
+  const root = await mkdtemp("/private/tmp/sage-observed-before-core-");
+  const journal = new EffectJournal(pathToFileURL(root));
+  let calls = 0;
+  const s = await setup(true, async (data) => {
+    if (data.kind !== "journal.observed") throw Error("Unexpected");
+    calls++;
+    expect(
+      (await journal.get(data.payload.operation_id)).observations,
+    ).toHaveLength(1);
+    await s.host.send({
+      kind: "journal.ack",
+      binding: data.binding,
+      payload: {
+        operation_id: data.payload.operation_id,
+        effect_id: data.payload.effect_id,
+        status: "recorded",
+        recorded_hash: journalHash(receiptProjection(data.payload)),
+      },
+    });
+  });
+  try {
+    await s.host.confirm(s.view.pair_id);
+    const view = await s.pairing;
+    const value = {
+      binding: context(view).binding,
+      operation_id: "op",
+      effect_id: "effect",
+      ordinal: 0,
+      scope: "code.create" as const,
+      target: "index.html" as const,
+      expected_hash: "a".repeat(64),
+    };
+    await journal.intent(value);
+    expect(
+      (await s.client.recordObserved(journal, { ...value, status: "created" }))
+        .status,
+    ).toBe("recorded");
+    expect(calls).toBe(1);
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });

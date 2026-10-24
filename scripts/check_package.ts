@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { rootProbeName } from "./build-root-probe.ts";
 
 export function canonicalArchiveEntry(
   name: string,
@@ -98,7 +99,9 @@ export function validateArchive(archive: string): void {
     throw Error("Unsafe application archive");
 }
 export async function validateVsix(archive: string): Promise<string[]> {
+  const helper = `extension/dist/${rootProbeName()}`;
   const source = new Map([
+    [helper, helper],
     ["extension/package.json", "extension/package.json"],
     ["extension/dist/extension.cjs", "extension/dist/extension.cjs"],
     ["extension/readme.md", "extension/README.md"],
@@ -124,7 +127,7 @@ archive,expected=sys.argv[1],json.loads(sys.argv[2])
 assert os.path.getsize(archive)<=2097152
 with zipfile.ZipFile(archive) as z:
  items=z.infolist(); names=[i.filename for i in items]
- assert len(names)==len(set(names))==7
+ assert len(names)==len(set(names))==8
  assert set(names)==set(expected)|{'[Content_Types].xml','extension.vsixmanifest'}
  for i in items:
   assert i.file_size<=1048576 and not stat.S_ISLNK(i.external_attr>>16) and not i.flag_bits&1
@@ -142,6 +145,9 @@ with zipfile.ZipFile(archive) as z:
     (await readFile(resolve("extension/package.json"))).toString(),
   );
   if (
+    !(await readFile(resolve("extension/dist/extension.cjs"))).includes(
+      Buffer.from(expected[helper]),
+    ) ||
     manifest.main !== "./dist/extension.cjs" ||
     manifest.publisher !== "sage-local" ||
     manifest.dependencies ||

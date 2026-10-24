@@ -43,7 +43,10 @@
     "desktop/shared/external-url.ts",
     "desktop/shared/framing.ts",
     "extension/src/bridge.ts",
-    "extension/src/extension.ts"
+    "extension/src/context.ts",
+    "extension/src/extension.ts",
+    "extension/src/journal.ts",
+    "extension/src/root-probe.ts"
   ],
   "trusted_python": [
     "src/sage/__init__.py",
@@ -83,11 +86,16 @@
     "desktop/shared/external-url.ts",
     "desktop/shared/framing.ts",
     "extension/src/bridge.ts",
-    "extension/src/extension.ts"
+    "extension/src/context.ts",
+    "extension/src/extension.ts",
+    "extension/src/journal.ts",
+    "extension/src/root-probe.ts"
   ],
   "excluded": [
     "generated build outputs: .vite, out, dist",
     "vendor/dependencies: .venv, node_modules, .runtime",
     "test fixtures, tests, and quality tooling are not application runtime source"
-  ]
+  ],
+  "native": ["extension/native/root-probe.c"],
+  "trusted_native": ["extension/native/root-probe.c"]
 }

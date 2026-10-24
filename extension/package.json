@@ -28,6 +28,18 @@
       {
         "command": "sage.pairLocalEditor",
         "title": "Sage: Pair Local Editor"
+      },
+      {
+        "command": "sage.captureContext",
+        "title": "Sage: Capture Explicit Context"
+      },
+      {
+        "command": "sage.sendContext",
+        "title": "Sage: Send Selected Context"
+      },
+      {
+        "command": "sage.cancelContext",
+        "title": "Sage: Cancel Context"
       }
     ]
   },

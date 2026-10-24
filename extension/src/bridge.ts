@@ -3,6 +3,14 @@ import { connect } from "node:net";
 import { realpathSync, statSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { randomBytes } from "node:crypto";
+import { requireFreshAcks, type EffectJournal } from "./journal";
+import {
+  parseCodeIntent,
+  parseCodeReceipt,
+  type CodeAck,
+  type CodeIntent,
+  type CodeReceipt,
+} from "../../desktop/shared/coding-contracts";
 import {
   BridgeSession,
   FramedPeer,
@@ -18,6 +26,7 @@ import {
   nonce,
   parseTicket,
   parseWorkspace,
+  sameBinding,
   rootIdentity,
   transcript,
   verifyProof,
@@ -28,11 +37,22 @@ import {
 type Options = {
   confirm: (view: PairView) => Promise<boolean>;
   guard?: () => void;
+  onClose?: () => void;
   random?: (size: number) => Buffer;
 };
 export class ExtensionBridge {
   private peer: FramedPeer | undefined;
   private session: BridgeSession | undefined;
+  private recording = false;
+  private pendingAck:
+    | {
+        binding: CodeIntent["binding"];
+        local: CodeAck;
+        resolve: (value: CodeAck) => void;
+        reject: (error: Error) => void;
+        timer: ReturnType<typeof setTimeout>;
+      }
+    | undefined;
   private handlers = new Set<(message: BridgeData) => void | Promise<void>>();
   constructor(private readonly options: Options) {}
   private check(): void {
@@ -45,7 +65,7 @@ export class ExtensionBridge {
   }
   async pair(ticket: string, workspace: LocalWorkspace): Promise<PairView> {
     this.check();
-    if (this.peer) invalid();
+    if (this.peer || this.recording) invalid();
     parseWorkspace(workspace);
     let parsed: ReturnType<typeof parseTicket> | undefined =
       parseTicket(ticket);
@@ -68,6 +88,8 @@ export class ExtensionBridge {
             this.peer = undefined;
             this.session = undefined;
           }
+          this.rejectAck();
+          this.options.onClose?.();
           reject(new Error("Editor bridge closed"));
         });
         peer.handler = async (frame) => {
@@ -115,6 +137,16 @@ export class ExtensionBridge {
             "extension",
             view,
             async (data) => {
+              if (data.kind === "journal.ack") {
+                const pending = this.pendingAck;
+                if (!pending || !sameBinding(pending.binding, data.binding))
+                  invalid();
+                requireFreshAcks(pending.local, data.payload);
+                clearTimeout(pending.timer);
+                this.pendingAck = undefined;
+                pending.resolve(data.payload);
+                return;
+              }
               for (const handler of this.handlers) {
                 this.check();
                 await handler(data);
@@ -154,6 +186,72 @@ export class ExtensionBridge {
       throw error;
     }
   }
+  private rejectAck(): void {
+    const pending = this.pendingAck;
+    this.pendingAck = undefined;
+    if (pending) {
+      clearTimeout(pending.timer);
+      pending.reject(Error("Journal reconciliation required"));
+    }
+  }
+  private async record(
+    journal: EffectJournal,
+    value: CodeIntent | CodeReceipt,
+    observed: boolean,
+  ): Promise<CodeAck> {
+    this.check();
+    if (!this.session || this.pendingAck || this.recording) invalid();
+    const valid = observed
+      ? parseCodeReceipt(JSON.parse(JSON.stringify(value)))
+      : parseCodeIntent(JSON.parse(JSON.stringify(value)));
+    this.recording = true;
+    try {
+      const local = observed
+        ? await journal.observed(valid as CodeReceipt)
+        : await journal.intent(valid as CodeIntent);
+      this.check();
+      if (local.status !== "recorded" || !this.session) invalid();
+      return await new Promise<CodeAck>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          this.rejectAck();
+          void this.close();
+        }, 30000);
+        this.pendingAck = {
+          binding: valid.binding,
+          local,
+          resolve,
+          reject,
+          timer,
+        };
+        const message: BridgeData = observed
+          ? {
+              kind: "journal.observed",
+              binding: valid.binding,
+              payload: valid as CodeReceipt,
+            }
+          : {
+              kind: "journal.intent",
+              binding: valid.binding,
+              payload: valid as CodeIntent,
+            };
+        void this.send(message).catch(() => {
+          this.rejectAck();
+          void this.close();
+        });
+      });
+    } catch (error) {
+      await this.close();
+      throw error;
+    } finally {
+      this.recording = false;
+    }
+  }
+  recordIntent(journal: EffectJournal, value: CodeIntent): Promise<CodeAck> {
+    return this.record(journal, value, false);
+  }
+  recordObserved(journal: EffectJournal, value: CodeReceipt): Promise<CodeAck> {
+    return this.record(journal, value, true);
+  }
   async send(message: BridgeData): Promise<void> {
     this.check();
     if (!this.session) invalid();
@@ -164,6 +262,7 @@ export class ExtensionBridge {
     return () => this.handlers.delete(handler);
   }
   async close(): Promise<void> {
+    this.rejectAck();
     this.peer?.close();
     this.peer = undefined;
     this.session = undefined;

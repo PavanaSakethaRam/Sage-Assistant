@@ -28,6 +28,7 @@ def main() -> int:
         ],
         [NPM, "run", "test:coverage"],
         [NPM, "run", "test:e2e"],
+        [NPM, "run", "test:native-coverage"],
         [
             sys.executable,
             "scripts/check_coverage.py",
@@ -35,6 +36,8 @@ def main() -> int:
             "coverage.json",
             "--javascript",
             "coverage/coverage-summary.json",
+            "--native",
+            ".cache/task4-native-coverage/coverage.json",
         ],
         [NPM, "run", "typecheck"],
         [NPM, "run", "lint"],

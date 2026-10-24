@@ -868,3 +868,19 @@ def test_recipe_checks_known_selected_hashes_without_requiring_all_source_bodies
     selected = selected.model_copy(update={"recipe_hash": recipe_hash(selected)})
     assert jobs.prepare_test(selected).state == "test_review"
     assert jobs.get("job-1").file_count == 2
+
+
+def test_literal_extension_journal_projection_and_receipt_parity() -> None:
+    import hashlib
+
+    from sage.coding_contracts import parse_code_intent, parse_code_receipt
+
+    corpus = json.loads((Path(__file__).parents[1] / "fixtures/coding-contracts.json").read_text())
+    for vector in corpus["journal_vectors"]:
+        if vector["kind"] == "intent":
+            material = CodingJobs._projection(parse_code_intent(vector["input"]))
+        else:
+            material = parse_code_receipt(vector["input"]).model_dump(mode="json")
+        assert json.loads(json.dumps(material)) == vector["projection"], vector["label"]
+        encoded = json.dumps(material, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        assert hashlib.sha256(encoded.encode()).hexdigest() == vector["canonical_sha256"]

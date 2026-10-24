@@ -15,13 +15,14 @@ import { build } from "vite";
 import { chromium } from "@playwright/test";
 import { assertNativeElectronContext } from "../e2e/native-context.ts";
 import { validateVsix } from "./check_package.ts";
+import { rootProbeName } from "./build-root-probe.ts";
 import { revalidate, VERSION } from "./provision-vscode.ts";
 import { fileURLToPath } from "node:url";
 const activeChildren = new Set<ChildProcess>();
 const SUITE_LIMIT = 600_000,
   CASE_LIMIT = 120_000,
   OUTPUT_LIMIT = 262144;
-export function selectedCase(args: string[]): "bridge" | "all" {
+export function selectedCase(args: string[]): "bridge" | "context" | "all" {
   if (args.length === 0) return "bridge";
   if (
     args.length !== 2 ||
@@ -37,8 +38,8 @@ export function selectedCase(args: string[]): "bridge" | "all" {
     ].includes(args[1])
   )
     throw Error("Unknown editor test case");
-  if (args[1] !== "bridge" && args[1] !== "all")
-    throw Error("Editor case is not implemented in Task3");
+  if (args[1] !== "bridge" && args[1] !== "context" && args[1] !== "all")
+    throw Error("Editor case is not implemented in Task4");
   return args[1];
 }
 async function until<T>(
@@ -148,6 +149,7 @@ async function lane(
   executable: string,
   trusted: boolean,
   packaged = false,
+  selectedCase: "bridge" | "context" | "all" = "bridge",
 ): Promise<void> {
   const owned = await realpath(
     await mkdtemp(
@@ -162,7 +164,12 @@ async function lane(
     extensions = join(owned, "extensions"),
     home = join(owned, "home"),
     temp = join(owned, "temp"),
-    workspace = join(owned, "workspace"),
+    workspace = join(
+      owned,
+      process.platform === "darwin" && selectedCase !== "bridge"
+        ? "workspace:context"
+        : "workspace",
+    ),
     fixture = join(owned, "fixture");
   for (const path of [
     profile,
@@ -220,14 +227,15 @@ async function lane(
     );
     const extract = `import sys,zipfile,io,stat,pathlib
 root=pathlib.Path(sys.argv[1])
-allowed={'extension/package.json','extension/dist/extension.cjs','extension/readme.md','extension/LICENSE.txt','extension/THIRD_PARTY_NOTICES.md','extension.vsixmanifest','[Content_Types].xml'}
+allowed={'extension/package.json','extension/dist/extension.cjs','extension/readme.md','extension/LICENSE.txt','extension/THIRD_PARTY_NOTICES.md','extension/dist/${rootProbeName()}','extension.vsixmanifest','[Content_Types].xml'}
 with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
- items=z.infolist(); assert len(items)==7 and {i.filename for i in items}==allowed
+ items=z.infolist(); assert len(items)==8 and {i.filename for i in items}==allowed
  for i in items:
   assert not stat.S_ISLNK(i.external_attr>>16) and i.file_size<=1048576 and not i.flag_bits&1
   if not i.filename.startswith('extension/'): continue
   target=root/i.filename[len('extension/'):]; target.parent.mkdir(parents=True,exist_ok=True)
-  with target.open('xb') as f: f.write(z.read(i))`;
+  with target.open('xb') as f: f.write(z.read(i))
+  if i.filename=='extension/dist/${rootProbeName()}': target.chmod(0o755)`;
     const extracted = spawnSync(python, ["-c", extract, productPath], {
       shell: false,
       input: bytes,
@@ -257,6 +265,7 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     packageHash,
     bundleHash,
     productPath,
+    selectedCase,
   };
   await writeFile(join(fixture, "case.json"), JSON.stringify(config));
   const argv = [
@@ -304,7 +313,12 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
   }, CASE_LIMIT);
   let browser: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
   let host:
-    { close(): Promise<void>; assertDisconnected(): Promise<void> } | undefined;
+    | {
+        close(): Promise<void>;
+        assertDisconnected(): Promise<void>;
+        exerciseContext(): Promise<void>;
+      }
+    | undefined;
   try {
     const receipt = async (phase: string) =>
       until(async () => {
@@ -370,9 +384,23 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
       const integration = await import(
         pathToFileURL(resolve(".cache/vscode-tools/bridge.cjs")).href
       );
-      host = await integration.pairThroughWorkbench(page);
+      host = await integration.pairThroughWorkbench(
+        page,
+        selectedCase !== "bridge",
+      );
+      if (selectedCase !== "bridge") await host!.exerciseContext();
       console.log(
-        JSON.stringify({ profile: owned, receipt: await receipt("initial") }),
+        JSON.stringify({
+          profile: owned,
+          receipt: await receipt("initial"),
+          ...(selectedCase !== "bridge"
+            ? {
+                context_native: await json(
+                  join(fixture, "context-native.json"),
+                ),
+              }
+            : {}),
+        }),
       );
       if (!packaged) {
         await writeFile(
@@ -382,7 +410,10 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
         await page.keyboard.press(
           process.platform === "darwin" ? "Meta+Shift+P" : "Control+Shift+P",
         );
-        const command = page.getByRole("textbox");
+        const command = page.getByPlaceholder(
+          "Type the name of a command to run.",
+          { exact: true },
+        );
         await command.fill(">Developer: Reload Window");
         await command.press("Enter");
         console.log(
@@ -425,11 +456,16 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     await browser?.close();
     await stop(child);
     activeChildren.delete(child);
-    await rm(owned, { recursive: true, force: true });
+    await rm(owned, {
+      recursive: true,
+      force: true,
+      maxRetries: 5,
+      retryDelay: 100,
+    });
   }
 }
 async function main(): Promise<void> {
-  selectedCase(process.argv.slice(2));
+  const selected = selectedCase(process.argv.slice(2));
   assertNativeElectronContext();
   const suiteTimer = setTimeout(() => {
     console.error("FAIL editor suite timeout");
@@ -443,6 +479,13 @@ async function main(): Promise<void> {
     const executable = await revalidate();
     await build({
       configFile: false,
+      define: {
+        __SAGE_ROOT_PROBE_SHA256__: JSON.stringify(
+          createHash("sha256")
+            .update(await readFile(join("extension/dist", rootProbeName())))
+            .digest("hex"),
+        ),
+      },
       logLevel: "silent",
       build: {
         outDir: "extension/test/driver/dist",
@@ -472,9 +515,9 @@ async function main(): Promise<void> {
       },
     });
     try {
-      await lane(executable, true);
-      await lane(await revalidate(), true, true);
-      await lane(await revalidate(), false, true);
+      await lane(executable, true, false, selected);
+      await lane(await revalidate(), true, true, selected);
+      await lane(await revalidate(), false, true, selected);
       console.log(
         "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
       );

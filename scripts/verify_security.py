@@ -197,6 +197,52 @@ def scan(base: str, head: str) -> dict[str, Any]:
             raise ValueError("scanner version mismatch")
     with tempfile.TemporaryDirectory(prefix="sage-security-") as scratch:
         temp = Path(scratch)
+        native_sources = sorted((ROOT / "extension/native").glob("*.c"))
+        native_names = [p.relative_to(ROOT).as_posix() for p in native_sources]
+        manifest = json.loads((ROOT / "scripts/coverage-manifest.json").read_text())
+        if native_names != manifest["native"] or native_names != manifest["trusted_native"]:
+            raise ValueError("native static source inventory drift")
+        if sys.platform == "darwin" and os.uname().machine == "arm64":
+            compiler = "/usr/bin/clang"
+            version = subprocess.run(
+                [compiler, "--version"], capture_output=True, text=True, check=False
+            )
+            analysis = execute(
+                [
+                    compiler,
+                    "--analyze",
+                    "-Xanalyzer",
+                    "-analyzer-output=text",
+                    "-std=c11",
+                    "-Wall",
+                    "-Wextra",
+                    "-Werror",
+                    "-arch",
+                    "arm64",
+                    str(native_sources[0]),
+                    "-o",
+                    str(temp / "native.plist"),
+                ]
+            )
+            results["native"] = {
+                "status": "pass"
+                if version.returncode == 0 and analysis[0] == 0 and not analysis[2]
+                else "incomplete",
+                "compiler": compiler,
+                "version": version.stdout.splitlines()[0] if version.stdout else "unavailable",
+                "mode": "clang static analyzer and warnings; manual security review still required",
+                "sources": {
+                    p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in native_sources
+                },
+                "windows_gate": "uncompiled/unobserved; Task10 required",
+            }
+        else:
+            results["native"] = {
+                "status": "incomplete",
+                "reason": "native platform analyzer gate unavailable",
+                "sources": native_names,
+            }
         requirements = temp / "requirements.txt"
         code, _, _ = execute(
             [

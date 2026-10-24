@@ -45,13 +45,18 @@ export type PairView = Readonly<
     status: "awaiting_confirmation" | "paired";
   }
 >;
+export type ContextOffer = Readonly<{
+  context: CodeContext;
+  captured_at_ms: number;
+  expires_at_ms: number;
+}>;
 type Data<K extends string, P> = Readonly<{
   kind: K;
   binding: CodeBinding;
   payload: P;
 }>;
 export type BridgeData =
-  | Data<"context.offer", CodeContext>
+  | Data<"context.offer", ContextOffer>
   | Data<"proposal.offer", CodeProposal>
   | Data<"test.preview", TestRecipe>
   | Data<"result.dismissed", null>
@@ -348,7 +353,7 @@ const hostKinds = [
   "reconcile.offer",
   "revoke",
 ];
-function sameBinding(left: CodeBinding, right: CodeBinding): boolean {
+export function sameBinding(left: CodeBinding, right: CodeBinding): boolean {
   return [
     "job_id",
     "boot_id",
@@ -360,6 +365,32 @@ function sameBinding(left: CodeBinding, right: CodeBinding): boolean {
   ].every(
     (key) => left[key as keyof CodeBinding] === right[key as keyof CodeBinding],
   );
+}
+export function parseContextOffer(
+  value: unknown,
+  now = Date.now(),
+): ContextOffer {
+  const row = exact(value, ["context", "captured_at_ms", "expires_at_ms"]);
+  for (const key of ["captured_at_ms", "expires_at_ms"]) {
+    if (
+      typeof row[key] !== "number" ||
+      !Number.isSafeInteger(row[key]) ||
+      (row[key] as number) < 0 ||
+      (row[key] as number) > 253402300799999
+    )
+      invalid();
+  }
+  const offer = row as ContextOffer;
+  if (
+    !Number.isSafeInteger(now) ||
+    offer.captured_at_ms >= offer.expires_at_ms ||
+    offer.expires_at_ms - offer.captured_at_ms > 1800000 ||
+    offer.captured_at_ms > now ||
+    now >= offer.expires_at_ms
+  )
+    invalid();
+  parseCodeContext(offer.context);
+  return offer;
 }
 export function parseBridgeData(
   value: unknown,
@@ -398,7 +429,9 @@ export function parseBridgeData(
   let parsedPayload = row.payload;
   switch (row.kind) {
     case "context.offer": {
-      const c = parseCodeContext(row.payload);
+      const offer = parseContextOffer(JSON.parse(JSON.stringify(row.payload)));
+      parsedPayload = offer;
+      const c = offer.context;
       nested = c.binding;
       if (c.root_uri !== view.root_uri || c.root_file_id !== view.root_file_id)
         invalid();
@@ -569,6 +602,8 @@ export class BridgeSession {
   private remote = false;
   private context: CodeContext | undefined;
   private contextTimer: ReturnType<typeof setTimeout> | undefined;
+  private lastClock = Date.now();
+  private contextDeadline = 0;
   private readyResolve!: (view: PairView) => void;
   private readyReject!: (error: Error) => void;
   readonly ready: Promise<PairView>;
@@ -591,7 +626,7 @@ export class BridgeSession {
       this.readyReject(new Error("Editor bridge closed"));
     });
     peer.handler = async (frame) => {
-      this.guard();
+      this.check();
       const payload = openEnvelope(
         this.key,
         this.direction === "host" ? "extension" : "host",
@@ -635,9 +670,10 @@ export class BridgeSession {
           view,
           this.context,
         );
+        this.remember(data);
         await this.onData(data);
         if (this.peer.closed) return;
-        this.remember(data);
+        this.check();
         if (data.kind === "revoke") this.peer.close();
       } else if (
         row.kind ===
@@ -691,8 +727,21 @@ export class BridgeSession {
       this.readyResolve(this.view);
     }
   }
-  async send(message: BridgeData): Promise<void> {
+  private check(): void {
     this.guard();
+    const now = Date.now();
+    if (
+      !Number.isSafeInteger(now) ||
+      now < this.lastClock ||
+      (this.contextDeadline && now >= this.contextDeadline)
+    ) {
+      this.peer.close();
+      invalid();
+    }
+    this.lastClock = now;
+  }
+  async send(message: BridgeData): Promise<void> {
+    this.check();
     if (!this.paired) invalid();
     const data = parseBridgeData(
       message,
@@ -700,6 +749,7 @@ export class BridgeSession {
       this.view,
       this.context,
     );
+    this.remember(data);
     await this.peer.write(
       envelope(this.key, this.direction, this.outgoing++, {
         ...this.payload("data"),
@@ -707,19 +757,28 @@ export class BridgeSession {
       }),
     );
     if (this.peer.closed) invalid();
-    this.remember(data);
+    this.check();
     if (data.kind === "revoke") this.peer.close();
   }
   private clearContext(): void {
     this.context = undefined;
+    this.contextDeadline = 0;
     if (this.contextTimer) clearTimeout(this.contextTimer);
     this.contextTimer = undefined;
   }
   private remember(data: BridgeData): void {
     if (data.kind === "context.offer") {
-      this.clearContext();
-      this.context = data.payload;
-      this.contextTimer = setTimeout(() => this.clearContext(), 30 * 60_000);
+      if (this.context) {
+        this.peer.close();
+        invalid();
+      }
+      const offer = parseContextOffer(data.payload);
+      this.context = offer.context;
+      this.contextDeadline = offer.expires_at_ms;
+      this.contextTimer = setTimeout(
+        () => this.peer.close(),
+        offer.expires_at_ms - Date.now(),
+      );
     }
     if (
       data.kind === "result.dismissed" &&

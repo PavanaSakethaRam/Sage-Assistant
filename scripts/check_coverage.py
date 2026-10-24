@@ -1,7 +1,10 @@
 """Validate integer coverage counts against the complete reviewed source inventory."""
 
 import argparse
+import hashlib
 import json
+import platform
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +28,7 @@ def pair(covered: Any, total: Any) -> tuple[int, int]:
     return c, t
 
 
-def check(python: Path, javascript: Path) -> dict[str, object]:
+def check(python: Path, javascript: Path, native: Path) -> dict[str, object]:
     manifest = json.loads((ROOT / "scripts/coverage-manifest.json").read_text())
     actual_py = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "src/sage").rglob("*.py"))
     actual_js = sorted(
@@ -63,7 +66,57 @@ def check(python: Path, javascript: Path) -> dict[str, object]:
             pair(s["statements"]["covered"], s["statements"]["total"]),
             pair(s["branches"]["covered"], s["branches"]["total"]),
         )
+    actual_native = sorted(
+        p.relative_to(ROOT).as_posix() for p in (ROOT / "extension/native").glob("*.c")
+    )
+    if manifest["native"] != actual_native or manifest["trusted_native"] != actual_native:
+        raise ValueError("native source inventory drift")
+    packet = json.loads(native.read_text())
+    expected_platform = (
+        "darwin-arm64"
+        if sys.platform == "darwin" and platform.machine() == "arm64"
+        else "win32-x64"
+        if sys.platform == "win32" and platform.machine().lower() in {"amd64", "x86_64"}
+        else "unsupported"
+    )
+    if (
+        type(packet["version"]) is not int
+        or packet["version"] != 1
+        or packet["platform"] != expected_platform
+        or len(packet["binary_sha256"]) != 64
+        or any(c not in "0123456789abcdef" for c in packet["binary_sha256"])
+        or set(packet["source_sha256"]) != set(actual_native)
+    ):
+        raise ValueError("invalid native coverage provenance")
+    for name in actual_native:
+        if packet["source_sha256"][name] != hashlib.sha256((ROOT / name).read_bytes()).hexdigest():
+            raise ValueError("native source hash drift")
+    native_files = packet["coverage"]["data"][0]["files"]
+    native_counts = {}
+    for item in native_files:
+        name = Path(item["filename"]).as_posix().removeprefix(ROOT.as_posix() + "/")
+        if name in native_counts:
+            raise ValueError("ambiguous native source")
+        summary = item["summary"]
+        native_counts[name] = (
+            pair(summary["regions"]["covered"], summary["regions"]["count"]),
+            pair(summary["branches"]["covered"], summary["branches"]["count"]),
+        )
+    if sorted(native_counts) != actual_native:
+        raise ValueError("incomplete native coverage")
     result: dict[str, object] = {}
+    for scope, thresholds in [("maintained", (80, 75)), ("trusted", (90, 85))]:
+        sums = [
+            tuple(sum(native_counts[n][i][j] for n in actual_native) for j in (0, 1))
+            for i in (0, 1)
+        ]
+        for metric, (covered, total), threshold in zip(
+            ("regions", "branches"), sums, thresholds, strict=True
+        ):
+            if not total or covered * 100 < total * threshold:
+                raise CoverageThresholdError(f"native_{scope}_{metric}")
+        result[f"native_{scope}"] = {"regions": sums[0], "branches": sums[1]}
+
     for lang, entries in counts.items():
         trusted = manifest["trusted_" + lang]
         if not trusted or not set(trusted) <= set(entries):
@@ -91,9 +144,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--python", type=Path, required=True)
     parser.add_argument("--javascript", type=Path, required=True)
+    parser.add_argument("--native", type=Path, required=True)
     args = parser.parse_args()
     try:
-        print(json.dumps(check(args.python, args.javascript), sort_keys=True))
+        print(json.dumps(check(args.python, args.javascript, args.native), sort_keys=True))
         return 0
     except (OSError, ValueError, KeyError, TypeError, IndexError) as error:
         # No source text or artifact contents are echoed.
