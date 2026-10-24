@@ -407,3 +407,50 @@ export function contextOffer(context: CodeContext): ContextOffer {
 export function releaseContext(context: CodeContext): void {
   snapshots.delete(context);
 }
+
+/** Visible local disclosure metadata, partitioned exactly like the provider's context budget. */
+export function disclosureSummary(context: CodeContext): readonly string[] {
+  contextOffer(context);
+  const points = (value: string) => [...value].length;
+  const selected = context.files.map((file) => file.name);
+  const readOnly = selected.filter((name) => name !== context.target);
+  const source = context.files.reduce(
+    (sum, file) => sum + points(file.text),
+    0,
+  );
+  const diagnostics = (context.diagnostics ?? []).reduce(
+    (sum, text) => sum + points(text),
+    0,
+  );
+  const metadata =
+    points(context.mode) +
+    points(context.target ?? "") +
+    selected.reduce((sum, name) => sum + points(name), 0);
+  const lines = [
+    `Mode: ${context.mode}`,
+    `Selected manifest (${selected.length} existing): ${selected.join(", ") || "none"}`,
+    `Target: ${context.target ?? "new empty project"}`,
+    `Read-only scope: ${readOnly.join(", ") || "none"}`,
+  ];
+  if (context.mode === "create_focus_project")
+    lines.push(`Creation outputs: ${FOCUS_NAMES.join(", ")}`);
+  const hash = (label: string, value: string) => {
+    lines.push(
+      `${label} SHA256 (1/2): ${value.slice(0, 32)}`,
+      `${label} SHA256 (2/2): ${value.slice(32)}`,
+    );
+  };
+  hash("Context", context.context_hash);
+  for (const file of context.files) {
+    lines.push(`${file.name} source: ${points(file.text)} code points`);
+    hash(`${file.name} text`, file.text_hash);
+    hash(`${file.name} disk`, file.disk_hash);
+  }
+  lines.push(
+    `Source: ${source} code points`,
+    `Selected diagnostics: ${diagnostics} code points (${(context.diagnostics ?? []).length} selected)`,
+    `Provider-visible metadata: ${metadata} code points`,
+    `Total: ${source + diagnostics + metadata} / 64000 code points`,
+  );
+  return Object.freeze(lines);
+}

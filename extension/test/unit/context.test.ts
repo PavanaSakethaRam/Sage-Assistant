@@ -668,3 +668,113 @@ it("refuses a selected document changed during the final native await", async ()
     vi.mocked(probeRoot).mockResolvedValue("darwin-native-1");
   }
 });
+
+function expectedSummary(
+  hash: string,
+  files: readonly string[],
+  fileHash: string,
+  creation = false,
+): string[] {
+  const lines = [
+    `Mode: ${creation ? "create_focus_project" : "replace_focus_file"}`,
+    `Selected manifest (${files.length} existing): ${files.join(", ") || "none"}`,
+    `Target: ${creation ? "new empty project" : "focus.js"}`,
+    `Read-only scope: ${creation ? "none" : files.filter((name) => name !== "focus.js").join(", ") || "none"}`,
+  ];
+  if (creation)
+    lines.push(
+      "Creation outputs: index.html, focus.js, focus.test.mjs, README.md",
+    );
+  lines.push(
+    `Context SHA256 (1/2): ${hash.slice(0, 32)}`,
+    `Context SHA256 (2/2): ${hash.slice(32)}`,
+  );
+  for (const name of files)
+    lines.push(
+      `${name} source: 18 code points`,
+      `${name} text SHA256 (1/2): ${fileHash.slice(0, 32)}`,
+      `${name} text SHA256 (2/2): ${fileHash.slice(32)}`,
+      `${name} disk SHA256 (1/2): ${fileHash.slice(0, 32)}`,
+      `${name} disk SHA256 (2/2): ${fileHash.slice(32)}`,
+    );
+  lines.push(
+    `Source: ${creation ? 0 : 36} code points`,
+    `Selected diagnostics: ${creation ? 0 : 24} code points (${creation ? 0 : 1} selected)`,
+    `Provider-visible metadata: ${creation ? 20 : 43} code points`,
+    `Total: ${creation ? 20 : 103} / 64000 code points`,
+  );
+  return lines;
+}
+it.each([false, true])(
+  "shows the exact immutable disclosure summary in preview and final expirable control (empty creation %s)",
+  async (creation) => {
+    const c = await controller();
+    let pending: Promise<void> | undefined;
+    try {
+      const root = new URL(editor.rootUri).pathname;
+      if (creation) {
+        await rm(join(root, "focus.js"));
+        editor.choices = [["Create focus project"]];
+      } else {
+        await writeFile(join(root, "README.md"), editor.text);
+        editor.diagnostics = [
+          {
+            message: "selected 😀",
+            range: { start: { line: 0, character: 1 } },
+          },
+        ];
+        editor.choices = [
+          ["Replace one focus file"],
+          ["focus.js"],
+          ["README.md"],
+          ["Select diagnostics"],
+          ["focus.js:1:2: selected 😀"],
+        ];
+      }
+      await c.capture();
+      const preview = (editor.active as { document: { getText(): string } })
+        .document;
+      const text = preview.getText();
+      const hash = /Context hash: ([0-9a-f]{64})/.exec(text)![1];
+      const { createHash } = await import("node:crypto");
+      const fileHash = createHash("sha256")
+        .update("selected source 😀\n")
+        .digest("hex");
+      const expected = expectedSummary(
+        hash,
+        creation ? [] : ["focus.js", "README.md"],
+        fileHash,
+        creation,
+      );
+      expect(text).toContain(expected.join("\n"));
+      expect(editor.sent).toEqual([]);
+      pending = c.send();
+      await vi.waitFor(() =>
+        expect(editor.picker?.items[0].label).toBe(
+          "Send selected context to local Sage",
+        ),
+      );
+      const picker = editor.picker!;
+      expect(picker.items.map((item) => item.label)).toEqual([
+        "Send selected context to local Sage",
+        "Keep local",
+        ...expected,
+      ]);
+      for (const item of picker.items.slice(2)) {
+        expect(item).toMatchObject({ alwaysShow: true });
+        expect(item.label).not.toContain("selected 😀");
+        expect(item.label).not.toContain("selected source");
+      }
+      await c.cancel();
+      picker.selectedItems = [picker.items[0]];
+      picker.accept();
+      await pending;
+      expect(editor.sent).toEqual([]);
+      expect(preview.getText()).toBe("Disclosure expired or cancelled.");
+    } finally {
+      await c.cancel();
+      await pending;
+      await c.cleanup();
+    }
+  },
+);

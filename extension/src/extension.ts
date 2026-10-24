@@ -9,6 +9,7 @@ import {
   captureContext,
   contextOffer,
   diagnosticChoices,
+  disclosureSummary,
   releaseContext,
   validateContext,
 } from "./context";
@@ -419,7 +420,7 @@ export function activate(context: vscode.ExtensionContext): void {
         operation.preview = uri;
         contents.set(
           uri.toString(),
-          `Selected disclosure to local Sage\nSending this context does not call a cloud model.\nFolder: ${captured.root_uri}\nMode: ${captured.mode}\nFixed manifest: ${FOCUS_NAMES.join(", ")}\nTarget: ${captured.target ?? "new empty project"}\nContext hash: ${captured.context_hash}\n\n${captured.files.map((file) => `--- ${file.name} (version ${file.document_version}, SHA256 ${file.text_hash}) ---\n${file.text}`).join("\n")}\nSelected diagnostics:\n${(captured.diagnostics ?? []).join("\n")}\n\nUse Sage: Send Selected Context to send exactly this snapshot, or Sage: Cancel Context.\n`,
+          `Selected disclosure to local Sage\nSending this context does not call a cloud model.\nFolder: ${captured.root_uri}\nContext hash: ${captured.context_hash}\n${disclosureSummary(captured).join("\n")}\n\n${captured.files.map((file) => `--- ${file.name} (version ${file.document_version}, SHA256 ${file.text_hash}) ---\n${file.text}`).join("\n")}\nSelected diagnostics:\n${(captured.diagnostics ?? []).join("\n")}\n\nUse Sage: Send Selected Context to send exactly this snapshot, or Sage: Cancel Context.\n`,
         );
         const document = await vscode.workspace.openTextDocument(uri);
         guard();
@@ -457,11 +458,21 @@ export function activate(context: vscode.ExtensionContext): void {
         operation.guard();
         await validateContext(captured);
         operation.guard();
+        const summary = disclosureSummary(captured);
         const selected = await input(
           operation,
           [
-            { label: "Send selected context to local Sage", send: true },
+            {
+              label: "Send selected context to local Sage",
+              description: `Target: ${captured.target ?? "new empty project"}; ${summary.at(-1)}`,
+              send: true,
+            },
             { label: "Keep local", send: false },
+            ...summary.map((label) => ({
+              label,
+              alwaysShow: true,
+              send: false,
+            })),
           ],
           "Sage: Confirm selected disclosure",
         );

@@ -1,4 +1,5 @@
 /** Native workbench controls drive product confirmation; no product test-only API. */
+import { createHash } from "node:crypto";
 import { strict as assert } from "node:assert";
 import type { Page } from "@playwright/test";
 import { EditorBridgeHost } from "../../../desktop/main/editor-bridge";
@@ -92,6 +93,48 @@ export async function pairThroughWorkbench(
           { exact: true },
         );
         await send.waitFor({ timeout: 20000 });
+        const confirmation = page
+          .locator(".quick-input-widget")
+          .filter({ has: send });
+        assert.equal(offers.length, 0);
+        const fileHash = createHash("sha256")
+          .update("export const nativeMarker = '😀';\n")
+          .digest("hex");
+        const visibleParts: string[] = [];
+        for (const part of [1, 2]) {
+          await send.fill(`Context SHA256 (${part}/2):`);
+          const label = confirmation
+            .getByText(
+              new RegExp(`^Context SHA256 \\(${part}/2\\): [0-9a-f]{32}$`),
+            )
+            .first();
+          await label.waitFor({ timeout: 10000 });
+          visibleParts.push((await label.innerText()).split(": ")[1]);
+        }
+        const expected = [
+          "Mode: replace_focus_file",
+          "Selected manifest (1 existing): focus.js",
+          "Target: focus.js",
+          "Read-only scope: none",
+          `Context SHA256 (1/2): ${visibleParts[0]}`,
+          `Context SHA256 (2/2): ${visibleParts[1]}`,
+          "focus.js source: 33 code points",
+          `focus.js text SHA256 (1/2): ${fileHash.slice(0, 32)}`,
+          `focus.js text SHA256 (2/2): ${fileHash.slice(32)}`,
+          `focus.js disk SHA256 (1/2): ${fileHash.slice(0, 32)}`,
+          `focus.js disk SHA256 (2/2): ${fileHash.slice(32)}`,
+          "Source: 33 code points",
+          "Selected diagnostics: 0 code points (0 selected)",
+          "Provider-visible metadata: 34 code points",
+          "Total: 67 / 64000 code points",
+        ];
+        for (const line of expected) {
+          await send.fill(line);
+          const item = confirmation.getByText(line, { exact: true }).first();
+          await item.waitFor({ timeout: 10000 });
+          await item.scrollIntoViewIfNeeded();
+          assert.equal(await item.isVisible(), true);
+        }
         assert.equal(offers.length, 0);
         await send.fill("Send selected context to local Sage");
         await send.press("Enter");
@@ -101,6 +144,17 @@ export async function pairThroughWorkbench(
         assert.equal(offers.length, 1);
         assert.equal(offers[0].context.mode, "replace_focus_file");
         assert.equal(offers[0].context.files.length, 1);
+        assert.equal(visibleParts.join(""), offers[0].context.context_hash);
+        assert.equal(offers[0].context.target, "focus.js");
+        assert.equal(offers[0].context.files[0].text_hash, fileHash);
+        assert.equal(offers[0].context.files[0].disk_hash, fileHash);
+        console.log(
+          JSON.stringify({
+            confirmation_summary_checked: true,
+            visible_summary: expected,
+            confirmed_context_hash: offers[0].context.context_hash,
+          }),
+        );
         assert.equal(
           offers[0].context.files[0].text,
           "export const nativeMarker = '😀';\n",

@@ -125,10 +125,37 @@ async function run(): Promise<void> {
         assert.ok(
           preview.getText().includes("Selected disclosure to local Sage"),
         );
+        const contextHash = /Context hash: ([0-9a-f]{64})/.exec(
+          preview.getText(),
+        )?.[1];
+        assert.ok(contextHash);
+        const fileHash = createHash("sha256")
+          .update("export const nativeMarker = '😀';\n")
+          .digest("hex");
+        const summary = [
+          "Mode: replace_focus_file",
+          "Selected manifest (1 existing): focus.js",
+          "Target: focus.js",
+          "Read-only scope: none",
+          `Context SHA256 (1/2): ${contextHash.slice(0, 32)}`,
+          `Context SHA256 (2/2): ${contextHash.slice(32)}`,
+          "focus.js source: 33 code points",
+          `focus.js text SHA256 (1/2): ${fileHash.slice(0, 32)}`,
+          `focus.js text SHA256 (2/2): ${fileHash.slice(32)}`,
+          `focus.js disk SHA256 (1/2): ${fileHash.slice(0, 32)}`,
+          `focus.js disk SHA256 (2/2): ${fileHash.slice(32)}`,
+          "Source: 33 code points",
+          "Selected diagnostics: 0 code points (0 selected)",
+          "Provider-visible metadata: 34 code points",
+          "Total: 67 / 64000 code points",
+        ];
+        assert.ok(preview.getText().includes(summary.join("\n")));
         assert.equal(preview.isDirty, false);
         await emitReceipt(join(fixture, "context-preview.json"), {
           ...receipt,
           preview_readonly: true,
+          preview_summary_checked: true,
+          summary,
           preview_uri: preview.uri.toString(),
         });
         stage = "context-send";
@@ -160,6 +187,8 @@ async function run(): Promise<void> {
           ...proof,
           product_active: product.isActive,
           preview_cleared: true,
+          preview_summary_checked: true,
+          summary,
           unrelated_tab_preserved: true,
         });
       }
