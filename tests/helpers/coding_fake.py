@@ -67,3 +67,53 @@ def make_receipt(**overrides: Any) -> dict[str, Any]:
         "observed_length": 12,
         **overrides,
     }
+
+
+class DeferredCodingBackend:
+    """Constructor-injected double; no local product backend or runtime."""
+
+    def __init__(self) -> None:
+        import asyncio
+
+        self.entered = asyncio.Event()
+        self.release = asyncio.Event()
+        self.requests: list[Any] = []
+        self.closed = 0
+        self.cancelled: list[str] = []
+        self.swallow = False
+        self.error: Exception | None = None
+
+    def coding_readiness(self) -> Any:
+        from sage.contracts import ProviderReadiness
+
+        return ProviderReadiness(
+            provider="copilot",
+            status="not_configured",
+            evidence=(),
+            explanation="explicit_connection_check_required",
+        )
+
+    async def propose_code(self, request: Any) -> Any:
+        import asyncio
+
+        from sage.coding_contracts import CodeProposal
+
+        self.requests.append(request)
+        self.entered.set()
+        try:
+            await self.release.wait()
+        except asyncio.CancelledError:
+            if not self.swallow:
+                raise
+            await self.release.wait()
+        if self.error:
+            raise self.error
+        return CodeProposal.model_validate(
+            make_proposal(job_id=request.job_id, revision=request.revision)
+        )
+
+    async def cancel(self, request_id: str) -> None:
+        self.cancelled.append(request_id)
+
+    async def aclose(self) -> None:
+        self.closed += 1

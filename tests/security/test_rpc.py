@@ -92,7 +92,12 @@ def test_settings_and_unavailable_inference_are_explicit(core: CoreService) -> N
             request("set", "settings.update", ai_mode="assistant", reasoning_backend="copilot"),
         )
     )
-    assert changed == {"ai_mode": "assistant", "reasoning_backend": "copilot"}
+    assert changed == {
+        "ai_mode": "assistant",
+        "reasoning_backend": "copilot",
+        "coding_backend": "none",
+        "coding_model": None,
+    }
     assert result(dispatch(core, request("test", "connection.test")))["status"] == "unavailable"
     assert result(dispatch(core, request("readiness", "readiness.list")))["items"]
     assert (
@@ -724,7 +729,12 @@ def test_idle_connection_survives_receive_budget_and_accepts_later_request(
         await asyncio.wait_for(running, 1)
         found = await responses(writer)
         assert [frame["id"] for frame in found] == ["later", "stop"]
-        assert found[0]["result"] == {"ai_mode": "local", "reasoning_backend": None}
+        assert found[0]["result"] == {
+            "ai_mode": "local",
+            "reasoning_backend": None,
+            "coding_backend": "none",
+            "coding_model": None,
+        }
 
     asyncio.run(run())
 

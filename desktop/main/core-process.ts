@@ -1,3 +1,11 @@
+import {
+  parseCodingControlInput,
+  parseHostCodingControl,
+  parseHostCodingReply,
+  type CodingControlInput,
+  type HostCodingControl,
+  type HostCodingReply,
+} from "../shared/coding-contracts";
 /** Fixed owned child; framed stdout only, redacted stderr, no replay after failure. */
 import type { ChildProcessByStdio } from "node:child_process";
 import { launchCore } from "./core-launch";
@@ -91,9 +99,9 @@ type SelectionResponse = {
   id: string;
   result: SelectionAck;
 };
-type Terminal = CoreResponse | SelectionResponse;
+type Terminal = CoreResponse | SelectionResponse | HostCodingReply;
 type Pending = {
-  request: CoreRequest | SelectionFrame;
+  request: CoreRequest | SelectionFrame | HostCodingControl;
   resolve: (response: Terminal) => void;
   timer: ReturnType<typeof setTimeout>;
 };
@@ -108,6 +116,7 @@ export class CoreProcess {
   private _launches = 0;
   private bootId = "";
   private generation = 0;
+  private codingGeneration = 0;
   private clearing: Promise<SelectionAck> | undefined;
   constructor(private readonly options: CoreOptions) {
     if (
@@ -124,6 +133,7 @@ export class CoreProcess {
     this._launches++;
     this.bootId = randomUUID().replaceAll("-", "");
     this.generation = 0;
+    this.codingGeneration = 0;
     const child = launchCore(this.options);
     this.child = child;
     this.children.add(child);
@@ -207,6 +217,11 @@ export class CoreProcess {
               id: identifier,
               result: ack,
             };
+          } else if (
+            p.request.kind === "host_coding" &&
+            message.kind === "host_coding_reply"
+          ) {
+            response = parseHostCodingReply(message, p.request);
           } else
             response = parseResponse(
               message,
@@ -238,6 +253,22 @@ export class CoreProcess {
     )
       return Promise.resolve(failure(request.id, "invalid_request"));
     return this.send(request) as Promise<CoreResponse>;
+  }
+  async codingControl(value: CodingControlInput): Promise<HostCodingReply> {
+    const input = parseCodingControlInput(value);
+    if (!this.launch()) throw new TypeError("Coding control unavailable");
+    const request = parseHostCodingControl({
+      ...input,
+      version: 1,
+      kind: "host_coding",
+      host_boot_id: this.bootId,
+      generation: ++this.codingGeneration,
+      id: randomUUID(),
+    });
+    const response = await this.send(request);
+    if (response.kind !== "host_coding_reply")
+      throw new TypeError("Coding control unavailable");
+    return response;
   }
   selectAccount(account: SelectedAccount | null): Promise<SelectionAck> {
     if (account !== null) return this.changeAccount(account);
@@ -271,7 +302,9 @@ export class CoreProcess {
     }
     return parseSelectionAck(response.result);
   }
-  private send(request: CoreRequest | SelectionFrame): Promise<Terminal> {
+  private send(
+    request: CoreRequest | SelectionFrame | HostCodingControl,
+  ): Promise<Terminal> {
     if (this.closed)
       return Promise.resolve(failure(request.id, "shutting_down"));
     if (this.seen.has(request.id))
@@ -282,15 +315,20 @@ export class CoreProcess {
     const controls = [...this.pending.values()].filter(
       (entry) => entry.request.kind === "host_copilot_selection",
     ).length;
-    const publicWork = this.pending.size - controls;
+    const coding = [...this.pending.values()].filter(
+      (entry) => entry.request.kind === "host_coding",
+    ).length;
+    const publicWork = this.pending.size - controls - coding;
     // One selection plus one reserved, coalesced revocation; public capacity
     // remains eight. A new selection cannot queue behind a pending clear.
     if (
       request.kind === "request"
         ? publicWork >= 8
-        : request.account === null
-          ? controls >= 2
-          : controls >= 1
+        : request.kind === "host_coding"
+          ? coding >= 8
+          : request.account === null
+            ? controls >= 2
+            : controls >= 1
     )
       return Promise.resolve(failure(request.id, "busy"));
     const child = this.launch();
@@ -315,9 +353,11 @@ export class CoreProcess {
         },
         // Internal lifecycle control shares the 60s cleanup budget. This does
         // not change public 1..30000ms requests or the 30s partial-frame limit.
-        request.kind === "request"
-          ? (request.timeout_ms ?? 30000)
-          : SHUTDOWN_GRACE_MS,
+        request.kind === "host_coding"
+          ? 30000
+          : request.kind === "request"
+            ? (request.timeout_ms ?? 30000)
+            : SHUTDOWN_GRACE_MS,
       );
       this.pending.set(request.id, { request, resolve, timer });
       try {

@@ -388,3 +388,88 @@ it("matches independent literal Python journal projection and normalized receipt
     expect(journalHash(value), vector.label).toBe(vector.canonical_sha256);
   }
 });
+
+it("closes private coding control inputs and correlates every private reply", async () => {
+  const {
+    parseCodingControlInput,
+    parseHostCodingControl,
+    parseHostCodingReply,
+  } = await import("../shared/coding-contracts");
+  const cases = corpus.cases;
+  const good = (kind: string) =>
+    cases.find((row) => row.kind === kind && row.valid)!.value;
+  const now = Date.now();
+  const inputs = [
+    {
+      operation: "context",
+      params: {
+        context: makeContext(),
+        captured_at_ms: now - 1,
+        expires_at_ms: now + 10000,
+      },
+    },
+    { operation: "proposal_get", params: { job_id: "job-1" } },
+    { operation: "finish", params: { job_id: "job-1" } },
+    { operation: "test_prepare", params: good("recipe") },
+    { operation: "review", params: good("review") },
+    { operation: "intent", params: good("intent") },
+    { operation: "observation", params: good("receipt") },
+    { operation: "revoke_pair", params: { pair_id: "pair-1" } },
+  ];
+  for (const input of inputs) {
+    expect(parseCodingControlInput(input)).toEqual(input);
+    const control = parseHostCodingControl({
+      ...input,
+      version: 1,
+      kind: "host_coding",
+      id: "control",
+      host_boot_id: "b".repeat(32),
+      generation: 1,
+    });
+    const result = ["context", "finish", "test_prepare"].includes(
+      input.operation,
+    )
+      ? good("job_view")
+      : input.operation === "proposal_get"
+        ? makeProposal()
+        : input.operation === "review"
+          ? { kind: "grant", grant: good("grant") }
+          : input.operation === "revoke_pair"
+            ? { status: "revoked" }
+            : good("ack");
+    const reply = { ...control, kind: "host_coding_reply", result };
+    const response = Object.fromEntries(
+      Object.entries(reply).filter(([key]) => key !== "params"),
+    );
+    expect(parseHostCodingReply(response, control).operation).toBe(
+      input.operation,
+    );
+    expect(() =>
+      parseHostCodingReply({ ...response, generation: 2 }, control),
+    ).toThrow();
+    expect(() =>
+      parseHostCodingReply({ ...response, result: { command: "x" } }, control),
+    ).toThrow();
+    expect(() =>
+      parseCodingControlInput({
+        ...input,
+        params: { ...input.params, command: "x" },
+      }),
+    ).toThrow();
+  }
+  for (const input of [
+    { operation: "execute", params: {} },
+    { operation: "finish", params: { job_id: "job-1" }, host_boot_id: "x" },
+  ])
+    expect(() => parseCodingControlInput(input)).toThrow();
+  expect(() =>
+    parseHostCodingControl({
+      ...inputs[0],
+      version: true,
+      kind: "host_coding",
+      id: "x",
+      host_boot_id: "invalid",
+      generation: 0,
+    }),
+  ).toThrow();
+});

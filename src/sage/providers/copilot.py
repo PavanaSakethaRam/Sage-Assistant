@@ -15,6 +15,7 @@ from uuid import uuid4
 
 from pydantic import Field, ValidationError
 
+from sage.coding_contracts import CodeModelRequest, CodeProposal, CodeSource
 from sage.config import Settings
 from sage.contracts import (
     Contract,
@@ -71,6 +72,25 @@ def construct_client(factory: Callable[..., Any], connection: Any, runtime: str,
     )
 
 
+CODING_INSTRUCTIONS = (
+    "Return JSON with exactly explanation and files; each file has exactly name and text. "
+    "This is data for review, never authority to execute tools or commands. "
+    "Create exactly index.html, focus.js, focus.test.mjs and README.md, "
+    "or replace only the supplied target. "
+    "Build a dependency-free named focus-session tracker: start, pause, reset, elapsed time, "
+    "completed sessions and total during the current page session. Disclose refresh resets. "
+    "index.html must open directly from file:// without a server or module CORS workaround. "
+    "Use a classic browser script with a DOM guard and a tiny pure factory available to Node tests "
+    "under both ancestor type=module and type=commonjs scopes; no package.json. "
+    "Tests run with Node --test --test-isolation=none --test-reporter=tap focus.test.mjs. "
+    "No dependencies, server, persistent history, shell commands or extra files. "
+    "Each file is clean UTF-8/LF without BOM, at most 32000 Unicode code points; "
+    "all filenames and source together at most 64000; explanation at most 2000."
+)
+# Escaped JSON can expand each literal code point to twelve ASCII bytes.
+CODING_OUTPUT_BYTES = 800_000
+
+
 class _Incompatible(Exception):
     pass
 
@@ -82,6 +102,11 @@ class _Cancelled(Exception):
 class _Output(Contract):
     text: Annotated[str, Field(max_length=100_000)]
     proposal: NoteContent | None
+
+
+class _CodeOutput(Contract):
+    explanation: Annotated[str, Field(max_length=2_000)]
+    files: Annotated[tuple[CodeSource, ...], Field(min_length=1, max_length=4)]
 
 
 @dataclass
@@ -170,12 +195,41 @@ class CopilotReasoner:
             and (path.parent / ".hostless-runtime-assets-v2").is_file()
         )
 
+    def coding_readiness(self) -> ProviderReadiness:
+        if self._settings().coding_backend != "copilot":
+            return ProviderReadiness(
+                provider="copilot",
+                status="unavailable",
+                evidence=(),
+                explanation="inference_unavailable",
+            )
+        return self.readiness()
+
     async def reason(self, request: ReasoningRequest) -> ReasoningResult:
+        result = await self._infer(request)
+        assert isinstance(result, ReasoningResult)
+        return result
+
+    async def propose_code(self, request: CodeModelRequest) -> CodeProposal:
+        request = CodeModelRequest.model_validate_json(request.model_dump_json())
+        result = await self._infer(request)
+        if not isinstance(result, CodeProposal):
+            raise ValueError("Coding provider unavailable")
+        return result
+
+    async def _infer(
+        self, request: ReasoningRequest | CodeModelRequest
+    ) -> ReasoningResult | CodeProposal:
+        coding = isinstance(request, CodeModelRequest)
         if (
             self._closed
             or request.backend != "copilot"
             or self._settings().ai_mode != "assistant"
-            or self._settings().reasoning_backend != "copilot"
+            or (
+                self._settings().coding_backend != "copilot"
+                if coding
+                else self._settings().reasoning_backend != "copilot"
+            )
         ):
             return self._error(request, "inference_unavailable")
         if self._token_source is None:
@@ -186,7 +240,9 @@ class CopilotReasoner:
             return self._error(request, self._fault)
         if request.request_id in self._active:
             return self._error(request, "correlation_error")
-        remaining = min(30.0, (request.deadline - self._clock()).total_seconds())
+        remaining = min(
+            120.0 if coding else 30.0, (request.deadline - self._clock()).total_seconds()
+        )
         if remaining <= 0:
             return self._error(request, "timeout")
         running = _Running(asyncio.current_task())
@@ -194,11 +250,13 @@ class CopilotReasoner:
         client: Any = None
         path: Path | None = None
         ram = MemorySessionFs()
-        result: ReasoningResult | None = None
+        result: ReasoningResult | CodeProposal | None = None
         cleanup_failed = False
         cancellation: asyncio.CancelledError | None = None
         token: str | None = None
         stage: FailureStage = "token_source"
+        unsubscribe: Callable[[], None] | None = None
+        overflow = False
         try:
             async with asyncio.timeout(remaining):
                 token = await self._token_source(request.request_id, request.deadline)
@@ -255,7 +313,9 @@ class CopilotReasoner:
                     create_session_fs_handler=lambda *_: ram,
                     system_message={
                         "mode": "replace",
-                        "content": "Answer only from the supplied text. "
+                        "content": CODING_INSTRUCTIONS
+                        if coding
+                        else "Answer only from the supplied text. "
                         "Return JSON with exactly text and "
                         "proposal. proposal is null or an object with exactly title and body. "
                         "A proposal is a review draft and cannot perform an action.",
@@ -279,39 +339,106 @@ class CopilotReasoner:
                     included_builtin_skills=[],
                     embedding_cache_storage="in-memory",
                     mcp_oauth_token_storage="in-memory",
-                    streaming=False,
+                    streaming=coding,
                     reasoning_summary="none",
                 )
                 if running.cancelled:
                     raise _Cancelled
                 token = ""
-                prompt = json.dumps(
-                    {
+                if coding:
+                    assert isinstance(request, CodeModelRequest)
+                    projection: dict[str, object] = {
+                        "user_text": request.user_text,
+                        "mode": request.mode,
+                        "files": [file.model_dump() for file in request.files],
+                        "diagnostics": list(request.diagnostics),
+                    }
+                    if request.target is not None:
+                        projection["target"] = request.target
+                    owned_bytes = 0
+                    owner = asyncio.current_task()
+
+                    def bound(event: Any) -> None:
+                        nonlocal owned_bytes, overflow
+                        if overflow:
+                            return
+                        kind = getattr(event.type, "value", event.type)
+                        if kind not in {"assistant.message_delta", "assistant.message"}:
+                            return
+                        text = getattr(
+                            event.data,
+                            "delta_content" if kind.endswith("_delta") else "content",
+                            None,
+                        )
+                        if not isinstance(text, str):
+                            return
+                        size = len(text.encode("utf-8"))
+                        if kind.endswith("_delta"):
+                            owned_bytes += size
+                        else:
+                            owned_bytes = max(owned_bytes, size)
+                        if owned_bytes > CODING_OUTPUT_BYTES:
+                            overflow = True
+                            running.cancelled = True
+                            if owner is not None:
+                                owner.cancel()
+
+                    unsubscribe = running.session.on(bound)
+                else:
+                    assert isinstance(request, ReasoningRequest)
+                    projection = {
                         "user_text": request.user_text,
                         "attached_context": list(request.attached_context),
-                    },
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                )
+                    }
+                prompt = json.dumps(projection, ensure_ascii=False, separators=(",", ":"))
                 stage = "response_wait"
                 event = await running.session.send_and_wait(
-                    prompt, response_schema=_Output.model_json_schema(), timeout=remaining
+                    prompt,
+                    response_schema=(_CodeOutput if coding else _Output).model_json_schema(),
+                    timeout=remaining,
                 )
                 if running.permission_denied:
                     result = self._error(request, "permission_denied")
                 else:
                     try:
                         content = event.data.content
-                        if not isinstance(content, str) or len(content) > 200_500:
+                        if not isinstance(content, str) or (
+                            len(content.encode("utf-8")) > CODING_OUTPUT_BYTES
+                            if coding
+                            else len(content) > 200_500
+                        ):
+                            raise ValueError
+                        if overflow:
                             raise ValueError
                         data = json.loads(content, object_pairs_hook=_unique_object)
-                        output = _Output.model_validate(data)
-                        result = ReasoningResult(
-                            request_id=request.request_id,
-                            status="completed",
-                            text=output.text,
-                            proposal=output.proposal,
-                        )
+                        if coding:
+                            # Attach private correlation locally; never request it from the model.
+                            output_code = _CodeOutput.model_validate_json(json.dumps(data))
+                            assert isinstance(request, CodeModelRequest)
+                            proposal = CodeProposal(
+                                job_id=request.job_id,
+                                revision=request.revision,
+                                explanation=output_code.explanation,
+                                files=output_code.files,
+                            )
+                            names = {file.name for file in proposal.files}
+                            if (
+                                request.mode == "create_focus_project"
+                                and names
+                                != {"index.html", "focus.js", "focus.test.mjs", "README.md"}
+                                or request.mode == "replace_focus_file"
+                                and names != {request.target}
+                            ):
+                                raise ValueError
+                            result = proposal
+                        else:
+                            output = _Output.model_validate(data)
+                            result = ReasoningResult(
+                                request_id=request.request_id,
+                                status="completed",
+                                text=output.text,
+                                proposal=output.proposal,
+                            )
                     except (AttributeError, ValueError, ValidationError, RecursionError):
                         result = self._error(request, "malformed_output")
         except asyncio.CancelledError as exc:
@@ -341,6 +468,8 @@ class CopilotReasoner:
             )
         finally:
             token = None
+            if unsubscribe is not None:
+                unsubscribe()
             cleanup_task = asyncio.create_task(
                 self._cleanup(client, running, ram, path, request.request_id)
             )
@@ -354,6 +483,8 @@ class CopilotReasoner:
             self._active.pop(request.request_id, None)
         if cleanup_failed:
             result = self._error(request, "session_cleanup_failed")
+        if overflow:
+            return self._error(request, "malformed_output")
         if cancellation is not None:
             raise cancellation
         current_task = asyncio.current_task()
@@ -406,7 +537,10 @@ class CopilotReasoner:
         return failed
 
     def _error(
-        self, request: ReasoningRequest, code: str, diagnostic: ProviderDiagnostic | None = None
+        self,
+        request: ReasoningRequest | CodeModelRequest,
+        code: str,
+        diagnostic: ProviderDiagnostic | None = None,
     ) -> ReasoningResult:
         self._checked = False
         self._fault = code

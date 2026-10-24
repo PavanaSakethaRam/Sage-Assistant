@@ -78,7 +78,7 @@ async def _run(
                 token_source=source,
             )
 
-        service = CoreService(store, backend_factory=backend)
+        service = CoreService(store, backend_factory=backend, coding_backend_factory=backend)
         service.backend = backend(None)
         loop = asyncio.get_running_loop()
         reader = asyncio.StreamReader()

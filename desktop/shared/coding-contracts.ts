@@ -575,6 +575,20 @@ export function parseCodeProposal(
   value: unknown,
   context: CodeContext,
 ): CodeProposal {
+  const proposal = parseCodeProposalValue(value);
+  if (
+    proposal.job_id !== context.binding.job_id ||
+    proposal.revision !== context.binding.revision
+  )
+    invalid();
+  const names = proposal.files.map((file) => file.name);
+  if (context.mode === "create_focus_project") {
+    if (names.length !== 4 || FOCUS_NAMES.some((item) => !names.includes(item)))
+      invalid();
+  } else if (names.length !== 1 || names[0] !== context.target) invalid();
+  return proposal;
+}
+export function parseCodeProposalValue(value: unknown): CodeProposal {
   frame(value);
   const row = object(value, ["job_id", "revision", "explanation", "files"]);
   id(row.job_id);
@@ -594,15 +608,6 @@ export function parseCodeProposal(
     ) > 64000
   )
     invalid();
-  if (
-    row.job_id !== context.binding.job_id ||
-    row.revision !== context.binding.revision
-  )
-    invalid();
-  if (context.mode === "create_focus_project") {
-    if (names.length !== 4 || FOCUS_NAMES.some((item) => !names.includes(item)))
-      invalid();
-  } else if (names.length !== 1 || names[0] !== context.target) invalid();
   return value as CodeProposal;
 }
 export function providerContext(context: CodeContext): readonly CodeSource[] {
@@ -1112,4 +1117,174 @@ export async function proposalHash(
       })),
     },
   });
+}
+
+export type ContextOffer = Readonly<{
+  context: CodeContext;
+  captured_at_ms: number;
+  expires_at_ms: number;
+}>;
+export function parseContextOffer(
+  value: unknown,
+  now = Date.now(),
+): ContextOffer {
+  frame(value);
+  const row = object(value, ["context", "captured_at_ms", "expires_at_ms"]);
+  integer(row.captured_at_ms, 0, 253402300799999);
+  integer(row.expires_at_ms, 0, 253402300799999);
+  const offer = row as ContextOffer;
+  if (
+    !Number.isSafeInteger(now) ||
+    offer.captured_at_ms >= offer.expires_at_ms ||
+    offer.expires_at_ms - offer.captured_at_ms > 1800000 ||
+    offer.captured_at_ms > now ||
+    now >= offer.expires_at_ms
+  )
+    invalid();
+  parseCodeContext(offer.context);
+  return offer;
+}
+export type CodingControlInput =
+  | Readonly<{ operation: "context"; params: ContextOffer }>
+  | Readonly<{
+      operation: "proposal_get" | "finish";
+      params: Readonly<{ job_id: string }>;
+    }>
+  | Readonly<{ operation: "test_prepare"; params: TestRecipe }>
+  | Readonly<{ operation: "review"; params: CodeReview }>
+  | Readonly<{ operation: "intent"; params: CodeIntent }>
+  | Readonly<{ operation: "observation"; params: CodeReceipt }>
+  | Readonly<{
+      operation: "revoke_pair";
+      params: Readonly<{ pair_id: string }>;
+    }>;
+export type HostCodingControl = CodingControlInput &
+  Readonly<{
+    version: 1;
+    kind: "host_coding";
+    host_boot_id: string;
+    generation: number;
+    id: string;
+  }>;
+type CodingResults = {
+  context: CodeJobView;
+  proposal_get: CodeProposal;
+  test_prepare: CodeJobView;
+  finish: CodeJobView;
+  review: CodeReviewResult;
+  intent: CodeAck;
+  observation: CodeAck;
+  revoke_pair: Readonly<{ status: "revoked" }>;
+};
+export type HostCodingReply = {
+  [K in keyof CodingResults]: Readonly<{
+    version: 1;
+    kind: "host_coding_reply";
+    host_boot_id: string;
+    generation: number;
+    id: string;
+    operation: K;
+    result: CodingResults[K];
+  }>;
+}[keyof CodingResults];
+export function parseCodingControlInput(value: unknown): CodingControlInput {
+  frame(value);
+  const row = object(value, ["operation", "params"]);
+  switch (row.operation) {
+    case "context":
+      parseContextOffer(row.params);
+      break;
+    case "proposal_get":
+    case "finish":
+      id(object(row.params, ["job_id"]).job_id);
+      break;
+    case "test_prepare":
+      parseTestRecipe(row.params);
+      break;
+    case "review":
+      parseCodeReview(row.params);
+      break;
+    case "intent":
+      parseCodeIntent(row.params);
+      break;
+    case "observation":
+      parseCodeReceipt(row.params);
+      break;
+    case "revoke_pair":
+      id(object(row.params, ["pair_id"]).pair_id);
+      break;
+    default:
+      invalid();
+  }
+  return value as CodingControlInput;
+}
+export function parseHostCodingControl(value: unknown): HostCodingControl {
+  frame(value);
+  const row = object(value, [
+    "version",
+    "kind",
+    "host_boot_id",
+    "generation",
+    "id",
+    "operation",
+    "params",
+  ]);
+  oneOf(row.version, [1]);
+  oneOf(row.kind, ["host_coding"]);
+  id(row.id);
+  if (
+    typeof row.host_boot_id !== "string" ||
+    !/^[a-f0-9]{32}$/.test(row.host_boot_id)
+  )
+    invalid();
+  integer(row.generation, 1);
+  parseCodingControlInput({ operation: row.operation, params: row.params });
+  return value as HostCodingControl;
+}
+export function parseHostCodingReply(
+  value: unknown,
+  control: HostCodingControl,
+): HostCodingReply {
+  frame(value);
+  const row = object(value, [
+    "version",
+    "kind",
+    "host_boot_id",
+    "generation",
+    "id",
+    "operation",
+    "result",
+  ]);
+  if (
+    row.version !== 1 ||
+    row.kind !== "host_coding_reply" ||
+    row.host_boot_id !== control.host_boot_id ||
+    row.generation !== control.generation ||
+    row.id !== control.id ||
+    row.operation !== control.operation
+  )
+    invalid();
+  switch (row.operation) {
+    case "context":
+    case "test_prepare":
+    case "finish":
+      parseCodeJobView(row.result);
+      break;
+    case "proposal_get":
+      parseCodeProposalValue(row.result);
+      break;
+    case "review":
+      parseCodeReviewResult(row.result);
+      break;
+    case "intent":
+    case "observation":
+      parseCodeAck(row.result);
+      break;
+    case "revoke_pair":
+      oneOf(object(row.result, ["status"]).status, ["revoked"]);
+      break;
+    default:
+      invalid();
+  }
+  return value as HostCodingReply;
 }

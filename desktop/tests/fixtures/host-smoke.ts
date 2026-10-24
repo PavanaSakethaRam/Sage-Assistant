@@ -27,11 +27,22 @@ app.on("browser-window-created", (_event, window) => {
         version: 1,
         id: "smoke",
         kind: "response",
-        result: { ai_mode: "local", reasoning_backend: null },
+        result: {
+          ai_mode: "local",
+          reasoning_backend: null,
+          coding_backend: "none",
+          coding_model: null,
+        },
       });
       assert.equal(
         await window.webContents.executeJavaScript(
           `window.sage.request({version:1,id:'bad',kind:'request',method:'settings.get',params:{executable:'/evil'}}).then(()=>false,()=>true)`,
+        ),
+        true,
+      );
+      assert.equal(
+        await window.webContents.executeJavaScript(
+          `window.sage.request({version:1,id:'private',kind:'host_coding',host_boot_id:'${"b".repeat(32)}',generation:1,operation:'revoke_pair',params:{pair_id:'pair'}}).then(()=>false,()=>true)`,
         ),
         true,
       );

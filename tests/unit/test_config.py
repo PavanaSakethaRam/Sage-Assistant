@@ -85,3 +85,18 @@ def test_unsafe_configured_backends_rejected(payload: dict[str, object]) -> None
 def test_nonlocal_mode_rejects_unknown_backend() -> None:
     with pytest.raises(ValueError):
         Settings(ai_mode="assistant").validate_reasoning_destination("shell", None)
+
+
+def test_coding_selection_is_independent_and_disabled_by_default() -> None:
+    assert Settings(ai_mode="assistant", reasoning_backend="copilot").coding_backend == "none"
+    settings = Settings(ai_mode="assistant", coding_backend="copilot", coding_model="pinned-model")
+    assert settings.reasoning_backend is None
+    assert settings.coding_model == "pinned-model"
+
+
+@pytest.mark.parametrize(
+    "value", [{"coding_backend": "local"}, {"coding_model": "../bad model"}, {"coding_model": 1}]
+)
+def test_coding_config_is_closed(value: dict[str, object]) -> None:
+    with pytest.raises(ValidationError):
+        Settings.model_validate(value)

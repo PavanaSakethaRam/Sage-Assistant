@@ -1,15 +1,18 @@
 """Explicit configuration values, with no ambient environment/credential reads."""
 
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import model_validator
+from pydantic import AfterValidator, Field, model_validator
 
+from sage.coding_contracts import _model
 from sage.contracts import Backend, Contract
 
 
 class Settings(Contract):
     ai_mode: Literal["local", "assistant", "api"] = "local"
     reasoning_backend: Backend | None = None
+    coding_backend: Literal["none", "copilot"] = "none"
+    coding_model: Annotated[str, Field(max_length=200), AfterValidator(_model)] | None = None
 
     @model_validator(mode="after")
     def _validate_local_backend(self) -> Self:

@@ -2,9 +2,9 @@
 
 import asyncio
 import json
-from typing import Annotated, Literal, cast
+from typing import Annotated, Literal, Self, cast
 
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, model_validator
 
 from sage.contracts import Contract
 
@@ -153,3 +153,119 @@ async def read_frame(reader: asyncio.StreamReader) -> dict[str, object]:
         return cast(dict[str, object], value)
     except (asyncio.IncompleteReadError, TimeoutError, ValueError, UnicodeError, RecursionError):
         raise ProtocolError("Invalid frame") from None
+
+
+class HostCodingControl(Contract):
+    version: Literal[1]
+    kind: Literal["host_coding"]
+    host_boot_id: Annotated[str, Field(pattern=r"^[a-f0-9]{32}$")]
+    generation: Annotated[int, Field(strict=True, ge=1, le=9_007_199_254_740_991)]
+    id: RpcId
+    operation: Literal[
+        "context",
+        "proposal_get",
+        "test_prepare",
+        "finish",
+        "review",
+        "intent",
+        "observation",
+        "revoke_pair",
+    ]
+    params: dict[str, object]
+
+    @model_validator(mode="after")
+    def closed_params(self) -> Self:
+        self.parsed_params()
+        return self
+
+    def parsed_params(self) -> Contract:
+        from sage.coding_contracts import (
+            CodeJobId,
+            CodePairId,
+            CodeReview,
+            ContextOffer,
+            TestRecipe,
+            parse_code_intent,
+            parse_code_receipt,
+        )
+
+        if self.operation == "intent":
+            return parse_code_intent(self.params)
+        if self.operation == "observation":
+            return parse_code_receipt(self.params)
+        schemas: dict[str, type[Contract]] = {
+            "context": ContextOffer,
+            "proposal_get": CodeJobId,
+            "test_prepare": TestRecipe,
+            "finish": CodeJobId,
+            "review": CodeReview,
+            "revoke_pair": CodePairId,
+        }
+        return schemas[self.operation].model_validate(self.params)
+
+
+class HostCodingReply(Contract):
+    version: Literal[1] = 1
+    kind: Literal["host_coding_reply"] = "host_coding_reply"
+    id: RpcId
+    host_boot_id: Annotated[str, Field(pattern=r"^[a-f0-9]{32}$")]
+    generation: Annotated[int, Field(strict=True, ge=1, le=9_007_199_254_740_991)]
+    operation: Literal[
+        "context",
+        "proposal_get",
+        "test_prepare",
+        "finish",
+        "review",
+        "intent",
+        "observation",
+        "revoke_pair",
+    ]
+    result: dict[str, object]
+
+    @model_validator(mode="after")
+    def closed_result(self) -> Self:
+        from sage.coding_contracts import (
+            CodeAck,
+            CodeGrantResult,
+            CodeJobResult,
+            CodeJobView,
+            CodeProposal,
+            CodeReceiptResult,
+        )
+
+        if self.operation == "revoke_pair":
+            if self.result != {"status": "revoked"}:
+                raise ValueError("Invalid coding reply")
+        elif self.operation == "review":
+            variants: dict[str, type[Contract]] = {
+                "grant": CodeGrantResult,
+                "job": CodeJobResult,
+                "receipt": CodeReceiptResult,
+            }
+            kind = self.result.get("kind")
+            if not isinstance(kind, str) or kind not in variants:
+                raise ValueError("Invalid coding reply")
+            variants[kind].model_validate(self.result)
+        else:
+            schemas: dict[str, type[Contract]] = {
+                "context": CodeJobView,
+                "proposal_get": CodeProposal,
+                "test_prepare": CodeJobView,
+                "finish": CodeJobView,
+                "intent": CodeAck,
+                "observation": CodeAck,
+            }
+            schemas[self.operation].model_validate(self.result)
+        return self
+
+
+def host_coding(message: dict[str, object]) -> HostCodingControl:
+    try:
+        if type(message.get("version")) is not int:
+            raise ValueError
+        encode_frame(message)
+        control = HostCodingControl.model_validate(message)
+        control.parsed_params()
+        return control
+    except (ValueError, ValidationError):
+        raise ProtocolError("Invalid coding control") from None

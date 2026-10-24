@@ -10,7 +10,8 @@ from typing import Annotated, Literal, Self
 from pydantic import AfterValidator, AwareDatetime, BeforeValidator, Field, model_validator
 
 from sage.contracts import Contract
-from sage.protocol import RpcId
+
+RpcId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")]
 
 MAX_SAFE_INTEGER = 9_007_199_254_740_991
 FocusName = Literal["index.html", "focus.js", "focus.test.mjs", "README.md"]
@@ -661,3 +662,35 @@ class CodeJobPage(Contract):
             raise ValueError("Page exceeds limit")
         _bounded(self)
         return self
+
+
+class ContextOffer(Contract):
+    context: CodeContext
+    captured_at_ms: Annotated[int, Field(strict=True, ge=0, le=253402300799999)]
+    expires_at_ms: Annotated[int, Field(strict=True, ge=0, le=253402300799999)]
+
+    @model_validator(mode="after")
+    def check_lease(self) -> Self:
+        if not 0 < self.expires_at_ms - self.captured_at_ms <= 1_800_000:
+            raise ValueError("Invalid source lease")
+        _bounded(self)
+        return self
+
+    def deadline(self, now: datetime) -> datetime:
+        # Integer timedelta conversion preserves the original MAC-covered lease.
+        from datetime import timedelta
+
+        epoch = datetime(1970, 1, 1, tzinfo=UTC)
+        captured = epoch + timedelta(milliseconds=self.captured_at_ms)
+        expires = epoch + timedelta(milliseconds=self.expires_at_ms)
+        if not captured <= now < expires:
+            raise ValueError("Invalid source lease")
+        return expires
+
+
+class CodeJobId(Contract):
+    job_id: RpcId
+
+
+class CodePairId(Contract):
+    pair_id: RpcId

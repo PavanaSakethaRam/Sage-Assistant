@@ -276,10 +276,10 @@ it("fails closed on a fresh crash remnant without deleting reconciliation eviden
 
 it("ages out only recognized expired owned version1 pending metadata", async () => {
   const { root, journal } = await fixture();
+  await journal.intent(intent());
   const now = Date.now(),
     old = new Date(now - 31 * 86400000),
     pending = join(root, `pending-${"a".repeat(32)}`);
-  await journal.intent(intent());
   const source = join(root, "operation-op.json");
   await rename(source, pending);
   await utimes(pending, old, old);

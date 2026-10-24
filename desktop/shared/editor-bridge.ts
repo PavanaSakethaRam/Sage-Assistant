@@ -5,7 +5,6 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { FrameDecoder, encodeFrame } from "./framing";
 import {
   parseCodeAck,
-  parseCodeContext,
   parseCodeGrant,
   parseCodeIntent,
   parseCodeJobView,
@@ -45,11 +44,8 @@ export type PairView = Readonly<
     status: "awaiting_confirmation" | "paired";
   }
 >;
-export type ContextOffer = Readonly<{
-  context: CodeContext;
-  captured_at_ms: number;
-  expires_at_ms: number;
-}>;
+import { parseContextOffer, type ContextOffer } from "./coding-contracts";
+export { parseContextOffer, type ContextOffer } from "./coding-contracts";
 type Data<K extends string, P> = Readonly<{
   kind: K;
   binding: CodeBinding;
@@ -365,32 +361,6 @@ export function sameBinding(left: CodeBinding, right: CodeBinding): boolean {
   ].every(
     (key) => left[key as keyof CodeBinding] === right[key as keyof CodeBinding],
   );
-}
-export function parseContextOffer(
-  value: unknown,
-  now = Date.now(),
-): ContextOffer {
-  const row = exact(value, ["context", "captured_at_ms", "expires_at_ms"]);
-  for (const key of ["captured_at_ms", "expires_at_ms"]) {
-    if (
-      typeof row[key] !== "number" ||
-      !Number.isSafeInteger(row[key]) ||
-      (row[key] as number) < 0 ||
-      (row[key] as number) > 253402300799999
-    )
-      invalid();
-  }
-  const offer = row as ContextOffer;
-  if (
-    !Number.isSafeInteger(now) ||
-    offer.captured_at_ms >= offer.expires_at_ms ||
-    offer.expires_at_ms - offer.captured_at_ms > 1800000 ||
-    offer.captured_at_ms > now ||
-    now >= offer.expires_at_ms
-  )
-    invalid();
-  parseCodeContext(offer.context);
-  return offer;
 }
 export function parseBridgeData(
   value: unknown,

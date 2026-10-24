@@ -1,3 +1,9 @@
+import {
+  parseCodeJobView,
+  type CodingControlInput,
+  type HostCodingReply,
+} from "../shared/coding-contracts";
+import { makeProposal } from "./coding-fixtures";
 import { afterEach, expect, it, vi } from "vitest";
 import { connect, createServer, type Socket } from "node:net";
 import { createHash } from "node:crypto";
@@ -65,9 +71,11 @@ function context(view: PairView): BridgeData {
 async function setup(
   confirm = true,
   onData: (message: BridgeData) => void | Promise<void> = () => {},
+  options: Partial<ConstructorParameters<typeof EditorBridgeHost>[0]> = {},
 ) {
   let offered: PairView | undefined;
   const host = new EditorBridgeHost({
+    ...options,
     onData,
     onPair: (view) => {
       offered = view;
@@ -1737,5 +1745,222 @@ it("durably records observation before dispatching it to the core consumer", asy
     expect(calls).toBe(1);
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+it("routes authenticated coding controls once, polls source-free status and drops late replies on close", async () => {
+  const controls: CodingControlInput[] = [];
+  const received: BridgeData[] = [];
+  const closed = vi.fn();
+  let release: (() => void) | undefined;
+  let hold = false;
+  let ready = false;
+  const template = corpus.cases.find(
+    (row) => row.kind === "job_view" && row.valid,
+  )!.value;
+  const selected: { binding?: BridgeData["binding"] } = {};
+  let polls = 0;
+  const observer = vi.fn();
+  const s = await setup(true, observer, {
+    onClose: closed,
+    codingControl: async (input) => {
+      controls.push(input);
+      if (hold)
+        await new Promise<void>((resolve) => {
+          release = resolve;
+        });
+      const result =
+        input.operation === "revoke_pair"
+          ? { status: "revoked" }
+          : input.operation === "proposal_get"
+            ? makeProposal()
+            : parseCodeJobView({ ...template, binding: selected.binding });
+      return {
+        version: 1,
+        kind: "host_coding_reply",
+        id: "trusted",
+        host_boot_id: "b".repeat(32),
+        generation: controls.length,
+        operation: input.operation,
+        result,
+      } as HostCodingReply;
+    },
+    codingStatus: async () => {
+      polls++;
+      return parseCodeJobView({
+        ...template,
+        binding: selected.binding,
+        state: ready ? "review_required" : "proposing",
+      });
+    },
+  });
+  await s.host.confirm(s.view.pair_id);
+  const paired = await s.pairing;
+  const message = context(paired);
+  const binding = message.binding;
+  selected.binding = binding;
+  s.client.onData((value) => {
+    received.push(value);
+  });
+  await s.client.send(message);
+  for (let i = 0; i < 50 && !received.length; i++) await wait(2);
+  expect(controls.map((row) => row.operation)).toEqual(["context"]);
+  expect(observer).not.toHaveBeenCalled();
+  expect(received[0].kind).toBe("job.status");
+  ready = true;
+  await wait(1100);
+  expect(polls).toBe(1);
+  expect(received.some((row) => row.kind === "proposal.offer")).toBe(true);
+  expect(s.host.codingJobStatus("job-1")?.state).toBe("review_required");
+  expect(s.host.codingJobStatus("other")).toBeUndefined();
+  hold = true;
+  await s.client.send({
+    kind: "review.decision",
+    binding,
+    payload: {
+      binding,
+      scope: "code.create",
+      approved_hash: "a".repeat(64),
+      decision: "accept",
+    },
+  });
+  for (let i = 0; i < 50 && !release; i++) await wait(2);
+  const old = received.length;
+  hold = false;
+  await s.host.revoke();
+  release?.();
+  await wait();
+  expect(received).toHaveLength(old);
+  expect(controls.at(-1)?.operation).toBe("revoke_pair");
+  expect(closed).toHaveBeenCalledTimes(1);
+  expect(s.host.codingJobStatus("job-1")).toBeUndefined();
+  await s.host.close();
+  expect(closed).toHaveBeenCalledTimes(1);
+});
+
+it("routes only fixed review/test/journal/finish kinds and keeps fresh ack correlation", async () => {
+  const { EffectJournal, journalHash, intentProjection, receiptProjection } =
+    await import("../../extension/src/journal");
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { pathToFileURL } = await import("node:url");
+  const root = await mkdtemp("/private/tmp/sage-task5-journal-");
+  resources.push({ close: () => rm(root, { recursive: true, force: true }) });
+  const journal = new EffectJournal(pathToFileURL(root));
+  const controls: string[] = [];
+  const received: BridgeData[] = [];
+  const selected: { binding?: BridgeData["binding"] } = {};
+  const good = (kind: string) =>
+    corpus.cases.find((row) => row.kind === kind && row.valid)!.value;
+  const template = good("job_view");
+  const s = await setup(true, () => {}, {
+    codingControl: async (input) => {
+      controls.push(input.operation);
+      const binding = selected.binding!;
+      const job = parseCodeJobView({ ...template, binding });
+      const result =
+        input.operation === "revoke_pair"
+          ? { status: "revoked" }
+          : input.operation === "review"
+            ? { kind: "job", job }
+            : input.operation === "intent" || input.operation === "observation"
+              ? {
+                  operation_id: input.params.operation_id,
+                  effect_id: input.params.effect_id,
+                  status: "recorded",
+                  recorded_hash: journalHash(
+                    input.operation === "intent"
+                      ? intentProjection(input.params)
+                      : receiptProjection(input.params),
+                  ),
+                }
+              : job;
+      return {
+        version: 1,
+        kind: "host_coding_reply",
+        id: "trusted",
+        host_boot_id: "b".repeat(32),
+        generation: controls.length,
+        operation: input.operation,
+        result,
+      } as HostCodingReply;
+    },
+  });
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  const message = context(view),
+    binding = message.binding;
+  selected.binding = binding;
+  s.client.onData((value) => {
+    received.push(value);
+  });
+  await s.client.send(message);
+  await wait();
+  await s.client.send({
+    kind: "review.decision",
+    binding,
+    payload: {
+      binding,
+      scope: "code.create",
+      decision: "reject",
+      approved_hash: "a".repeat(64),
+    },
+  });
+  expect(
+    (
+      await s.client.recordIntent(journal, {
+        ...good("intent"),
+        binding,
+      } as never)
+    ).status,
+  ).toBe("recorded");
+  expect(
+    (
+      await s.client.recordObserved(journal, {
+        ...good("receipt"),
+        binding,
+      } as never)
+    ).status,
+  ).toBe("recorded");
+  await s.client.send({
+    kind: "test.preview",
+    binding,
+    payload: { ...good("recipe"), root_id: binding.root_id } as never,
+  });
+  await wait();
+  await s.client.send({ kind: "result.dismissed", binding, payload: null });
+  await wait();
+  expect(controls).toEqual([
+    "context",
+    "review",
+    "intent",
+    "observation",
+    "test_prepare",
+    "finish",
+  ]);
+  expect(received.map((row) => row.kind)).toEqual([
+    "job.status",
+    "grant.reply",
+    "job.status",
+    "job.status",
+  ]);
+  await s.host.revoke();
+});
+
+it("closes the owned listener even when the lifecycle observer rejects", async () => {
+  const s = await setup(true, () => {}, {
+    onClose: async () => {
+      throw Error("fixed observer failure");
+    },
+  });
+  await s.host.confirm(s.view.pair_id);
+  await s.pairing;
+  const listener = (s.host as unknown as { server: import("node:net").Server })
+    .server;
+  try {
+    await expect(s.host.revoke()).rejects.toThrow("fixed observer failure");
+    expect(listener.listening).toBe(false);
+  } finally {
+    if (listener.listening)
+      await new Promise<void>((resolve) => listener.close(() => resolve()));
   }
 });

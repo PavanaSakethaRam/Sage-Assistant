@@ -1,3 +1,13 @@
+import {
+  parseCodeStart,
+  parseCodeJobView,
+  parseCodePage,
+  parseCodeJobPage,
+  type CodeStart,
+  type CodeJobView,
+  type CodeJobPage,
+  type CodePage,
+} from "./coding-contracts";
 /** Closed renderer protocol. This module also runs in the sandboxed preload: no Node APIs. */
 export const MAX_FRAME_BYTES = 1_048_576;
 export const REQUEST_CHANNEL = "sage:request";
@@ -7,6 +17,8 @@ export type NoteContent = { title: string; body: string };
 export type Settings = {
   ai_mode: "local" | "assistant" | "api";
   reasoning_backend: Backend | null;
+  coding_backend?: "none" | "copilot";
+  coding_model?: string | null;
 };
 export type Proposal = {
   id: string;
@@ -75,6 +87,11 @@ export type Readiness = {
 export type Page<T> = { items: T[]; next_offset: number | null };
 type PageInput = { limit?: number; offset?: number };
 export type Params = {
+  "coding.start": CodeStart;
+  "coding.get": { job_id: string };
+  "coding.list": CodePage;
+  "coding.cancel": { job_id: string };
+  "coding.readiness": Record<string, never>;
   "settings.get": Record<string, never>;
   "settings.update": Partial<Settings>;
   "readiness.list": Record<string, never>;
@@ -117,6 +134,11 @@ export type CoreRequest = {
 }[Method];
 type Unavailable = { status: "unavailable"; code: "inference_unavailable" };
 export type Results = {
+  "coding.start": CodeJobView;
+  "coding.get": CodeJobView;
+  "coding.list": CodeJobPage;
+  "coding.cancel": CodeJobView;
+  "coding.readiness": Readiness;
   "settings.get": Settings;
   "settings.update": Settings;
   "readiness.list": { items: Readiness[] };
@@ -274,15 +296,25 @@ export function parseNoteContent(value: unknown): NoteContent {
 }
 const backends = ["copilot", "local", "api"];
 function settings(value: unknown, partial = false): void {
-  const r = object(
-    value,
-    partial ? [] : ["ai_mode", "reasoning_backend"],
-    partial ? ["ai_mode", "reasoning_backend"] : [],
-  );
+  const r = object(value, partial ? [] : ["ai_mode", "reasoning_backend"], [
+    ...(partial ? ["ai_mode", "reasoning_backend"] : []),
+    "coding_backend",
+    "coding_model",
+  ]);
   if (Object.hasOwn(r, "ai_mode"))
     literal(r.ai_mode, ["local", "assistant", "api"]);
   if (Object.hasOwn(r, "reasoning_backend"))
     nullable(r.reasoning_backend, (v) => literal(v, backends));
+  if (Object.hasOwn(r, "coding_backend"))
+    literal(r.coding_backend, ["none", "copilot"]);
+  if (Object.hasOwn(r, "coding_model"))
+    nullable(r.coding_model, (value) => {
+      if (
+        typeof value !== "string" ||
+        !/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/.test(value)
+      )
+        invalid();
+    });
   if ((r.ai_mode ?? "local") === "local" && r.reasoning_backend != null)
     invalid();
 }
@@ -302,6 +334,19 @@ export function parseRequest(value: unknown): CoreRequest {
   id(r.id);
   if (Object.hasOwn(r, "timeout_ms")) integer(r.timeout_ms, 1, 30000);
   switch (r.method) {
+    case "coding.start":
+      parseCodeStart(r.params);
+      break;
+    case "coding.get":
+    case "coding.cancel":
+      id(object(r.params, ["job_id"]).job_id);
+      break;
+    case "coding.list":
+      parseCodePage(r.params);
+      break;
+    case "coding.readiness":
+      object(r.params, []);
+      break;
     case "copilot.chooseAccount":
     case "copilot.disconnect":
     case "settings.get":
@@ -495,6 +540,17 @@ function unavailable(r: RecordValue): boolean {
 }
 function result(value: unknown, method: Method): void {
   switch (method) {
+    case "coding.start":
+    case "coding.get":
+    case "coding.cancel":
+      parseCodeJobView(value);
+      break;
+    case "coding.list":
+      parseCodeJobPage(value);
+      break;
+    case "coding.readiness":
+      readiness(value);
+      break;
     case "settings.get":
     case "settings.update":
       settings(value);

@@ -1,5 +1,6 @@
 """Pure coding authority: durable source-free facts and one expiring volatile slot."""
 
+import asyncio
 import hashlib
 import json
 import sqlite3
@@ -22,6 +23,7 @@ from sage.coding_contracts import (
     CodeJobPage,
     CodeJobResult,
     CodeJobView,
+    CodeModelRequest,
     CodePage,
     CodeProposal,
     CodeReceipt,
@@ -38,8 +40,11 @@ from sage.coding_contracts import (
     parse_code_proposal,
     parse_code_receipt,
     proposal_hash,
+    provider_context,
     recipe_hash,
 )
+from sage.contracts import ProviderReadiness
+from sage.providers.base import CodingBackend
 from sage.storage import StorageError, Store
 
 _TERMINAL = {
@@ -81,7 +86,13 @@ def _digest(value: object) -> str:
 
 
 class CodingJobs:
-    def __init__(self, store: Store, boot_id: str, clock: Callable[[], datetime]) -> None:
+    def __init__(
+        self,
+        store: Store,
+        boot_id: str,
+        clock: Callable[[], datetime],
+        backend: CodingBackend | None = None,
+    ) -> None:
         if type(boot_id) is not str or not boot_id:
             raise CodingError("invalid")
         self._store = store
@@ -94,6 +105,121 @@ class CodingJobs:
         self._review_expires: datetime | None = None
         self._latest: datetime | None = None
         self._invalidate_pending = False
+        self._backend = backend
+        self._work: asyncio.Task[None] | None = None
+        self._draining: set[asyncio.Task[object]] = set()
+        self._request_id: str | None = None
+        self._inference_deadline: datetime | None = None
+        self._lease_timer: asyncio.TimerHandle | None = None
+        self._epoch = 0
+        self._closed = False
+
+    def readiness(self) -> ProviderReadiness:
+        if self._closed or self._selection[0] == "none" or self._backend is None:
+            return ProviderReadiness(
+                provider="copilot",
+                status="unavailable",
+                evidence=(),
+                explanation="inference_unavailable",
+            )
+        return self._backend.coding_readiness()
+
+    def _cancel_owned(self) -> None:
+        self._epoch += 1
+        work = self._work
+        if work is not None and not work.done():
+            if work is not asyncio.current_task():
+                work.cancel()
+            if self._backend is not None and self._request_id is not None:
+                task = asyncio.create_task(self._backend.cancel(self._request_id))
+                self._draining.add(task)
+                task.add_done_callback(self._draining.discard)
+                task.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+        self._inference_deadline = None
+
+    async def _drain(self) -> None:
+        tasks = [*self._draining]
+        if self._work is not None and self._work is not asyncio.current_task():
+            tasks.append(self._work)
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        self._work = None
+        self._request_id = None
+
+    async def replace_backend(self, backend: CodingBackend | None) -> None:
+        previous = self._backend
+        self.interrupt()
+        await self._drain()
+        self._backend = backend
+        if previous is not None and previous is not backend:
+            await previous.aclose()
+
+    async def aclose(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        await self.replace_backend(None)
+
+    async def cancel_work(self, job_id: str) -> CodeJobView:
+        view = self.cancel(job_id)
+        await self._drain()
+        return view
+
+    async def start(self, start: CodeStart) -> CodeJobView:
+        start = CodeStart.model_validate_json(start.model_dump_json())
+        view = self.get(start.job_id)
+        if self._work is not None and not self._work.done():
+            raise CodingError("unavailable")
+        if self.readiness().status in {"unavailable", "auth_required", "incompatible", "error"}:
+            with self._transaction() as (db, now):
+                return self._stop(db, view, now, "provider_unavailable", "failed")
+        view = self.begin_proposal(start)
+        assert self._context is not None and self._backend is not None
+        context, backend = self._context, self._backend
+        deadline = min(self._clock() + timedelta(seconds=120), view.expires_at)
+        data = dict(
+            start.model_dump(),
+            request_id=uuid4().hex,
+            deadline=deadline,
+            mode=context.mode,
+            files=provider_context(context),
+            diagnostics=context.diagnostics,
+        )
+        if context.target is not None:
+            data["target"] = context.target
+        request = CodeModelRequest.model_validate(data)
+        self._request_id = request.request_id
+        self._inference_deadline = deadline
+        epoch = self._epoch
+
+        async def propose() -> None:
+            try:
+                async with asyncio.timeout(max(0, (deadline - self._clock()).total_seconds())):
+                    proposal = await backend.propose_code(request)
+                self.expire()
+                if self._epoch == epoch and self._context is context and self._clock() < deadline:
+                    self.set_proposal(proposal)
+            except asyncio.CancelledError:
+                pass
+            except Exception:
+                if self._epoch == epoch:
+                    with self._transaction() as (db, now):
+                        self._stop(
+                            db, self._view(db, start.job_id), now, "provider_error", "failed"
+                        )
+            finally:
+                if self._epoch == epoch:
+                    self._inference_deadline = None
+
+        self._work = asyncio.create_task(propose())
+        return view
+
+    def proposal_get(self, job_id: str) -> CodeProposal:
+        view = self.get(job_id)
+        self._fresh(view)
+        if view.state != "review_required" or self._proposal is None:
+            raise CodingError()
+        return self._proposal
 
     @contextmanager
     def _transaction(self) -> Iterator[tuple[sqlite3.Connection, datetime]]:
@@ -112,6 +238,12 @@ class CodingJobs:
                     db.execute(
                         "UPDATE coding_grants SET revoked=1 WHERE grant_boot_id=?", (self._boot_id,)
                     )
+                    for row in db.execute(
+                        "SELECT view_json FROM coding_jobs WHERE active=1"
+                    ).fetchall():
+                        self._stop(
+                            db, CodeJobView.model_validate_json(row[0]), now, "stale_context"
+                        )
                 self._cleanup(db, now)
                 yield db, now
             self._invalidate_pending = False
@@ -129,6 +261,10 @@ class CodingJobs:
             and self._context.binding.job_id != job_id
         ):
             return
+        self._cancel_owned()
+        if self._lease_timer is not None:
+            self._lease_timer.cancel()
+            self._lease_timer = None
         self._context = None
         self._proposal = None
         self._recipe = None
@@ -247,9 +383,14 @@ class CodingJobs:
                 and view.state in {"review_required", "test_review"}
                 and not any(r.scope == "code.test" for r in view.receipts)
             )
-            if (now >= view.expires_at or review_expired or grant_expired) and (
-                not view.cancel_requested or view.state == "test_review"
-            ):
+            inference_expired = (
+                view.state == "proposing"
+                and self._inference_deadline is not None
+                and now >= self._inference_deadline
+            )
+            if (
+                now >= view.expires_at or review_expired or grant_expired or inference_expired
+            ) and (not view.cancel_requested or view.state == "test_review"):
                 self._stop(db, view, now, "expired")
 
     def configure_selection(
@@ -299,7 +440,9 @@ class CodingJobs:
                 self._stop(db, CodeJobView.model_validate_json(row[0]), now, "stale_context")
         self._selection = selection
 
-    def accept_context(self, context: CodeContext) -> CodeJobView:
+    def accept_context(
+        self, context: CodeContext, *, expires_at: datetime | None = None
+    ) -> CodeJobView:
         try:
             context = CodeContext.model_validate_json(context.model_dump_json())
             if context.context_hash != context_hash(context) or any(
@@ -341,7 +484,9 @@ class CodingJobs:
                 "metadata_codepoints": sum(len(file.name) for file in context.files)
                 + len(context.mode)
                 + len(context.target or ""),
-                "expires_at": now + _SOURCE_LEASE,
+                "expires_at": min(now + _SOURCE_LEASE, expires_at)
+                if expires_at is not None
+                else now + _SOURCE_LEASE,
                 "diagnostic": None,
                 "receipts": (),
             }
@@ -354,6 +499,14 @@ class CodingJobs:
             )
         self._clear()
         self._context = context
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            pass
+        else:
+            self._lease_timer = loop.call_later(
+                max(0, (view.expires_at - self._clock()).total_seconds()), self.expire
+            )
         return view
 
     def get(self, job_id: str) -> CodeJobView:

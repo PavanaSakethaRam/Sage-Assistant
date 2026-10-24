@@ -1,7 +1,7 @@
 """One local core owner and a closed private request dispatcher."""
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal, Protocol
@@ -10,6 +10,17 @@ from uuid import uuid4
 from pydantic import AfterValidator, Field, ValidationError, field_validator
 
 from sage.actions import ActionService
+from sage.coding_contracts import (
+    CodeJobId,
+    CodePage,
+    CodePairId,
+    CodeReview,
+    CodeStart,
+    ContextOffer,
+    TestRecipe,
+    parse_code_intent,
+    parse_code_receipt,
+)
 from sage.coding_jobs import CodingJobs
 from sage.config import Settings
 from sage.contracts import (
@@ -25,6 +36,7 @@ from sage.logging import diagnostic
 from sage.protocol import (
     ErrorCode,
     Failure,
+    HostCodingReply,
     ProtocolError,
     Request,
     Response,
@@ -32,11 +44,12 @@ from sage.protocol import (
     SelectedAccount,
     encode_frame,
     failure,
+    host_coding,
     read_frame,
     request,
     selection,
 )
-from sage.providers.base import ReasoningBackend
+from sage.providers.base import CodingBackend, ReasoningBackend
 from sage.storage import Store
 
 
@@ -106,6 +119,16 @@ class _Inference:
     cancelled: bool = False
 
 
+async def _settle_owners(coding: Awaitable[None], notes: ReasoningBackend | None) -> None:
+    work = [coding]
+    if notes is not None:
+        work.append(notes.aclose())
+    results = await asyncio.gather(*work, return_exceptions=True)
+    for result in results:
+        if isinstance(result, BaseException):
+            raise result
+
+
 class CoreService:
     """Startup owns one Store and one long-lived ActionService with a fresh boot."""
 
@@ -115,16 +138,23 @@ class CoreService:
         clock: Callable[[], datetime] | None = None,
         backend: ReasoningBackend | None = None,
         backend_factory: Callable[[SelectedAccount | None], ReasoningBackend] | None = None,
+        coding_backend: CodingBackend | None = None,
+        coding_backend_factory: Callable[[SelectedAccount | None], CodingBackend] | None = None,
     ) -> None:
         self.store = store
         self.clock = clock or (lambda: datetime.now(UTC))
         self.boot_id = uuid4().hex
         self.actions = ActionService(store, self.clock, self.boot_id)
-        self.clock = self.actions.observe_clock
-        self.coding = CodingJobs(store, self.boot_id, self.clock)
+        self._clock_latest: datetime | None = None
+        self.clock = self._observe_clock
+        self.coding = CodingJobs(store, self.boot_id, self.clock, coding_backend)
         self.coding.interrupt()
         self.backend = backend
         self._backend_factory = backend_factory
+        self._coding_backend_factory = coding_backend_factory
+        self._account: SelectedAccount | None = None
+        self._coding_boot: str | None = None
+        self._coding_generation = 0
         self._selection_boot: str | None = None
         self._selection_generation = 0
         self._selection_lock = asyncio.Lock()
@@ -133,6 +163,93 @@ class CoreService:
         self._seen: set[str] = set()
         self.shutting_down = False
         self.store.interrupt_inference(self.clock())
+        self._configure_coding()
+
+    def _observe_clock(self) -> datetime:
+        now = self.actions.observe_clock()
+        rollback = self._clock_latest is not None and now < self._clock_latest
+        self._clock_latest = now
+        # ActionService has committed shared grant revocation before source/work clearing.
+        if rollback and hasattr(self, "coding"):
+            self.coding.interrupt()
+        return now
+
+    def _configure_coding(self) -> None:
+        settings = self.get_settings()
+        enabled = settings.ai_mode == "assistant" and settings.coding_backend == "copilot"
+        self.coding.configure_selection(
+            backend="copilot" if enabled else "none",
+            account=self._account.login if enabled and self._account else None,
+            model=settings.coding_model if enabled else None,
+            account_generation=self._selection_generation if enabled else 0,
+        )
+
+    async def coding_control(self, message: dict[str, object]) -> dict[str, object]:
+        identifier: str | None = None
+        try:
+            control = host_coding(message)
+            identifier = control.id
+            if self.shutting_down:
+                return failure(control.id, "shutting_down")
+            if control.id in self._seen:
+                return failure(control.id, "duplicate_id")
+            if len(self._seen) >= 4096:
+                return failure(control.id, "session_limit")
+            if (
+                self._coding_boot is not None
+                and control.host_boot_id != self._coding_boot
+                or control.generation <= self._coding_generation
+            ):
+                return failure(control.id, "invalid_request")
+            self._seen.add(control.id)
+            self._coding_boot = control.host_boot_id
+            self._coding_generation = control.generation
+            value = control.parsed_params()
+            result: Contract
+            match control.operation:
+                case "context":
+                    assert isinstance(value, ContextOffer)
+                    result = self.coding.accept_context(
+                        value.context, expires_at=value.deadline(self.clock())
+                    )
+                case "proposal_get":
+                    assert isinstance(value, CodeJobId)
+                    result = self.coding.proposal_get(value.job_id)
+                case "test_prepare":
+                    assert isinstance(value, TestRecipe)
+                    result = self.coding.prepare_test(value)
+                case "finish":
+                    assert isinstance(value, CodeJobId)
+                    result = self.coding.finish(value.job_id)
+                case "review":
+                    assert isinstance(value, CodeReview)
+                    result = self.coding.review(value)
+                case "intent":
+                    result = self.coding.begin(parse_code_intent(control.params))
+                case "observation":
+                    result = self.coding.observe(parse_code_receipt(control.params))
+                case "revoke_pair":
+                    assert isinstance(value, CodePairId)
+                    self.coding.revoke_pair(value.pair_id)
+                    return HostCodingReply(
+                        id=control.id,
+                        host_boot_id=control.host_boot_id,
+                        generation=control.generation,
+                        operation=control.operation,
+                        result={"status": "revoked"},
+                    ).model_dump(mode="json")
+            return HostCodingReply(
+                id=control.id,
+                host_boot_id=control.host_boot_id,
+                generation=control.generation,
+                operation=control.operation,
+                result=result.model_dump(mode="json"),
+            ).model_dump(mode="json")
+        except (ValueError, ValidationError):
+            return failure(identifier, "invalid_request")
+        except Exception:
+            diagnostic("request_failed")
+            return failure(None, "internal_error")
 
     async def select_account(self, message: dict[str, object]) -> dict[str, object]:
         """Parent pipe only. Boot correlates; the inherited pipe supplies authority."""
@@ -163,7 +280,7 @@ class CoreService:
                 "cleared"
                 if frame.account is None
                 else "selected"
-                if self._backend_factory is not None
+                if self._backend_factory is not None or self._coding_backend_factory is not None
                 else "unavailable"
             )
             return Response(
@@ -172,10 +289,14 @@ class CoreService:
 
     async def _replace_source(self, account: SelectedAccount | None) -> None:
         self._generation += 1
+        self._account = account
+        self.coding.interrupt()
         previous, self.backend = self.backend, None
         await self._cancel_inflight()
-        if previous is not None:
-            await previous.aclose()
+        await _settle_owners(self.coding.replace_backend(None), previous)
+        if self._coding_backend_factory is not None:
+            await self.coding.replace_backend(self._coding_backend_factory(account))
+        self._configure_coding()
         if self._backend_factory is not None:
             self.backend = self._backend_factory(account)
 
@@ -187,9 +308,9 @@ class CoreService:
         self.shutting_down = True
         for entry in self._inflight.values():
             entry.cancelled = True
+        previous, self.backend = self.backend, None
         try:
-            if self.backend is not None:
-                await self.backend.aclose()
+            await _settle_owners(self.coding.aclose(), previous)
         finally:
             self.close()
 
@@ -214,6 +335,14 @@ class CoreService:
             self.clock()
             if envelope.method in {"reasoning.start", "connection.test", "reasoning.cancel"}:
                 value = await self._provider_dispatch(envelope)
+            elif envelope.method == "coding.start":
+                value = (
+                    await self.coding.start(CodeStart.model_validate(envelope.params))
+                ).model_dump(mode="json")
+            elif envelope.method == "coding.cancel":
+                value = (
+                    await self.coding.cancel_work(CodeJobId.model_validate(envelope.params).job_id)
+                ).model_dump(mode="json")
             elif envelope.method == "settings.update":
                 settings = Settings.model_validate(envelope.params)
                 async with self._selection_lock:
@@ -221,11 +350,15 @@ class CoreService:
                     await self._cancel_inflight()
                     if settings.ai_mode != "assistant" and self._backend_factory is not None:
                         await self._replace_source(None)
+                    if settings != self.get_settings():
+                        self.coding.interrupt()
                     value = self._dispatch(envelope)
+                    self._configure_coding()
             else:
                 if envelope.method == "app.shutdown":
                     Empty.model_validate(envelope.params)
                     await self._cancel_inflight()
+                    await self.coding.aclose()
                 elif envelope.method == "tasks.cancel":
                     target = TaskId.model_validate(envelope.params)
                     for identifier, entry in list(self._inflight.items()):
@@ -389,6 +522,18 @@ class CoreService:
     def _dispatch(self, envelope: Request) -> dict[str, object]:
         params = envelope.params
         match envelope.method:
+            case "coding.get":
+                return self.coding.get(CodeJobId.model_validate(params).job_id).model_dump(
+                    mode="json"
+                )
+            case "coding.list":
+                coding_page = CodePage.model_validate(params)
+                return self.coding.list(coding_page.limit, coding_page.offset).model_dump(
+                    mode="json"
+                )
+            case "coding.readiness":
+                Empty.model_validate(params)
+                return self.coding.readiness().model_dump(mode="json")
             case "settings.get":
                 Empty.model_validate(params)
                 with self.store.transaction() as db:
@@ -495,8 +640,8 @@ class Writer(Protocol):
 async def run_service(reader: asyncio.StreamReader, writer: Writer, service: CoreService) -> None:
     """One connection, at most eight requests; cancellation invalidates late output.
 
-    Provider work added by Task 5 must remain awaited inside dispatch, propagate
-    CancelledError, and check its request/task identity before emitting proposals.
+    Coding start acknowledges a separately owned background job. Private coding
+    control is main-only and never consumes renderer request capacity.
     This loop emits exactly one terminal frame per accepted request; children
     never write stdout themselves. No unbounded output/progress queue exists.
     """
@@ -582,6 +727,9 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
             except (ProtocolError, TimeoutError):
                 await send(failure(None, "invalid_frame"))
                 break
+            if message.get("kind") == "host_coding":
+                await send(await service.coding_control(message))
+                continue
             if message.get("kind") == "host_copilot_selection":
                 try:
                     await send(await service.select_account(message))
@@ -632,7 +780,7 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
         await asyncio.gather(*(task for _, task in list(pending.values())), return_exceptions=True)
     finally:
         try:
-            service.coding.interrupt()
+            await service.coding.aclose()
         except Exception:
             diagnostic("request_failed")
         cleanup.cancel()

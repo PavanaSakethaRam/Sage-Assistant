@@ -31,6 +31,8 @@ class FakeSdk:
         self.forced = 0
         self.stop_error = False
         self.ram: Any = None
+        self.handlers: list[Any] = []
+        self.deltas: list[str] = []
 
     def client(self, **kwargs: Any) -> Any:
         self.created += 1
@@ -51,13 +53,26 @@ class FakeSdk:
         return SimpleNamespace(
             session_id="synthetic-session",
             send_and_wait=self.send,
+            on=self.on,
             abort=self.abort,
             disconnect=self.disconnect,
         )
 
+    def on(self, handler: Any) -> Any:
+        self.handlers.append(handler)
+        return lambda: self.handlers.remove(handler)
+
     async def send(self, prompt: str, **kwargs: Any) -> Any:
         self.prompts.append(prompt)
         self.started.set()
+        for delta in self.deltas:
+            for handler in self.handlers:
+                handler(
+                    SimpleNamespace(
+                        type="assistant.message_delta", data=SimpleNamespace(delta_content=delta)
+                    )
+                )
+            await asyncio.sleep(0)
         await self.ram.write_file("/sage/state/events", "synthetic-private-marker")
         base = Path(self.client_options["base_directory"])
         (base / "synthetic-artifact").write_text("synthetic-private-marker")

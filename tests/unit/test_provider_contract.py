@@ -28,14 +28,22 @@ def request(**changes: Any) -> ReasoningRequest:
 
 
 def backend(
-    tmp_path: Path, sdk: FakeSdk, *, local: bool = False, auth: bool = True
+    tmp_path: Path, sdk: FakeSdk, *, local: bool = False, auth: bool = True, coding: bool = False
 ) -> CopilotReasoner:
     runtime = tmp_path / "native" / "copilot-runtime"
     runtime.parent.mkdir()
     runtime.touch()
     (runtime.parent / "runtime.node").touch()
     (runtime.parent / ".hostless-runtime-assets-v2").touch()
-    settings = Settings() if local else Settings(ai_mode="assistant", reasoning_backend="copilot")
+    settings = (
+        Settings()
+        if local
+        else Settings(
+            ai_mode="assistant",
+            reasoning_backend=None if coding else "copilot",
+            coding_backend="copilot" if coding else "none",
+        )
+    )
     return CopilotReasoner(
         SessionStore(tmp_path / "sessions"),
         runtime,
