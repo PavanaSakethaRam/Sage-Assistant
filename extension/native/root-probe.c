@@ -53,6 +53,8 @@ static int check(char *path) {
 #include <windows.h>
 #include <aclapi.h>
 #include <wchar.h>
+#include <io.h>
+#include <fcntl.h>
 static int owned(HANDLE handle){
   PSID owner=NULL;PSECURITY_DESCRIPTOR descriptor=NULL;HANDLE token=NULL;DWORD size=0;int ok=0;TOKEN_USER *user=NULL;
   if(GetSecurityInfo(handle,SE_FILE_OBJECT,OWNER_SECURITY_INFORMATION,&owner,NULL,NULL,NULL,&descriptor)!=ERROR_SUCCESS)goto done;
@@ -92,6 +94,9 @@ static int check(char *input_path) {
 #error Unsupported root probe platform
 #endif
 int main(int argc,char **argv){
+#ifdef _WIN32
+ if(_setmode(_fileno(stdin),_O_BINARY)==-1||_setmode(_fileno(stdout),_O_BINARY)==-1)return 1;
+#endif
  char path[INPUT_CAP+2];
  if(argc!=2||strcmp(argv[1],"--check-root-v1")||!input(path)||!check(path))return 1;
  return fflush(stdout)==0?0:1;
