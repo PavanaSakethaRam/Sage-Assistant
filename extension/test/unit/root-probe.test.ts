@@ -61,6 +61,7 @@ import {
   chmod,
   copyFile,
   readdir,
+  readFile,
 } from "node:fs/promises";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -73,6 +74,40 @@ vi.mock("node:child_process", async (importOriginal) => ({
   spawn: mockSpawn,
 }));
 import { buildRootProbe } from "../../../scripts/build-root-probe";
+it.runIf(process.platform === "darwin" && process.arch === "arm64")(
+  "builds instrumented helpers in the canonical cache under an owned root",
+  async () => {
+    const root = await realpath(
+      await mkdtemp("/private/tmp/sage-native-cache-"),
+    );
+    try {
+      await mkdir(join(root, "scripts"));
+      await mkdir(join(root, "extension/native"), { recursive: true });
+      for (const name of [
+        "scripts/build-root-probe.ts",
+        "extension/native/root-probe.c",
+      ])
+        await copyFile(join(process.cwd(), name), join(root, name));
+      const built = spawnSync(
+        process.execPath,
+        [join(root, "scripts/build-root-probe.ts"), "--coverage"],
+        { cwd: root, shell: false, encoding: "utf8", timeout: 30000 },
+      );
+      expect(built.status, built.stderr).toBe(0);
+      expect(await readdir(join(root, ".cache"))).toEqual(["native-coverage"]);
+      const provenance = JSON.parse(
+        await readFile(
+          join(root, ".cache/native-coverage/provenance.json"),
+          "utf8",
+        ),
+      );
+      expect(provenance.coverage).toBe(true);
+      expect(provenance.flags).toContain("-fcoverage-mapping");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
 it.runIf(process.platform === "darwin" && process.arch === "arm64")(
   "exercises the actual fixed native helper on local folders and refuses aliases/invalid bytes",
   async () => {
@@ -96,7 +131,7 @@ it.runIf(process.platform === "darwin" && process.arch === "arm64")(
               ? {
                   LLVM_PROFILE_FILE: join(
                     process.cwd(),
-                    `.cache/task4-native-coverage/run-${process.pid}-${sequence++}.profraw`,
+                    `.cache/native-coverage/run-${process.pid}-${sequence++}.profraw`,
                   ),
                 }
               : {}),

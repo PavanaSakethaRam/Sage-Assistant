@@ -37,7 +37,7 @@ def main() -> int:
             "--javascript",
             "coverage/coverage-summary.json",
             "--native",
-            ".cache/task4-native-coverage/coverage.json",
+            ".cache/native-coverage/coverage.json",
         ],
         [NPM, "run", "typecheck"],
         [NPM, "run", "lint"],

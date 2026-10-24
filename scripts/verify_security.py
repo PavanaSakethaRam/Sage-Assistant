@@ -373,8 +373,13 @@ def scan(base: str, head: str) -> dict[str, Any]:
         if (
             eslint[0] not in {0, 1}
             or not isinstance(data, list)
+            or any(
+                not isinstance(f, dict)
+                or type(f.get("errorCount")) is not int
+                or f["errorCount"] != 0
+                for f in data
+            )
             or not expected_js <= {Path(f["filePath"]) for f in data}
-            or any(f.get("errorCount") for f in data)
         ):
             results["eslint"] = {
                 "status": "incomplete",

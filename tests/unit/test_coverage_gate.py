@@ -1,6 +1,7 @@
 """A rounded percentage, omitted source, or weak branch gate must never pass."""
 
 import hashlib
+import importlib.util
 import json
 import platform
 import subprocess
@@ -268,3 +269,51 @@ def test_native_source_provenance_and_integer_thresholds_fail_closed(
             packet["version"] = 2
         path.write_text(json.dumps(packet))
     assert run(p, j).returncode == 1
+
+
+@pytest.mark.parametrize("damage", ["missing_extension_report", "unlisted_extension_source"])
+def test_owned_extension_inventory_fails_for_one_isolated_omission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, damage: str
+) -> None:
+    root = tmp_path / "owned"
+    names = {
+        "python": ["src/sage/owned.py"],
+        "javascript": ["desktop/owned.ts", "extension/src/owned.ts"],
+        "native": ["extension/native/owned.c"],
+    }
+    for entries in names.values():
+        for name in entries:
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("/* owned */\n" if name.endswith(".c") else "\n")
+    scripts = root / "scripts"
+    scripts.mkdir()
+    (scripts / "check_coverage.py").write_bytes((ROOT / "scripts/check_coverage.py").read_bytes())
+    manifest = {**names, **{"trusted_" + lang: entries for lang, entries in names.items()}}
+    (scripts / "coverage-manifest.json").write_text(json.dumps(manifest))
+    monkeypatch.setattr(sys.modules[__name__], "ROOT", root)
+    p, j = reports(tmp_path)
+    baseline = run(p, j)
+    assert baseline.returncode == 0, baseline.stdout + baseline.stderr
+    assert baseline.stderr == ""
+
+    spec = importlib.util.spec_from_file_location("owned_coverage", scripts / "check_coverage.py")
+    assert spec and spec.loader
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    if damage == "missing_extension_report":
+        entries = json.loads(j.read_text())
+        del entries["extension/src/owned.ts"]
+        j.write_text(json.dumps(entries))
+        with pytest.raises(KeyError, match="extension/src/owned.ts"):
+            checker.check(p, j, tmp_path / "native.json")
+        label = "KeyError"
+    else:
+        (root / "extension/src/unlisted.ts").write_text("export {};\n")
+        with pytest.raises(ValueError, match="^source inventory drift; review manifest$"):
+            checker.check(p, j, tmp_path / "native.json")
+        label = "ValueError"
+    result = run(p, j)
+    assert result.returncode == 1
+    assert result.stdout.strip() == "coverage gate failed: " + label
+    assert result.stderr == ""

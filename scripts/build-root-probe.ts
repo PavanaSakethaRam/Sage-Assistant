@@ -17,9 +17,7 @@ export async function buildRootProbe(
   coverage = false,
 ): Promise<{ path: string; name: string; sha256: string }> {
   const name = rootProbeName(),
-    dir = resolve(
-      coverage ? ".cache/task4-native-coverage" : ".cache/root-probe",
-    ),
+    dir = resolve(coverage ? ".cache/native-coverage" : ".cache/root-probe"),
     path = join(dir, name),
     source = resolve("extension/native/root-probe.c");
   await mkdir(dir, { recursive: true });
@@ -107,7 +105,7 @@ export async function buildRootProbe(
   return { path, name, sha256 };
 }
 export async function reportNativeCoverage(): Promise<void> {
-  const dir = resolve(".cache/task4-native-coverage"),
+  const dir = resolve(".cache/native-coverage"),
     binary = join(dir, rootProbeName());
   const provenance = JSON.parse(
     await readFile(join(dir, "provenance.json"), "utf8"),
