@@ -4,7 +4,7 @@ import {
   PROGRESS_CHANNEL,
   parseRequest,
   parseResponse,
-  parseProgress,
+  parseRendererEvent,
   type SageApi,
 } from "../shared/contracts";
 const api: SageApi = {
@@ -22,7 +22,7 @@ const api: SageApi = {
     if (typeof handler !== "function") throw new TypeError("Invalid handler");
     const listener = (_event: unknown, value: unknown) => {
       try {
-        handler(parseProgress(value));
+        handler(parseRendererEvent(value));
       } catch {
         /* Discard invalid progress; no event object crosses the bridge. */
       }

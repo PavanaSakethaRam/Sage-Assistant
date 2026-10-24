@@ -172,3 +172,10 @@ ul {
   white-space: nowrap;
   border: 0;
 }
+
+[aria-label="Selected disclosure"],
+[aria-label="Paired destination"] {
+  overflow-wrap: anywhere;
+  border-left: 3px solid currentColor;
+  padding-left: 1rem;
+}

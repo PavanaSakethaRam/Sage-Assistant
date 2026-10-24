@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { it, expect } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "../renderer/App";
 import { fixture, deferred, proposal } from "./renderer-fixture";
@@ -196,4 +196,21 @@ it("does not let an older cancellation status overwrite a new pending response",
   expect(
     screen.getByRole("status", { name: "Conversation status" }),
   ).toHaveTextContent(/^Pending$/);
+});
+
+it("ignores development event families while a conversation is mounted", async () => {
+  const f = fixture();
+  const listeners: Parameters<typeof f.api.onProgress>[0][] = [];
+  f.api.onProgress = (callback) => {
+    listeners.push(callback);
+    return () => {};
+  };
+  render(<App api={f.api} />);
+  await screen.findByRole("button", { name: "Send message" });
+  await act(async () => {
+    listeners.forEach((emit) =>
+      emit({ version: 1, kind: "coding_cleared", pair_id: "pair-1" }),
+    );
+  });
+  expect(screen.getByRole("button", { name: "New note" })).toBeEnabled();
 });

@@ -28,6 +28,11 @@ export function fixture(
 ) {
   const calls: CoreRequest[] = [];
   const defaults: Partial<Results> = {
+    "editor.status": null,
+    "editor.pair": null,
+    "editor.confirm": null,
+    "editor.disconnect": null,
+    "coding.list": { items: [], next_offset: null },
     "settings.get": { ai_mode: "local", reasoning_backend: null },
     "readiness.list": {
       items: [

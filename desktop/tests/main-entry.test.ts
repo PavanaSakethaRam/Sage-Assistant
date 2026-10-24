@@ -1,6 +1,6 @@
 /** Breaks if main loses owned-window sender binding, progress fences or shutdown ownership. */
 import { EventEmitter } from "node:events";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({
   window: undefined as unknown,
   progress: undefined as unknown,
@@ -14,6 +14,16 @@ const state = vi.hoisted(() => ({
   coreRequest: vi.fn(),
   result: 1,
   fail: false,
+  lifecycle: undefined as undefined | (() => void),
+  generation: 1,
+  running: true,
+  dialog: vi.fn<(...args: unknown[]) => Promise<{ response: number }>>(),
+  clipboard: vi.fn(),
+  host: undefined as unknown,
+  hostOptions: undefined as unknown,
+  hostClose: vi.fn(async () => {}),
+  hostConfirm: vi.fn(),
+  view: null as unknown,
 }));
 class Window extends EventEmitter {
   static latest: Window;
@@ -66,7 +76,8 @@ vi.mock("electron", () => ({
     removeHandler: (name: string) => state.handlers.delete(name),
   },
   shell: { openExternal: vi.fn(async () => {}) },
-  dialog: { showMessageBox: async () => ({ response: state.result }) },
+  dialog: { showMessageBox: (...args: unknown[]) => state.dialog(...args) },
+  clipboard: { writeText: state.clipboard },
 }));
 vi.mock("../main/core-process", async (original) => ({
   ...(await original<object>()),
@@ -78,7 +89,41 @@ vi.mock("../main/core-process", async (original) => ({
     },
     selectAccount: vi.fn(),
     close: state.close,
+    get running() {
+      return state.running;
+    },
+    get launchGeneration() {
+      return state.generation;
+    },
+    codingControl: vi.fn(),
+    onLifecycle: (callback: () => void) => {
+      state.lifecycle = callback;
+      return vi.fn();
+    },
   }),
+}));
+vi.mock("../main/editor-bridge", () => ({
+  EditorBridgeHost: class {
+    constructor(options: unknown) {
+      state.host = this;
+      state.hostOptions = options;
+    }
+    start = vi.fn(async () => ({
+      version: 1,
+      port: 12345,
+      host_boot_id: "host-1",
+      secret: "SYNTHETIC_PAIR_CAPABILITY",
+    }));
+    pairingAvailable = () => state.running;
+    pairView = () => state.view;
+    currentCodingJob = () => undefined;
+    codingJobStatus = () => undefined;
+    close = async () => {
+      state.view = null;
+      await state.hostClose();
+    };
+    confirm = state.hostConfirm;
+  },
 }));
 vi.mock("../main/copilot-account", async (original) => ({
   ...(await original<object>()),
@@ -89,12 +134,19 @@ vi.mock("../main/copilot-account", async (original) => ({
     close = state.accountClose;
   },
 }));
+beforeEach(() => {
+  state.dialog.mockImplementation(async () => ({ response: state.result }));
+});
 afterEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
   state.handlers.clear();
   state.listeners.clear();
   state.fail = false;
+  state.view = null;
+  state.running = true;
+  state.generation = 1;
+  state.dialog.mockImplementation(async () => ({ response: state.result }));
 });
 it("binds real IPC and progress to the live owned main frame, then closes account and core once", async () => {
   state.coreRequest.mockImplementation(async (request: { id: string }) => ({
@@ -139,13 +191,25 @@ it("binds real IPC and progress to the live owned main frame, then closes accoun
     task_id: "task",
     version: 1,
     kind: "progress",
-    status: "pending",
+    status: "started",
   });
   expect(window.webContents.send).toHaveBeenCalledTimes(1);
   window.webContents.mainFrame.url = "https://evil.test/";
-  progress({});
+  progress({
+    version: 1,
+    id: "entry",
+    kind: "progress",
+    status: "started",
+    task_id: "task",
+  });
   window.destroyed = true;
-  progress({});
+  progress({
+    version: 1,
+    id: "entry",
+    kind: "progress",
+    status: "started",
+    task_id: "task",
+  });
   expect(window.webContents.send).toHaveBeenCalledTimes(1);
   const options = state.options as {
     enabled: () => Promise<boolean>;
@@ -168,6 +232,9 @@ it("binds real IPC and progress to the live owned main frame, then closes accoun
   state.listeners.get("before-quit")!({ preventDefault });
   await vi.waitFor(() => expect(state.close).toHaveBeenCalledOnce());
   expect(state.accountClose).toHaveBeenCalledOnce();
+  expect(state.close.mock.invocationCallOrder[0]).toBeLessThan(
+    state.accountClose.mock.invocationCallOrder[0],
+  );
   expect(preventDefault).toHaveBeenCalledOnce();
   state.listeners.get("window-all-closed")!();
 });
@@ -181,4 +248,98 @@ it("redacts a startup failure and still owns bounded shutdown", async () => {
   state.listeners.get("before-quit")!({ preventDefault: () => {} });
   await vi.waitFor(() => expect(state.close).toHaveBeenCalledOnce());
   error.mockRestore();
+});
+
+const testPair = {
+  root_uri: "file:///private/owned/focus",
+  root_file_id: "root-1",
+  window_id: "window-1",
+  host_boot_id: "host-1",
+  pair_id: "pair-1",
+  root_id: "root-1",
+  challenge: "1234-5678",
+  status: "awaiting_confirmation",
+};
+async function entry() {
+  state.coreRequest.mockImplementation(async (r: { id: string }) => ({
+    version: 1,
+    kind: "response",
+    id: r.id,
+    result: { ai_mode: "local", reasoning_backend: null },
+  }));
+  await import("../main/index");
+  await vi.waitFor(() => expect(Window.latest.show).toHaveBeenCalledOnce());
+  const w = Window.latest;
+  return (method: string, params = {}) =>
+    state.handlers.get("sage:request")!(
+      { sender: w.webContents, senderFrame: w.webContents.mainFrame },
+      {
+        version: 1,
+        kind: "request",
+        id: method.replaceAll(".", "_"),
+        method,
+        params,
+      },
+    );
+}
+it("defaults native pairing to Cancel, never exposes ticket, and copies only explicit trusted choice", async () => {
+  const invoke = await entry();
+  state.result = 1;
+  expect(await invoke("editor.pair")).toMatchObject({ result: null });
+  expect(state.clipboard).not.toHaveBeenCalled();
+  expect(state.dialog.mock.calls[0][1]).toMatchObject({
+    defaultId: 1,
+    cancelId: 1,
+    buttons: ["Copy pairing ticket", "Cancel"],
+  });
+  state.result = 0;
+  const result = await invoke("editor.pair");
+  expect(result).toMatchObject({ result: null });
+  expect(JSON.stringify(result)).not.toContain("SYNTHETIC_PAIR_CAPABILITY");
+  expect(state.clipboard).toHaveBeenCalledOnce();
+  await invoke("editor.disconnect");
+});
+it("serializes pairing before await and rejects delayed Copy after generation revocation", async () => {
+  const invoke = await entry();
+  let resolve!: (value: { response: number }) => void;
+  state.dialog.mockImplementation(
+    () =>
+      new Promise((done) => {
+        resolve = done;
+      }),
+  );
+  const first = invoke("editor.pair");
+  await vi.waitFor(() => expect(state.dialog).toHaveBeenCalledOnce());
+  expect(await invoke("editor.pair")).toMatchObject({ result: null });
+  state.running = false;
+  state.lifecycle!();
+  resolve({ response: 0 });
+  expect(await first).toMatchObject({ result: null });
+  expect(state.clipboard).not.toHaveBeenCalled();
+  expect(state.hostClose).toHaveBeenCalled();
+});
+it("pins native confirmation to captured pair and discards old dialog after settings change", async () => {
+  const invoke = await entry();
+  state.result = 0;
+  await invoke("editor.pair");
+  state.view = testPair;
+  let resolve!: (value: { response: number }) => void;
+  state.dialog.mockImplementation(
+    () =>
+      new Promise((done) => {
+        resolve = done;
+      }),
+  );
+  const confirm = invoke("editor.confirm");
+  await vi.waitFor(() => expect(state.dialog).toHaveBeenCalledTimes(2));
+  expect(state.dialog.mock.calls[1][1]).toMatchObject({
+    defaultId: 1,
+    cancelId: 1,
+    detail: expect.stringContaining(testPair.root_uri),
+  });
+  await invoke("settings.update", { coding_backend: "none" });
+  state.view = { ...testPair, pair_id: "pair-2" };
+  resolve({ response: 0 });
+  expect(await confirm).toMatchObject({ result: null });
+  expect(state.hostConfirm).not.toHaveBeenCalled();
 });

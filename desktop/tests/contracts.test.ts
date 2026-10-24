@@ -268,3 +268,88 @@ describe("closed renderer contracts", () => {
       ).toHaveProperty("result");
   });
 });
+
+it("keeps editor views and renderer events closed and Core progress separate", async () => {
+  const { parsePairView, parseRendererEvent } =
+    await import("../shared/contracts");
+  const { default: corpus } =
+    await import("../../tests/fixtures/coding-contracts.json");
+  const pair = {
+    root_uri: "file:///private/owned/focus",
+    root_file_id: "root-1",
+    window_id: "window-1",
+    host_boot_id: "host-1",
+    pair_id: "pair-1",
+    root_id: "root-1",
+    challenge: "1234",
+    status: "paired",
+  };
+  expect(parsePairView(pair)).toEqual(pair);
+  for (const method of [
+    "editor.pair",
+    "editor.status",
+    "editor.confirm",
+    "editor.disconnect",
+  ] as const) {
+    expect(parseRequest(req(method)).method).toBe(method);
+    expect(
+      parseResponse(
+        { version: 1, id: "a", kind: "response", result: null },
+        method,
+      ),
+    ).toMatchObject({ result: null });
+    expect(
+      parseResponse(
+        { version: 1, id: "a", kind: "response", result: pair },
+        method,
+      ),
+    ).toMatchObject({ result: pair });
+    expect(() => parseRequest(req(method, { approved: true }))).toThrow();
+    expect(() =>
+      parseResponse(
+        {
+          version: 1,
+          id: "a",
+          kind: "response",
+          result: { ...pair, secret: "denied" },
+        },
+        method,
+      ),
+    ).toThrow();
+  }
+  for (const extra of [
+    { secret: "denied" },
+    { source: "denied" },
+    { status: "approved" },
+    { root_uri: "https://example.com" },
+    { root_uri: "file://remote/focus" },
+    { pair_id: "bad/identity" },
+  ])
+    expect(() => parsePairView({ ...pair, ...extra })).toThrow();
+  const job = corpus.cases.find(
+    (row) => row.kind === "job_view" && row.valid,
+  )!.value;
+  const event = { version: 1, kind: "coding_status", job };
+  expect(parseRendererEvent(event)).toMatchObject(event);
+  expect(() => parseProgress(event)).toThrow();
+  expect(
+    parseRendererEvent({
+      version: 1,
+      kind: "coding_cleared",
+      pair_id: "pair-1",
+    }),
+  ).toMatchObject({ pair_id: "pair-1" });
+  for (const value of [
+    { ...event, source: "denied" },
+    { ...event, job: { ...job, ticket: "denied" } },
+    {
+      version: 1,
+      kind: "coding_cleared",
+      pair_id: "pair-1",
+      root_uri: pair.root_uri,
+    },
+    { version: 1, kind: "coding_cleared", pair_id: "bad/identity" },
+    { version: 1, kind: "unknown", pair_id: "pair-1" },
+  ])
+    expect(() => parseRendererEvent(value)).toThrow();
+});

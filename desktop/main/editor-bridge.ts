@@ -33,6 +33,7 @@ type HostOptions = {
   onPair: (view: PairView) => void;
   onClose?: (view: PairView | undefined) => void | Promise<void>;
   codingControl?: (value: CodingControlInput) => Promise<HostCodingReply>;
+  onJobStatus?: (job: CodeJobView) => void;
   codingStatus?: (jobId: string) => Promise<CodeJobView>;
   now?: () => number;
   random?: (size: number) => Buffer;
@@ -54,6 +55,8 @@ export class EditorBridgeHost {
   private polling: ReturnType<typeof setTimeout> | undefined;
   private activeBinding: CodeBinding | undefined;
   private epoch = 0;
+  private contextExpires = 0;
+  private contextTimer: ReturnType<typeof setTimeout> | undefined;
   private latestJob: CodeJobView | undefined;
   private offeredRevision = 0;
   private pollOwner = 0;
@@ -88,7 +91,7 @@ export class EditorBridgeHost {
       peer.setDeadline(Math.min(10_000, this.expires - this.now()));
       peer.onClose(() => {
         this.peers.delete(peer);
-        if (this.session?.peer === peer) void this.revoke();
+        if (this.session?.peer === peer) void this.revoke().catch(() => {});
       });
       let pending:
         | {
@@ -206,12 +209,12 @@ export class EditorBridgeHost {
         });
       });
       server.on("error", () => {
-        void this.revoke();
+        void this.revoke().catch(() => {});
       });
       const address = server.address();
       if (!address || typeof address === "string") invalid();
       this.expiry = setTimeout(() => {
-        if (!this.session?.paired) void this.revoke();
+        if (!this.session?.paired) void this.revoke().catch(() => {});
       }, 60_000);
       return {
         version: 1,
@@ -261,6 +264,17 @@ export class EditorBridgeHost {
     if (!control) {
       await this.options.onData(message);
       return;
+    }
+    if (message.kind === "context.offer") {
+      this.latestJob = undefined;
+      this.contextExpires = message.payload.expires_at_ms;
+      if (this.contextTimer) clearTimeout(this.contextTimer);
+      this.contextTimer = setTimeout(
+        () => {
+          void this.revoke().catch(() => {});
+        },
+        Math.max(0, this.contextExpires - this.now()),
+      );
     }
     if (
       message.kind === "context.offer" ||
@@ -327,8 +341,14 @@ export class EditorBridgeHost {
         if (reply.operation === "context") {
           this.activeBinding = job.binding;
           this.offeredRevision = 0;
-          this.latestJob = job;
+          this.cache(job);
           this.poll(session, view, epoch);
+        } else if (
+          this.latestJob &&
+          sameBinding(this.latestJob.binding, job.binding)
+        ) {
+          this.cache(job);
+          if (reply.operation === "finish") this.stopPoll();
         }
 
         break;
@@ -359,10 +379,66 @@ export class EditorBridgeHost {
         invalid();
     }
   }
+  pairingAvailable(): boolean {
+    try {
+      this.checkClock();
+      return !!this.server && !this.closed && !this.revoking;
+    } catch {
+      return false;
+    }
+  }
+  pairView(): PairView | null {
+    if (!this.view || this.closed || this.revoking) return null;
+    if (!this.session?.paired) {
+      try {
+        this.checkClock();
+      } catch {
+        void this.revoke().catch(() => {});
+        return null;
+      }
+    }
+    return structuredClone({
+      ...this.view,
+      status: this.session?.paired ? "paired" : "awaiting_confirmation",
+    });
+  }
+  currentCodingJob(): CodeJobView | undefined {
+    const pair = this.pairView(),
+      job = this.latestJob,
+      now = this.now();
+    if (!pair || pair.status !== "paired" || !job) return undefined;
+    if (
+      !Number.isFinite(now) ||
+      now < this.last ||
+      now >= this.contextExpires ||
+      now >= Date.parse(job.expires_at)
+    ) {
+      void this.revoke().catch(() => {});
+      return undefined;
+    }
+    this.last = now;
+    if (
+      job.binding.pair_id !== pair.pair_id ||
+      job.binding.window_id !== pair.window_id ||
+      job.binding.root_id !== pair.root_id
+    )
+      return undefined;
+    return structuredClone(job);
+  }
   codingJobStatus(jobId: string): CodeJobView | undefined {
-    return this.latestJob?.binding.job_id === jobId
-      ? structuredClone(this.latestJob)
-      : undefined;
+    const job = this.currentCodingJob();
+    return job?.binding.job_id === jobId ? job : undefined;
+  }
+  private cache(value: CodeJobView): void {
+    this.latestJob = parseCodeJobView(value);
+    const job = this.currentCodingJob();
+    if (job) {
+      try {
+        this.options.onJobStatus?.(job);
+      } catch {
+        /* UI does not own transport. */
+      }
+    }
   }
   private stopPoll(): void {
     this.pollOwner++;
@@ -405,7 +481,8 @@ export class EditorBridgeHost {
           if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
           const job = parseCodeJobView(value);
           if (!sameBinding(job.binding, binding)) invalid();
-          this.latestJob = job;
+          this.cache(job);
+          if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
           await session.send({ kind: "job.status", binding, payload: job });
           if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
           if (
@@ -460,6 +537,9 @@ export class EditorBridgeHost {
     this.epoch++;
     this.stopPoll();
     this.latestJob = undefined;
+    this.contextExpires = 0;
+    if (this.contextTimer) clearTimeout(this.contextTimer);
+    this.contextTimer = undefined;
     if (this.expiry) clearTimeout(this.expiry);
     this.expiry = undefined;
     this.secret?.fill(0);
@@ -471,6 +551,17 @@ export class EditorBridgeHost {
     session?.close();
     for (const peer of this.peers) peer.close();
     this.peers.clear();
+    let notificationError: unknown;
+    let notified: Promise<void> | undefined;
+    try {
+      notified = Promise.resolve(this.options.onClose?.(view)).catch(
+        (error) => {
+          notificationError = error;
+        },
+      );
+    } catch (error) {
+      notificationError = error;
+    }
     this.closingPair = (async () => {
       try {
         if (view && this.options.codingControl)
@@ -480,7 +571,8 @@ export class EditorBridgeHost {
           });
       } finally {
         try {
-          await this.options.onClose?.(view);
+          await notified;
+          if (notificationError) throw notificationError;
         } finally {
           if (server)
             await new Promise<void>((resolve) => server.close(() => resolve()));

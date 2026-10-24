@@ -58,7 +58,9 @@ it("shows all requested choices without unsupported key collection or fake local
     await screen.findByText(/Account selected.*not model readiness/),
   ).toBeInTheDocument();
   expect(calls.filter((c) => c.method === "connection.test")).toHaveLength(0);
-  expect(screen.getByText(/quota/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Test connection sends a fixed synthetic prompt/),
+  ).toBeInTheDocument();
   await userEvent.click(
     screen.getByRole("button", { name: "Test connection" }),
   );
@@ -211,4 +213,34 @@ it("serializes explicit reload recovery and refreshes prerequisites", async () =
   await waitFor(() =>
     expect(calls.filter((c) => c.method === "readiness.list")).toHaveLength(2),
   );
+});
+it("keeps coding preference separate from reasoning and invalidates the mounted disclosure during selection", async () => {
+  const pending = deferred<unknown>();
+  const { api, calls } = fixture({
+    "settings.get": () => ({
+      ai_mode: "assistant",
+      reasoning_backend: "copilot",
+      coding_backend: "none",
+    }),
+    "settings.update": () => pending.promise,
+  });
+  render(<App api={api} />);
+  await screen.findByRole("button", { name: "Pair VS Code" });
+  await userEvent.selectOptions(
+    screen.getByRole("combobox", { name: "Coding provider" }),
+    "copilot",
+  );
+  expect(screen.queryByRole("button", { name: "Send request" })).toBeNull();
+  expect(calls.find((c) => c.method === "settings.update")?.params).toEqual({
+    coding_backend: "copilot",
+    coding_model: null,
+  });
+  pending.resolve({
+    ai_mode: "assistant",
+    reasoning_backend: "copilot",
+    coding_backend: "copilot",
+    coding_model: null,
+  });
+  await screen.findByRole("button", { name: "Send request" });
+  expect(screen.getByRole("button", { name: "New note" })).toBeEnabled();
 });

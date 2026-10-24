@@ -264,11 +264,22 @@ it("handles native account requests locally, denies input and clears selection b
       deps,
     ),
   ).toMatchObject({ result: { ai_mode: "local" } });
+  await handleRequest(
+    event,
+    account("settings.update", {
+      coding_backend: "copilot",
+      coding_model: null,
+    }),
+    deps,
+  );
   expect(calls).toEqual([
     "choose",
     "disconnect",
     "begin",
     "disconnect",
+    "settings.update",
+    "finish",
+    "begin",
     "settings.update",
     "finish",
   ]);
@@ -297,4 +308,102 @@ it("permits Vite injected styles only in validated loopback development trust", 
       createTrust({ packaged: false, rendererDir: "/app/ui", devServerUrl }),
     ).toThrow();
   }
+});
+
+it("routes only trusted closed editor gestures and cached active reads without a second Core poll", async () => {
+  const { default: corpus } =
+    await import("../../tests/fixtures/coding-contracts.json");
+  const job = corpus.cases.find(
+    (row) => row.kind === "job_view" && row.valid,
+  )!.value;
+  const calls: string[] = [];
+  const deps = {
+    owner: { webContents: sender, mainFrame: frame },
+    trust,
+    core: {
+      request: async (request: { id: string; method: string }) => {
+        calls.push(request.method);
+        return {
+          version: 1 as const,
+          id: request.id,
+          kind: "error" as const,
+          code: "not_found" as const,
+        };
+      },
+    },
+    openExternal: async () => {},
+    editor: {
+      request: async () => {
+        calls.push("native");
+        return null;
+      },
+      invalidate: async () => {
+        calls.push("invalidate");
+      },
+      cached: (id: string) =>
+        id === "active" ? (job as never) : id === "expired" ? null : undefined,
+    },
+  };
+  const request = (method: string, params = {}) => ({
+    version: 1,
+    kind: "request",
+    id: "a",
+    method,
+    params,
+  });
+  expect(
+    await handleRequest(event, request("editor.pair"), deps),
+  ).toMatchObject({ result: null });
+  expect(calls).toEqual(["native"]);
+  for (const method of [
+    "coding.review",
+    "coding.test",
+    "coding.apply",
+    "host_coding",
+    "codingControl",
+  ])
+    expect(await handleRequest(event, request(method), deps)).toMatchObject({
+      code: "invalid_request",
+    });
+  expect(
+    await handleRequest(
+      event,
+      request("editor.confirm", { approved: true }),
+      deps,
+    ),
+  ).toMatchObject({ code: "invalid_request" });
+  expect(
+    await handleRequest(
+      { sender: {}, senderFrame: frame },
+      request("editor.pair"),
+      deps,
+    ),
+  ).toMatchObject({ code: "invalid_request" });
+  expect(
+    await handleRequest(
+      event,
+      request("coding.get", { job_id: "active" }),
+      deps,
+    ),
+  ).toMatchObject({ result: job });
+  expect(
+    await handleRequest(
+      event,
+      request("coding.get", { job_id: "expired" }),
+      deps,
+    ),
+  ).toMatchObject({ code: "not_found" });
+  expect(calls).toEqual(["native"]);
+  await handleRequest(
+    event,
+    request("coding.get", { job_id: "historical" }),
+    deps,
+  );
+  expect(calls).toEqual(["native", "coding.get"]);
+  await handleRequest(
+    event,
+    request("settings.update", { coding_backend: "none" }),
+    deps,
+  );
+  expect(calls.slice(-2)).toEqual(["invalidate", "settings.update"]);
 });

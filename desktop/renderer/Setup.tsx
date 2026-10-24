@@ -130,6 +130,30 @@ export function Setup({
       }
     }
   }
+  async function updateCoding(coding_backend: "none" | "copilot") {
+    setBusy(true);
+    onBusy(true);
+    try {
+      const value = await call(api, "settings.update", {
+        coding_backend,
+        coding_model: null,
+      });
+      if (alive.current) {
+        setSettings(value);
+        onSettings(value);
+        setStatus("Coding preference saved");
+      }
+    } catch (error) {
+      if (alive.current) {
+        setStatus(`Coding preference failed: ${message(error)}`);
+      }
+    } finally {
+      if (alive.current) {
+        setBusy(false);
+        onBusy(false);
+      }
+    }
+  }
   async function account(
     method: "copilot.chooseAccount" | "copilot.disconnect" | "connection.test",
   ) {
@@ -241,6 +265,30 @@ export function Setup({
           </button>
         </>
       )}
+      <fieldset
+        disabled={busy || !settings || settings.ai_mode !== "assistant"}
+      >
+        <legend>Coding preference</legend>
+        <label>
+          Coding provider
+          <select
+            aria-label="Coding provider"
+            value={settings?.coding_backend ?? "none"}
+            onChange={(event) =>
+              void updateCoding(event.target.value as "none" | "copilot")
+            }
+          >
+            <option value="none">Disabled</option>
+            <option value="copilot">GitHub Copilot</option>
+          </select>
+        </label>
+        <p>
+          Separate from conversation. Model:{" "}
+          {settings?.coding_model ?? "Provider default (exact model unknown)"}.
+          Changing this preference disconnects the editor; select fresh context
+          afterward.
+        </p>
+      </fieldset>
       <ul aria-label="Provider prerequisites">
         {items.map((item) => (
           <li key={item.provider}>

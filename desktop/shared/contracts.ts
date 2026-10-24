@@ -1,3 +1,5 @@
+import type { PairView } from "./editor-bridge";
+export type { PairView } from "./editor-bridge";
 import {
   parseCodeStart,
   parseCodeJobView,
@@ -87,6 +89,10 @@ export type Readiness = {
 export type Page<T> = { items: T[]; next_offset: number | null };
 type PageInput = { limit?: number; offset?: number };
 export type Params = {
+  "editor.pair": Record<string, never>;
+  "editor.status": Record<string, never>;
+  "editor.confirm": Record<string, never>;
+  "editor.disconnect": Record<string, never>;
   "coding.start": CodeStart;
   "coding.get": { job_id: string };
   "coding.list": CodePage;
@@ -134,6 +140,10 @@ export type CoreRequest = {
 }[Method];
 type Unavailable = { status: "unavailable"; code: "inference_unavailable" };
 export type Results = {
+  "editor.pair": PairView | null;
+  "editor.status": PairView | null;
+  "editor.confirm": PairView | null;
+  "editor.disconnect": PairView | null;
   "coding.start": CodeJobView;
   "coding.get": CodeJobView;
   "coding.list": CodeJobPage;
@@ -198,9 +208,13 @@ export type Progress = {
   status: "started";
   task_id: string;
 };
+export type RendererEvent =
+  | Progress
+  | { version: 1; kind: "coding_status"; job: CodeJobView }
+  | { version: 1; kind: "coding_cleared"; pair_id: string };
 export type SageApi = {
   request(request: CoreRequest): Promise<CoreResponse>;
-  onProgress(handler: (progress: Progress) => void): () => void;
+  onProgress(handler: (progress: RendererEvent) => void): () => void;
 };
 
 type RecordValue = Record<string, unknown>;
@@ -344,6 +358,10 @@ export function parseRequest(value: unknown): CoreRequest {
     case "coding.list":
       parseCodePage(r.params);
       break;
+    case "editor.pair":
+    case "editor.status":
+    case "editor.confirm":
+    case "editor.disconnect":
     case "coding.readiness":
       object(r.params, []);
       break;
@@ -540,6 +558,12 @@ function unavailable(r: RecordValue): boolean {
 }
 function result(value: unknown, method: Method): void {
   switch (method) {
+    case "editor.pair":
+    case "editor.status":
+    case "editor.confirm":
+    case "editor.disconnect":
+      nullable(value, parsePairView);
+      break;
     case "coding.start":
     case "coding.get":
     case "coding.cancel":
@@ -696,6 +720,69 @@ export function parseProgress(value: unknown): Progress {
   id(r.id);
   id(r.task_id);
   return value as Progress;
+}
+/** Closed local destination view; transport/crypto stays outside the renderer bundle. */
+export function parsePairView(value: unknown): PairView {
+  bounded(value);
+  const row = object(value, [
+    "root_uri",
+    "root_file_id",
+    "window_id",
+    "host_boot_id",
+    "pair_id",
+    "root_id",
+    "challenge",
+    "status",
+  ]);
+  for (const key of [
+    "root_file_id",
+    "window_id",
+    "host_boot_id",
+    "pair_id",
+    "root_id",
+  ])
+    if (
+      typeof row[key] !== "string" ||
+      !/^[A-Za-z0-9_-]{1,128}$/u.test(row[key])
+    )
+      invalid();
+  text(row.root_uri, 8192, false, true);
+  const uri = new URL(row.root_uri as string);
+  if (
+    uri.protocol !== "file:" ||
+    uri.host ||
+    uri.search ||
+    uri.hash ||
+    uri.username ||
+    uri.password
+  )
+    invalid();
+  text(row.challenge, 128, false, true);
+  literal(row.status, ["awaiting_confirmation", "paired"]);
+  return value as PairView;
+}
+export function parseRendererEvent(value: unknown): RendererEvent {
+  bounded(value);
+  if ((value as { kind?: unknown } | null)?.kind === "progress")
+    return parseProgress(value);
+  const row = object(value, ["version", "kind"], ["job", "pair_id"]);
+  literal(row.version, [1]);
+  if (row.kind === "coding_status") {
+    object(row, ["version", "kind", "job"]);
+    return {
+      version: 1,
+      kind: "coding_status",
+      job: parseCodeJobView(row.job),
+    };
+  }
+  object(row, ["version", "kind", "pair_id"]);
+  literal(row.kind, ["coding_cleared"]);
+  if (
+    typeof row.pair_id !== "string" ||
+    !/^[A-Za-z0-9_-]{1,128}$/u.test(row.pair_id)
+  )
+    invalid();
+  return value as RendererEvent;
 }
 export function failure(id: string | null, code: ErrorCode): CoreResponse {
   return { version: 1, id, kind: "error", code };

@@ -9,6 +9,7 @@ import type {
   TaskSummary,
 } from "../shared/contracts";
 import { call, message } from "./host";
+import { Development } from "./Development";
 import { Setup } from "./Setup";
 import { Conversation } from "./Conversation";
 import { NoteReview } from "./NoteReview";
@@ -223,6 +224,7 @@ export function App({ api = window.sage }: { api?: SageApi }) {
           <Notes api={api} refresh={refresh} />
         </div>
       </div>
+      {!busy && <Development api={api} />}
       <section aria-labelledby="tasks-heading">
         <h2 id="tasks-heading">Task history</h2>
         <p>

@@ -113,6 +113,7 @@ export class CoreProcess {
   private discarded = new Set<string>();
   private pending = new Map<string, Pending>();
   private handlers = new Set<(progress: Progress) => void>();
+  private lifecycle = new Set<() => void>();
   private _launches = 0;
   private bootId = "";
   private generation = 0;
@@ -130,6 +131,7 @@ export class CoreProcess {
   private launch(): Child | undefined {
     if (this.child) return this.child;
     if (this.closed || this._launches >= 2) return undefined;
+    this.notifyLifecycle();
     this._launches++;
     this.bootId = randomUUID().replaceAll("-", "");
     this.generation = 0;
@@ -146,6 +148,7 @@ export class CoreProcess {
       if (frameTimer) clearTimeout(frameTimer);
       if (this.child === child) {
         this.child = undefined;
+        this.notifyLifecycle();
         for (const [id, p] of this.pending) {
           clearTimeout(p.timer);
           p.resolve(failure(id, "internal_error"));
@@ -247,9 +250,15 @@ export class CoreProcess {
   request(value: CoreRequest): Promise<CoreResponse> {
     const request = parseRequest(value);
     if (
-      ["external.open", "copilot.chooseAccount", "copilot.disconnect"].includes(
-        request.method,
-      )
+      [
+        "editor.pair",
+        "editor.status",
+        "editor.confirm",
+        "editor.disconnect",
+        "external.open",
+        "copilot.chooseAccount",
+        "copilot.disconnect",
+      ].includes(request.method)
     )
       return Promise.resolve(failure(request.id, "invalid_request"));
     return this.send(request) as Promise<CoreResponse>;
@@ -395,10 +404,33 @@ export class CoreProcess {
       this.handlers.delete(handler);
     };
   }
+  get launchGeneration(): number {
+    return this._launches;
+  }
+  get running(): boolean {
+    return !!this.child && !this.closed;
+  }
+  onLifecycle(handler: () => void): () => void {
+    this.lifecycle.add(handler);
+    return () => {
+      this.lifecycle.delete(handler);
+    };
+  }
+  private notifyLifecycle(): void {
+    for (const handler of this.lifecycle) {
+      try {
+        handler();
+      } catch {
+        /* Observers cannot own child lifetime. */
+      }
+    }
+  }
   private closing: Promise<void> | undefined;
   close(): Promise<void> {
     if (this.closing) return this.closing;
     this.closed = true;
+    this.notifyLifecycle();
+    this.lifecycle.clear();
     this.handlers.clear();
     this.closing = (async () => {
       for (const id of this.pending.keys()) this.invalidate(id, "cancelled");

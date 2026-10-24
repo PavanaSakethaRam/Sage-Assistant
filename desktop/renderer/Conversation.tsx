@@ -54,6 +54,7 @@ export function Conversation({
   useEffect(() => {
     alive.current = true;
     const unsubscribe = api.onProgress((p) => {
+      if (p.kind !== "progress") return;
       if (p.id === active.current) setStatus(`Pending — task ${p.task_id}`);
     });
     return () => {

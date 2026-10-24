@@ -2240,3 +2240,90 @@ it.each(["job.status", "proposal.offer"] as const)(
     }
   },
 );
+
+it("publishes cloned source-free metadata, snapshots current pair, and clears original-lease ownership synchronously", async () => {
+  const statuses: ReturnType<typeof parseCodeJobView>[] = [];
+  const closes: PairView[] = [];
+  const template = corpus.cases.find(
+    (row) => row.kind === "job_view" && row.valid,
+  )!.value;
+  const s = await setup(
+    true,
+    () => {
+      throw Error("raw observer must not run");
+    },
+    {
+      onJobStatus: (job) => {
+        statuses.push(job);
+      },
+      onClose: (view) => {
+        if (view) closes.push(view);
+      },
+      codingControl: async (input) =>
+        ({
+          version: 1,
+          kind: "host_coding_reply",
+          id: "control",
+          host_boot_id: "host-1",
+          generation: 1,
+          operation: input.operation,
+          result:
+            input.operation === "context"
+              ? {
+                  ...template,
+                  binding: input.params.context.binding,
+                  expires_at: new Date(input.params.expires_at_ms)
+                    .toISOString()
+                    .replace(/\.\d{3}Z$/, "Z"),
+                }
+              : { status: "revoked" },
+        }) as HostCodingReply,
+    },
+  );
+  expect(s.host.pairingAvailable()).toBe(true);
+  expect(s.host.pairView()?.status).toBe("awaiting_confirmation");
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  expect(s.host.pairView()?.status).toBe("paired");
+  const offered = context(view) as Extract<
+    BridgeData,
+    { kind: "context.offer" }
+  >;
+  await s.client.send(offered);
+  await vi.waitFor(() => expect(statuses).toHaveLength(1));
+  const snapshot = s.host.currentCodingJob()!;
+  expect(snapshot.binding).toEqual(offered.binding);
+  (snapshot.binding as { pair_id: string }).pair_id = "mutated";
+  expect(s.host.codingJobStatus(offered.binding.job_id)?.binding.pair_id).toBe(
+    view.pair_id,
+  );
+  const closed = s.host.close();
+  expect(s.host.currentCodingJob()).toBeUndefined();
+  expect(s.host.pairView()).toBeNull();
+  expect(closes).toHaveLength(1);
+  await closed;
+});
+it("cache reads reject clock rollback and never renew an original source expiry", async () => {
+  vi.useFakeTimers();
+  const h = pollOwnerHarness(async () => h.job("old"));
+  await h.accept("old");
+  const snapshot = h.host.currentCodingJob();
+  expect(snapshot).toBeDefined();
+  vi.setSystemTime(Date.now() - 1);
+  expect(h.host.currentCodingJob()).toBeUndefined();
+  await h.host.close();
+  vi.useRealTimers();
+});
+it("still closes the listener when a close notification throws synchronously", async () => {
+  const s = await setup(true, () => {}, {
+    onClose: () => {
+      throw Error("synthetic observer");
+    },
+  });
+  await s.host.confirm(s.view.pair_id);
+  await s.pairing;
+  const server = (s.host as unknown as { server: import("node:net").Server })
+    .server;
+  await expect(s.host.close()).rejects.toThrow("synthetic observer");
+  expect(server.listening).toBe(false);
+});

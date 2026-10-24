@@ -664,3 +664,45 @@ it("owns a closed host coding lane distinct from public renderer requests", asyn
     core.request({ version: 1, kind: "host_coding", id: "public" } as never),
   ).toThrow();
 });
+
+subprocessIt(
+  "notifies generation boundaries synchronously, isolates and unsubscribes observers, and denies host-only editor forwarding",
+  async () => {
+    const core = await fake("selection-restart");
+    const events: { running: boolean; generation: number }[] = [];
+    const off = core.onLifecycle(() =>
+      events.push({ running: core.running, generation: core.launchGeneration }),
+    );
+    core.onLifecycle(() => {
+      throw Error("observer failure");
+    });
+    expect(core.launchGeneration).toBe(0);
+    await core.request(request("first"));
+    expect(core.running).toBe(true);
+    expect(core.launchGeneration).toBe(1);
+    await core.request(request("crash"));
+    expect(core.running).toBe(false);
+    await core.request(request("second"));
+    expect(core.launchGeneration).toBe(2);
+    expect(events).toEqual([
+      { running: false, generation: 0 },
+      { running: false, generation: 1 },
+      { running: false, generation: 1 },
+    ]);
+    for (const method of [
+      "editor.pair",
+      "editor.status",
+      "editor.confirm",
+      "editor.disconnect",
+    ])
+      expect(
+        await core.request(
+          request(`closed_${method.replace(".", "_")}`, method),
+        ),
+      ).toMatchObject({ code: "invalid_request" });
+    off();
+    await core.close();
+    expect(events).toHaveLength(3);
+    expect(core.running).toBe(false);
+  },
+);
