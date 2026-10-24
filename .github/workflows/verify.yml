@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, windows-2025]
+        os: [macos-15, windows-2022]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     env:
@@ -24,6 +24,8 @@ jobs:
         with:
           node-version: '26.12.1'
           package-manager-cache: false
+      - name: Assert allocated host and standalone Node
+        run: node -e "if(process.version!=='v26.12.1'||!((process.env.RUNNER_OS==='macOS'&&process.env.RUNNER_ARCH==='ARM64'&&process.platform==='darwin'&&process.arch==='arm64')||(process.env.RUNNER_OS==='Windows'&&process.env.RUNNER_ARCH==='X64'&&process.platform==='win32'&&process.arch==='x64')))throw Error('Unsupported allocated native host'); console.log(JSON.stringify({platform:process.platform,arch:process.arch,node:process.version,os:require('node:os').release(),image:process.env.ImageVersion}));"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: '0.13.5'
@@ -35,13 +37,24 @@ jobs:
           npm ci --include=dev
           uv run --locked --no-sync python scripts/provision_gitleaks.py
       - name: Deterministic execution (no accounts, model or secrets)
+        if: runner.os != 'Windows'
         run: npm run verify:deterministic
+      - name: Windows deterministic execution (installed vendor shell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          . ./scripts/enter-native-toolchain.ps1
+          npm run verify:deterministic
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Locked dependency, static and redacting current/new diff scans (network)
         if: always()
         env:
           DIFF_BASE: ${{ github.event.pull_request.base.sha }}
           DIFF_HEAD: ${{ github.sha }}
-        run: uv run --locked --no-sync python scripts/verify_security.py --base "$env:DIFF_BASE" --head "$env:DIFF_HEAD"
+        run: |
+          if ($IsWindows) { . ./scripts/enter-native-toolchain.ps1 }
+          uv run --locked --no-sync python scripts/verify_security.py --base "$env:DIFF_BASE" --head "$env:DIFF_HEAD"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         shell: pwsh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()

@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, windows-2025]
+        os: [macos-15, windows-2022]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     env:
@@ -33,6 +33,8 @@ jobs:
         with:
           node-version: '26.12.1'
           package-manager-cache: false
+      - name: Assert allocated host and standalone Node
+        run: node -e "if(process.version!=='v26.12.1'||!((process.env.RUNNER_OS==='macOS'&&process.env.RUNNER_ARCH==='ARM64'&&process.platform==='darwin'&&process.arch==='arm64')||(process.env.RUNNER_OS==='Windows'&&process.env.RUNNER_ARCH==='X64'&&process.platform==='win32'&&process.arch==='x64')))throw Error('Unsupported allocated native host'); console.log(JSON.stringify({platform:process.platform,arch:process.arch,node:process.version,os:require('node:os').release(),image:process.env.ImageVersion}));"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: '0.13.5'
@@ -57,8 +59,22 @@ jobs:
         env:
           UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
         run: uv run --locked --no-sync python -m scripts.stage_package
+      - name: Production editor native helper prerequisite
+        shell: pwsh
+        run: |
+          if ($IsWindows) { . ./scripts/enter-native-toolchain.ps1 }
+          npm run build:extension
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Unreleased portable ZIP (no installer)
+        if: runner.os != 'Windows'
         run: npm run make
+      - name: Windows unreleased portable ZIP (installed vendor shell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          . ./scripts/enter-native-toolchain.ps1
+          npm run make
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Actual Windows ZIP content inventory
         if: runner.os == 'Windows'
         run: uv run --locked --no-sync python scripts/check_windows_zip.py
