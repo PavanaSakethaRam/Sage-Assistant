@@ -161,10 +161,54 @@ function validateRuntime(text) {
 }
 
 // XML is parsed only after rejecting DTD/entity constructs; ElementTree never resolves external input.
-const CHECK = `import sys,json,zipfile,hashlib,stat,io,re,struct,xml.etree.ElementTree as ET
+const CHECK = `import sys,json,zipfile,hashlib,stat,io,re,struct,zlib,xml.etree.ElementTree as ET
 FORBIDDEN=r'sourceMappingURL|__sageE2E|FakeReasoner|e2e/fixtures|events\\.jsonl|full\\.once|egress_probe|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\\bgh[opusr]_[A-Za-z0-9]{20,}|\\bgithub_pat_[A-Za-z0-9_]{20,}'
 def check(ok,kind):
  if not ok: raise ValueError(kind)
+def envelope(raw,items):
+ # Only the eight bounded ZIP32 STORED/DEFLATE records are supported; zipfile owns CRC/content parsing.
+ end=len(raw)-22; trailer=struct.unpack_from('<4s4H2IH',raw,end)
+ check(trailer[:5]==(b'PK\\x05\\x06',0,0,8,8) and trailer[7]==0,'metadata')
+ size,central=trailer[5:7]
+ check(0<central<=end and central+size==end,'metadata')
+ at=central
+ for item in items:
+  check(at+46<=end,'metadata')
+  record=struct.unpack_from('<4s6H3I5H2I',raw,at)
+  length=46+record[10]+record[11]+record[12]
+  check(record[0]==b'PK\\x01\\x02' and at+length<=end and record[11:14]==(0,0,0),'metadata')
+  check(raw[at+46:at+length]==item.filename.encode('ascii'),'metadata')
+  check(record[1:5]==((item.create_system<<8)|item.create_version,item.extract_version,item.flag_bits,item.compress_type) and record[7:10]==(item.CRC,item.compress_size,item.file_size) and record[14:]==(item.internal_attr,item.external_attr,item.header_offset),'metadata')
+  at+=length
+ check(at==end,'metadata')
+ ordered=sorted(items,key=lambda item:item.header_offset); cursor=0; decoded={}
+ for index,item in enumerate(ordered):
+  check(item.header_offset==cursor and cursor+30<=central and item.extract_version<=20,'metadata')
+  check(0<item.file_size<=1048576 and 0<=item.compress_size<=2097152 and item.compress_type in {0,8} and not item.flag_bits&~0x808,'metadata')
+  header=struct.unpack_from('<4s5H3I2H',raw,cursor)
+  start=cursor+30; stop=start+header[9]
+  check(header[0]==b'PK\\x03\\x04' and header[1]==item.extract_version and header[10]==0 and stop<=central and raw[start:stop]==item.filename.encode('ascii') and header[2]==item.flag_bits and header[3]==item.compress_type,'metadata')
+  values=(item.CRC,item.compress_size,item.file_size)
+  check(header[6:9] in ((0,0,0),values) if item.flag_bits&8 else header[6:9]==values,'metadata')
+  data_end=stop+item.compress_size
+  boundary=ordered[index+1].header_offset if index+1<len(ordered) else central
+  check(stop<=data_end<=boundary<=central,'metadata')
+  descriptor=raw[data_end:boundary]
+  if item.flag_bits&8:
+   check(len(descriptor) in {12,16},'metadata')
+   if len(descriptor)==16:
+    check(descriptor[:4]==b'PK\\x07\\x08','metadata'); descriptor=descriptor[4:]
+   check(struct.unpack('<3I',descriptor)==values,'metadata')
+  else: check(not descriptor,'metadata')
+  compressed=raw[stop:data_end]
+  if item.compress_type==8:
+   decoder=zlib.decompressobj(-15); plain=decoder.decompress(compressed,item.file_size+1)
+   check(decoder.eof and not decoder.unused_data and not decoder.unconsumed_tail,'metadata')
+  else: plain=compressed
+  check(len(plain)==item.file_size,'metadata')
+  decoded[item.filename]=plain; cursor=boundary
+ check(cursor==central,'metadata')
+ return decoded
 def parse_json(raw):
  def pairs(items):
   out={}
@@ -223,17 +267,15 @@ try:
   items=z.infolist(); names=[i.filename for i in items]
   check(len(names)==len(set(names))==8 and set(names)==set(expected)|{'[Content_Types].xml','extension.vsixmanifest'},'inventory')
   check(not z.comment and raw[-2:]==bytes(2) and min(i.header_offset for i in items)==0 and raw[-22:-18]==b'PK\\x05\\x06','metadata')
+  decoded=envelope(raw,items)
   data={}
   for item in items:
    mode=item.external_attr>>16
    check(not item.extra and not item.comment and 0<=item.header_offset<=len(raw)-30,'metadata')
-   header=struct.unpack_from('<4s5H3I2H',raw,item.header_offset)
-   name_start=item.header_offset+30; name_end=name_start+header[9]
-   check(header[0]==b'PK\\x03\\x04' and header[10]==0 and name_end<=len(raw) and raw[name_start:name_end]==item.filename.encode('ascii') and header[2]==item.flag_bits and header[3]==item.compress_type,'metadata')
    check(item.create_system==3 and stat.S_ISREG(mode) and not mode&0o7000 and not item.external_attr&0x10,'metadata')
    check(item.filename!=helper or mode==0o100755,'metadata')
-   check(0<item.file_size<=1048576 and item.compress_type in {0,8} and not item.flag_bits&~0x808,'metadata')
    data[item.filename]=z.read(item)
+   check(data[item.filename]==decoded[item.filename],'metadata')
    if item.filename in expected: check(hashlib.sha256(data[item.filename]).hexdigest()==expected[item.filename],'content')
    if item.filename!=helper:
     try: text=data[item.filename].decode('utf-8')

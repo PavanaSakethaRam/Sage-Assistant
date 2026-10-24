@@ -173,6 +173,17 @@ type Mutation = {
   production?: boolean;
   platform?: VsixInputs["platform"];
   expected?: boolean;
+  streaming?: boolean;
+  unsignedDescriptor?: boolean;
+  stored?: boolean;
+  internalGap?: "central" | "member";
+  compressedTail?: boolean;
+  descriptorMismatch?: boolean;
+  eocdCount?: boolean;
+  localSizeMismatch?: boolean;
+  descriptorTruncated?: boolean;
+  centralDisk?: boolean;
+  recordOverlap?: boolean;
 };
 async function archive(mutation: Mutation = {}) {
   const root = await realpath(
@@ -233,9 +244,12 @@ async function archive(mutation: Mutation = {}) {
     python,
     [
       "-c",
-      `import sys,json,zipfile,base64,struct
+      `import sys,json,zipfile,base64,struct,io
 +entries,mutation,helper=json.loads(sys.stdin.buffer.read())
-+with zipfile.ZipFile(sys.argv[1],'w',compression=zipfile.ZIP_DEFLATED) as z:
++class Stream(io.BytesIO):
++ def seek(self,*args): raise io.UnsupportedOperation('owned streaming fixture')
++sink=Stream() if mutation.get('streaming') else sys.argv[1]
++with zipfile.ZipFile(sink,'w',compression=zipfile.ZIP_DEFLATED) as z:
 + if mutation.get('archiveComment'): z.comment=b'PRIVATE_MARKER'
 + for name,data in entries.items():
 +  if mutation.get('missing') and name==helper: continue
@@ -244,10 +258,67 @@ async function archive(mutation: Mutation = {}) {
 +   item.external_attr=mutation.get('mode',0o100755)<<16; item.create_system=mutation.get('creator',3)
 +   if mutation.get('memberComment'): item.comment=b'PRIVATE_MARKER'
 +   if mutation.get('memberExtra'): item.extra=b'\\xfe\\xca\\x04\\x00test'
-+  item.compress_type=zipfile.ZIP_DEFLATED; z.writestr(item,base64.b64decode(data))
++  item.compress_type=zipfile.ZIP_STORED if mutation.get('stored') else zipfile.ZIP_DEFLATED; z.writestr(item,base64.b64decode(data))
 +  if mutation.get('duplicate') and name==helper: z.writestr(item,base64.b64decode(data))
 + if mutation.get('extra'):
 +  item=zipfile.ZipInfo('extension/test/driver.cjs'); item.create_system=3; item.external_attr=0o100644<<16; z.writestr(item,b'private driver')
++if mutation.get('streaming'): open(sys.argv[1],'wb').write(sink.getvalue())
++if mutation.get('unsignedDescriptor'):
++ raw=open(sys.argv[1],'rb').read(); end=len(raw)-22; central=struct.unpack_from('<I',raw,end+16)[0]; out=bytearray(); offsets={}
++ with zipfile.ZipFile(io.BytesIO(raw)) as original:
++  for item in sorted(original.infolist(),key=lambda item:item.header_offset):
++   start=item.header_offset; length=struct.unpack_from('<H',raw,start+26)[0]; stop=start+30+length+item.compress_size
++   assert raw[stop:stop+4]==b'PK\\x07\\x08'
++   offsets[start]=len(out); out+=raw[start:stop]+raw[stop+4:stop+16]
++ new_central=len(out); records=bytearray(raw[central:end]); at=0
++ while at<len(records):
++  length=46+sum(struct.unpack_from('<3H',records,at+28)); old=struct.unpack_from('<I',records,at+42)[0]; struct.pack_into('<I',records,at+42,offsets[old]); at+=length
++ trailer=bytearray(raw[end:]); struct.pack_into('<I',trailer,16,new_central); open(sys.argv[1],'wb').write(out+records+trailer)
++if mutation.get('internalGap') or mutation.get('compressedTail'):
++ raw=bytearray(open(sys.argv[1],'rb').read()); end=len(raw)-22; central=struct.unpack_from('<I',raw,end+16)[0]
++ with zipfile.ZipFile(io.BytesIO(raw)) as original: first,second=sorted(original.infolist(),key=lambda item:item.header_offset)[:2]
++ point=central if mutation.get('internalGap')=='central' else second.header_offset
++ if mutation.get('compressedTail'):
++  point=first.header_offset+30+len(first.filename.encode())+first.compress_size
++ gap=b'PRIVATE_SOURCE_PAYLOAD\\n-----BEGIN OPENSSH PRIVATE KEY-----\\nPRIVATE_MARKER\\n'
++ raw[point:point]=gap; central+=len(gap); end+=len(gap); struct.pack_into('<I',raw,end+16,central)
++ at=central
++ while at<end:
++  offset=struct.unpack_from('<I',raw,at+42)[0]
++  if offset>=point: struct.pack_into('<I',raw,at+42,offset+len(gap))
++  if mutation.get('compressedTail') and offset==first.header_offset: struct.pack_into('<I',raw,at+20,first.compress_size+len(gap))
++  at+=46+sum(struct.unpack_from('<3H',raw,at+28))
++ if mutation.get('compressedTail'):
++  if first.flag_bits&8: struct.pack_into('<I',raw,point+len(gap)+8,first.compress_size+len(gap))
++  else: struct.pack_into('<I',raw,first.header_offset+18,first.compress_size+len(gap))
++ open(sys.argv[1],'wb').write(raw)
++ with zipfile.ZipFile(sys.argv[1]) as check:
++  assert check.testzip() is None and len(check.infolist())==8
++  assert all(check.read(name)==base64.b64decode(data) for name,data in entries.items())
++if mutation.get('descriptorMismatch') or mutation.get('eocdCount') or mutation.get('localSizeMismatch'):
++ raw=bytearray(open(sys.argv[1],'rb').read())
++ if mutation.get('descriptorMismatch'):
++  at=raw.find(b'PK\\x07\\x08'); assert at>=0; raw[at+4]^=1
++ if mutation.get('eocdCount'): struct.pack_into('<H',raw,len(raw)-12,7)
++ if mutation.get('localSizeMismatch'): struct.pack_into('<I',raw,22,1)
++ open(sys.argv[1],'wb').write(raw)
++if mutation.get('descriptorTruncated') or mutation.get('centralDisk') or mutation.get('recordOverlap'):
++ raw=bytearray(open(sys.argv[1],'rb').read()); end=len(raw)-22; central=struct.unpack_from('<I',raw,end+16)[0]
++ if mutation.get('centralDisk'): struct.pack_into('<H',raw,central+34,1)
++ if mutation.get('recordOverlap'):
++  with zipfile.ZipFile(io.BytesIO(raw)) as original: first=original.infolist()[0]
++  struct.pack_into('<I',raw,18,first.compress_size+1); struct.pack_into('<I',raw,central+20,first.compress_size+1)
++ if mutation.get('descriptorTruncated'):
++  at=raw.find(b'PK\\x07\\x08'); assert at>=0; del raw[at+12:at+16]; central-=4; end-=4; struct.pack_into('<I',raw,end+16,central)
++  cursor=central
++  while cursor<end:
++   offset=struct.unpack_from('<I',raw,cursor+42)[0]
++   if offset>at: struct.pack_into('<I',raw,cursor+42,offset-4)
++   cursor+=46+sum(struct.unpack_from('<3H',raw,cursor+28))
++ open(sys.argv[1],'wb').write(raw)
++ if mutation.get('descriptorTruncated'):
++  with zipfile.ZipFile(sys.argv[1]) as check:
++   assert check.testzip() is None and all(check.read(name)==base64.b64decode(data) for name,data in entries.items())
 +if mutation.get('encrypted'):
 + raw=bytearray(open(sys.argv[1],'rb').read())
 + for signature,offset in [(b'PK\\x03\\x04',6),(b'PK\\x01\\x02',8)]:
@@ -321,6 +392,45 @@ test("refuses an inherited platform key that would otherwise select an unapprove
     "Unsafe VSIX platform",
   );
 });
+
+test.each([
+  { stored: true },
+  { streaming: true },
+  { streaming: true, unsignedDescriptor: true },
+])(
+  "accepts complete known ZIP records including optional streaming descriptors: %j",
+  async (mutation) => {
+    const fixture = await archive(mutation);
+    await expect(
+      validateVsix(fixture.path, fixture.expected),
+    ).resolves.toMatchObject({
+      entries: expect.arrayContaining([fixture.helper]),
+    });
+  },
+);
+
+test.each([
+  { internalGap: "central" as const },
+  { internalGap: "member" as const },
+  { compressedTail: true },
+  { compressedTail: true, streaming: true },
+  { descriptorMismatch: true, streaming: true },
+  { eocdCount: true },
+  { localSizeMismatch: true },
+  { descriptorTruncated: true, streaming: true },
+  { centralDisk: true },
+  { recordOverlap: true },
+])(
+  "refuses unaccounted archive bytes or mismatched record boundaries: %j",
+  async (mutation) => {
+    const fixture = await archive(mutation);
+    const destination = join(fixture.root, "extension");
+    await expect(
+      extractVsix(fixture.path, destination, fixture.expected),
+    ).rejects.toThrow("Unsafe VSIX metadata");
+    expect(await readdir(fixture.root)).toEqual(["fixture.vsix"]);
+  },
+);
 
 test.each([
   ["missing execute", 0o100644, 3],
