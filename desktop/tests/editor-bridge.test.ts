@@ -1964,3 +1964,279 @@ it("closes the owned listener even when the lifecycle observer rejects", async (
       await new Promise<void>((resolve) => listener.close(() => resolve()));
   }
 });
+
+/** Ownership-unit harness: actual host methods, injected capabilities, no transport attestation claim. */
+function pollOwnerHarness(
+  status: (id: string) => Promise<ReturnType<typeof parseCodeJobView>>,
+  proposal?: (id: string) => Promise<unknown>,
+) {
+  const view: PairView = {
+    ...workspace,
+    host_boot_id: "b".repeat(32),
+    pair_id: "pair-1",
+    root_id: rootIdentity(workspace),
+    challenge: "synthetic",
+    status: "paired",
+  };
+  const sent: BridgeData[] = [];
+  const session = {
+    paired: true,
+    send: async (value: BridgeData) => {
+      sent.push(value);
+    },
+    close: vi.fn(),
+  };
+  const template = corpus.cases.find(
+    (row) => row.kind === "job_view" && row.valid,
+  )!.value;
+  const message = (id: string) => {
+    const original = context(view) as Extract<
+      BridgeData,
+      { kind: "context.offer" }
+    >;
+    const binding = { ...original.binding, job_id: id };
+    return {
+      ...original,
+      binding,
+      payload: {
+        ...original.payload,
+        context: { ...original.payload.context, binding },
+      },
+    };
+  };
+  const job = (id: string, state = "context_ready") =>
+    parseCodeJobView({ ...template, binding: message(id).binding, state });
+  const host = new EditorBridgeHost({
+    onData: () => {},
+    onPair: () => {},
+    codingStatus: status,
+    codingControl: async (input) => {
+      const id =
+        input.operation === "context"
+          ? input.params.context.binding.job_id
+          : input.operation === "proposal_get" || input.operation === "finish"
+            ? input.params.job_id
+            : "unused";
+      const result =
+        input.operation === "revoke_pair"
+          ? { status: "revoked" }
+          : input.operation === "proposal_get"
+            ? await (proposal?.(id) ??
+                Promise.resolve(makeProposal({ job_id: id })))
+            : job(
+                id,
+                input.operation === "finish" ? "completed" : "context_ready",
+              );
+      return {
+        version: 1,
+        kind: "host_coding_reply",
+        id: "control",
+        host_boot_id: "c".repeat(32),
+        generation: 1,
+        operation: input.operation,
+        result,
+      } as HostCodingReply;
+    },
+  });
+  const owner = host as unknown as {
+    session: unknown;
+    view: PairView;
+    epoch: number;
+    receive: (value: BridgeData, s: unknown, v: PairView) => Promise<void>;
+    poll: (s: unknown, v: PairView, e: number) => void;
+  };
+  Object.assign(owner, { session, view, epoch: 1 });
+  return {
+    host,
+    session,
+    sent,
+    job,
+    accept: (id: string) => owner.receive(message(id), session, view),
+    finish: (id: string) =>
+      owner.receive(
+        {
+          kind: "result.dismissed",
+          binding: message(id).binding,
+          payload: null,
+        },
+        session,
+        view,
+      ),
+    refresh: () => owner.poll(session, view, 1),
+  };
+}
+
+it.each(["completed", "review_required", "failure"])(
+  "poll owner discards stale %s status after same-pair replacement",
+  async (state) => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    let release!: (value: ReturnType<typeof parseCodeJobView>) => void,
+      reject!: (reason: Error) => void;
+    const held = new Promise<ReturnType<typeof parseCodeJobView>>(
+      (resolve, fail) => {
+        release = resolve;
+        reject = fail;
+      },
+    );
+    const proposal = vi.fn(async () => {
+      throw Error("obsolete proposal");
+    });
+    const h = pollOwnerHarness(
+      async (id) => (id === "job-1" ? held : h.job(id, "proposing")),
+      proposal,
+    );
+    try {
+      await h.accept("job-1");
+      await vi.advanceTimersByTimeAsync(1000);
+      await h.finish("job-1");
+      await h.accept("job-2");
+      if (state === "failure") reject(Error("obsolete status"));
+      else release(h.job("job-1", state));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(h.host.codingJobStatus("job-2")?.binding.job_id).toBe("job-2");
+      expect(
+        h.sent.filter((value) => value.binding.job_id === "job-1"),
+      ).toHaveLength(2);
+      expect(proposal).not.toHaveBeenCalled();
+      expect(h.session.close).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(h.host.codingJobStatus("job-2")?.state).toBe("proposing");
+    } finally {
+      release(h.job("job-1", "completed"));
+      await vi.advanceTimersByTimeAsync(0);
+      await h.host.close();
+      vi.useRealTimers();
+    }
+  },
+);
+
+it.each([false, true])(
+  "old proposal completion cannot affect the replacement owner (reject=%s)",
+  async (fails) => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    let release!: (value: unknown) => void, reject!: (reason: Error) => void;
+    const held = new Promise<unknown>((resolve, fail) => {
+      release = resolve;
+      reject = fail;
+    });
+    const h = pollOwnerHarness(
+      async (id) => h.job(id, "review_required"),
+      async () => held,
+    );
+    try {
+      await h.accept("job-1");
+      await vi.advanceTimersByTimeAsync(1000);
+      await h.finish("job-1");
+      await h.accept("job-2");
+      if (fails) reject(Error("obsolete proposal"));
+      else release(makeProposal());
+      await vi.advanceTimersByTimeAsync(0);
+      expect(h.session.close).not.toHaveBeenCalled();
+      expect(h.sent.filter((value) => value.kind === "proposal.offer")).toEqual(
+        [],
+      );
+      expect(h.host.codingJobStatus("job-2")?.binding.job_id).toBe("job-2");
+    } finally {
+      release(makeProposal());
+      await vi.advanceTimersByTimeAsync(0);
+      await h.host.close();
+      vi.useRealTimers();
+    }
+  },
+);
+
+it("keeps one status request across same-job refresh and replacement", async () => {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  let release!: (value: ReturnType<typeof parseCodeJobView>) => void;
+  const held = new Promise<ReturnType<typeof parseCodeJobView>>((resolve) => {
+    release = resolve;
+  });
+  let active = 0,
+    maximum = 0;
+  const requests: string[] = [];
+  const h = pollOwnerHarness(async (id) => {
+    requests.push(id);
+    active++;
+    maximum = Math.max(maximum, active);
+    try {
+      return id === "job-1" ? await held : h.job(id, "proposing");
+    } finally {
+      active--;
+    }
+  });
+  try {
+    await h.accept("job-1");
+    await vi.advanceTimersByTimeAsync(1000);
+    h.refresh();
+    h.refresh();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(requests).toEqual(["job-1"]);
+    await h.finish("job-1");
+    await h.accept("job-2");
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(requests).toEqual(["job-1"]);
+    release(h.job("job-1", "completed"));
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(requests).toEqual(["job-1", "job-2"]);
+    expect(maximum).toBe(1);
+  } finally {
+    release(h.job("job-1", "completed"));
+    await vi.advanceTimersByTimeAsync(0);
+    await h.host.close();
+    vi.useRealTimers();
+  }
+});
+
+it.each(["job.status", "proposal.offer"] as const)(
+  "old %s send completion cannot mutate the next poll owner",
+  async (kind) => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const proposals: string[] = [];
+    const h = pollOwnerHarness(
+      async (id) => h.job(id, "review_required"),
+      async (id) => {
+        proposals.push(id);
+        return makeProposal({ job_id: id });
+      },
+    );
+    const send = h.session.send;
+    let blocked = false;
+    h.session.send = async (value) => {
+      if (
+        !blocked &&
+        value.binding.job_id === "job-1" &&
+        value.kind === kind &&
+        (value.kind !== "job.status" ||
+          value.payload.state === "review_required")
+      ) {
+        blocked = true;
+        await held;
+      }
+      await send(value);
+    };
+    try {
+      await h.accept("job-1");
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(blocked).toBe(true);
+      await h.finish("job-1");
+      await h.accept("job-2");
+      release();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(h.host.codingJobStatus("job-2")?.binding.job_id).toBe("job-2");
+      if (kind === "job.status") expect(proposals).toEqual([]);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(proposals).toContain("job-2");
+      expect(h.session.close).not.toHaveBeenCalled();
+    } finally {
+      release();
+      await vi.advanceTimersByTimeAsync(0);
+      await h.host.close();
+      vi.useRealTimers();
+    }
+  },
+);

@@ -56,6 +56,8 @@ export class EditorBridgeHost {
   private epoch = 0;
   private latestJob: CodeJobView | undefined;
   private offeredRevision = 0;
+  private pollOwner = 0;
+  private pollInFlight = false;
   private revoking = false;
   private closingPair: Promise<void> | undefined;
   constructor(private readonly options: HostOptions) {
@@ -260,6 +262,16 @@ export class EditorBridgeHost {
       await this.options.onData(message);
       return;
     }
+    if (
+      message.kind === "context.offer" ||
+      (message.kind === "result.dismissed" &&
+        this.activeBinding &&
+        sameBinding(this.activeBinding, message.binding))
+    )
+      this.stopPoll();
+    const owner = this.pollOwner;
+    const changesOwner =
+      message.kind === "context.offer" || message.kind === "result.dismissed";
     let input: CodingControlInput;
     switch (message.kind) {
       case "context.offer":
@@ -291,7 +303,11 @@ export class EditorBridgeHost {
     }
     const reply = await control(input);
     if (reply.operation !== input.operation) invalid();
-    if (!this.current(session, view, epoch)) return;
+    if (
+      !this.current(session, view, epoch) ||
+      (changesOwner && owner !== this.pollOwner)
+    )
+      return;
     switch (reply.operation) {
       case "context":
       case "test_prepare":
@@ -303,13 +319,18 @@ export class EditorBridgeHost {
           binding: message.binding,
           payload: job,
         });
+        if (
+          !this.current(session, view, epoch) ||
+          (changesOwner && owner !== this.pollOwner)
+        )
+          return;
         if (reply.operation === "context") {
           this.activeBinding = job.binding;
           this.offeredRevision = 0;
           this.latestJob = job;
           this.poll(session, view, epoch);
         }
-        if (reply.operation === "finish") this.stopPoll();
+
         break;
       }
       case "review":
@@ -344,33 +365,49 @@ export class EditorBridgeHost {
       : undefined;
   }
   private stopPoll(): void {
+    this.pollOwner++;
     if (this.polling) clearTimeout(this.polling);
     this.polling = undefined;
     this.activeBinding = undefined;
+  }
+  private ownsPoll(
+    session: BridgeSession,
+    view: PairView,
+    epoch: number,
+    owner: number,
+    binding: CodeBinding,
+  ): boolean {
+    return (
+      this.current(session, view, epoch) &&
+      this.pollOwner === owner &&
+      this.activeBinding !== undefined &&
+      sameBinding(this.activeBinding, binding)
+    );
   }
   private poll(session: BridgeSession, view: PairView, epoch: number): void {
     if (
       !this.options.codingStatus ||
       !this.options.codingControl ||
       !this.activeBinding ||
-      this.polling
+      this.polling ||
+      this.pollInFlight
     )
       return;
-    const binding = this.activeBinding;
+    const binding = this.activeBinding,
+      owner = this.pollOwner;
     this.polling = setTimeout(() => {
+      if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
       this.polling = undefined;
+      this.pollInFlight = true;
       void (async () => {
         try {
-          const job = parseCodeJobView(
-            await this.options.codingStatus!(binding.job_id),
-          );
-          if (
-            !this.current(session, view, epoch) ||
-            !sameBinding(job.binding, binding)
-          )
-            return;
+          const value = await this.options.codingStatus!(binding.job_id);
+          if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
+          const job = parseCodeJobView(value);
+          if (!sameBinding(job.binding, binding)) invalid();
           this.latestJob = job;
           await session.send({ kind: "job.status", binding, payload: job });
+          if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
           if (
             job.state === "review_required" &&
             this.offeredRevision !== binding.revision
@@ -379,18 +416,18 @@ export class EditorBridgeHost {
               operation: "proposal_get",
               params: { job_id: binding.job_id },
             });
-            if (!this.current(session, view, epoch)) return;
+            if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
             if (reply.operation !== "proposal_get") invalid();
-            // BridgeSession validates proposal/context binding and original source deadline again.
             await session.send({
               kind: "proposal.offer",
               binding,
               payload: reply.result,
             });
+            if (!this.ownsPoll(session, view, epoch, owner, binding)) return;
             this.offeredRevision = binding.revision;
           }
           if (
-            [
+            ![
               "context_ready",
               "proposing",
               "review_required",
@@ -400,10 +437,15 @@ export class EditorBridgeHost {
               "testing",
             ].includes(job.state)
           )
-            this.poll(session, view, epoch);
-          else this.stopPoll();
+            this.stopPoll();
         } catch {
-          await this.revoke();
+          if (this.ownsPoll(session, view, epoch, owner, binding))
+            await this.revoke();
+        } finally {
+          this.pollInFlight = false;
+          // A replaced owner waits for the old request to settle; it never overlaps it.
+          if (this.session && this.view)
+            this.poll(this.session, this.view, this.epoch);
         }
       })();
     }, 1000);

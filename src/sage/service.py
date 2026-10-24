@@ -773,26 +773,34 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
             pending[envelope.id] = (envelope, task)
             # Give shutdown and local effects their ordering point before the next read.
             await asyncio.sleep(0)
+    finally:
+        # Revoke authority before any public/provider cleanup can suspend on EOF or failure.
+        service.shutting_down = True
+        try:
+            service.coding.interrupt()
+        except Exception:
+            diagnostic("request_failed")
         for identifier, (_, task) in list(pending.items()):
             if identifier not in ready:
                 invalidated.setdefault(identifier, "cancelled")
                 task.cancel()
-        await asyncio.gather(*(task for _, task in list(pending.values())), return_exceptions=True)
-    finally:
-        try:
-            await service.coding.aclose()
-        except Exception:
-            diagnostic("request_failed")
         cleanup.cancel()
         stop_waiter.cancel()
         if incoming is not None:
             incoming.cancel()
-            await asyncio.gather(incoming, return_exceptions=True)
-        await asyncio.gather(cleanup, stop_waiter, return_exceptions=True)
-        for identifier, (_, task) in list(pending.items()):
-            invalidated.setdefault(identifier, "cancelled")
-            task.cancel()
-        await asyncio.gather(*(task for _, task in list(pending.values())), return_exceptions=True)
+        note_owner = service.backend
+        settled = await asyncio.gather(
+            _settle_owners(service.coding.aclose(), note_owner),
+            *(task for _, task in list(pending.values())),
+            cleanup,
+            stop_waiter,
+            *((incoming,) if incoming is not None else ()),
+            return_exceptions=True,
+        )
+        if service.backend is note_owner:
+            service.backend = None
+        if isinstance(settled[0], BaseException):
+            diagnostic("request_failed")
         writer.close()
         try:
             await asyncio.wait_for(writer.wait_closed(), 5)

@@ -280,3 +280,119 @@ def test_invalid_private_identifier_is_never_echoed_or_raised(tmp_path: Path) ->
         await core.aclose()
 
     asyncio.run(run())
+
+
+@pytest.mark.parametrize("close_failure", [False, True])
+def test_framed_eof_revokes_coding_before_blocked_note_cleanup(
+    tmp_path: Path, close_failure: bool
+) -> None:
+    from sage.config import Settings
+    from sage.contracts import ProviderReadiness, ReasoningRequest, ReasoningResult
+    from tests.helpers.coding_fake import DeferredCodingBackend
+    from tests.integration.test_coding_provider import capture
+
+    async def run() -> None:
+        note_started, note_cleanup, note_close = (asyncio.Event() for _ in range(3))
+        release_notes, coding_close = asyncio.Event(), asyncio.Event()
+
+        class Notes:
+            closed = 0
+
+            def readiness(self) -> ProviderReadiness:
+                return ProviderReadiness(
+                    provider="copilot", status="ready", evidence=(), explanation="synthetic"
+                )
+
+            async def reason(self, request: ReasoningRequest) -> ReasoningResult:
+                note_started.set()
+                try:
+                    await asyncio.Event().wait()
+                except asyncio.CancelledError:
+                    note_cleanup.set()
+                    await release_notes.wait()
+                return ReasoningResult(request_id=request.request_id, status="cancelled")
+
+            async def cancel(self, request_id: str) -> None:
+                pass
+
+            async def aclose(self) -> None:
+                note_close.set()
+                await release_notes.wait()
+                self.closed += 1
+
+        class Coding(DeferredCodingBackend):
+            async def propose_code(self, request: Any) -> Any:
+                from sage.coding_contracts import CodeProposal
+                from tests.helpers.coding_fake import make_proposal
+
+                self.requests.append(request)
+                self.entered.set()
+                while not self.release.is_set():
+                    try:
+                        await self.release.wait()
+                    except asyncio.CancelledError:
+                        continue
+                return CodeProposal.model_validate(make_proposal())
+
+            async def aclose(self) -> None:
+                self.closed += 1
+                coding_close.set()
+                if close_failure:
+                    raise ValueError("fixed cleanup failure")
+
+        notes, coding = Notes(), Coding()
+        store = Store.open(tmp_path / "core.sqlite")
+        with store.transaction() as db:
+            db.execute(
+                "INSERT INTO settings VALUES(1,?)",
+                (
+                    Settings(
+                        ai_mode="assistant", reasoning_backend="copilot", coding_backend="copilot"
+                    ).model_dump_json(),
+                ),
+            )
+        core = CoreService(store, backend=notes, coding_backend=coding)
+        start = capture(core)
+        reader, output = asyncio.StreamReader(), Pipe()
+        running = asyncio.create_task(run_service(reader, output, core))
+        try:
+            reader.feed_data(encode_frame(envelope("coding.start", start.model_dump(mode="json"))))
+            assert (await read_frame(output.reader))["kind"] == "response"
+            await coding.entered.wait()
+            reader.feed_data(
+                encode_frame(
+                    envelope(
+                        "reasoning.start",
+                        {"backend": "copilot", "user_text": "synthetic note"},
+                        "note",
+                    )
+                )
+            )
+            await asyncio.wait_for(note_started.wait(), 1)
+            reader.feed_eof()
+            await asyncio.wait_for(note_cleanup.wait(), 1)
+            assert not release_notes.is_set()
+            assert core.coding._context is None
+            assert core.coding.get("job-1").cancel_requested
+            await asyncio.sleep(0)
+            assert coding.cancelled
+            await asyncio.wait_for(note_close.wait(), 1)
+            coding.release.set()
+            await asyncio.wait_for(coding_close.wait(), 1)
+            assert not release_notes.is_set()
+            assert core.coding.get("job-1").state != "review_required"
+            assert core.coding._proposal is None
+            with store.transaction() as db:
+                assert (
+                    db.execute("SELECT count(*) FROM coding_grants WHERE revoked=0").fetchone()[0]
+                    == 0
+                )
+        finally:
+            coding.release.set()
+            release_notes.set()
+            reader.feed_eof()
+            await asyncio.wait_for(running, 2)
+            await core.aclose()
+        assert notes.closed == coding.closed == 1
+
+    asyncio.run(run())
