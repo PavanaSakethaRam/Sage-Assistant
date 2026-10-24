@@ -258,11 +258,36 @@ describe("closed coding contracts", () => {
     for (const row of corpus.recipe_vectors) {
       const recipe = parseTestRecipe(row.recipe);
       expect(await recipeHash(recipe)).toBe(row.expected);
+      if ("python_wire" in row) {
+        const pythonWire = parseTestRecipe(row.python_wire);
+        expect(await recipeHash(pythonWire)).toBe(row.expected);
+      }
       const changed = parseTestRecipe({
         ...row.recipe,
         environment: { ...row.recipe.environment, TEMP: "/new" },
       });
       expect(await recipeHash(changed)).not.toBe(row.expected);
+    }
+  });
+
+  it("applies canonical UTC spellings and real calendar bounds across shared values", () => {
+    const parsers = {
+      recipe: parseTestRecipe,
+      model_request: parseCodeModelRequest,
+      job_view: parseCodeJobView,
+      grant: parseCodeGrant,
+    };
+    for (const row of corpus.utc_cases) {
+      const base = corpus.cases.find(
+        (candidate) => candidate.kind === row.kind && candidate.valid,
+      );
+      expect(base).toBeDefined();
+      const candidate = { ...base!.value, [row.field]: row.value };
+      const parse = parsers[row.kind as keyof typeof parsers];
+      if (row.valid) {
+        const parsed = parse(candidate) as unknown as Record<string, unknown>;
+        expect(parsed[row.field], row.label).toBe(row.value);
+      } else expect(() => parse(candidate), row.label).toThrow();
     }
   });
 

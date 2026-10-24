@@ -676,7 +676,7 @@
         "files": [
           {
             "name": "index.html",
-            "text": "\ufeffa"
+            "text": "﻿a"
           },
           {
             "name": "focus.js",
@@ -2258,7 +2258,7 @@
         "job_id": "job-1",
         "revision": 1,
         "account_generation": 1,
-        "user_text": "Build a focus tracker \ud83d\ude00",
+        "user_text": "Build a focus tracker 😀",
         "backend": "copilot",
         "model": null
       },
@@ -2348,6 +2348,180 @@
         "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "expected": "90ccedca74cd94fa017efa691614d020f773925862c8e7c60122c1c9a5985c12"
+    },
+    {
+      "recipe": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.000001Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "e7cac8df47fa4077ac0d2260a374a6c7049378ac3a909c40b1988f17417dfb16",
+      "python_wire": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.000001Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "recipe": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.123456Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "6797d4c5d969ce15be5f8941767aac3cd33abc6d0fd97ef1cb6ea9a138d389ad",
+      "python_wire": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.123456Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
     }
   ],
   "context_hash_vectors": [
@@ -2398,6 +2572,225 @@
         "target": "index.html"
       },
       "expected": "09f8bb872c6879a550323e7a5100dbe588c558f2da6c13f859bb6a6d07e9b74e"
+    }
+  ],
+  "utc_cases": [
+    {
+      "label": "microsecond-min",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.000001Z",
+      "valid": true
+    },
+    {
+      "label": "microsecond-max",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.999999Z",
+      "valid": true
+    },
+    {
+      "label": "zero-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.000000Z",
+      "valid": false
+    },
+    {
+      "label": "short-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.1Z",
+      "valid": false
+    },
+    {
+      "label": "five-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.12345Z",
+      "valid": false
+    },
+    {
+      "label": "long-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.1234567Z",
+      "valid": false
+    },
+    {
+      "label": "alternate-offset",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30+00:00",
+      "valid": false
+    },
+    {
+      "label": "negative-zero-offset",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30-00:00",
+      "valid": false
+    },
+    {
+      "label": "leap-day",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2024-02-29T23:59:59Z",
+      "valid": true
+    },
+    {
+      "label": "nonleap-day",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-02-29T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "impossible-day",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-02-30T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "month-thirteen",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-13-01T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "month-zero",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-00-01T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "day-zero",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-01-00T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "hour-twenty-four",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T24:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "minute-sixty",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:60:30Z",
+      "valid": false
+    },
+    {
+      "label": "second-sixty",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:60Z",
+      "valid": false
+    },
+    {
+      "label": "year-zero",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "0000-10-24T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "first-year",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "0001-01-01T00:00:00Z",
+      "valid": true
+    },
+    {
+      "label": "last-year",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "9999-12-31T23:59:59Z",
+      "valid": true
+    },
+    {
+      "label": "request-microsecond",
+      "kind": "model_request",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.123456Z",
+      "valid": true
+    },
+    {
+      "label": "request-offset",
+      "kind": "model_request",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30+00:00",
+      "valid": false
+    },
+    {
+      "label": "view-leap-microsecond",
+      "kind": "job_view",
+      "field": "expires_at",
+      "value": "2024-02-29T23:59:59.000001Z",
+      "valid": true
+    },
+    {
+      "label": "view-impossible-day",
+      "kind": "job_view",
+      "field": "expires_at",
+      "value": "2026-02-30T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "grant-issued-microsecond",
+      "kind": "grant",
+      "field": "issued_at",
+      "value": "2026-10-24T12:00:30.123456Z",
+      "valid": true
+    },
+    {
+      "label": "grant-expires-microsecond",
+      "kind": "grant",
+      "field": "expires_at",
+      "value": "2026-10-24T12:05:30.654321Z",
+      "valid": true
+    },
+    {
+      "label": "grant-impossible-second",
+      "kind": "grant",
+      "field": "expires_at",
+      "value": "2026-10-24T12:00:60Z",
+      "valid": false
+    },
+    {
+      "label": "nonleap-century",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "1900-02-29T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "leap-century",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2000-02-29T12:00:30Z",
+      "valid": true
+    },
+    {
+      "label": "nonascii-digits",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "２０２６-10-24T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "lowercase-zone",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30z",
+      "valid": false
     }
   ]
 }

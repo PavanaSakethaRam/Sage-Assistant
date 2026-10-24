@@ -4,7 +4,7 @@ import hashlib
 import json
 import re
 import unicodedata
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated, Literal, Self
 
 from pydantic import AfterValidator, AwareDatetime, BeforeValidator, Field, model_validator
@@ -107,16 +107,22 @@ DiagnosticText = Annotated[str, AfterValidator(_literal)]
 
 
 def _utc(value: object) -> datetime:
-    if isinstance(value, str) and re.fullmatch(
-        r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|\+00:00)", value
-    ):
-        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if isinstance(value, str):
+        match = re.fullmatch(
+            r"([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{6}))?Z",
+            value,
+        )
+        if match is None or match.group(7) == "000000":
+            raise ValueError("Expected canonical UTC timestamp")
+        year, month, day, hour, minute, second = (int(item) for item in match.groups()[:6])
+        microsecond = int(match.group(7) or "0")
+        return datetime(year, month, day, hour, minute, second, microsecond, tzinfo=UTC)
     if not isinstance(value, datetime) or value.tzinfo is None:
         raise ValueError("Expected UTC timestamp")
     offset = value.utcoffset()
     if offset is None or offset.total_seconds() != 0:
         raise ValueError("Expected UTC timestamp")
-    return value
+    return value.astimezone(UTC)
 
 
 UtcDateTime = Annotated[AwareDatetime, BeforeValidator(_utc)]

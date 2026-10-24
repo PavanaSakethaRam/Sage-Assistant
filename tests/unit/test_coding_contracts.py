@@ -3,6 +3,7 @@
 import asyncio
 import json
 from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -238,8 +239,42 @@ def test_recipe_hash_uses_fixed_fields_and_constructed_environment() -> None:
     for row in corpus["recipe_vectors"]:
         recipe = CodingTestRecipe.model_validate(row["recipe"])
         assert recipe_hash(recipe) == row["expected"]
+        if "python_wire" in row:
+            wire = recipe.model_dump(mode="json")
+            assert wire == row["python_wire"]
+            assert recipe_hash(CodingTestRecipe.model_validate(wire)) == row["expected"]
         changed = {**row["recipe"], "environment": {**row["recipe"]["environment"], "TEMP": "/new"}}
         assert recipe_hash(CodingTestRecipe.model_validate(changed)) != row["expected"]
+
+
+def test_canonical_utc_parity_across_shared_values() -> None:
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
+    parsers: dict[str, Callable[[object], Contract]] = {
+        "recipe": CodingTestRecipe.model_validate,
+        "model_request": CodeModelRequest.model_validate,
+        "job_view": CodeJobView.model_validate,
+        "grant": CodeGrant.model_validate,
+    }
+    for row in corpus["utc_cases"]:
+        base = next(
+            case["value"]
+            for case in corpus["cases"]
+            if case["kind"] == row["kind"] and case["valid"]
+        )
+        candidate = {**base, row["field"]: row["value"]}
+        parse = parsers[row["kind"]]
+        if row["valid"]:
+            parsed = parse(candidate)
+            assert parsed.model_dump(mode="json")[row["field"]] == row["value"], row["label"]
+        else:
+            with pytest.raises((ValidationError, ValueError)):
+                parse(candidate)
+
+    recipe = CodingTestRecipe.model_validate(corpus["recipe_vectors"][0]["recipe"])
+    internal = recipe.model_copy(
+        update={"deadline": datetime(2026, 10, 24, 12, 0, 30, 123456, tzinfo=UTC)}
+    )
+    assert internal.model_dump(mode="json")["deadline"] == "2026-10-24T12:00:30.123456Z"
 
 
 def test_escaped_duplicate_names_fail_at_existing_frame_boundary() -> None:
