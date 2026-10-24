@@ -1,6 +1,15 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import {
+  appendFile,
+  chmod,
+  copyFile,
+  mkdtemp,
+  realpath,
+  rename,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { lstatSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -517,14 +526,75 @@ it("exit_with_inherited_stdout_stays_bounded and does not claim descendant conta
   // The owned fixture descendant settles itself; wait for its bounded cleanup before deleting files.
   await new Promise((r) => setTimeout(r, 1800));
 }, 8000);
-it("changed executable bytes cannot reuse the captured candidate", async () => {
-  const f = await fixture(),
-    vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(NODE));
-  const bad = { ...node, hash: "0".repeat(64) };
-  await expect(prepareFocusTest(f.context, bad)).rejects.toThrow();
-  expect(f.intents).toEqual([]);
-});
+it.each(["during review", "after intent"] as const)(
+  "a genuinely inspected executable changed %s refuses before any fixed-test spawn",
+  async (boundary) => {
+    const f = await fixture(),
+      vscode = await import("vscode"),
+      actual =
+        await vi.importActual<typeof import("node:child_process")>(
+          "node:child_process",
+        ),
+      directory = await realpath(
+        await mkdtemp("/private/tmp/sage-selected-node-"),
+      ),
+      selected = join(directory, "node"),
+      calls: { executable: string; argv: readonly string[] }[] = [],
+      hash = (path: string) =>
+        createHash("sha256").update(readFileSync(path)).digest("hex"),
+      pinnedHash = hash(NODE);
+    roots.push(directory);
+    await copyFile(NODE, selected);
+    await chmod(selected, 0o700);
+    expect(hash(selected)).toBe(pinnedHash);
+    expect(lstatSync(selected).ino).not.toBe(lstatSync(NODE).ino);
+    processDouble.spawn = (...args) => {
+      const argv = Array.isArray(args[1]) ? args[1] : [];
+      calls.push({ executable: args[0], argv });
+      // A failed guard must be observable without executing the mutated file.
+      if (argv[0] !== "--version") throw Error("Unexpected fixed-test spawn");
+      return Reflect.apply(actual.spawn, undefined, args);
+    };
+    const node = await inspectNode(vscode.Uri.file(selected));
+    expect(node).toMatchObject({
+      executable: selected,
+      hash: pinnedHash,
+      version: "26.12.1",
+      available: true,
+    });
+    const recipe = await prepareFocusTest(f.context, node);
+    expect(recipe.executable).toBe(selected);
+    expect(recipe.executable_hash).toBe(pinnedHash);
+    let changed = false;
+    const mutate = async () => {
+      const before = lstatSync(selected, { bigint: true });
+      if (boundary === "during review") {
+        await appendFile(selected, "\0");
+        expect(hash(selected)).not.toBe(pinnedHash);
+      } else {
+        const replacement = join(directory, "replacement");
+        await copyFile(NODE, replacement);
+        await chmod(replacement, 0o700);
+        await rename(replacement, selected);
+        expect(hash(selected)).toBe(pinnedHash);
+        expect(lstatSync(selected, { bigint: true }).ino).not.toBe(before.ino);
+      }
+      changed = true;
+    };
+    if (boundary === "during review") ui.beforeConfirm = mutate;
+    else f.afterIntent(mutate);
+    ui.choices = ["Run fixed tests"];
+    await expect(f.review.showTest(f.context, recipe)).rejects.toThrow(
+      "Fixed test recipe unavailable or changed",
+    );
+    expect(changed).toBe(true);
+    expect(f.intents).toHaveLength(boundary === "during review" ? 0 : 1);
+    expect(f.receipts).toEqual([]);
+    expect(calls).toEqual([{ executable: selected, argv: ["--version"] }]);
+    expect(calls.filter((call) => call.argv[0] === "--test")).toEqual([]);
+    expect(hash(NODE)).toBe(pinnedHash);
+  },
+);
 it("older standalone runtime remains unavailable, without fallback", async () => {
   const vscode = await import("vscode"),
     node = await inspectNode(vscode.Uri.file(process.execPath));
