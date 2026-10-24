@@ -22,7 +22,9 @@ const activeChildren = new Set<ChildProcess>();
 const SUITE_LIMIT = 600_000,
   CASE_LIMIT = 120_000,
   OUTPUT_LIMIT = 262144;
-export function selectedCase(args: string[]): "bridge" | "context" | "all" {
+export function selectedCase(
+  args: string[],
+): "bridge" | "context" | "create" | "all" {
   if (args.length === 0) return "bridge";
   if (
     args.length !== 2 ||
@@ -38,7 +40,12 @@ export function selectedCase(args: string[]): "bridge" | "context" | "all" {
     ].includes(args[1])
   )
     throw Error("Unknown editor test case");
-  if (args[1] !== "bridge" && args[1] !== "context" && args[1] !== "all")
+  if (
+    args[1] !== "bridge" &&
+    args[1] !== "context" &&
+    args[1] !== "create" &&
+    args[1] !== "all"
+  )
     throw Error("Editor case is not implemented in Task4");
   return args[1];
 }
@@ -149,7 +156,8 @@ async function lane(
   executable: string,
   trusted: boolean,
   packaged = false,
-  selectedCase: "bridge" | "context" | "all" = "bridge",
+  selectedCase: "bridge" | "context" | "create" | "all" = "bridge",
+  createScenario: import("../extension/test/integration/create").CreateScenario = "success",
 ): Promise<void> {
   const owned = await realpath(
     await mkdtemp(
@@ -266,6 +274,8 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     bundleHash,
     productPath,
     selectedCase,
+    createScenario,
+    fixtureSource: resolve("tests/fixtures/focus-project"),
   };
   await writeFile(join(fixture, "case.json"), JSON.stringify(config));
   const argv = [
@@ -384,22 +394,38 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
       const integration = await import(
         pathToFileURL(resolve(".cache/vscode-tools/bridge.cjs")).href
       );
-      host = await integration.pairThroughWorkbench(
-        page,
-        selectedCase !== "bridge",
-      );
-      if (selectedCase !== "bridge") await host!.exerciseContext();
+      host =
+        selectedCase === "create"
+          ? await integration.createThroughWorkbench(
+              page,
+              fixture,
+              workspace,
+              createScenario,
+            )
+          : await integration.pairThroughWorkbench(
+              page,
+              selectedCase !== "bridge",
+            );
+      if (selectedCase !== "bridge" && selectedCase !== "create")
+        await host!.exerciseContext();
       console.log(
         JSON.stringify({
           profile: owned,
           receipt: await receipt("initial"),
-          ...(selectedCase !== "bridge"
+          ...(selectedCase === "create"
             ? {
-                context_native: await json(
-                  join(fixture, "context-native.json"),
+                create_authority: await json(
+                  join(fixture, "create-authority.json"),
                 ),
+                diffs: await json(join(fixture, "diffs-checked.json")),
               }
-            : {}),
+            : selectedCase !== "bridge"
+              ? {
+                  context_native: await json(
+                    join(fixture, "context-native.json"),
+                  ),
+                }
+              : {}),
         }),
       );
       if (!packaged) {
@@ -456,12 +482,13 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     await browser?.close();
     await stop(child);
     activeChildren.delete(child);
-    await rm(owned, {
-      recursive: true,
-      force: true,
-      maxRetries: 5,
-      retryDelay: 100,
-    });
+    if (selectedCase !== "create")
+      await rm(owned, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 100,
+      });
   }
 }
 async function main(): Promise<void> {
@@ -511,13 +538,23 @@ async function main(): Promise<void> {
           formats: ["cjs"],
           fileName: () => "bridge.cjs",
         },
-        rolldownOptions: { external: ["@playwright/test", /^node:/] },
+        rolldownOptions: { external: ["vscode", "@playwright/test", /^node:/] },
       },
     });
     try {
       await lane(executable, true, false, selected);
       await lane(await revalidate(), true, true, selected);
       await lane(await revalidate(), false, true, selected);
+      if (selected === "create")
+        for (const scenario of [
+          "decline",
+          "collision",
+          "root-switch",
+          "cancel-prefix",
+          "ack-loss",
+          "expiry",
+        ] as const)
+          await lane(await revalidate(), true, false, "create", scenario);
       console.log(
         "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
       );

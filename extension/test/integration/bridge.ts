@@ -185,3 +185,5 @@ export async function pairThroughWorkbench(
     throw error;
   }
 }
+
+export { createThroughWorkbench } from "./create";

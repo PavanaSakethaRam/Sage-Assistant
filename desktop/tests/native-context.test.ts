@@ -25,3 +25,10 @@ it("leaves ordinary macOS and other platforms eligible for real startup checks",
   expect(ordinaryMac.CODEX_SANDBOX).toBe("other");
   expect(otherPlatform.CODEX_SANDBOX).toBe("seatbelt");
 });
+
+import { selectedCase } from "../../scripts/test-vscode";
+it("selects only implemented fixed editor cases", () => {
+  expect(selectedCase(["--case", "create"])).toBe("create");
+  expect(() => selectedCase(["--case", "replace"])).toThrow();
+  expect(() => selectedCase(["--case", "create", "arbitrary"])).toThrow();
+});

@@ -61,6 +61,9 @@ vi.mock("../../src/bridge", async (importOriginal) => {
     ...original,
     ExtensionBridge: class {
       closed = false;
+      onData() {
+        return () => {};
+      }
       constructor(
         private options: {
           onClose: () => void;
@@ -126,6 +129,7 @@ vi.mock("vscode", () => {
       parse: uri,
     },
     TabInputText,
+    TabInputTextDiff: class {},
     EndOfLine: { LF: 1 },
     commands: {
       registerCommand: (name: string, handler: () => Promise<void>) => {

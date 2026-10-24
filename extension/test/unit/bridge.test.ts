@@ -77,6 +77,7 @@ vi.mock("vscode", () => ({
     }),
   },
   TabInputText: class {},
+  TabInputTextDiff: class {},
   UIKind: { Desktop: 1 },
   env: {
     get remoteName() {
@@ -229,7 +230,7 @@ it("fixed native case selection fails unknown or future cases instead of silentl
   expect(selectedCase(["--case", "bridge"])).toBe("bridge");
   for (const args of [
     ["--case", "arbitrary"],
-    ["--case", "create"],
+    ["--case", "replace"],
     ["--case", "bridge", "extra"],
     ["--other", "bridge"],
   ])
@@ -582,4 +583,68 @@ it("rejects an original dot-segment folder URI before requesting a pairing ticke
   } finally {
     await fixture.cleanup();
   }
+});
+
+import { ExtensionBridge } from "../../src/bridge";
+import { EffectJournal } from "../../src/journal";
+import { BINDING, HASH } from "../../../desktop/tests/coding-fixtures";
+import type {
+  CodeIntent,
+  CodeFileReceipt,
+  CodeBinding,
+} from "../../../desktop/shared/coding-contracts";
+it("closed bridge retains only an exact preexisting intent observation locally and sends no frame", async () => {
+  const root = await realpath(
+    await mkdtemp("/private/tmp/sage-closed-observed-"),
+  );
+  roots.push(root);
+  const journal = new EffectJournal(pathToFileURL(root));
+  const intent: CodeIntent = {
+    binding: BINDING as CodeBinding,
+    operation_id: "closed-operation",
+    effect_id: "closed-effect",
+    scope: "code.create",
+    target: "index.html",
+    ordinal: 0,
+    expected_hash: HASH,
+  };
+  await journal.intent(intent);
+  const bridge = new ExtensionBridge({
+    confirm: async () => true,
+    guard: () => {
+      throw Error("cancelled");
+    },
+  });
+  const sent = vi.spyOn(bridge, "send");
+  const receipt: CodeFileReceipt = {
+    ...intent,
+    scope: "code.create",
+    status: "needs_reconciliation",
+    observed_hash: null,
+    observed_length: null,
+  };
+  await expect(
+    bridge.recordObserved(journal, {
+      ...receipt,
+      binding: { ...receipt.binding, job_id: "wrong" },
+    }),
+  ).rejects.toThrow();
+  expect((await journal.get(intent.operation_id)).observations).toHaveLength(0);
+  await bridge.close();
+  await expect(bridge.recordObserved(journal, receipt)).rejects.toThrow();
+  expect((await journal.get(intent.operation_id)).observations).toHaveLength(1);
+  await expect(
+    bridge.recordObserved(journal, { ...receipt, status: "partial" }),
+  ).rejects.toThrow();
+  expect((await journal.get(intent.operation_id)).observations).toHaveLength(1);
+  expect(sent).not.toHaveBeenCalled();
+  await expect(
+    bridge.recordIntent(journal, {
+      ...intent,
+      effect_id: "next",
+      ordinal: 1,
+      target: "focus.js",
+    }),
+  ).rejects.toThrow();
+  expect((await journal.get(intent.operation_id)).intents).toHaveLength(1);
 });

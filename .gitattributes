@@ -9,3 +9,12 @@ scripts/*.mjs text eol=lf
 /*.ts text eol=lf
 /*.json text eol=lf
 /*.mjs text eol=lf
+
+# Strict UTF-8/LF editor snapshots and the four-file direct-open fixture.
+extension/**/*.ts text eol=lf
+extension/**/*.c text eol=lf
+extension/**/*.json text eol=lf
+tests/fixtures/focus-project/index.html text eol=lf
+tests/fixtures/focus-project/focus.js text eol=lf
+tests/fixtures/focus-project/focus.test.mjs text eol=lf
+tests/fixtures/focus-project/README.md text eol=lf

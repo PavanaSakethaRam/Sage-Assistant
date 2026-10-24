@@ -45,8 +45,10 @@
     "desktop/shared/framing.ts",
     "extension/src/bridge.ts",
     "extension/src/context.ts",
+    "extension/src/create.ts",
     "extension/src/extension.ts",
     "extension/src/journal.ts",
+    "extension/src/review.ts",
     "extension/src/root-probe.ts"
   ],
   "trusted_python": [
@@ -88,8 +90,10 @@
     "desktop/shared/framing.ts",
     "extension/src/bridge.ts",
     "extension/src/context.ts",
+    "extension/src/create.ts",
     "extension/src/extension.ts",
     "extension/src/journal.ts",
+    "extension/src/review.ts",
     "extension/src/root-probe.ts"
   ],
   "excluded": [

@@ -199,8 +199,10 @@ export class ExtensionBridge {
     value: CodeIntent | CodeReceipt,
     observed: boolean,
   ): Promise<CodeAck> {
-    this.check();
-    if (!this.session || this.pendingAck || this.recording) invalid();
+    // Observations are facts about a preexisting intent, even after disconnect.
+    if (!observed) this.check();
+    if ((!observed && !this.session) || this.pendingAck || this.recording)
+      invalid();
     const valid = observed
       ? parseCodeReceipt(JSON.parse(JSON.stringify(value)))
       : parseCodeIntent(JSON.parse(JSON.stringify(value)));

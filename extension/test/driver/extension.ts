@@ -106,6 +106,79 @@ async function run(): Promise<void> {
         status: "ready",
       });
       await vscode.commands.executeCommand("sage.pairLocalEditor");
+      if (config.selectedCase === "create") {
+        stage = "create-capture";
+        assert.deepEqual(
+          await import("node:fs/promises").then((fs) =>
+            fs.readdir(vscode.workspace.workspaceFolders![0].uri.fsPath),
+          ),
+          [],
+        );
+        await vscode.commands.executeCommand("sage.captureContext");
+        const preview = vscode.window.activeTextEditor?.document;
+        assert.equal(preview?.uri.scheme, "sage-context");
+        stage = "create-send";
+        await vscode.commands.executeCommand("sage.sendContext");
+        await emitReceipt(join(fixture, "create-disclosure-sent.json"), {
+          ...receipt,
+        });
+        stage = "create-diffs";
+        const end = Date.now() + 30000;
+        let diffs: vscode.TabInputTextDiff[] = [];
+        while (Date.now() < end) {
+          diffs = vscode.window.tabGroups.all
+            .flatMap((g) => g.tabs)
+            .flatMap((t) =>
+              t.input instanceof vscode.TabInputTextDiff &&
+              t.input.original.scheme === "sage-diff"
+                ? [t.input]
+                : [],
+            );
+          if (diffs.length === 4) break;
+          await new Promise((r) => setTimeout(r, 20));
+        }
+        assert.equal(diffs.length, 4);
+        const checked = [];
+        for (const name of [
+          "index.html",
+          "focus.js",
+          "focus.test.mjs",
+          "README.md",
+        ]) {
+          const diff = diffs.find((d) => d.modified.path.endsWith("/" + name));
+          assert.ok(diff);
+          const before = await vscode.workspace.openTextDocument(diff.original),
+            after = await vscode.workspace.openTextDocument(diff.modified);
+          const expected = await readFile(
+            join(config.fixtureSource, name),
+            "utf8",
+          );
+          assert.equal(before.getText(), "");
+          assert.equal(after.getText(), expected);
+          assert.equal(before.isDirty, false);
+          assert.equal(after.isDirty, false);
+          checked.push({
+            name,
+            sha256: createHash("sha256").update(expected).digest("hex"),
+            bytes: Buffer.byteLength(expected),
+          });
+        }
+        await emitReceipt(join(fixture, "diffs-checked.json"), {
+          ...receipt,
+          diffs: checked,
+          literal_readonly: true,
+        });
+        stage = "create-result";
+        while (Date.now() < end + 30000) {
+          try {
+            await readFile(join(fixture, "create-finished.json"));
+            break;
+          } catch {
+            await new Promise((r) => setTimeout(r, 20));
+          }
+        }
+        assert.ok(await readFile(join(fixture, "create-finished.json")));
+      }
       if (config.selectedCase === "context" || config.selectedCase === "all") {
         stage = "context-preview";
         const other = vscode.Uri.file(join(fixture, "unrelated.txt"));

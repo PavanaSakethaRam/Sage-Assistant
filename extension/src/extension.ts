@@ -13,6 +13,7 @@ import {
   releaseContext,
   validateContext,
 } from "./context";
+import { ProposalReview } from "./review";
 import { probeRoot } from "./root-probe";
 import { EffectJournal } from "./journal";
 import {
@@ -32,6 +33,9 @@ type PairOperation = {
   nativeIdentity?: string;
   journal?: EffectJournal;
   context?: CodeContext;
+  review?: ProposalReview;
+  reviewTask?: Promise<void>;
+  applied?: boolean;
   sent?: boolean;
   preview?: vscode.Uri;
   timer?: ReturnType<typeof setTimeout>;
@@ -52,9 +56,13 @@ async function closeOperation(
     picker.dispose();
   }
   operation.pickers.clear();
+  operation.review?.cancel();
+  const reviewCleanup = operation.review?.dispose();
+  operation.review = undefined;
   const cleanup = operation.clearPreview?.();
   await client?.close();
   await cleanup;
+  await reviewCleanup;
   operation.journal = undefined;
 }
 function input<T extends vscode.QuickPickItem>(
@@ -125,6 +133,7 @@ export function activate(context: vscode.ExtensionContext): void {
     operation.context = undefined;
     operation.preview = undefined;
     operation.sent = false;
+    operation.applied = false;
     if (operation.timer) clearTimeout(operation.timer);
     operation.timer = undefined;
     if (captured) releaseContext(captured);
@@ -168,6 +177,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const operation = owner;
       if (
         operation?.preview &&
+        !operation.applied &&
         event.closed.some(
           (tab) =>
             tab.input instanceof vscode.TabInputText &&
@@ -272,6 +282,33 @@ export function activate(context: vscode.ExtensionContext): void {
         ticket = undefined;
         operation.pair = await pairing;
         guard();
+        const review = new ProposalReview({
+          bridge: client,
+          journal: operation.journal!,
+          guard,
+          onFailure: () => closeOperation(operation),
+          onApplied: () => {
+            guard();
+            operation.applied = true;
+          },
+        });
+        operation.review = review;
+        client.onData((message) => {
+          if (message.kind === "proposal.offer") {
+            const captured = operation.context;
+            if (!captured || !operation.sent || operation.applied)
+              throw Error("No current selected context");
+            // Return to the receive pump so grant/ACK frames can complete the local gesture.
+            operation.reviewTask = review
+              .show(captured, message.payload)
+              .catch(() => {
+                void closeOperation(operation);
+                void vscode.window.showErrorMessage(
+                  "Sage stopped creation. Existing and partial files were preserved; capture fresh context before another attempt.",
+                );
+              });
+          }
+        });
         void vscode.window.showInformationMessage(
           "Sage paired with this local folder. No source has been shared.",
         );

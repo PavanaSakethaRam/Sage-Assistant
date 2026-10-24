@@ -884,3 +884,16 @@ def test_literal_extension_journal_projection_and_receipt_parity() -> None:
         assert json.loads(json.dumps(material)) == vector["projection"], vector["label"]
         encoded = json.dumps(material, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         assert hashlib.sha256(encoded.encode()).hexdigest() == vector["canonical_sha256"]
+
+
+def test_created_saved_context_remains_for_separate_test_review_without_spawn(
+    state: tuple[Store, Clock, CodingJobs],
+) -> None:
+    store, clock, jobs = state
+    grant = saved(jobs)
+    current = jobs.get(grant.binding.job_id)
+    assert current.state == "applied_saved" and len(current.receipts) == 4
+    assert jobs.prepare_test(recipe(clock)).state == "test_review"
+    with store.transaction() as db:
+        assert db.execute("SELECT count(*) FROM coding_effects").fetchone()[0] == 4
+        assert db.execute("SELECT count(*) FROM tasks").fetchone()[0] == 0

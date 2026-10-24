@@ -44,6 +44,10 @@ type Snapshot = {
   last: number;
   monotonic: number;
   hash: string;
+  created?: Map<
+    FocusName,
+    { version: number; stat: BigIntStats; hash: string; length: number }
+  >;
 };
 const snapshots = new WeakMap<CodeContext, Snapshot>(),
   SOURCE_CAP = 128000;
@@ -453,4 +457,121 @@ export function disclosureSummary(context: CodeContext): readonly string[] {
     `Total: ${source + diagnostics + metadata} / 64000 code points`,
   );
   return Object.freeze(lines);
+}
+
+/** Original capture authority is retained while only its approved created prefix grows. */
+export type CreatedPrefix = Readonly<{ name: FocusName; stat: BigIntStats }>;
+export async function validateCreateProgress(
+  context: CodeContext,
+  proposal: import("../../desktop/shared/coding-contracts").CodeProposal,
+  prefix: readonly CreatedPrefix[],
+): Promise<string> {
+  const snapshot = snapshots.get(context);
+  if (!snapshot) invalid();
+  try {
+    check(snapshot);
+    if (
+      context.mode !== "create_focus_project" ||
+      context.context_hash !== snapshot.hash ||
+      prefix.length > 4 ||
+      prefix.length < (snapshot.created?.size ?? 0) ||
+      prefix.length > (snapshot.created?.size ?? 0) + 1
+    )
+      invalid();
+    const root = await native(snapshot);
+    check(snapshot);
+    const finalChecks: (() => void)[] = [];
+    const versions: NonNullable<Snapshot["created"]> = new Map();
+    const directoryCheck = () => {
+      check(snapshot);
+      const directory = opendirSync(root),
+        found: string[] = [];
+      try {
+        for (
+          let entry = directory.readSync();
+          entry;
+          entry = directory.readSync()
+        ) {
+          if (found.length === 4) invalid();
+          found.push(entry.name);
+        }
+      } finally {
+        directory.closeSync();
+      }
+      if (
+        found.length !== prefix.length ||
+        found.some((n) => !prefix.some((p) => p.name === n))
+      )
+        invalid();
+    };
+    directoryCheck();
+    const uncreatedBufferCheck = () => {
+      for (const name of FOCUS_NAMES.filter(
+        (name) => !prefix.some((item) => item.name === name),
+      )) {
+        const uri = vscode.Uri.file(join(root, name)).toString();
+        if (
+          vscode.workspace.textDocuments?.some(
+            (document) => document.uri.toString() === uri,
+          )
+        )
+          invalid();
+      }
+    };
+    uncreatedBufferCheck();
+    for (const [i, item] of prefix.entries()) {
+      if (item.name !== FOCUS_NAMES[i]) invalid();
+      const file = await readFile(snapshot, item.name, finalChecks);
+      check(snapshot);
+      const approved = proposal.files.find((f) => f.name === item.name);
+      const previous = snapshot.created?.get(item.name);
+      if (
+        previous !== undefined &&
+        (previous.version !== file.document_version ||
+          !sameStat(previous.stat, item.stat) ||
+          previous.hash !== file.disk_hash)
+      )
+        invalid();
+      versions.set(item.name, {
+        version: file.document_version,
+        stat: item.stat,
+        hash: file.disk_hash,
+        length: Buffer.byteLength(file.text),
+      });
+      if (
+        !approved ||
+        file.text !== approved.text ||
+        file.file_id !== `${item.stat.dev}-${item.stat.ino}` ||
+        !sameStat(item.stat, lstatSync(join(root, item.name), { bigint: true }))
+      )
+        invalid();
+      const known =
+        vscode.workspace.textDocuments?.filter(
+          (d) =>
+            d.uri.toString() ===
+            vscode.Uri.file(join(root, item.name)).toString(),
+        ) ?? [];
+      for (const document of known) {
+        const version = document.version;
+        finalChecks.push(() => {
+          if (
+            document.isDirty ||
+            document.version !== version ||
+            document.getText() !== approved.text
+          )
+            invalid();
+        });
+      }
+    }
+    await native(snapshot);
+    check(snapshot);
+    directoryCheck();
+    uncreatedBufferCheck();
+    for (const finalCheck of finalChecks) finalCheck();
+    snapshot.created = versions;
+    return root;
+  } catch (error) {
+    releaseContext(context);
+    throw error;
+  }
 }
