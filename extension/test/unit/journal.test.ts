@@ -32,8 +32,39 @@ import {
   type CodeIntent,
   type CodeBinding,
 } from "../../../desktop/shared/coding-contracts";
+const boundary = vi.hoisted(() => ({
+  collision: false,
+  rename: "" as "" | "before" | "after",
+}));
+vi.mock("node:fs/promises", async (original) => {
+  const fs = await original<typeof import("node:fs/promises")>();
+  return {
+    ...fs,
+    mkdir: async (...args: Parameters<typeof fs.mkdir>) => {
+      if (boundary.collision && String(args[0]).includes("acknowledged-")) {
+        await fs.mkdir(args[0]);
+        await fs.writeFile(
+          String(args[0]) + "/human",
+          "retained human marker",
+          { flag: "wx" },
+        );
+      }
+      return fs.mkdir(...args);
+    },
+    rename: async (...args: Parameters<typeof fs.rename>) => {
+      const owned = String(args[1]).includes("acknowledged-");
+      if (owned && boundary.rename === "before")
+        throw Error("owned pre-rename interruption");
+      await fs.rename(...args);
+      if (owned && boundary.rename === "after")
+        throw Error("owned post-rename interruption");
+    },
+  };
+});
 const roots: string[] = [];
 afterEach(async () => {
+  boundary.collision = false;
+  boundary.rename = "";
   await Promise.all(
     roots.splice(0).map((p) => rm(p, { recursive: true, force: true })),
   );
@@ -497,3 +528,62 @@ it("refuses acknowledging otherwise valid v1 evidence whose original metadata cl
   expect(result.entries[0].classification).toBe("unsafe");
   await expect(journal.acknowledgePending(result.entries[0])).rejects.toThrow();
 });
+
+it("an exclusive acknowledgment-directory collision never overwrites an existing destination", async () => {
+  const { root, journal } = await fixture();
+  const name = "pending-" + "7".repeat(32);
+  await writeFile(join(root, name), '{"version":1,');
+  const choice = (await journal.inspectPending()).entries[0];
+  boundary.collision = true;
+  await expect(journal.acknowledgePending(choice)).rejects.toThrow();
+  expect(await readFile(join(root, name), "utf8")).toBe('{"version":1,');
+  const retained = (await readdir(root)).find((entry) =>
+    entry.startsWith("acknowledged-"),
+  )!;
+  expect(await readFile(join(root, retained, "human"), "utf8")).toBe(
+    "retained human marker",
+  );
+  expect(await readdir(join(root, retained))).toEqual(["human"]);
+});
+it.each(["before", "after"] as const)(
+  "an interruption %s acknowledgment rename preserves exact bytes/age and never promotes an operation",
+  async (cutpoint) => {
+    const { root, journal } = await fixture();
+    const name = "pending-" + "8".repeat(32);
+    await writeFile(join(root, name), '{"version":1,');
+    const age = new Date(Date.now() - 1000);
+    await utimes(join(root, name), age, age);
+    const before = await lstat(join(root, name));
+    const choice = (await journal.inspectPending()).entries[0];
+    boundary.rename = cutpoint;
+    await expect(journal.acknowledgePending(choice)).rejects.toThrow();
+    boundary.rename = "";
+    const directory = (await readdir(root)).find((entry) =>
+      entry.startsWith("acknowledged-"),
+    )!;
+    const retained =
+      cutpoint === "before" ? join(root, name) : join(root, directory, name);
+    expect(await readFile(retained, "utf8")).toBe('{"version":1,');
+    expect((await lstat(retained)).mtimeMs).toBe(before.mtimeMs);
+    await expect(journal.get("op")).rejects.toThrow();
+    const fresh = {
+      ...intent(),
+      operation_id: "fresh-op",
+      binding: {
+        ...intent().binding,
+        job_id: "fresh-job",
+        boot_id: "fresh-boot",
+        pair_id: "fresh-pair",
+      },
+    };
+    if (cutpoint === "before") {
+      expect(await readdir(join(root, directory))).toEqual([]);
+      await expect(journal.intent(fresh)).rejects.toThrow(
+        /Inspect interrupted Sage journal/,
+      );
+    } else {
+      expect(await readdir(join(root, directory))).toEqual([name]);
+      expect((await journal.intent(fresh)).status).toBe("recorded");
+    }
+  },
+);
