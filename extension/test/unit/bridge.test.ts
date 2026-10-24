@@ -71,6 +71,10 @@ vi.mock("vscode", () => ({
     dispose() {}
   },
   Uri: {
+    parse: (value: string) => ({
+      toString: () => value,
+      scheme: value.split(":")[0],
+    }),
     file: (path: string) => ({
       fsPath: path,
       toString: () => pathToFileURL(path).href,

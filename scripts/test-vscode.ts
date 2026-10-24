@@ -22,6 +22,15 @@ const activeChildren = new Set<ChildProcess>();
 const SUITE_LIMIT = 600_000,
   CASE_LIMIT = 120_000,
   OUTPUT_LIMIT = 262144;
+const TEST_SCENARIOS = [
+  "success",
+  "nonzero",
+  "timeout",
+  "cancel",
+  "overflow",
+  "mutation",
+  "inherited",
+] as const;
 const REPLACE_SCENARIOS: readonly import("../extension/test/integration/replace").ReplaceScenario[] =
   [
     "success",
@@ -35,19 +44,19 @@ const REPLACE_SCENARIOS: readonly import("../extension/test/integration/replace"
   ];
 export function selectedCase(
   args: string[],
-): "bridge" | "context" | "create" | "replace" | "all" {
+): "bridge" | "context" | "create" | "replace" | "test-runner" | "all" {
   if (args.length === 0) return "bridge";
   if (args.length === 4) {
     if (
       args[0] !== "--case" ||
-      args[1] !== "replace" ||
+      !["replace", "test-runner"].includes(args[1]) ||
       args[2] !== "--scenario" ||
-      !REPLACE_SCENARIOS.includes(
-        args[3] as import("../extension/test/integration/replace").ReplaceScenario,
+      !(args[1] === "replace" ? REPLACE_SCENARIOS : TEST_SCENARIOS).includes(
+        args[3] as never,
       )
     )
       throw Error("Unknown editor test scenario");
-    return "replace";
+    return args[1] as "replace" | "test-runner";
   }
   if (
     args.length !== 2 ||
@@ -68,6 +77,7 @@ export function selectedCase(
     args[1] !== "context" &&
     args[1] !== "create" &&
     args[1] !== "replace" &&
+    args[1] !== "test-runner" &&
     args[1] !== "all"
   )
     throw Error("Editor case is not implemented in Task4");
@@ -180,9 +190,16 @@ async function lane(
   executable: string,
   trusted: boolean,
   packaged = false,
-  selectedCase: "bridge" | "context" | "create" | "replace" | "all" = "bridge",
+  selectedCase:
+    | "bridge"
+    | "context"
+    | "create"
+    | "replace"
+    | "test-runner"
+    | "all" = "bridge",
   createScenario: import("../extension/test/integration/create").CreateScenario = "success",
   replaceScenario: import("../extension/test/integration/replace").ReplaceScenario = "success",
+  testScenario: import("../extension/test/integration/test-runner").TestScenario = "success",
 ): Promise<void> {
   const owned = await realpath(
     await mkdtemp(
@@ -222,6 +239,9 @@ async function lane(
     JSON.stringify({
       "security.workspace.trust.enabled": true,
       "window.dialogStyle": "custom",
+      ...(selectedCase === "test-runner"
+        ? { "files.simpleDialog.enable": true }
+        : {}),
       "chat.disableAIFeatures": true,
       "security.workspace.trust.startupPrompt": "never",
       "git.enabled": false,
@@ -304,6 +324,7 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     selectedCase,
     createScenario,
     replaceScenario,
+    testScenario,
     fixtureSource: resolve("tests/fixtures/focus-project"),
     expectedRoot: uri,
   };
@@ -432,12 +453,13 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
               workspace,
               replaceScenario,
             )
-          : selectedCase === "create"
+          : selectedCase === "create" || selectedCase === "test-runner"
             ? await integration.createThroughWorkbench(
                 page,
                 fixture,
                 workspace,
                 createScenario,
+                selectedCase === "test-runner",
               )
             : await integration.pairThroughWorkbench(
                 page,
@@ -446,7 +468,8 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
       if (
         selectedCase !== "bridge" &&
         selectedCase !== "create" &&
-        selectedCase !== "replace"
+        selectedCase !== "replace" &&
+        selectedCase !== "test-runner"
       )
         await host!.exerciseContext();
       console.log(
@@ -460,8 +483,18 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
                 ),
                 replace_races: await json(join(fixture, "replace-races.json")),
               }
-            : selectedCase === "create"
+            : selectedCase === "create" || selectedCase === "test-runner"
               ? {
+                  ...(selectedCase === "test-runner"
+                    ? {
+                        test_runner: await json(
+                          join(fixture, "test-runner-proof.json"),
+                        ),
+                        native_environment: await json(
+                          join(fixture, "test-env-proof.json"),
+                        ),
+                      }
+                    : {}),
                   create_authority: await json(
                     join(fixture, "create-authority.json"),
                   ),
@@ -478,6 +511,7 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
       );
       if (
         !packaged &&
+        selectedCase !== "test-runner" &&
         (selectedCase !== "replace" || replaceScenario === "success")
       ) {
         await writeFile(
@@ -533,7 +567,11 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     await browser?.close();
     await stop(child);
     activeChildren.delete(child);
-    if (selectedCase !== "create" && selectedCase !== "replace")
+    if (
+      selectedCase !== "create" &&
+      selectedCase !== "replace" &&
+      selectedCase !== "test-runner"
+    )
       await rm(owned, {
         recursive: true,
         force: true,
@@ -545,10 +583,7 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
 async function main(): Promise<void> {
   const args = process.argv.slice(2),
     selected = selectedCase(args),
-    requestedScenario =
-      args.length === 4
-        ? (args[3] as import("../extension/test/integration/replace").ReplaceScenario)
-        : undefined;
+    requestedScenario = args.length === 4 ? args[3] : undefined;
   assertNativeElectronContext();
   const suiteTimer = setTimeout(() => {
     console.error("FAIL editor suite timeout");
@@ -602,10 +637,15 @@ async function main(): Promise<void> {
         await lane(
           executable,
           true,
-          false,
-          "replace",
+          selected === "test-runner" && requestedScenario === "success",
+          selected as "replace" | "test-runner",
           "success",
-          requestedScenario,
+          selected === "replace"
+            ? (requestedScenario as import("../extension/test/integration/replace").ReplaceScenario)
+            : "success",
+          selected === "test-runner"
+            ? (requestedScenario as import("../extension/test/integration/test-runner").TestScenario)
+            : "success",
         );
       else {
         await lane(executable, true, false, selected);
@@ -613,6 +653,17 @@ async function main(): Promise<void> {
           await lane(await revalidate(), true, true, selected);
           await lane(await revalidate(), false, true, selected);
         }
+        if (selected === "test-runner")
+          for (const scenario of TEST_SCENARIOS.filter((s) => s !== "success"))
+            await lane(
+              await revalidate(),
+              true,
+              false,
+              "test-runner",
+              "success",
+              "success",
+              scenario,
+            );
         if (selected === "replace")
           for (const scenario of [
             "participant",
@@ -647,7 +698,11 @@ async function main(): Promise<void> {
           ? requestedScenario
             ? `PASS owned editor replacement scenario ${requestedScenario}`
             : "PASS owned editor replacement, byte observations, native version races and persisted trust reload"
-          : "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
+          : selected === "test-runner"
+            ? requestedScenario
+              ? `PASS owned fixed test scenario ${requestedScenario}`
+              : "PASS owned fixed test approval, actual child receipts, result Done and restricted refusal"
+            : "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
       );
     } finally {
       clearTimeout(suiteTimer);

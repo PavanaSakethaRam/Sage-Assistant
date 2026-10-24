@@ -66,3 +66,74 @@ it("rejects conflicting case aliases for OS essentials before reading their valu
     }),
   ).toThrow("Ambiguous OS environment key");
 });
+
+import { nativeEnvironmentProof } from "../../extension/test/integration/test-runner";
+it("keeps supplied maps separate from the sealed actual native additions", () => {
+  const supplied = {
+    PATH: "",
+    TEMP: "/owned/tmp",
+    TMP: "/owned/tmp",
+    TMPDIR: "/owned/tmp",
+  };
+  const actual = {
+    ...supplied,
+    NODE_TEST_WORKER_ID: "1",
+    __CF_USER_TEXT_ENCODING: "0x1F5:0x0:0x0",
+  };
+  expect(
+    nativeEnvironmentProof(supplied, actual, "darwin", 501, 501).accepted,
+  ).toBe(true);
+  for (const mutation of [
+    { __CF_USER_TEXT_ENCODING: "0x000000001:0x0:0x0" },
+    { __CF_USER_TEXT_ENCODING: "0x1F4:0x0:0x0" },
+    { __CF_USER_TEXT_ENCODING: "0x1F5:0x0:0x0\n" },
+    { __CF_USER_TEXT_ENCODING: "0x1F5:0x0:0x0 " },
+    { __CF_USER_TEXT_ENCODING: "0x1F5:0x0" },
+    { EXTRA: "unknown" },
+    { Path: "" },
+    { PATH: "fallback" },
+    { NODE_TEST_WORKER_ID: "2" },
+  ])
+    expect(
+      nativeEnvironmentProof(
+        supplied,
+        { ...actual, ...mutation },
+        "darwin",
+        501,
+        501,
+      ).accepted,
+    ).toBe(false);
+  expect(
+    nativeEnvironmentProof(supplied, actual, "darwin", 501, 502).accepted,
+  ).toBe(false);
+});
+it("Windows constructor blanks prevent fallback but a map double never establishes native readiness", () => {
+  const supplied = isolatedChildEnv(
+    {
+      HOME: "",
+      TEMP: "C:\\owned\\tmp",
+      TMP: "C:\\owned\\tmp",
+      TMPDIR: "C:\\owned\\tmp",
+    },
+    "win32",
+    {},
+  ) as Record<string, string>;
+  expect(
+    nativeEnvironmentProof(
+      supplied,
+      { ...supplied, NODE_TEST_WORKER_ID: "1" },
+      "win32",
+      undefined,
+      undefined,
+    ).accepted,
+  ).toBe(true);
+  expect(
+    nativeEnvironmentProof(
+      supplied,
+      { ...supplied, NODE_TEST_WORKER_ID: "1", USERPROFILE: "C:\\ambient" },
+      "win32",
+      undefined,
+      undefined,
+    ).accepted,
+  ).toBe(false);
+});

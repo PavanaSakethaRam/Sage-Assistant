@@ -318,6 +318,9 @@ export function activate(context: vscode.ExtensionContext): void {
             // Return to the receive pump so grant/ACK frames can complete the local gesture.
             operation.reviewTask = review
               .show(captured, message.payload)
+              .then(() =>
+                operation.applied ? review.resultControls(captured) : undefined,
+              )
               .catch(reviewFailure(operation, captured.mode));
           }
         });

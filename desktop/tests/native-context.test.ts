@@ -55,3 +55,25 @@ it("selects only fixed replacement scenarios in the owned harness", () => {
   ])
     expect(() => selectedCase(args)).toThrow();
 });
+
+it("selects only bounded fixed test-runner scenarios and rejects mismatched flags", () => {
+  expect(selectedCase(["--case", "test-runner"])).toBe("test-runner");
+  for (const scenario of [
+    "success",
+    "nonzero",
+    "timeout",
+    "cancel",
+    "overflow",
+    "mutation",
+    "inherited",
+  ])
+    expect(
+      selectedCase(["--case", "test-runner", "--scenario", scenario]),
+    ).toBe("test-runner");
+  for (const args of [
+    ["--case", "test-runner", "--scenario", "participant"],
+    ["--case", "test-runner", "--other", "success"],
+    ["--case", "test-runner", "--scenario", "success", "extra"],
+  ])
+    expect(() => selectedCase(args)).toThrow();
+});

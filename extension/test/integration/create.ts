@@ -33,6 +33,7 @@ export async function createThroughWorkbench(
   fixture: string,
   root: string,
   scenario: CreateScenario,
+  testRunner = false,
 ) {
   const state = join(fixture, "core");
   await mkdir(state, { mode: 0o700 });
@@ -261,6 +262,17 @@ export async function createThroughWorkbench(
         bytes: await readFile(resolve("tests/fixtures/focus-project", name)),
       })),
     );
+    if (testRunner) {
+      const { focusTestSuffix } = await import("./test-runner");
+      const config = JSON.parse(
+        await readFile(join(fixture, "case.json"), "utf8"),
+      );
+      const test = source.find((f) => f.name === "focus.test.mjs")!;
+      test.bytes = Buffer.concat([
+        test.bytes,
+        Buffer.from(focusTestSuffix(config.testScenario ?? "success")),
+      ]);
+    }
     await wait(async () => {
       try {
         return !!JSON.parse(
@@ -393,6 +405,12 @@ export async function createThroughWorkbench(
         2,
       ),
     );
+    if (testRunner) {
+      const { testThroughWorkbench } = await import("./test-runner");
+      await testThroughWorkbench(page, fixture, root, () =>
+        status(job!.binding.job_id),
+      );
+    }
     await writeFile(
       join(fixture, "create-finished.json"),
       JSON.stringify({ scenario }),

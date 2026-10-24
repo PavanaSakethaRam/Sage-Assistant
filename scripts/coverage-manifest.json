@@ -50,6 +50,7 @@
     "extension/src/journal.ts",
     "extension/src/replace.ts",
     "extension/src/review.ts",
+    "extension/src/test-runner.ts",
     "extension/src/root-probe.ts"
   ],
   "trusted_python": [
@@ -96,6 +97,7 @@
     "extension/src/journal.ts",
     "extension/src/replace.ts",
     "extension/src/review.ts",
+    "extension/src/test-runner.ts",
     "extension/src/root-probe.ts"
   ],
   "excluded": [

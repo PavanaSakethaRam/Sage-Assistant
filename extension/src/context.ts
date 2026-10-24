@@ -69,6 +69,16 @@ type Snapshot = {
     hash: string;
     length: number;
   };
+  testFiles?: Map<
+    FocusName,
+    {
+      stat: BigIntStats;
+      hash: string;
+      length: number;
+      document: vscode.TextDocument;
+      version: number;
+    }
+  >;
   created?: Map<
     FocusName,
     { version: number; stat: BigIntStats; hash: string; length: number }
@@ -875,5 +885,189 @@ export function replacementState(context: CodeContext) {
         invalid();
       snapshot.replaced = { document, version: document.version, ...observed };
     },
+  };
+}
+
+/** Current saved project metadata only; unselected text never enters provider context. */
+export async function focusTestState(context: CodeContext) {
+  const snapshot = snapshots.get(context);
+  if (!snapshot) invalid();
+  const root = await native(snapshot);
+  check(snapshot);
+  if (
+    context.mode === "create_focus_project"
+      ? snapshot.created?.size !== 4
+      : !snapshot.replaced
+  )
+    invalid();
+  type Current = {
+    name: FocusName;
+    stat: BigIntStats;
+    hash: string;
+    length: number;
+    document: vscode.TextDocument;
+    version: number;
+  };
+  const current = (name: FocusName): Current => {
+    const rootStat = lstatSync(root, { bigint: true });
+    if (
+      !rootStat.isDirectory() ||
+      rootStat.isSymbolicLink() ||
+      realpathSync(root) !== root ||
+      `${rootStat.dev}-${rootStat.ino}` !== context.root_file_id
+    )
+      invalid();
+    const path = join(root, name),
+      before = lstatSync(path, { bigint: true });
+    if (
+      !before.isFile() ||
+      before.isSymbolicLink() ||
+      before.nlink !== 1n ||
+      before.size > BigInt(SOURCE_CAP) ||
+      (process.getuid && before.uid !== BigInt(process.getuid())) ||
+      realpathSync(path) !== path
+    )
+      invalid();
+    const fd = openSync(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+    let bytes: Buffer;
+    try {
+      if (!sameStat(before, fstatSync(fd, { bigint: true }))) invalid();
+      const buffer = Buffer.alloc(SOURCE_CAP + 1);
+      let offset = 0;
+      while (offset < buffer.length) {
+        const n = readSync(fd, buffer, offset, buffer.length - offset, offset);
+        offset += n;
+        if (!n) break;
+      }
+      if (
+        offset > SOURCE_CAP ||
+        BigInt(offset) !== before.size ||
+        !sameStat(before, fstatSync(fd, { bigint: true })) ||
+        !sameStat(before, lstatSync(path, { bigint: true }))
+      )
+        invalid();
+      bytes = buffer.subarray(0, offset);
+    } finally {
+      closeSync(fd);
+    }
+    const text = new TextDecoder("utf-8", {
+      fatal: true,
+      ignoreBOM: true,
+    }).decode(bytes);
+    if (
+      text.startsWith("\ufeff") ||
+      text.includes("\r") ||
+      [...text].length > 32000
+    )
+      invalid();
+    const documents = vscode.workspace.textDocuments.filter(
+      (d) => d.uri.toString() === vscode.Uri.file(path).toString(),
+    );
+    if (documents.length !== 1) invalid();
+    const document = documents[0],
+      hash = digest(bytes),
+      length = bytes.length;
+    if (
+      document.isClosed ||
+      document.isDirty ||
+      document.eol !== vscode.EndOfLine.LF ||
+      document.encoding !== "utf8" ||
+      !matchesUtf8Text(document.getText(), hash, length)
+    )
+      invalid();
+    return {
+      name,
+      stat: before,
+      hash,
+      length,
+      document,
+      version: document.version,
+    };
+  };
+  // Open fixed manifest documents under the original lease, without retaining source text.
+  for (const name of FOCUS_NAMES) {
+    await vscode.workspace.openTextDocument(vscode.Uri.file(join(root, name)));
+    check(snapshot);
+  }
+  const files = FOCUS_NAMES.map(current);
+  for (const file of files) {
+    const prior = snapshot.testFiles?.get(file.name);
+    if (
+      prior &&
+      (file.hash !== prior.hash ||
+        file.length !== prior.length ||
+        file.version !== prior.version ||
+        file.document !== prior.document ||
+        !sameStat(file.stat, prior.stat))
+    )
+      invalid();
+    const saved =
+      snapshot.created?.get(file.name) ??
+      (file.name === context.target ? snapshot.replaced : undefined);
+    const source = context.files.find((f) => f.name === file.name);
+    if (saved) {
+      if (
+        file.hash !== saved.hash ||
+        file.length !== saved.length ||
+        file.version !== saved.version ||
+        !sameStat(file.stat, saved.stat)
+      )
+        invalid();
+    } else if (
+      source &&
+      (file.hash !== source.disk_hash ||
+        file.version !== source.document_version ||
+        !sameStat(file.stat, snapshot.sourceStats!.get(file.name)!))
+    )
+      invalid();
+  }
+  snapshot.testFiles ??= new Map(files.map((file) => [file.name, file]));
+  const observe = () => {
+    try {
+      if (snapshot.released || snapshots.get(context) !== snapshot) {
+        const rootStat = lstatSync(root, { bigint: true });
+        return (
+          rootStat.isDirectory() &&
+          !rootStat.isSymbolicLink() &&
+          realpathSync(root) === root &&
+          `${rootStat.dev}-${rootStat.ino}` === context.root_file_id &&
+          files.every(
+            (file) =>
+              sameStat(
+                file.stat,
+                lstatSync(join(root, file.name), { bigint: true }),
+              ) &&
+              !file.document.isClosed &&
+              !file.document.isDirty &&
+              file.document.version === file.version,
+          )
+        );
+      }
+      return files.every((file) => {
+        const now = current(file.name);
+        return (
+          now.hash === file.hash &&
+          now.length === file.length &&
+          now.version === file.version &&
+          now.document === file.document &&
+          sameStat(now.stat, file.stat)
+        );
+      });
+    } catch {
+      return false;
+    }
+  };
+  const owned = () => {
+    if (snapshots.get(context) !== snapshot) invalid();
+    check(snapshot);
+    if (!observe()) invalid();
+  };
+  owned();
+  return {
+    root,
+    expires: snapshot.expires,
+    files: files.map(({ name, hash }) => ({ name, hash })),
+    check: owned,
+    observe,
   };
 }

@@ -18,6 +18,29 @@ SOURCE = Path(__file__).resolve().parents[2] / "tests/fixtures/focus-project"
 NAMES = ("index.html", "focus.js", "focus.test.mjs", "README.md")
 
 
+def fixture_text(name):
+    text = (SOURCE / name).read_text()
+    config = json.loads((ROOT.parent / "case.json").read_text())
+    if name == "focus.test.mjs" and config.get("selectedCase") == "test-runner":
+        suffixes = {
+            "success": "",
+            "nonzero": "\nprocess.exitCode=1;\n",
+            "timeout": "\nsetInterval(()=>{},1000);\n",
+            "cancel": "\nsetInterval(()=>{},1000);\n",
+            "overflow": "\nprocess.stdout.write('x'.repeat(300000));\n",
+            "mutation": (
+                "\n(await import('node:fs')).writeFileSync("
+                "'focus.js','changed by owned test');\n"
+            ),
+            "inherited": (
+                "\n(await import('node:child_process')).spawn(process.execPath,"
+                "['-e','setTimeout(()=>{},4500)'],{stdio:['ignore',1,2],detached:false}).unref();\n"
+            ),
+        }
+        text += suffixes[config["testScenario"]]
+    return text
+
+
 class FixtureBackend:
     def coding_readiness(self):
         return ProviderReadiness(provider="copilot", status="ready", explanation="owned fixture")
@@ -38,7 +61,7 @@ class FixtureBackend:
                     }
                 ]
                 if request.mode == "replace_focus_file"
-                else [{"name": name, "text": (SOURCE / name).read_text()} for name in NAMES]
+                else [{"name": name, "text": fixture_text(name)} for name in NAMES]
             ),
         )
 

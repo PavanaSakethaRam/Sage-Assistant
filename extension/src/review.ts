@@ -10,6 +10,8 @@ import {
   type CodeContext,
   type CodeProposal,
   type CodeGrant,
+  type TestRecipe,
+  type CodeReceipt,
 } from "../../desktop/shared/coding-contracts";
 import {
   sameBinding,
@@ -26,6 +28,15 @@ import type { ExtensionBridge } from "./bridge";
 import type { EffectJournal } from "./journal";
 import { createFocusProject } from "./create";
 import { replaceFocusFile } from "./replace";
+import {
+  inspectNode,
+  prepareFocusTest,
+  openKnownResult,
+  runFocusTest,
+  testRecipeContext,
+  testResultText,
+  clearTestRecipe,
+} from "./test-runner";
 declare const localReview: unique symbol;
 export type LocalReview = { readonly [localReview]: never };
 type Authority = {
@@ -37,6 +48,18 @@ type Authority = {
   check: () => void;
 };
 const approvals = new WeakMap<LocalReview, Authority>();
+const testApprovals = new WeakMap<
+  LocalReview,
+  Omit<Authority, "proposal"> & { recipe: TestRecipe }
+>();
+export function consumeLocalTestReview(token: LocalReview, recipe: TestRecipe) {
+  const owned = testApprovals.get(token);
+  testApprovals.delete(token);
+  if (!owned || owned.recipe !== recipe)
+    throw Error("Local test confirmation required");
+  owned.check();
+  return owned;
+}
 export function consumeLocalReview(
   token: LocalReview,
   context: CodeContext,
@@ -92,6 +115,7 @@ export class ProposalReview {
   private pending:
     | {
         hash: string;
+        scope: CodeGrant["scope"];
         context: CodeContext;
         resolve: (g: CodeGrant) => void;
         reject: (e: Error) => void;
@@ -102,6 +126,12 @@ export class ProposalReview {
   private emitter = new vscode.EventEmitter<vscode.Uri>();
   private provider: vscode.Disposable;
   private unsubscribe: () => void;
+  private testRecipe: TestRecipe | undefined;
+  private testUri = vscode.Uri.parse(
+    `sage-diff:/${randomBytes(16).toString("hex")}/focus-test.txt`,
+  );
+  private testFinished = false;
+  private resultSummary: string | undefined;
   constructor(private readonly options: Options) {
     this.provider = vscode.workspace.registerTextDocumentContentProvider(
       "sage-diff",
@@ -132,10 +162,7 @@ export class ProposalReview {
       if (
         !sameBinding(grant.binding, p.context.binding) ||
         !sameBinding(message.binding, p.context.binding) ||
-        grant.scope !==
-          (p.context.mode === "create_focus_project"
-            ? "code.create"
-            : "code.replace") ||
+        grant.scope !== p.scope ||
         grant.approved_hash !== p.hash ||
         grant.consumed_at ||
         Date.parse(grant.issued_at) > Date.now() ||
@@ -326,6 +353,7 @@ export class ProposalReview {
           }, 30000);
           this.pending = {
             hash,
+            scope,
             context,
             resolve: (g) => {
               clearTimeout(timeout);
@@ -433,10 +461,263 @@ export class ProposalReview {
       if (!applied) await this.options.onFailure();
     }
   }
+  async showTest(
+    context: CodeContext,
+    recipe: TestRecipe,
+  ): Promise<CodeReceipt | undefined> {
+    if (
+      this.active ||
+      this.testFinished ||
+      testRecipeContext(recipe) !== context
+    )
+      throw Error("Test review unavailable");
+    this.active = true;
+    this.reviewedContext = context;
+    this.testRecipe = recipe;
+    this.controller = new AbortController();
+    const controller = this.controller,
+      generation = ++this.generation;
+    this.unsubscribeContext = onContextRelease(context, () => this.cancel());
+    const started = Date.now(),
+      mono = performance.now();
+    let last = started,
+      complete = false;
+    const check = () => {
+      this.options.guard();
+      contextOffer(context);
+      const now = Date.now();
+      if (
+        controller.signal.aborted ||
+        generation !== this.generation ||
+        now < last ||
+        now >= Date.parse(recipe.deadline) ||
+        performance.now() - mono >= 300000
+      )
+        throw Error("Test review expired or cancelled");
+      last = now;
+    };
+    let timer: ReturnType<typeof setTimeout> | undefined = setTimeout(
+      () => this.cancel(),
+      Math.max(0, Date.parse(recipe.deadline) - Date.now()),
+    );
+    try {
+      check();
+      this.texts.set(
+        this.testUri.toString(),
+        `Fixed focus test preview (local only)\n${JSON.stringify(recipe, null, 2)}\nLatest permitted start: ${recipe.deadline}\nRuntime from spawn: 30 seconds; output cap 256 KiB; shell:false, detached:false, closed stdin.\nSupplied environment map above is hash-bound; known native additions are separately disclosed: NODE_TEST_WORKER_ID=1; on macOS, validated OS text-encoding key __CF_USER_TEXT_ENCODING.\nTest code has your file, network and process authority. Direct-child termination does not contain descendants. Generated tests do not certify app behavior.\n`,
+      );
+      await this.options.bridge.send({
+        kind: "test.preview",
+        binding: context.binding,
+        payload: recipe,
+      });
+      check();
+      await this.showTestDocument();
+      check();
+      const choice = await this.choose(
+        [{ label: "Run fixed tests" }, { label: "Decline" }],
+        check,
+      );
+      check();
+      if (choice !== "Run fixed tests") return;
+      const confirmation = await abortableChoice(
+        vscode.window.showWarningMessage(
+          "Run these fixed tests with your user authority?",
+          {
+            modal: true,
+            detail: `Executable: ${recipe.executable}\nVersion: ${recipe.executable_version}\nRecipe SHA256: ${recipe.recipe_hash}\nLatest start: ${recipe.deadline}\n30 seconds from spawn, 256 KiB. Tests can access files/network/processes; no descendant containment. Generated tests do not certify app behavior.`,
+          },
+          "Run fixed tests",
+        ),
+        controller.signal,
+      );
+      check();
+      if (confirmation !== "Run fixed tests") return;
+      if (testRecipeContext(recipe) !== context)
+        throw Error("Test recipe changed");
+      const grant = await new Promise<CodeGrant>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          this.pending = undefined;
+          reject(Error("Test grant timeout"));
+          void this.options.onFailure();
+        }, 30000);
+        this.pending = {
+          hash: recipe.recipe_hash,
+          scope: "code.test",
+          context,
+          resolve: (g) => {
+            clearTimeout(timeout);
+            resolve(g);
+          },
+          reject: (e) => {
+            clearTimeout(timeout);
+            reject(e);
+          },
+        };
+        void this.options.bridge
+          .send({
+            kind: "review.decision",
+            binding: context.binding,
+            payload: {
+              binding: context.binding,
+              scope: "code.test",
+              approved_hash: recipe.recipe_hash,
+              decision: "accept",
+            },
+          })
+          .catch((e) => {
+            this.pending?.reject(e);
+            this.pending = undefined;
+          });
+      });
+      check();
+      if (Date.parse(grant.expires_at) > Date.parse(recipe.deadline))
+        throw Error("Test grant exceeds recipe deadline");
+      const token = Object.freeze({}) as LocalReview,
+        grantStart = performance.now(),
+        grantRemaining = Date.parse(grant.expires_at) - Date.now();
+      testApprovals.set(token, {
+        context,
+        recipe,
+        grant,
+        bridge: this.options.bridge,
+        journal: this.options.journal,
+        check: () => {
+          check();
+          if (
+            Date.now() >= Date.parse(grant.expires_at) ||
+            performance.now() - grantStart >= grantRemaining
+          )
+            throw Error("Test grant expired");
+        },
+      });
+      // Human latest-start expiry never shortens or extends an already started runtime.
+      clearTimeout(timer);
+      timer = undefined;
+      const receipt = await runFocusTest(recipe, token);
+      this.testFinished = true;
+      this.options.guard();
+      contextOffer(context);
+      if (controller.signal.aborted || generation !== this.generation)
+        throw Error("Test review cancelled");
+      const fact =
+        receipt as import("../../desktop/shared/coding-contracts").CodeTestReceipt;
+      this.resultSummary = `Fixed test result: ${fact.status}\nExit: ${fact.exit_code}; signal: ${fact.signal}\nCancel requested: ${fact.cancel_requested}; timeout: ${fact.timeout}; overflow: ${fact.overflow}\nOutput SHA256 (${fact.overflow ? "captured prefix" : "captured bytes; may be incomplete"}): ${fact.output_digest}\nGenerated tests do not certify app behavior. Test code ran with your file/network/process authority. Direct-child observation does not contain descendants.`;
+      this.texts.set(
+        this.testUri.toString(),
+        this.resultSummary + "\n\n" + testResultText(recipe),
+      );
+      this.emitter.fire(this.testUri);
+      await this.showTestDocument();
+      this.options.guard();
+      contextOffer(context);
+      complete = true;
+      return receipt;
+    } finally {
+      if (timer) clearTimeout(timer);
+      this.active = false;
+      if (!complete) {
+        clearTestRecipe(recipe);
+        this.stop(true);
+        await this.clear();
+        await this.options.onFailure();
+      }
+    }
+  }
+  private async showTestDocument(): Promise<void> {
+    if (this.resultSummary && this.testRecipe) {
+      this.texts.set(
+        this.testUri.toString(),
+        this.resultSummary + "\n\n" + testResultText(this.testRecipe),
+      );
+      this.emitter.fire(this.testUri);
+    }
+    const document = await vscode.workspace.openTextDocument(this.testUri);
+    this.options.guard();
+    if (this.controller?.signal.aborted) throw Error("Test review cancelled");
+    await vscode.window.showTextDocument(document, { preview: false });
+  }
+  async resultControls(context: CodeContext): Promise<void> {
+    const check = () => {
+      this.options.guard();
+      contextOffer(context);
+    };
+    check();
+    const choice = await this.choose(
+      [
+        ...(!this.testFinished
+          ? [{ label: "Review fixed tests" }]
+          : [{ label: "Inspect test result" }]),
+        { label: "Open index.html in editor" },
+        { label: "Open tracker externally" },
+        { label: "Done" },
+      ],
+      check,
+    );
+    check();
+    if (choice === "Review fixed tests") {
+      const consent = await vscode.window.showWarningMessage(
+        "Inspect a selected standalone Node executable with --version?",
+        {
+          modal: true,
+          detail:
+            "One version probe only; at most 5 seconds and 4 KiB. No install or fallback.",
+        },
+        "Select Node",
+      );
+      check();
+      if (consent !== "Select Node") return;
+      const selected = await vscode.window.showOpenDialog({
+        title: "Select standalone Node for fixed focus tests",
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        openLabel: "Select Node",
+      });
+      check();
+      if (selected?.length !== 1) return;
+      const node = await inspectNode(selected[0]);
+      check();
+      if (!node.available)
+        throw Error("Selected Node build/platform recipe unavailable");
+      const recipe = await prepareFocusTest(context, node);
+      check();
+      await this.showTest(context, recipe);
+      await this.resultControls(context);
+    } else if (choice === "Inspect test result") {
+      await this.showTestDocument();
+      await this.resultControls(context);
+    } else if (
+      choice === "Open index.html in editor" ||
+      choice === "Open tracker externally"
+    ) {
+      await openKnownResult(
+        context,
+        "index.html",
+        choice === "Open tracker externally" ? "browser" : "editor",
+      );
+      if (choice === "Open tracker externally")
+        void vscode.window.showInformationMessage(
+          "External handoff requested. Your OS default HTML app may differ from your default HTTP browser; the return does not prove rendering.",
+        );
+      await this.resultControls(context);
+    } else if (choice === "Done" || !choice) {
+      await this.options.bridge.send({
+        kind: "result.dismissed",
+        binding: context.binding,
+        payload: null,
+      });
+      this.cancel();
+      await this.options.onFailure();
+    }
+  }
   cancel(): void {
     this.stop(true);
   }
   private stop(revoke: boolean): void {
+    if (this.testRecipe) clearTestRecipe(this.testRecipe);
+    this.testRecipe = undefined;
+    this.resultSummary = undefined;
     this.source?.clear();
     this.source = undefined;
     this.unsubscribeContext?.();
@@ -459,9 +740,11 @@ export class ProposalReview {
       .flatMap((g) => g.tabs)
       .filter(
         (t) =>
-          t.input instanceof vscode.TabInputTextDiff &&
-          (owned.has(t.input.original.toString()) ||
-            owned.has(t.input.modified.toString())),
+          (t.input instanceof vscode.TabInputTextDiff &&
+            (owned.has(t.input.original.toString()) ||
+              owned.has(t.input.modified.toString()))) ||
+          (t.input instanceof vscode.TabInputText &&
+            owned.has(t.input.uri.toString())),
       );
     if (tabs.length) await vscode.window.tabGroups.close(tabs, true);
   }

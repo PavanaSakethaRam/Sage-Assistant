@@ -274,7 +274,10 @@ async function run(): Promise<void> {
             await runReplacementEditorRaces(product.extensionPath, fixture),
           );
       }
-      if (config.selectedCase === "create") {
+      if (
+        config.selectedCase === "create" ||
+        config.selectedCase === "test-runner"
+      ) {
         stage = "create-capture";
         assert.deepEqual(
           await import("node:fs/promises").then((fs) =>
@@ -317,10 +320,18 @@ async function run(): Promise<void> {
           assert.ok(diff);
           const before = await vscode.workspace.openTextDocument(diff.original),
             after = await vscode.workspace.openTextDocument(diff.modified);
-          const expected = await readFile(
+          let expected = await readFile(
             join(config.fixtureSource, name),
             "utf8",
           );
+          if (
+            config.selectedCase === "test-runner" &&
+            name === "focus.test.mjs"
+          ) {
+            const { focusTestSuffix } =
+              await import("../integration/test-runner");
+            expected += focusTestSuffix(config.testScenario ?? "success");
+          }
           assert.equal(before.getText(), "");
           assert.equal(after.getText(), expected);
           assert.equal(before.isDirty, false);
@@ -336,8 +347,40 @@ async function run(): Promise<void> {
           diffs: checked,
           literal_readonly: true,
         });
+        if (config.selectedCase === "test-runner") {
+          const { runNativeEnvironmentFixture } =
+            await import("../integration/test-runner");
+          await runNativeEnvironmentFixture(fixture);
+        }
         stage = "create-result";
+        let resultInspected = false;
         while (Date.now() < end + 30000) {
+          if (config.selectedCase === "test-runner" && !resultInspected) {
+            try {
+              await readFile(join(fixture, "test-result-ready.json"));
+              const result = vscode.window.activeTextEditor?.document;
+              assert.equal(result?.uri.scheme, "sage-diff");
+              assert.ok(result!.getText().startsWith("Fixed test result:"));
+              assert.ok(
+                result!
+                  .getText()
+                  .includes("Generated tests do not certify app behavior"),
+              );
+              assert.equal(result!.isDirty, false);
+              resultInspected = true;
+              await writeFile(
+                join(fixture, "test-result-inspected.json"),
+                JSON.stringify({
+                  readonly: true,
+                  warning: true,
+                  result_uri: result!.uri.toString(),
+                }),
+              );
+            } catch (error) {
+              if ((error as NodeJS.ErrnoException).code !== "ENOENT")
+                throw error;
+            }
+          }
           try {
             await readFile(join(fixture, "create-finished.json"));
             break;
