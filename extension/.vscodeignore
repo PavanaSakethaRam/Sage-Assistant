@@ -1,0 +1,8 @@
+**
+!package.json
+!dist/extension.cjs
+!README.md
+!LICENSE
+!THIRD_PARTY_NOTICES.md
+!dist/root-probe-darwin-arm64
+!dist/root-probe-win32-x64.exe

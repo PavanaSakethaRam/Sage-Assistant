@@ -1,0 +1,189 @@
+{
+  "record_date_utc": "2026-10-23",
+  "tested_source": {
+    "head": "12d813fabf5344eccf32aab929956742efb3eb22",
+    "tree": "3ef5f9399b689d2ae75afa54b8149d4fd40d1414",
+    "base_parent": "c7943bd4322f18d9201f4213e168e4747f5d0185",
+    "checkout_merge": "09d47971bd74cbe858ecd0fb1e47a5768681b871",
+    "checkout_merge_tree": "3ef5f9399b689d2ae75afa54b8149d4fd40d1414",
+    "source_and_checkout_trees_equal": true,
+    "verify_workflow_git_blob": "b2a6566f8435669ddf61fce5ffda3501001c1401",
+    "package_workflow_git_blob": "cea82b2ead7e168251ef869d5e52e3514d87907c"
+  },
+  "verify": {
+    "run_id": 39991009260,
+    "attempt": 1,
+    "url": "https://github.com/PavanaSakethaRam/Sage-Assistant/actions/runs/39991009260",
+    "conclusion": "success",
+    "jobs": {
+      "macos": {
+        "job_id": 120542443976,
+        "conclusion": "success",
+        "toolchain": {
+          "node": "26.12.1",
+          "npm": "11.20.0",
+          "python": "3.13.17"
+        },
+        "tests": {
+          "python": {
+            "passed": 587,
+            "failed": 0,
+            "skipped": 1
+          },
+          "node_tooling": {
+            "passed": 7,
+            "failed": 0,
+            "skipped": 0
+          },
+          "vitest": {
+            "passed": 171,
+            "failed": 0,
+            "skipped": 1
+          },
+          "electron_e2e": {
+            "passed": 5,
+            "failed": 0,
+            "skipped": 0
+          }
+        },
+        "integer_coverage": {
+          "javascript_maintained": {
+            "branches": [696, 810],
+            "statements": [1099, 1182]
+          },
+          "javascript_trusted": {
+            "branches": [496, 547],
+            "statements": [757, 804]
+          },
+          "python_maintained": {
+            "branches": [560, 606],
+            "statements": [1948, 2025]
+          },
+          "python_trusted": {
+            "branches": [560, 606],
+            "statements": [1948, 2025]
+          }
+        },
+        "static_checks": {
+          "mypy_source_files": 46,
+          "ruff_formatted_files": 58,
+          "typescript": "pass",
+          "eslint": "pass",
+          "format": "pass",
+          "security_collector": "pass_with_untriaged_lower_static_findings"
+        },
+        "sanitized_log_sha256": "65bb518b3eb66187c1d05091e8bdd1ded36fe592be37e05a47212eee3ee1faa6"
+      },
+      "windows": {
+        "job_id": 120542444200,
+        "conclusion": "success",
+        "toolchain": {
+          "node": "26.12.1",
+          "npm": "11.20.0",
+          "python": "3.13.17"
+        },
+        "tests": {
+          "python": {
+            "passed": 556,
+            "failed": 0,
+            "skipped": 32
+          },
+          "node_tooling": {
+            "passed": 7,
+            "failed": 0,
+            "skipped": 0
+          },
+          "vitest": {
+            "passed": 161,
+            "failed": 0,
+            "skipped": 11
+          },
+          "electron_e2e": {
+            "passed": 5,
+            "failed": 0,
+            "skipped": 0
+          }
+        },
+        "integer_coverage": {
+          "javascript_maintained": {
+            "branches": [698, 810],
+            "statements": [1098, 1182]
+          },
+          "javascript_trusted": {
+            "branches": [498, 547],
+            "statements": [756, 804]
+          },
+          "python_maintained": {
+            "branches": [524, 606],
+            "statements": [1850, 2025]
+          },
+          "python_trusted": {
+            "branches": [524, 606],
+            "statements": [1850, 2025]
+          }
+        },
+        "static_checks": {
+          "mypy_source_files": 46,
+          "ruff_formatted_files": 58,
+          "typescript": "pass",
+          "eslint": "pass",
+          "format": "pass",
+          "security_collector": "pass_with_untriaged_lower_static_findings"
+        },
+        "sanitized_log_sha256": "d943bf25d7e727d80888f1cde1966cf89d8e6012fd03c2658ade6fc48696ab1b"
+      }
+    },
+    "all_11_deterministic_commands": "pass",
+    "additional_security_collection": "pass",
+    "sanitized_report_upload": "pass"
+  },
+  "package": {
+    "run_id": 39991009240,
+    "attempt": 1,
+    "url": "https://github.com/PavanaSakethaRam/Sage-Assistant/actions/runs/39991009240",
+    "conclusion": "success",
+    "toolchain": {
+      "node": "26.12.1",
+      "npm": "11.20.0",
+      "python": "3.13.17",
+      "pyinstaller": "6.22.3",
+      "pyinstaller_hooks_contrib": "2026.9",
+      "frozen_smoke_sdk": "1.0.25"
+    },
+    "jobs": {
+      "macos": {
+        "job_id": 120542443598,
+        "conclusion": "success",
+        "windows_zip_inventory": "platform_step_skipped",
+        "asar_fuses_resource_baseline": "pass",
+        "joint_fixed_offline_probes_and_local_note_restart": "pass",
+        "frozen": true,
+        "upload": "skipped"
+      },
+      "windows": {
+        "job_id": 120542444008,
+        "conclusion": "success",
+        "windows_zip_inventory": "pass",
+        "windows_zip_files": 1037,
+        "asar_fuses_resource_baseline": "pass",
+        "joint_fixed_offline_probes_and_local_note_restart": "pass",
+        "frozen": true,
+        "upload": "skipped"
+      }
+    },
+    "artifacts_total_count": 0
+  },
+  "evidence_sha256": {
+    "ci_verify_report": "0f32b6356cae7b8d0712119a181301cd1004f8ce9a264bf34bee0631252ec5f5",
+    "ci_verify_numeric_summary": "2e71feb76f2b6beb0ac24ff5a3ac098b4180ea9c644c14b7f0a411fc09ce5b7c",
+    "ci_package_report": "c1a9d8bbfed1388d1d55a3c989a4552fc512d95af25c6611623c5d3e8caee0dc",
+    "checkout_tree_proof": "8c0555275e50b7e3426cc2b66d4125f14611c3c2b4537a23de714819c13d1c7b"
+  },
+  "limits": [
+    "No authenticated provider, account, session or model request occurred in these jobs.",
+    "Frozen SDK construction is an offline fixed probe, not a live inference result.",
+    "No main-native UI, real credential-store, clean-machine, installer, signing, legal, native CVE or historical credential closure is established.",
+    "Passing security collection retains untriaged lower static findings.",
+    "Package artifacts were not uploaded."
+  ]
+}
