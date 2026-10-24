@@ -5,6 +5,7 @@ import {
   lstat,
   mkdir,
   open,
+  opendir,
   readdir,
   rename,
   unlink,
@@ -284,6 +285,7 @@ export class EffectJournal {
   private queue: Promise<unknown> = Promise.resolve();
   private last = 0;
   private pendingChoices = new WeakSet<PendingEvidence>();
+  private directoryInfo: Stats | undefined;
   constructor(storageUri: { toString(): string }) {
     const uri = new URL(storageUri.toString());
     if (uri.protocol !== "file:" || uri.host || uri.search || uri.hash)
@@ -308,6 +310,7 @@ export class EffectJournal {
     await mkdir(this.root, { recursive: true, mode: 0o700 });
     const info = await lstat(this.root);
     if (!info.isDirectory() || info.isSymbolicLink()) invalid();
+    this.directoryInfo ??= info;
     if (
       !allowPending &&
       (await readdir(this.root)).some((name) =>
@@ -316,13 +319,77 @@ export class EffectJournal {
     )
       throw new PendingJournalError();
   }
-  private async readText(path: string): Promise<{ text: string; info: Stats }> {
-    const before = await lstat(path);
+  private async readOnlyDirectory(): Promise<void> {
+    const info = await lstat(this.root);
     if (
-      !before.isFile() ||
-      before.isSymbolicLink() ||
-      before.nlink !== 1 ||
-      before.size > CAP
+      !info.isDirectory() ||
+      info.isSymbolicLink() ||
+      (this.directoryInfo &&
+        (info.dev !== this.directoryInfo.dev ||
+          info.ino !== this.directoryInfo.ino))
+    )
+      invalid();
+    this.directoryInfo ??= info;
+  }
+  private inspectionClock(started: number): void {
+    if (this.clock() - started >= 30000) invalid();
+  }
+  private ordinary(info: Stats): boolean {
+    return (
+      info.isFile() &&
+      !info.isSymbolicLink() &&
+      info.nlink === 1 &&
+      Number.isSafeInteger(info.size) &&
+      info.size >= 0 &&
+      info.size <= CAP
+    );
+  }
+  private async inventory(
+    started: number,
+    kind: "job" | "pending",
+  ): Promise<string[]> {
+    const check = () => this.inspectionClock(started);
+    check();
+    await this.readOnlyDirectory();
+    check();
+    const directory = await opendir(this.root, { bufferSize: 1 });
+    try {
+      check();
+      const names: string[] = [];
+      let count = 0;
+      for (;;) {
+        check();
+        const entry = await directory.read();
+        check();
+        if (!entry) break;
+        if (++count > MAX_OPERATIONS) invalid();
+        const pending = /^pending-[0-9a-f]{32}$/.test(entry.name);
+        if (kind === "job" && pending) throw new PendingJournalError();
+        if (
+          kind === "pending"
+            ? pending
+            : /^operation-[A-Za-z0-9_-]{1,64}\.json$/.test(entry.name)
+        )
+          names.push(entry.name);
+      }
+      await this.readOnlyDirectory();
+      check();
+      return names.sort();
+    } finally {
+      await directory.close();
+    }
+  }
+  private async readText(
+    path: string,
+    expected?: Stats,
+    check: () => void = () => {},
+  ): Promise<{ text: string; info: Stats }> {
+    check();
+    const before = await lstat(path);
+    check();
+    if (
+      !this.ordinary(before) ||
+      (expected && !this.sameFile(expected, before))
     )
       invalid();
     const handle = await open(
@@ -330,21 +397,27 @@ export class EffectJournal {
       constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
     );
     try {
+      check();
       const info = await handle.stat();
+      check();
       if (!this.sameFile(before, info)) invalid();
-      const bytes = Buffer.alloc(CAP + 1);
+      // Inspections reserve this exact size before opening; growth cannot consume another byte of their budget.
+      const bytes = Buffer.alloc(expected ? expected.size : CAP + 1);
       let length = 0;
       while (length < bytes.length) {
+        check();
         const result = await handle.read(
           bytes,
           length,
           bytes.length - length,
           length,
         );
+        check();
         length += result.bytesRead;
         if (!result.bytesRead) break;
       }
       const after = await handle.stat();
+      check();
       if (length > CAP || length !== info.size || !this.sameFile(info, after))
         invalid();
       return {
@@ -585,11 +658,15 @@ export class EffectJournal {
       ":",
     );
   }
-  private async pending(name: string): Promise<PendingEvidence> {
+  private async pending(
+    name: string,
+    expected?: Stats,
+    check?: () => void,
+  ): Promise<PendingEvidence> {
     if (!/^pending-[0-9a-f]{32}$/.test(name)) invalid();
     try {
       const path = join(this.root, name);
-      const { text, info } = await this.readText(path);
+      const { text, info } = await this.readText(path, expected, check);
       if (
         !this.sameFile(info, await lstat(path)) ||
         !Number.isFinite(info.mtimeMs) ||
@@ -673,28 +750,35 @@ export class EffectJournal {
     entries: readonly PendingEvidence[];
   }> {
     return this.serial(async () => {
-      const started = this.clock();
-      await this.directory(true);
-      const names = (await readdir(this.root)).filter((name) =>
-        /^pending-[0-9a-f]{32}$/.test(name),
-      );
-      if (names.length > MAX_OPERATIONS)
-        return { complete: false, entries: [] };
-      const entries: PendingEvidence[] = [];
+      const started = this.clock(),
+        entries: PendingEvidence[] = [];
+      const check = () => this.inspectionClock(started);
       let size = 0;
-      for (const name of names) {
-        const now = this.clock();
-        if (now - started >= 30000 || size >= 8 * CAP)
-          return { complete: false, entries };
-        const entry = await this.pending(name);
-        this.clock();
-        size += entry.identity ? Number(entry.identity.split(":")[2]) : CAP;
-        entries.push(entry);
+      try {
+        await this.directory(true);
+        check();
+        const names = await this.inventory(started, "pending");
+        check();
+        for (const name of names) {
+          await this.readOnlyDirectory();
+          check();
+          const info = await lstat(join(this.root, name));
+          check();
+          const reserved = this.ordinary(info) ? info.size : 0;
+          if (size + reserved > 8 * CAP) return { complete: false, entries };
+          size += reserved;
+          const entry = await this.pending(name, info, check);
+          check();
+          await this.readOnlyDirectory();
+          check();
+          entries.push(entry);
+        }
+        await this.readOnlyDirectory();
+        check();
+        return { complete: true, entries };
+      } catch {
+        return { complete: false, entries };
       }
-      return {
-        complete: this.clock() - started < 30000 && size <= 8 * CAP,
-        entries,
-      };
     });
   }
   acknowledgePending(choice: PendingEvidence): Promise<void> {
@@ -777,25 +861,28 @@ export class EffectJournal {
       const started = this.clock();
       let total = 0;
       try {
-        await this.directory();
-        const names = (await readdir(this.root)).filter((name) =>
-          /^operation-[A-Za-z0-9_-]{1,64}\.json$/.test(name),
-        );
-        if (names.length > MAX_OPERATIONS)
-          return { complete: false, operations: [] };
+        const check = () => this.inspectionClock(started);
+        const names = await this.inventory(started, "job");
+        check();
         for (const name of names) {
-          const now = this.clock();
-          if (now - started >= 30000) return { complete: false, operations };
+          await this.readOnlyDirectory();
+          check();
           const path = join(this.root, name),
             info = await lstat(path);
+          check();
+          if (!this.ordinary(info) || total + info.size > 8 * CAP)
+            return { complete: false, operations };
           total += info.size;
-          if (total > 8 * CAP) return { complete: false, operations };
-          const { text, info: opened } = await this.readText(path);
+          const { text, info: opened } = await this.readText(path, info, check);
+          check();
+          await this.readOnlyDirectory();
+          check();
           if (
             !this.sameFile(info, opened) ||
             !this.sameFile(opened, await lstat(path))
           )
             invalid();
+          check();
           const value = JSON.parse(text) as JournalOperation;
           if (canonical(value) !== text) invalid();
           const record = parseOperation(value, name.slice(10, -5));
@@ -806,6 +893,8 @@ export class EffectJournal {
           if (canonical(record.intents[0].binding) === expected)
             operations.push(record);
         }
+        await this.readOnlyDirectory();
+        this.inspectionClock(started);
         return { complete: true, operations };
       } catch {
         return { complete: false, operations };

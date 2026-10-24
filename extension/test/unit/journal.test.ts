@@ -35,12 +35,81 @@ import {
 const boundary = vi.hoisted(() => ({
   collision: false,
   rename: "" as "" | "before" | "after",
+  readdirCalls: 0,
+  mkdirCalls: 0,
+  writeCalls: 0,
+  directoryReads: 0,
+  directoryEntries: 0,
+  directoryCloses: 0,
+  readBytes: 0,
+  opened: [] as string[],
+  sortListing: false,
+  elapsedAfterEntry: undefined as (() => void) | undefined,
 }));
 vi.mock("node:fs/promises", async (original) => {
   const fs = await original<typeof import("node:fs/promises")>();
   return {
     ...fs,
+    writeFile: async (...args: Parameters<typeof fs.writeFile>) => {
+      boundary.writeCalls++;
+      return fs.writeFile(...args);
+    },
+    unlink: async (...args: Parameters<typeof fs.unlink>) => {
+      boundary.writeCalls++;
+      return fs.unlink(...args);
+    },
+    rmdir: async (...args: Parameters<typeof fs.rmdir>) => {
+      boundary.writeCalls++;
+      return fs.rmdir(...args);
+    },
+    readdir: async (...args: Parameters<typeof fs.readdir>) => {
+      boundary.readdirCalls++;
+      const entries = await fs.readdir(...args);
+      boundary.elapsedAfterEntry?.();
+      return boundary.sortListing
+        ? entries.sort((a, b) => String(a).localeCompare(String(b)))
+        : entries;
+    },
+    opendir: async (...args: Parameters<typeof fs.opendir>) => {
+      const directory = await fs.opendir(...args);
+      return new Proxy(directory, {
+        get(target, key) {
+          if (key === "read")
+            return async () => {
+              boundary.directoryReads++;
+              const entry = await target.read();
+              if (entry) boundary.directoryEntries++;
+              boundary.elapsedAfterEntry?.();
+              return entry;
+            };
+          if (key === "close")
+            return async () => {
+              boundary.directoryCloses++;
+              await target.close();
+            };
+          const value = Reflect.get(target, key);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      });
+    },
+    open: async (...args: Parameters<typeof fs.open>) => {
+      boundary.opened.push(String(args[0]));
+      const handle = await fs.open(...args);
+      return new Proxy(handle, {
+        get(target, key) {
+          if (key === "read")
+            return async (...values: unknown[]) => {
+              const result = await Reflect.apply(target.read, target, values);
+              boundary.readBytes += result.bytesRead;
+              return result;
+            };
+          const value = Reflect.get(target, key);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      });
+    },
     mkdir: async (...args: Parameters<typeof fs.mkdir>) => {
+      boundary.mkdirCalls++;
       if (boundary.collision && String(args[0]).includes("acknowledged-")) {
         await fs.mkdir(args[0]);
         await fs.writeFile(
@@ -52,6 +121,7 @@ vi.mock("node:fs/promises", async (original) => {
       return fs.mkdir(...args);
     },
     rename: async (...args: Parameters<typeof fs.rename>) => {
+      boundary.writeCalls++;
       const owned = String(args[1]).includes("acknowledged-");
       if (owned && boundary.rename === "before")
         throw Error("owned pre-rename interruption");
@@ -61,10 +131,25 @@ vi.mock("node:fs/promises", async (original) => {
     },
   };
 });
+function resetInventoryCounts(): void {
+  boundary.readdirCalls =
+    boundary.mkdirCalls =
+    boundary.writeCalls =
+    boundary.directoryReads =
+    boundary.directoryEntries =
+    boundary.directoryCloses =
+    boundary.readBytes =
+      0;
+  boundary.opened = [];
+}
 const roots: string[] = [];
 afterEach(async () => {
   boundary.collision = false;
   boundary.rename = "";
+  boundary.sortListing = false;
+  boundary.elapsedAfterEntry = undefined;
+  resetInventoryCounts();
+  vi.restoreAllMocks();
   await Promise.all(
     roots.splice(0).map((p) => rm(p, { recursive: true, force: true })),
   );
@@ -587,3 +672,119 @@ it.each(["before", "after"] as const)(
     }
   },
 );
+
+it.each(["job", "pending"] as const)(
+  "%s inventory stops streaming at the entry budget including irrelevant private names",
+  async (kind) => {
+    const { root, journal } = await fixture();
+    for (let i = 0; i < 1025; i++)
+      await writeFile(join(root, `irrelevant-${i}`), "");
+    resetInventoryCounts();
+    const result =
+      kind === "job"
+        ? await journal.inspectJob(BINDING as CodeBinding)
+        : await journal.inspectPending();
+    expect(result.complete).toBe(false);
+    expect(boundary.readdirCalls).toBe(0);
+    expect(boundary.directoryEntries).toBe(1025);
+    expect(boundary.directoryReads).toBe(1025);
+    expect(boundary.directoryCloses).toBe(1);
+    expect(boundary.opened).toEqual([]);
+  },
+);
+it("pending inventory reserves the next validated size before crossing the 8MiB read budget", async () => {
+  const { root, journal } = await fixture();
+  const cap = 1048576,
+    names = Array.from(
+      { length: 9 },
+      (_, i) => "pending-" + i.toString(16).padStart(32, "0"),
+    );
+  for (const [i, name] of names.entries()) {
+    const size = i === 7 ? cap / 2 : cap;
+    await writeFile(join(root, name), '{"version":1,' + " ".repeat(size - 13));
+    const age = new Date(Date.now() - 1000);
+    await utimes(join(root, name), age, age);
+  }
+  boundary.sortListing = true;
+  resetInventoryCounts();
+  const result = await journal.inspectPending();
+  expect(result.complete).toBe(false);
+  expect(boundary.readBytes).toBe(7.5 * cap);
+  expect(boundary.opened).not.toContain(join(root, names[8]));
+  expect(result.entries).toHaveLength(8);
+  expect(boundary.readdirCalls).toBe(0);
+});
+it.each(["job", "pending"] as const)(
+  "%s inventory elapsed deadline stops before the next directory entry or data open",
+  async (kind) => {
+    const { root, journal } = await fixture();
+    await writeFile(join(root, "irrelevant-a"), "");
+    await writeFile(join(root, "irrelevant-b"), "");
+    resetInventoryCounts();
+    boundary.elapsedAfterEntry = () => {
+      const now = Date.now();
+      vi.spyOn(Date, "now").mockReturnValue(now + 30000);
+    };
+    const result =
+      kind === "job"
+        ? await journal.inspectJob(BINDING as CodeBinding)
+        : await journal.inspectPending();
+    expect(result.complete).toBe(false);
+    expect(boundary.readdirCalls).toBe(0);
+    expect(boundary.directoryEntries).toBe(1);
+    expect(boundary.directoryReads).toBe(1);
+    expect(boundary.directoryCloses).toBe(1);
+    expect(boundary.opened).toEqual([]);
+  },
+);
+it.each(["missing", "replaced"] as const)(
+  "historical lookup of %s private storage is incomplete without mkdir/write/repair",
+  async (state) => {
+    const { root, journal } = await fixture();
+    await journal.intent(intent());
+    if (state === "missing") await rm(root, { recursive: true });
+    else {
+      await rename(root, root + "-old");
+      roots.push(root + "-old");
+      await mkdir(root);
+    }
+    resetInventoryCounts();
+    const result = await journal.inspectJob(BINDING as CodeBinding);
+    expect(boundary.mkdirCalls).toBe(0);
+    expect(boundary.writeCalls).toBe(0);
+    expect(result).toEqual({ complete: false, operations: [] });
+    expect(boundary.opened).toEqual([]);
+    if (state === "missing")
+      expect(await lstat(root).catch(() => undefined)).toBeUndefined();
+  },
+);
+
+it("exactly 1024 irrelevant entries completes after one bounded EOF lookahead", async () => {
+  const { root, journal } = await fixture();
+  for (let i = 0; i < 1024; i++)
+    await writeFile(join(root, `irrelevant-${i}`), "");
+  resetInventoryCounts();
+  expect(await journal.inspectJob(BINDING as CodeBinding)).toEqual({
+    complete: true,
+    operations: [],
+  });
+  expect(boundary.readdirCalls).toBe(0);
+  expect(boundary.directoryEntries).toBe(1024);
+  expect(boundary.directoryReads).toBe(1025);
+  expect(boundary.directoryCloses).toBe(1);
+  expect(boundary.opened).toEqual([]);
+});
+it("historical pending blocker is found in the same bounded walk before any operation data read", async () => {
+  const { root, journal } = await fixture();
+  await journal.intent(intent());
+  await writeFile(join(root, "pending-" + "1".repeat(32)), '{"version":1,');
+  resetInventoryCounts();
+  expect(await journal.inspectJob(BINDING as CodeBinding)).toEqual({
+    complete: false,
+    operations: [],
+  });
+  expect(boundary.readdirCalls).toBe(0);
+  expect(boundary.directoryEntries).toBeLessThanOrEqual(2);
+  expect(boundary.directoryCloses).toBe(1);
+  expect(boundary.opened).toEqual([]);
+});
