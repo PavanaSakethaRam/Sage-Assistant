@@ -22,6 +22,8 @@ import {
   type CodeBinding,
   type CodeContext,
   type CodeFile,
+  type CodeProposal,
+  parseCodeProposal,
   type CodeMode,
   type FocusName,
 } from "../../desktop/shared/coding-contracts";
@@ -46,7 +48,12 @@ export type ContextSelection = {
   capturedAtMs?: number;
   guard: () => void;
 };
+type SourceCell = { value: string | undefined };
 type Snapshot = {
+  sources: Set<SourceCell>;
+  revocations: Set<() => void>;
+  released?: boolean;
+  timer?: ReturnType<typeof setTimeout>;
   selection: ContextSelection;
   captured: number;
   expires: number;
@@ -100,47 +107,136 @@ function localPath(raw: string): string {
     invalid();
   return fileURLToPath(uri);
 }
-function check(snapshot: Snapshot): string {
-  const s = snapshot.selection;
-  s.guard();
-  const now = Date.now();
-  if (
-    !Number.isSafeInteger(now) ||
-    now < snapshot.last ||
-    now < snapshot.captured ||
-    now >= snapshot.expires ||
-    performance.now() - snapshot.monotonic >=
-      snapshot.expires - snapshot.captured
-  )
-    invalid();
-  snapshot.last = now;
-  if (
-    s.pair.status !== "paired" ||
-    rootIdentity(s.pair) !== s.pair.root_id ||
-    s.binding.boot_id !== s.pair.host_boot_id ||
-    s.binding.pair_id !== s.pair.pair_id ||
-    s.binding.window_id !== s.pair.window_id ||
-    s.binding.root_id !== s.pair.root_id ||
-    !Number.isSafeInteger(s.generation) ||
-    s.generation < 0
-  )
-    invalid();
-  const root = localPath(s.rawRootUri);
-  validateRootSpelling(root);
-  if (
-    pathToFileURL(root).href !== s.pair.root_uri ||
-    realpathSync(root) !== root
-  )
-    invalid();
-  const info = lstatSync(root, { bigint: true });
-  if (
-    !info.isDirectory() ||
-    info.isSymbolicLink() ||
-    `${info.dev}-${info.ino}` !== s.pair.root_file_id
-  )
-    invalid();
-  return root;
+function clearSources(snapshot: Snapshot): void {
+  if (snapshot.released) return;
+  snapshot.released = true;
+  if (snapshot.timer) clearTimeout(snapshot.timer);
+  for (const cell of snapshot.sources) cell.value = undefined;
+  snapshot.sources.clear();
+  const callbacks = [...snapshot.revocations];
+  snapshot.revocations.clear();
+  for (const callback of callbacks) callback();
 }
+function sourceGetter(cell: SourceCell): () => string {
+  return () => {
+    if (cell.value === undefined) throw Error("Expired source");
+    return cell.value;
+  };
+}
+function ownText(snapshot: Snapshot, text: string): SourceCell {
+  const cell = { value: text };
+  snapshot.sources.add(cell);
+  return cell;
+}
+function sealContextText(snapshot: Snapshot, context: CodeContext): void {
+  for (const file of context.files)
+    Object.defineProperty(file, "text", {
+      get: sourceGetter(ownText(snapshot, file.text)),
+      enumerable: true,
+    });
+  for (let i = 0; i < (context.diagnostics?.length ?? 0); i++)
+    Object.defineProperty(context.diagnostics!, i, {
+      get: sourceGetter(ownText(snapshot, context.diagnostics![i])),
+      enumerable: true,
+    });
+}
+export function onContextRelease(
+  context: CodeContext,
+  callback: () => void,
+): () => void {
+  const snapshot = snapshots.get(context);
+  if (!snapshot) invalid();
+  check(snapshot);
+  snapshot.revocations.add(callback);
+  return () => snapshot.revocations.delete(callback);
+}
+function sourceClearer(snapshot: Snapshot, cells: SourceCell[]): () => void {
+  return () => {
+    for (const cell of cells) {
+      cell.value = undefined;
+      snapshot.sources.delete(cell);
+    }
+    cells.length = 0;
+  };
+}
+/** The synchronous boundary drops the raw proposal before owned asynchronous review. */
+export function ownProposal(
+  context: CodeContext,
+  input: CodeProposal,
+): { proposal: CodeProposal; clear: () => void } {
+  const snapshot = snapshots.get(context);
+  if (!snapshot) invalid();
+  check(snapshot);
+  const valid = parseCodeProposal(input, context),
+    parsed = { ...valid, files: valid.files.map((file) => ({ ...file })) },
+    cells: SourceCell[] = [];
+  for (const file of parsed.files) {
+    const cell = ownText(snapshot, file.text);
+    cells.push(cell);
+    Object.defineProperty(file, "text", {
+      get: sourceGetter(cell),
+      enumerable: true,
+    });
+    Object.freeze(file);
+  }
+  const explanation = ownText(snapshot, parsed.explanation);
+  cells.push(explanation);
+  Object.defineProperty(parsed, "explanation", {
+    get: sourceGetter(explanation),
+    enumerable: true,
+  });
+  Object.freeze(parsed.files);
+  Object.freeze(parsed);
+  return { proposal: parsed, clear: sourceClearer(snapshot, cells) };
+}
+function check(snapshot: Snapshot): string {
+  try {
+    if (snapshot.released) invalid();
+    const s = snapshot.selection;
+    s.guard();
+    const now = Date.now();
+    if (
+      !Number.isSafeInteger(now) ||
+      now < snapshot.last ||
+      now < snapshot.captured ||
+      now >= snapshot.expires ||
+      performance.now() - snapshot.monotonic >=
+        snapshot.expires - snapshot.captured
+    )
+      invalid();
+    snapshot.last = now;
+    if (
+      s.pair.status !== "paired" ||
+      rootIdentity(s.pair) !== s.pair.root_id ||
+      s.binding.boot_id !== s.pair.host_boot_id ||
+      s.binding.pair_id !== s.pair.pair_id ||
+      s.binding.window_id !== s.pair.window_id ||
+      s.binding.root_id !== s.pair.root_id ||
+      !Number.isSafeInteger(s.generation) ||
+      s.generation < 0
+    )
+      invalid();
+    const root = localPath(s.rawRootUri);
+    validateRootSpelling(root);
+    if (
+      pathToFileURL(root).href !== s.pair.root_uri ||
+      realpathSync(root) !== root
+    )
+      invalid();
+    const info = lstatSync(root, { bigint: true });
+    if (
+      !info.isDirectory() ||
+      info.isSymbolicLink() ||
+      `${info.dev}-${info.ino}` !== s.pair.root_file_id
+    )
+      invalid();
+    return root;
+  } catch (error) {
+    clearSources(snapshot);
+    throw error;
+  }
+}
+
 async function native(snapshot: Snapshot): Promise<string> {
   const root = check(snapshot),
     s = snapshot.selection;
@@ -364,6 +460,8 @@ export async function captureContext(
   };
   names(s);
   const snapshot: Snapshot = {
+    sources: new Set(),
+    revocations: new Set(),
     selection: s,
     captured,
     expires: captured + 1800000,
@@ -387,7 +485,13 @@ export async function captureContext(
   check(snapshot);
   const context = { ...value, context_hash: hash };
   snapshot.hash = hash;
+  sealContextText(snapshot, context);
   snapshots.set(context, snapshot);
+  snapshot.timer = setTimeout(
+    () => releaseContext(context),
+    Math.max(0, snapshot.expires - Date.now()),
+  );
+  snapshot.timer.unref?.();
   try {
     await validateContext(context);
     check(snapshot);
@@ -437,7 +541,9 @@ export function contextOffer(context: CodeContext): ContextOffer {
   };
 }
 export function releaseContext(context: CodeContext): void {
+  const snapshot = snapshots.get(context);
   snapshots.delete(context);
+  if (snapshot) clearSources(snapshot);
 }
 
 /** Visible local disclosure metadata, partitioned exactly like the provider's context budget. */
@@ -612,17 +718,29 @@ export function replacementState(context: CodeContext) {
   check(snapshot);
   const root = check(snapshot),
     path = join(root, context.target),
-    original = context.files.find((f) => f.name === context.target)!,
-    document = snapshot.documents?.get(context.target);
+    rootFileId = context.root_file_id,
+    target = context.target,
+    sources = context.files.map((file) => ({
+      name: file.name,
+      hash: file.text_hash,
+      diskHash: file.disk_hash,
+      length: Buffer.byteLength(file.text),
+      version: file.document_version,
+      fileId: file.file_id,
+      stat: snapshot.sourceStats!.get(file.name)!,
+      document: snapshot.documents!.get(file.name)!,
+    })),
+    original = sources.find((file) => file.name === target)!,
+    document = original.document;
   if (!document) invalid();
-  const disk = (name: FocusName = context.target!) => {
+  const disk = (name: FocusName = target) => {
     const path = join(root, name);
     const rootStat = lstatSync(root, { bigint: true });
     if (
       !rootStat.isDirectory() ||
       rootStat.isSymbolicLink() ||
       realpathSync(root) !== root ||
-      `${rootStat.dev}-${rootStat.ino}` !== context.root_file_id
+      `${rootStat.dev}-${rootStat.ino}` !== rootFileId
     )
       invalid();
     const before = lstatSync(path, { bigint: true });
@@ -657,13 +775,19 @@ export function replacementState(context: CodeContext) {
       closeSync(fd);
     }
   };
-  const live = (text: string, version: number, dirty: boolean) => {
+  const live = (
+    hash: string,
+    length: number,
+    version: number,
+    dirty: boolean,
+  ) => {
     if (
       document.isClosed ||
       !vscode.workspace.textDocuments.includes(document) ||
       localPath(document.uri.toString()) !== path ||
       document.version !== version ||
-      document.getText() !== text ||
+      digest(document.getText()) !== hash ||
+      Buffer.byteLength(document.getText()) !== length ||
       document.isDirty !== dirty ||
       document.eol !== vscode.EndOfLine.LF ||
       document.encoding !== "utf8"
@@ -683,67 +807,44 @@ export function replacementState(context: CodeContext) {
     if (snapshots.get(context) !== snapshot) invalid();
     check(snapshot);
   };
+  const unchanged = (file: typeof original, dirty = false) => {
+    const d = file.document,
+      current = disk(file.name);
+    return (
+      !d.isClosed &&
+      vscode.workspace.textDocuments.includes(d) &&
+      d.isDirty === dirty &&
+      d.version === file.version &&
+      digest(d.getText()) === file.hash &&
+      Buffer.byteLength(d.getText()) === file.length &&
+      d.eol === vscode.EndOfLine.LF &&
+      d.encoding === "utf8" &&
+      current.hash === file.diskHash &&
+      sameStat(current.stat, file.stat)
+    );
+  };
   const originalCheck = () => {
     owned();
-    for (const file of context.files) {
-      const d = snapshot.documents!.get(file.name)!;
-      const current = disk(file.name),
-        info = current.stat;
-      if (
-        d.isClosed ||
-        !vscode.workspace.textDocuments.includes(d) ||
-        d.isDirty ||
-        d.version !== file.document_version ||
-        d.getText() !== file.text ||
-        d.eol !== vscode.EndOfLine.LF ||
-        d.encoding !== "utf8" ||
-        !info.isFile() ||
-        info.isSymbolicLink() ||
-        info.nlink !== 1n ||
-        `${info.dev}-${info.ino}` !== file.file_id ||
-        current.hash !== file.disk_hash ||
-        !sameStat(current.stat, snapshot.sourceStats!.get(file.name)!)
-      )
-        invalid();
-    }
-    live(original.text, original.document_version, false);
-    const observed = disk();
-    if (
-      observed.hash !== original.disk_hash ||
-      `${observed.stat.dev}-${observed.stat.ino}` !== original.file_id
-    )
-      invalid();
+    for (const file of sources) if (!unchanged(file)) invalid();
+    live(original.hash, original.length, original.version, false);
   };
-  const unchangedSources = () => {
-    for (const file of context.files.filter((f) => f.name !== context.target)) {
-      const d = snapshot.documents!.get(file.name)!,
-        current = disk(file.name);
-      if (
-        d.isClosed ||
-        !vscode.workspace.textDocuments.includes(d) ||
-        d.isDirty ||
-        d.version !== file.document_version ||
-        d.getText() !== file.text ||
-        d.eol !== vscode.EndOfLine.LF ||
-        d.encoding !== "utf8" ||
-        current.hash !== file.disk_hash ||
-        !sameStat(current.stat, snapshot.sourceStats!.get(file.name)!)
-      )
-        return false;
-    }
-    return true;
-  };
+  const unchangedSources = () =>
+    sources
+      .filter((file) => file.name !== target)
+      .every((file) => unchanged(file));
   const sourceStat = disk().stat;
   return {
     document,
+    originalHash: original.diskHash,
+    originalLength: original.length,
     originalCheck,
-    beforeSave(text: string, version: number) {
+    beforeSave(hash: string, length: number, version: number) {
       owned();
-      live(text, version, true);
+      live(hash, length, version, true);
       if (!unchangedSources()) invalid();
       const observed = disk();
       if (
-        observed.hash !== original.disk_hash ||
+        observed.hash !== original.diskHash ||
         !sameStat(observed.stat, sourceStat)
       )
         invalid();
@@ -752,9 +853,14 @@ export function replacementState(context: CodeContext) {
     originalDisk: (observed: ReturnType<typeof disk>) =>
       sameStat(sourceStat, observed.stat),
     unchangedSources,
-    retain(observed: ReturnType<typeof disk>, version: number, text: string) {
+    retain(
+      observed: ReturnType<typeof disk>,
+      version: number,
+      hash: string,
+      length: number,
+    ) {
       owned();
-      live(text, version, false);
+      live(hash, length, version, false);
       if (!sameStat(observed.stat, disk().stat) || !unchangedSources())
         invalid();
       snapshot.replaced = { document, version: document.version, ...observed };

@@ -20,8 +20,10 @@ export async function replaceFocusFile(
   owner.check();
   const state = replacementState(context),
     document = state.document,
-    text = proposal.files[0].text,
-    expected = createHash("sha256").update(text).digest("hex");
+    expected = createHash("sha256")
+      .update(proposal.files[0].text)
+      .digest("hex"),
+    expectedLength = Buffer.byteLength(proposal.files[0].text);
   const editor = await vscode.window.showTextDocument(document, {
     preview: false,
   });
@@ -44,29 +46,30 @@ export async function replaceFocusFile(
     edited: boolean | undefined,
     saved: boolean | undefined,
     saveStarted = false,
-    saveVersion: number | undefined;
+    transactionVersion: number | undefined;
   try {
     owner.check();
     state.originalCheck();
     edited = await editor.edit((builder) => {
       owner.check();
       state.originalCheck();
+      transactionVersion = document.version + 1;
+      if (!Number.isSafeInteger(transactionVersion))
+        throw Error("Editor version unavailable");
       builder.replace(
         new vscode.Range(
           document.positionAt(0),
           document.positionAt(document.getText().length),
         ),
-        text,
+        proposal.files[0].text,
       );
       registered = true;
     });
     owner.check();
     if (!registered || !edited) throw Error("Editor refused replacement");
-    const version = document.version;
-    state.beforeSave(text, version);
+    state.beforeSave(expected, expectedLength, transactionVersion!);
     owner.check();
     // No await between the final check and dispatch. Never saveAll, force, retry or undo.
-    saveVersion = version;
     saveStarted = true;
     saved = await document.save();
   } catch {
@@ -78,21 +81,21 @@ export async function replaceFocusFile(
   } catch {
     /* The target can no longer be identified reliably. */
   }
-  const original = context.files.find((f) => f.name === context.target)!,
-    live =
+  const live =
       !document.isClosed && vscode.workspace.textDocuments.includes(document),
     exact =
       live &&
-      document.getText() === text &&
+      createHash("sha256").update(document.getText()).digest("hex") ===
+        expected &&
+      Buffer.byteLength(document.getText()) === expectedLength &&
       document.eol === vscode.EndOfLine.LF &&
       document.encoding === "utf8",
     oldDisk =
-      observed?.hash === original.disk_hash &&
-      observed.length === Buffer.byteLength(original.text) &&
+      observed?.hash === state.originalHash &&
+      observed.length === state.originalLength &&
       state.originalDisk(observed),
     approvedDisk =
-      observed?.hash === expected &&
-      observed.length === Buffer.byteLength(text);
+      observed?.hash === expected && observed.length === expectedLength;
   let unchangedSources: boolean | undefined;
   try {
     unchangedSources = state.unchangedSources();
@@ -106,12 +109,13 @@ export async function replaceFocusFile(
       !registered ||
       edited === false ||
       !exact ||
+      (registered && document.version !== transactionVersion) ||
       (!oldDisk && !approvedDisk)
     )
       status = "needs_review";
     else if (
       saved === true &&
-      document.version === saveVersion &&
+      document.version === transactionVersion &&
       !document.isDirty &&
       approvedDisk
     )
@@ -137,6 +141,6 @@ export async function replaceFocusFile(
   await owner.bridge.recordObserved(owner.journal, receipt);
   owner.check();
   if (status === "applied_saved")
-    state.retain(observed!, observedVersion, text);
+    state.retain(observed!, observedVersion, expected, expectedLength);
   return receipt;
 }

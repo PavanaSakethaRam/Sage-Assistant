@@ -8,6 +8,7 @@ import { ExtensionBridge, localWorkspace } from "./bridge";
 import {
   captureContext,
   contextOffer,
+  onContextRelease,
   diagnosticChoices,
   disclosureSummary,
   releaseContext,
@@ -41,6 +42,7 @@ type PairOperation = {
   timer?: ReturnType<typeof setTimeout>;
   pickers: Set<vscode.QuickInput>;
   clearPreview?: () => Promise<void>;
+  releaseContextListener?: () => void;
 };
 let owner: PairOperation | undefined;
 async function closeOperation(
@@ -64,6 +66,19 @@ async function closeOperation(
   await cleanup;
   await reviewCleanup;
   operation.journal = undefined;
+}
+function reviewFailure(
+  operation: PairOperation,
+  mode: CodeContext["mode"],
+): () => void {
+  return () => {
+    void closeOperation(operation);
+    void vscode.window.showErrorMessage(
+      mode === "replace_focus_file"
+        ? "Sage stopped replacement. Current buffer and disk were preserved; a dispatched save may have completed. Capture fresh context before another attempt."
+        : "Sage stopped creation. Existing and partial files were preserved; capture fresh context before another attempt.",
+    );
+  };
 }
 function input<T extends vscode.QuickPickItem>(
   operation: PairOperation,
@@ -130,6 +145,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const captured = operation.context,
       uri = operation.preview,
       sent = operation.sent;
+    operation.releaseContextListener?.();
+    operation.releaseContextListener = undefined;
     operation.context = undefined;
     operation.preview = undefined;
     operation.sent = false;
@@ -301,14 +318,7 @@ export function activate(context: vscode.ExtensionContext): void {
             // Return to the receive pump so grant/ACK frames can complete the local gesture.
             operation.reviewTask = review
               .show(captured, message.payload)
-              .catch(() => {
-                void closeOperation(operation);
-                void vscode.window.showErrorMessage(
-                  captured.mode === "replace_focus_file"
-                    ? "Sage stopped replacement. Current buffer and disk were preserved; a dispatched save may have completed. Capture fresh context before another attempt."
-                    : "Sage stopped creation. Existing and partial files were preserved; capture fresh context before another attempt.",
-                );
-              });
+              .catch(reviewFailure(operation, captured.mode));
           }
         });
         void vscode.window.showInformationMessage(
@@ -452,6 +462,10 @@ export function activate(context: vscode.ExtensionContext): void {
           throw error;
         }
         operation.context = captured;
+        operation.releaseContextListener = onContextRelease(
+          captured,
+          closeOperation.bind(undefined, operation),
+        );
         contextOffer(captured);
         const uri = vscode.Uri.parse(
           `sage-context:/${randomBytes(16).toString("hex")}/selected-disclosure.txt`,

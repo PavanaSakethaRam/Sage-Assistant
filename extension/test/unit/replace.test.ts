@@ -9,7 +9,12 @@ import {
   type CodeReceipt,
 } from "../../../desktop/shared/coding-contracts";
 import { rootIdentity } from "../../../desktop/shared/editor-bridge";
-import { captureContext } from "../../src/context";
+import {
+  captureContext,
+  contextOffer,
+  releaseContext,
+} from "../../src/context";
+import * as reviewModule from "../../src/review";
 import { ProposalReview } from "../../src/review";
 
 type TestDocument = {
@@ -225,7 +230,7 @@ afterEach(async () => {
     roots.splice(0).map((p) => rm(p, { force: true, recursive: true })),
   );
 });
-async function fixture(additional = false) {
+async function fixture(additional = false, ageMs = 0) {
   const root = await realpath(await mkdtemp("/private/tmp/sage-create-"));
   roots.push(root);
   const workspace = {
@@ -260,6 +265,7 @@ async function fixture(additional = false) {
     },
     binding,
     generation: 1,
+    capturedAtMs: Date.now() - ageMs,
     rawRootUri: workspace.root_uri,
     nativeIdentity: "native",
     extensionPath: root,
@@ -346,6 +352,7 @@ async function fixture(additional = false) {
   });
   return {
     root,
+    sourceText: context.files[0].text,
     context,
     proposal,
     bridge,
@@ -384,7 +391,7 @@ it("human_followup_baseline_survives: literal diff and one saved replacement pre
     f.proposal.files[0].text,
   );
   expect(ui.documents[0].getText()).toBe(f.proposal.files[0].text);
-  expect(ui.diffs[0].left).toBe(f.context.files[0].text);
+  expect(ui.diffs[0].left).toBe(f.sourceText);
   expect(f.receipts[0].status).toBe("applied_saved");
   expect(ui.edits).toBe(1);
   expect(ui.saves).toBe(1);
@@ -422,7 +429,7 @@ it("stale_edit_during_callback_is_refused without saving or erasing human conten
     d.version++;
   };
   await expect(f.review.show(f.context, f.proposal)).rejects.toThrow();
-  expect(ui.documents[0].text).toBe("// human\n" + f.context.files[0].text);
+  expect(ui.documents[0].text).toBe("// human\n" + f.sourceText);
   expect(ui.saves).toBe(0);
   expect(f.receipts[0].status).toBe("needs_review");
   expect(
@@ -471,7 +478,7 @@ it("false save reserves applied_unsaved for approved dirty buffer and unchanged 
       f
         .receipts[0] as import("../../../desktop/shared/coding-contracts").CodeFileReceipt
     ).observed_length,
-  ).toBe(Buffer.byteLength(f.context.files[0].text));
+  ).toBe(Buffer.byteLength(f.sourceText));
   expect(ui.documents[0].isDirty).toBe(true);
   expect(ui.saves).toBe(1);
 });
@@ -678,4 +685,108 @@ it("disk metadata drift after fresh intent ACK refuses the edit itself", async (
   expect(ui.edits).toBe(0);
   expect(ui.saves).toBe(0);
   expect(f.receipts[0].status).toBe("needs_review");
+});
+it("same approved text with additional versions before edit promise resumption never saves", async () => {
+  const f = await fixture();
+  approve();
+  ui.afterEdit = async () => {
+    ui.documents[0].version += 2;
+  };
+  await f.review.show(f.context, f.proposal).catch(() => {});
+  expect(ui.saves).toBe(0);
+  expect(f.receipts[0].status).toBe("needs_review");
+});
+it("false save plus same-text edit/undo is needs_review rather than applied_unsaved", async () => {
+  const f = await fixture();
+  approve();
+  ui.saveResult = false;
+  ui.duringSave = async () => {
+    ui.documents[0].version += 2;
+  };
+  await expect(f.review.show(f.context, f.proposal)).rejects.toThrow();
+  expect(f.receipts[0].status).toBe("needs_review");
+  expect(ui.saves).toBe(1);
+});
+
+it("original lease expiry clears owned source capsules before an unresolved save settles", async () => {
+  const f = await fixture();
+  approve();
+  let owner: ReturnType<typeof reviewModule.consumeLocalReview> | undefined,
+    settle: (() => void) | undefined;
+  const consume = reviewModule.consumeLocalReview;
+  const spy = vi
+    .spyOn(reviewModule, "consumeLocalReview")
+    .mockImplementation((...args) => {
+      owner = consume(...args);
+      return owner;
+    });
+  ui.duringSave = () =>
+    new Promise<void>((resolve) => {
+      settle = resolve;
+    });
+  const work = f.review.show(f.context, f.proposal).catch(() => {});
+  await vi.waitFor(() => expect(settle).toBeDefined());
+  const clock = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 1800001);
+  try {
+    expect(() => contextOffer(f.context)).toThrow();
+    expect(() => owner!.context.files[0].text).toThrow(/expired source/i);
+    expect(() => owner!.proposal.files[0].text).toThrow(/expired source/i);
+    expect(() => owner!.proposal.explanation).toThrow(/expired source/i);
+    expect(f.receipts).toHaveLength(0);
+    expect(ui.saves).toBe(1);
+  } finally {
+    releaseContext(f.context);
+    await f.review.dispose();
+    settle!();
+    await work;
+    clock.mockRestore();
+    spy.mockRestore();
+  }
+  expect(f.receipts).toHaveLength(1);
+  expect(f.receipts[0].status).toBe("applied_saved");
+  expect(
+    f.sent.some((s) => (s as { kind: string }).kind === "journal.observed"),
+  ).toBe(false);
+});
+
+it("original capture timer revokes source while native-save promise remains held", async () => {
+  vi.useFakeTimers();
+  const f = await fixture(false, 1799000);
+  approve();
+  let owner: ReturnType<typeof reviewModule.consumeLocalReview> | undefined,
+    settle: (() => void) | undefined;
+  const consume = reviewModule.consumeLocalReview;
+  const spy = vi
+    .spyOn(reviewModule, "consumeLocalReview")
+    .mockImplementation((...args) => {
+      owner = consume(...args);
+      return owner;
+    });
+  ui.duringSave = () =>
+    new Promise<void>((resolve) => {
+      settle = resolve;
+    });
+  const work = f.review.show(f.context, f.proposal).catch(() => {});
+  await vi.waitFor(() => expect(settle).toBeDefined());
+  await vi.advanceTimersByTimeAsync(1001);
+  try {
+    expect(() => owner!.context.files[0].text).toThrow(/expired source/i);
+    expect(() => owner!.proposal.files[0].text).toThrow(/expired source/i);
+    expect(() => owner!.proposal.explanation).toThrow(/expired source/i);
+    for (const raw of ui.diffUris)
+      expect(ui.providers.get("sage-diff")!({ toString: () => raw })).toBe(
+        "Review expired or cancelled.",
+      );
+    expect(f.receipts).toHaveLength(0);
+    expect(ui.saves).toBe(1);
+  } finally {
+    settle!();
+    await work;
+    spy.mockRestore();
+  }
+  expect(f.receipts).toHaveLength(1);
+  expect(f.receipts[0].status).toBe("applied_saved");
+  expect(
+    f.sent.some((row) => (row as { kind: string }).kind === "journal.observed"),
+  ).toBe(false);
 });

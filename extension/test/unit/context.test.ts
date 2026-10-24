@@ -13,6 +13,7 @@ import {
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { localWorkspace } from "../../src/bridge";
+import * as contextModule from "../../src/context";
 import {
   captureContext,
   validateContext,
@@ -788,3 +789,89 @@ it.each([false, true])(
     }
   },
 );
+it("revocation clears source and diagnostic getter cells while retaining only hash metadata", async () => {
+  const s = await selection();
+  editor.text = "owned selected body\n";
+  await writeFile(
+    join(new URL(s.rawRootUri).pathname, "focus.js"),
+    editor.text,
+  );
+  editor.diagnostics = [
+    {
+      message: "owned diagnostic body",
+      range: { start: { line: 0, character: 0 } },
+    },
+  ];
+  const c = await captureContext({ ...s, diagnosticIds: ["focus.js:0"] });
+  const hash = c.files[0].text_hash;
+  expect(c.diagnostics![0]).toContain("owned diagnostic body");
+  releaseContext(c);
+  expect(() => c.files[0].text).toThrow(/expired source/i);
+  expect(() => c.diagnostics![0]).toThrow(/expired source/i);
+  expect(c.files[0].text_hash).toBe(hash);
+  expect(Object.isFrozen(c)).toBe(true);
+});
+
+it("private context revocation synchronously clears activation disclosure ownership", async () => {
+  const capture = contextModule.captureContext;
+  let captured: Awaited<ReturnType<typeof capture>> | undefined;
+  const spy = vi
+    .spyOn(contextModule, "captureContext")
+    .mockImplementation(async (s) => {
+      captured = await capture(s);
+      return captured;
+    });
+  const c = await controller();
+  try {
+    editor.choices = [
+      ["Replace one focus file"],
+      ["focus.js"],
+      [],
+      ["No diagnostics"],
+    ];
+    await c.capture();
+    const preview = (editor.active as { document: { getText(): string } })
+      .document;
+    expect(preview.getText()).toContain(editor.text);
+    releaseContext(captured!);
+    expect(preview.getText()).toBe("Disclosure expired or cancelled.");
+    expect(() => captured!.files[0].text).toThrow(/expired source/i);
+  } finally {
+    await c.cleanup();
+    spy.mockRestore();
+  }
+});
+it("old source release cannot close the newer captured context in the same pair", async () => {
+  const capture = contextModule.captureContext,
+    captured: Awaited<ReturnType<typeof capture>>[] = [];
+  const spy = vi
+    .spyOn(contextModule, "captureContext")
+    .mockImplementation(async (s) => {
+      const value = await capture(s);
+      captured.push(value);
+      return value;
+    });
+  const c = await controller();
+  try {
+    for (let i = 0; i < 2; i++) {
+      editor.choices = [
+        ["Replace one focus file"],
+        ["focus.js"],
+        [],
+        ["No diagnostics"],
+      ];
+      await c.capture();
+    }
+    const preview = (editor.active as { document: { getText(): string } })
+      .document;
+    releaseContext(captured[0]);
+    expect(preview.getText()).toContain(editor.text);
+    expect(captured[1].files[0].text).toBe(editor.text);
+    editor.choices = [["Send selected context to local Sage"]];
+    await c.send();
+    expect(editor.sent).toHaveLength(1);
+  } finally {
+    await c.cleanup();
+    spy.mockRestore();
+  }
+});

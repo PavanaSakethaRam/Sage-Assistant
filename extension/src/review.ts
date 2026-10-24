@@ -5,7 +5,6 @@ import { join } from "node:path";
 import { createHash, randomBytes } from "node:crypto";
 import {
   FOCUS_NAMES,
-  parseCodeProposal,
   parseCodeGrant,
   proposalHash,
   type CodeContext,
@@ -16,7 +15,13 @@ import {
   sameBinding,
   type BridgeData,
 } from "../../desktop/shared/editor-bridge";
-import { contextOffer, validateContext } from "./context";
+import {
+  contextOffer,
+  validateContext,
+  releaseContext,
+  ownProposal,
+  onContextRelease,
+} from "./context";
 import type { ExtensionBridge } from "./bridge";
 import type { EffectJournal } from "./journal";
 import { createFocusProject } from "./create";
@@ -79,6 +84,9 @@ type Options = {
 };
 export class ProposalReview {
   private active = false;
+  private source: { clear: () => void } | undefined;
+  private reviewedContext: CodeContext | undefined;
+  private unsubscribeContext: (() => void) | undefined;
   private generation = 0;
   private controller: AbortController | undefined;
   private pending:
@@ -179,7 +187,25 @@ export class ProposalReview {
       picker.show();
     });
   }
-  async show(context: CodeContext, input: CodeProposal): Promise<void> {
+  show(context: CodeContext, input: CodeProposal): Promise<void> {
+    try {
+      if (this.active) throw Error("Review already active");
+      const owned = ownProposal(context, input);
+      this.source = owned;
+      this.reviewedContext = context;
+      this.unsubscribeContext = onContextRelease(
+        context,
+        this.cancel.bind(this),
+      );
+      return this.showOwned(context, owned.proposal);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+  private async showOwned(
+    context: CodeContext,
+    proposal: CodeProposal,
+  ): Promise<void> {
     if (this.active) throw Error("Review already active");
     this.active = true;
     const generation = ++this.generation,
@@ -214,11 +240,6 @@ export class ProposalReview {
           : ("code.create" as const),
         names = replacing ? [context.target!] : FOCUS_NAMES,
         action = replacing ? "Apply and save this file" : "Create four files";
-      const parsed = parseCodeProposal(input, context);
-      const proposal: CodeProposal = Object.freeze({
-        ...parsed,
-        files: Object.freeze(parsed.files.map((f) => Object.freeze({ ...f }))),
-      });
       const hash = await proposalHash(proposal, context, scope);
       check();
       const opened = new Set<string>(),
@@ -405,7 +426,7 @@ export class ProposalReview {
       }
     } finally {
       clearTimeout(timer);
-      this.cancel();
+      this.stop(!applied);
       await this.clear();
       this.active = false;
       // Applied context/lease stays owned for the separate, explicit test review.
@@ -413,6 +434,17 @@ export class ProposalReview {
     }
   }
   cancel(): void {
+    this.stop(true);
+  }
+  private stop(revoke: boolean): void {
+    this.source?.clear();
+    this.source = undefined;
+    this.unsubscribeContext?.();
+    this.unsubscribeContext = undefined;
+    const context = this.reviewedContext;
+    this.reviewedContext = undefined;
+    if (revoke && context) releaseContext(context);
+    void this.clear();
     this.generation++;
     this.controller?.abort();
     this.pending?.reject(Error("Review cancelled"));

@@ -132,6 +132,7 @@ async function run(): Promise<void> {
         const editor = await vscode.window.showTextDocument(doc, {
           preview: false,
         });
+        const sourceVersion = doc.version;
         const scenario = config.replaceScenario ?? "success";
         const realNow = Date.now;
         const listener = vscode.workspace.onWillSaveTextDocument((event) => {
@@ -163,10 +164,44 @@ async function run(): Promise<void> {
                 while (realNow() < deadline) {
                   try {
                     await readFile(join(fixture, "save-release.json"));
-                    if (scenario === "expiry-save")
+                    if (scenario === "expiry-save") {
                       await vscode.commands.executeCommand(
                         "sage.cancelContext",
                       );
+                      const views = vscode.workspace.textDocuments.filter(
+                        (d) =>
+                          d.uri.scheme === "sage-diff" ||
+                          d.uri.scheme === "sage-context",
+                      );
+                      for (
+                        let i = 0;
+                        i < 100 &&
+                        views.some(
+                          (d) => !d.getText().includes("expired or cancelled"),
+                        );
+                        i++
+                      )
+                        await new Promise((r) => setTimeout(r, 10));
+                      assert.ok(
+                        views.every((d) =>
+                          d.getText().includes("expired or cancelled"),
+                        ),
+                      );
+                      await assert.rejects(
+                        readFile(join(fixture, "save-settled.json")),
+                      );
+                      await emitReceipt(
+                        join(
+                          fixture,
+                          "source-revoked-before-save-settled.json",
+                        ),
+                        {
+                          source_views_cleared: true,
+                          save_still_pending: true,
+                          synthetic_clock: true,
+                        },
+                      );
+                    }
                     return [];
                   } catch {
                     await new Promise((r) => setTimeout(r, 10));
@@ -217,6 +252,14 @@ async function run(): Promise<void> {
                 ? "// pending human\n// " + expected
                 : expected;
         assert.equal(doc.getText(), wanted);
+        if (scenario === "success") {
+          assert.equal(doc.version, sourceVersion + 1);
+          await emitReceipt(join(fixture, "replace-version.json"), {
+            source_version: sourceVersion,
+            saved_version: doc.version,
+            one_transaction_delta: doc.version - sourceVersion,
+          });
+        }
         assert.equal(doc.isDirty, scenario === "external-save");
         assert.equal(
           await readFile(path, "utf8"),
