@@ -60,6 +60,7 @@ const editor = vi.hoisted(() => ({
   messageHeld: false,
   messages: [] as string[],
   picks: [] as string[],
+  pickerGuidance: [] as string[],
   providers: new Map<string, (uri: { toString(): string }) => string>(),
 }));
 vi.mock("../../src/root-probe", () => ({
@@ -143,6 +144,8 @@ vi.mock("vscode", () => ({
       let accept = () => {},
         hide = () => {};
       const picker = {
+        title: "",
+        placeholder: "",
         items: [] as { label: string }[],
         selectedItems: [] as { label: string }[],
         onDidAccept: (callback: () => void) => {
@@ -154,6 +157,7 @@ vi.mock("vscode", () => ({
           return { dispose() {} };
         },
         show() {
+          editor.pickerGuidance.push(`${picker.title} ${picker.placeholder}`);
           queueMicrotask(() => {
             const choice = editor.picks.shift();
             const item = picker.items.find((item) => item.label === choice);
@@ -708,6 +712,97 @@ it("explicit local pending inspection acknowledges exactly one unchanged v1 remn
     await f.cleanup();
   }
 });
+it.each([
+  ["partial", null],
+  ["applied_unsaved", null],
+  ["needs_review", null],
+  ["partial", 20],
+  ["applied_unsaved", 20],
+  ["needs_review", 20],
+] as const)(
+  "history checkpoint explains current-session %s with manual next %s and no repair",
+  async (state, next) => {
+    const f = await commandFixture();
+    const { EditorBridgeHost } =
+      await import("../../../desktop/main/editor-bridge");
+    const { parseCodeJobView } =
+      await import("../../../desktop/shared/coding-contracts");
+    const corpus =
+      await import("../../../tests/fixtures/coding-contracts.json");
+    let paired: import("../../../desktop/shared/editor-bridge").PairView;
+    const reads: number[] = [];
+    const effects: string[] = [];
+    const status = vi.fn();
+    const host = new EditorBridgeHost({
+      onData: (message) => {
+        effects.push(message.kind);
+      },
+      onPair: (view) => {
+        paired = view;
+        void host.confirm(view.pair_id);
+      },
+      codingStatus: status,
+      codingHistory: async (offset) => {
+        reads.push(offset);
+        return {
+          items: [
+            parseCodeJobView({
+              ...corpus.default.cases.find(
+                (item) => item.kind === "job_view" && item.valid,
+              )!.value,
+              binding: {
+                job_id: "current-job",
+                boot_id: paired.host_boot_id,
+                pair_id: paired.pair_id,
+                window_id: paired.window_id,
+                root_id: paired.root_id,
+                revision: 1,
+                policy_version: "code-v1",
+              },
+              state,
+              hashes: [],
+              receipts: [],
+            }),
+          ],
+          next_offset: next,
+        };
+      },
+    });
+    const guidance = (text: string) => {
+      expect(text).toMatch(/current.session/iu);
+      expect(text).toMatch(/fresh pair/iu);
+      expect(text).toMatch(/manual/iu);
+      expect(text).toMatch(/Next page/u);
+      expect(text).toMatch(/no repair|does not repair/iu);
+    };
+    try {
+      editor.ticket = Buffer.from(JSON.stringify(await host.start())).toString(
+        "base64url",
+      );
+      await f.command();
+      editor.pickerGuidance = [];
+      editor.picks = [];
+      await editor.commands.get("sage.inspectInterruptedJob")!();
+      expect(reads).toEqual([0]);
+      if (next === null) {
+        guidance(editor.messages.at(-1)!);
+        expect(editor.messages.at(-1)).toMatch(/does not establish absence/iu);
+        expect(editor.pickerGuidance).toEqual([]);
+      } else {
+        expect(editor.pickerGuidance).toHaveLength(1);
+        guidance(editor.pickerGuidance[0]);
+      }
+      expect(status).not.toHaveBeenCalled();
+      expect(effects).toEqual([]);
+      expect(host.currentCodingJob()).toBeUndefined();
+    } finally {
+      editor.picks = [];
+      editor.pickerGuidance = [];
+      await f.cleanup();
+      await host.close();
+    }
+  },
+);
 it("historical command manually advances one bounded filtered page and opens independent source-free metadata", async () => {
   const f = await commandFixture();
   const { EditorBridgeHost } =

@@ -2551,6 +2551,151 @@ it("delayed history read leaves ordinary intent ACK progress and current owner u
     await rm(root, { recursive: true, force: true });
   }
 });
+it("history checkpoint refuses host concurrency before the first request settles", async () => {
+  let finish!: (page: { items: never[]; next_offset: null }) => void;
+  const held = new Promise<{ items: never[]; next_offset: null }>((resolve) => {
+    finish = resolve;
+  });
+  const reads: number[] = [];
+  const s = await setup(true, () => {}, {
+    codingHistory: async (offset) => {
+      reads.push(offset);
+      return held;
+    },
+  });
+  await s.host.confirm(s.view.pair_id);
+  await s.pairing;
+  try {
+    const pending = s.client.history({ action: "list", offset: 0 });
+    const rejected = expect(pending).rejects.toThrow();
+    await vi.waitFor(() => expect(reads).toEqual([0]));
+    await s.client.send({
+      kind: "history.request",
+      payload: { inspection_id: "concurrent", action: "list", offset: 20 },
+    });
+    await rejected;
+    expect(reads).toEqual([0]);
+  } finally {
+    finish({ items: [], next_offset: null });
+  }
+});
+it.each([
+  ["resolve", false],
+  ["reject", false],
+  ["resolve", true],
+  ["reject", true],
+] as const)(
+  "history checkpoint releases timeout A after late A %s; concurrent refusal %s",
+  async (completion, concurrent) => {
+    let now = Date.now();
+    let resolveA!: (page: { items: never[]; next_offset: null }) => void,
+      rejectA!: (error: Error) => void,
+      resolveB!: (page: { items: never[]; next_offset: null }) => void;
+    const heldA = new Promise<{ items: never[]; next_offset: null }>(
+      (resolve, reject) => {
+        resolveA = resolve;
+        rejectA = reject;
+      },
+    );
+    const heldB = new Promise<{ items: never[]; next_offset: null }>(
+      (resolve) => {
+        resolveB = resolve;
+      },
+    );
+    const reads: number[] = [];
+    const effects: BridgeData[] = [];
+    const control = vi.fn();
+    const s = await setup(
+      true,
+      (message) => {
+        effects.push(message);
+      },
+      {
+        now: () => now,
+        codingControl: control,
+        codingHistory: async (offset) => {
+          reads.push(offset);
+          return offset === 0
+            ? heldA
+            : offset === 20
+              ? heldB
+              : { items: [], next_offset: null };
+        },
+      },
+    );
+    await s.host.confirm(s.view.pair_id);
+    await s.pairing;
+    const realTimeout = globalThis.setTimeout;
+    const timers: {
+      callback: () => void;
+      handle: ReturnType<typeof setTimeout>;
+    }[] = [];
+    const spy = vi
+      .spyOn(globalThis, "setTimeout")
+      .mockImplementation((callback, delay, ...args) => {
+        const handle = realTimeout(callback, delay, ...args);
+        if (delay === 30000)
+          timers.push({
+            callback: () => {
+              callback(...args);
+            },
+            handle,
+          });
+        return handle;
+      });
+    try {
+      const a = s.client.history({ action: "list", offset: 0 });
+      await vi.waitFor(() => expect(reads).toEqual([0]));
+      // Client installs its own deadline first; fire only the host's timer.
+      expect(timers).toHaveLength(2);
+      now += 30000;
+      clearTimeout(timers[1].handle);
+      timers[1].callback();
+      expect(await a).toMatchObject({ action: "unavailable" });
+      const b = s.client.history({ action: "list", offset: 20 });
+      const bResult = b.then(
+        (reply) => reply,
+        () => "pair closed",
+      );
+      await vi.waitFor(() => expect(reads).toEqual([0, 20]));
+      if (completion === "resolve") resolveA({ items: [], next_offset: null });
+      else rejectA(Error("Late unavailable backend"));
+      await wait();
+      expect(effects).toEqual([]);
+      expect(control).not.toHaveBeenCalled();
+      expect(s.host.currentCodingJob()).toBeUndefined();
+      expect(() => s.client.history({ action: "list", offset: 40 })).toThrow();
+      if (concurrent) {
+        // A's finally must not release B's host owner.
+        await s.client.send({
+          kind: "history.request",
+          payload: { inspection_id: "concurrent", action: "list", offset: 40 },
+        });
+        expect(await bResult).toBe("pair closed");
+        expect(reads).toEqual([0, 20]);
+        return;
+      }
+      resolveB({ items: [], next_offset: null });
+      expect(await bResult).toMatchObject({
+        action: "list",
+        items: [],
+        next_offset: null,
+      });
+      expect(
+        await s.client.history({ action: "list", offset: 40 }),
+      ).toMatchObject({ action: "list" });
+      expect(reads).toEqual([0, 20, 40]);
+      expect(effects).toEqual([]);
+      expect(control).not.toHaveBeenCalled();
+      expect(s.host.currentCodingJob()).toBeUndefined();
+    } finally {
+      resolveA({ items: [], next_offset: null });
+      resolveB({ items: [], next_offset: null });
+      timers.forEach(({ handle }) => clearTimeout(handle));
+      spy.mockRestore();
+    }
+  },
+);
 it("pair loss rejects a pending historical inspection and ignores its late completion", async () => {
   let resume!: (job: ReturnType<typeof historicalFixture>) => void;
   const held = new Promise<ReturnType<typeof historicalFixture>>((resolve) => {

@@ -279,6 +279,7 @@ export class EditorBridgeHost {
     const reply = async (payload: HistoryReply) => {
       if (settled) return;
       settled = true;
+      if (this.historyTask === token) this.historyTask = undefined;
       if (this.current(session, view, epoch))
         await session.send({ kind: "history.reply", payload });
     };

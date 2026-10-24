@@ -490,6 +490,8 @@ export function activate(context: vscode.ExtensionContext): void {
       try {
         await cleanup;
         guard();
+        const historyGuidance =
+          "Current-session terminal uncertainty requires a fresh pairing for historical inspection. Select Next page manually for pagination. Inspection performs no repair.";
         let offset = 0;
         for (;;) {
           const page = await client.history({ action: "list", offset });
@@ -510,14 +512,14 @@ export function activate(context: vscode.ExtensionContext): void {
             });
           if (!items.length) {
             void vscode.window.showInformationMessage(
-              "No eligible interrupted jobs in this Core page. This does not establish absence from all retained history.",
+              `No eligible interrupted jobs in this Core page. This does not establish absence from all retained history. ${historyGuidance}`,
             );
             return;
           }
           const selected = await input(
             local,
             items,
-            "Sage: Inspect interrupted job — one retained Core page",
+            `Sage: Inspect interrupted job — one retained Core page. ${historyGuidance}`,
           );
           guard();
           const choice = selected?.[0];
