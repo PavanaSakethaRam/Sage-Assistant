@@ -2,7 +2,21 @@
 import * as vscode from "vscode";
 import { randomBytes } from "node:crypto";
 import { ExtensionBridge, localWorkspace } from "./bridge";
-let bridge: ExtensionBridge | undefined;
+type PairOperation = {
+  client?: ExtensionBridge;
+  pending: boolean;
+  cancelled: boolean;
+};
+let owner: PairOperation | undefined;
+async function closeOperation(
+  operation: PairOperation | undefined,
+): Promise<void> {
+  if (!operation) return;
+  operation.cancelled = true;
+  if (owner === operation) owner = undefined;
+  await operation.client?.close();
+  operation.client = undefined;
+}
 export function activate(context: vscode.ExtensionContext): void {
   const windowId = randomBytes(16).toString("hex");
   const current = () =>
@@ -20,8 +34,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // Fail activation in unsupported environments even if the manifest guard changes.
   current();
   const dispose = () => {
-    void bridge?.close();
-    bridge = undefined;
+    void closeOperation(owner);
   };
   context.subscriptions.push(
     { dispose },
@@ -29,11 +42,25 @@ export function activate(context: vscode.ExtensionContext): void {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("sage.pairLocalEditor", async () => {
+      // Claim ownership before any await, including old-client disposal and prompts.
+      if (owner?.pending) return;
+      const previous = owner;
+      const operation: PairOperation = { pending: true, cancelled: false };
+      owner = operation;
+      let ticket: string | undefined;
       try {
+        await closeOperation(previous);
         const workspace = current();
-        await bridge?.close();
-        bridge = undefined;
-        let ticket = await vscode.window.showInputBox({
+        const guard = () => {
+          if (
+            operation.cancelled ||
+            owner !== operation ||
+            JSON.stringify(current()) !== JSON.stringify(workspace)
+          )
+            throw new Error("Pairing operation changed");
+        };
+        guard();
+        ticket = await vscode.window.showInputBox({
           title: "Pair local Sage",
           prompt: "Enter the one-use Sage pairing ticket",
           placeHolder: "Sage pairing ticket",
@@ -41,10 +68,6 @@ export function activate(context: vscode.ExtensionContext): void {
           ignoreFocusOut: true,
         });
         if (!ticket) return;
-        const guard = () => {
-          if (JSON.stringify(current()) !== JSON.stringify(workspace))
-            throw new Error("Workspace changed");
-        };
         guard();
         const client = new ExtensionBridge({
           guard,
@@ -62,7 +85,7 @@ export function activate(context: vscode.ExtensionContext): void {
             return choice === "Pair this folder";
           },
         });
-        bridge = client;
+        operation.client = client;
         const pairing = client.pair(ticket, workspace);
         ticket = undefined;
         await pairing;
@@ -71,15 +94,20 @@ export function activate(context: vscode.ExtensionContext): void {
           "Sage paired with this local folder. No source has been shared.",
         );
       } catch {
-        dispose();
-        void vscode.window.showErrorMessage(
-          "Sage could not pair. Use a fresh ticket in a trusted local single-folder desktop window.",
-        );
+        const cancelled = operation.cancelled;
+        await closeOperation(operation);
+        if (!cancelled)
+          void vscode.window.showErrorMessage(
+            "Sage could not pair. Use a fresh ticket in a trusted local single-folder desktop window.",
+          );
+      } finally {
+        ticket = undefined;
+        operation.pending = false;
+        if (!operation.client && owner === operation) owner = undefined;
       }
     }),
   );
 }
 export async function deactivate(): Promise<void> {
-  await bridge?.close();
-  bridge = undefined;
+  await closeOperation(owner);
 }

@@ -55,6 +55,8 @@ const editor = vi.hoisted(() => ({
   workspaceChanged: () => {},
   ticket: undefined as string | undefined,
   choice: undefined as string | undefined,
+  input: undefined as (() => Promise<string | undefined>) | undefined,
+  confirmation: undefined as (() => Promise<string | undefined>) | undefined,
   messageHeld: false,
   messages: [] as string[],
 }));
@@ -89,8 +91,9 @@ vi.mock("vscode", () => ({
     },
   },
   window: {
-    showInputBox: async () => editor.ticket,
-    showWarningMessage: async () => editor.choice,
+    showInputBox: async () => (editor.input ? editor.input() : editor.ticket),
+    showWarningMessage: async () =>
+      editor.confirmation ? editor.confirmation() : editor.choice,
     showInformationMessage: async (message: string) => {
       editor.messages.push(message);
       if (editor.messageHeld) await new Promise(() => {});
@@ -249,5 +252,277 @@ it("pairing command completes after consent without waiting for notification dis
     subscriptions.forEach((item) => item.dispose());
     await deactivate();
     await host.close();
+  }
+});
+
+import { channel } from "node:diagnostics_channel";
+import type { Socket } from "node:net";
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+async function commandFixture() {
+  const root = await realpath(
+    await mkdtemp(join(tmpdir(), "sage-command-owner-")),
+  );
+  roots.push(root);
+  editor.root = pathToFileURL(root).href;
+  editor.trusted = true;
+  editor.remote = undefined;
+  editor.choice = "Pair this folder";
+  editor.messages = [];
+  const shell = await import("../../src/extension");
+  const subscriptions: { dispose(): void }[] = [];
+  shell.activate({
+    subscriptions,
+  } as unknown as import("vscode").ExtensionContext);
+  const sockets = new Set<Socket>();
+  const observe = (event: unknown) => {
+    const { socket } = event as { socket: Socket };
+    sockets.add(socket);
+    socket.once("close", () => sockets.delete(socket));
+  };
+  channel("net.server.socket").subscribe(observe);
+  const hosts: import("../../../desktop/main/editor-bridge").EditorBridgeHost[] =
+    [];
+  async function host() {
+    const { EditorBridgeHost } =
+      await import("../../../desktop/main/editor-bridge");
+    const paired =
+      deferred<import("../../../desktop/shared/editor-bridge").PairView>();
+    let pairs = 0;
+    const server = new EditorBridgeHost({
+      onData: () => {
+        throw Error("Unexpected source");
+      },
+      onPair: (view) => {
+        pairs++;
+        paired.resolve(view);
+        void server.confirm(view.pair_id).catch(() => {});
+      },
+    });
+    hosts.push(server);
+    const ticket = Buffer.from(JSON.stringify(await server.start())).toString(
+      "base64url",
+    );
+    return { server, ticket, paired: paired.promise, pairs: () => pairs };
+  }
+  return {
+    sockets,
+    command: editor.commands.get("sage.pairLocalEditor")!,
+    host,
+    deactivate: shell.deactivate,
+    dispose: () => subscriptions.forEach((item) => item.dispose()),
+    async cleanup() {
+      editor.input = undefined;
+      editor.confirmation = undefined;
+      editor.ticket = undefined;
+      editor.choice = undefined;
+      subscriptions.forEach((item) => item.dispose());
+      await shell.deactivate();
+      await Promise.all(hosts.map((item) => item.close()));
+      channel("net.server.socket").unsubscribe(observe);
+    },
+  };
+}
+it("owns the whole pairing command before a pending ticket and closes its only authenticated socket", async () => {
+  const fixture = await commandFixture();
+  const first = await fixture.host(),
+    second = await fixture.host();
+  const input = deferred<string | undefined>();
+  let prompts = 0;
+  editor.input = () =>
+    ++prompts === 1 ? input.promise : Promise.resolve(second.ticket);
+  const older = fixture.command();
+  try {
+    await vi.waitFor(() => expect(prompts).toBe(1));
+    await fixture.command();
+    input.resolve(first.ticket);
+    await older;
+    await first.paired;
+    expect(fixture.sockets.size).toBe(1);
+    expect(prompts).toBe(1);
+    expect(second.pairs()).toBe(0);
+    await fixture.deactivate();
+    await vi.waitFor(() => expect(fixture.sockets.size).toBe(0));
+  } finally {
+    input.resolve(undefined);
+    await older;
+    await fixture.cleanup();
+  }
+});
+it.each(["dispose", "deactivate"] as const)(
+  "%s during a pending ticket prevents a later connection",
+  async (stop) => {
+    const fixture = await commandFixture();
+    const host = await fixture.host();
+    const input = deferred<string | undefined>();
+    let prompted = false;
+    editor.input = () => {
+      prompted = true;
+      return input.promise;
+    };
+    const command = fixture.command();
+    try {
+      await vi.waitFor(() => expect(prompted).toBe(true));
+      await fixture[stop]();
+      input.resolve(host.ticket);
+      await command;
+      expect(host.pairs()).toBe(0);
+      expect(
+        editor.messages.some((message) => message.startsWith("Sage paired")),
+      ).toBe(false);
+    } finally {
+      input.resolve(undefined);
+      await command;
+      await fixture.cleanup();
+    }
+  },
+);
+it.each(["dispose", "deactivate"] as const)(
+  "%s during confirmation closes the socket and refuses late approval",
+  async (stop) => {
+    const fixture = await commandFixture();
+    const host = await fixture.host();
+    const approval = deferred<string | undefined>();
+    let prompted = false;
+    editor.ticket = host.ticket;
+    editor.confirmation = () => {
+      prompted = true;
+      return approval.promise;
+    };
+    const command = fixture.command();
+    try {
+      await host.paired;
+      expect(fixture.sockets.size).toBe(1);
+      await vi.waitFor(() => expect(prompted).toBe(true));
+      await fixture[stop]();
+      approval.resolve("Pair this folder");
+      await command;
+      await vi.waitFor(() => expect(fixture.sockets.size).toBe(0));
+      expect(
+        editor.messages.some((message) => message.startsWith("Sage paired")),
+      ).toBe(false);
+    } finally {
+      approval.resolve(undefined);
+      await command;
+      await fixture.cleanup();
+    }
+  },
+);
+it("a cancelled older prompt cannot pair or close a newer authenticated client", async () => {
+  const fixture = await commandFixture();
+  const oldHost = await fixture.host(),
+    newHost = await fixture.host();
+  const input = deferred<string | undefined>();
+  let prompted = false;
+  editor.input = () => {
+    prompted = true;
+    return input.promise;
+  };
+  const older = fixture.command();
+  try {
+    await vi.waitFor(() => expect(prompted).toBe(true));
+    editor.workspaceChanged();
+    editor.input = undefined;
+    editor.ticket = newHost.ticket;
+    await fixture.command();
+    await newHost.paired;
+    input.resolve("bad-ticket");
+    await older;
+    expect(oldHost.pairs()).toBe(0);
+    expect(fixture.sockets.size).toBe(1);
+    expect(
+      editor.messages.filter((message) => message.startsWith("Sage paired")),
+    ).toHaveLength(1);
+    await fixture.deactivate();
+    await vi.waitFor(() => expect(fixture.sockets.size).toBe(0));
+  } finally {
+    input.resolve(undefined);
+    await older;
+    await fixture.cleanup();
+  }
+});
+
+it("retains command ownership while local confirmation is pending", async () => {
+  const fixture = await commandFixture();
+  const first = await fixture.host(),
+    second = await fixture.host();
+  const approval = deferred<string | undefined>();
+  let prompts = 0;
+  editor.ticket = first.ticket;
+  editor.input = async () => {
+    prompts++;
+    return editor.ticket;
+  };
+  editor.confirmation = () => approval.promise;
+  const older = fixture.command();
+  try {
+    await first.paired;
+    editor.ticket = second.ticket;
+    await fixture.command();
+    approval.resolve("Pair this folder");
+    await older;
+    expect(prompts).toBe(1);
+    expect(second.pairs()).toBe(0);
+    expect(fixture.sockets.size).toBe(1);
+    await fixture.deactivate();
+    await vi.waitFor(() => expect(fixture.sockets.size).toBe(0));
+  } finally {
+    approval.resolve(undefined);
+    await older;
+    await fixture.cleanup();
+  }
+});
+it("a cancelled older confirmation cannot close a newer paired client", async () => {
+  const fixture = await commandFixture();
+  const first = await fixture.host(),
+    second = await fixture.host();
+  const approval = deferred<string | undefined>();
+  editor.ticket = first.ticket;
+  editor.confirmation = () => approval.promise;
+  const older = fixture.command();
+  try {
+    await first.paired;
+    editor.workspaceChanged();
+    await older;
+    editor.confirmation = undefined;
+    editor.ticket = second.ticket;
+    await fixture.command();
+    await second.paired;
+    await vi.waitFor(() => expect(fixture.sockets.size).toBe(1));
+    approval.resolve("Pair this folder");
+    await new Promise<void>((done) => setImmediate(done));
+    expect(fixture.sockets.size).toBe(1);
+    expect(
+      editor.messages.filter((message) => message.startsWith("Sage paired")),
+    ).toHaveLength(1);
+    await fixture.deactivate();
+    await vi.waitFor(() => expect(fixture.sockets.size).toBe(0));
+  } finally {
+    approval.resolve(undefined);
+    await older;
+    await fixture.cleanup();
+  }
+});
+
+it("closes the previous paired socket even when the next workspace guard fails", async () => {
+  const fixture = await commandFixture();
+  const host = await fixture.host();
+  editor.ticket = host.ticket;
+  try {
+    await fixture.command();
+    await host.paired;
+    expect(fixture.sockets.size).toBe(1);
+    editor.trusted = false;
+    await fixture.command();
+    await vi.waitFor(() => expect(fixture.sockets.size).toBe(0));
+    expect(editor.messages.at(-1)).toMatch(/could not pair/u);
+  } finally {
+    editor.trusted = true;
+    await fixture.cleanup();
   }
 });
