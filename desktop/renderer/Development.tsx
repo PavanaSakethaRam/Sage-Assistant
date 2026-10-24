@@ -5,6 +5,7 @@ import {
   FOCUS_NAMES,
   type CodeDraft,
   type CodeJobView,
+  type CodeReceipt,
 } from "../shared/coding-contracts";
 import { call, message } from "./host";
 const running = new Set([
@@ -16,6 +17,59 @@ const running = new Set([
   "test_review",
   "testing",
 ]);
+const jobLabels: Record<CodeJobView["state"], string> = {
+  context_ready: "Context ready",
+  proposing: "Preparing proposal",
+  review_required: "Review required",
+  applying: "Applying reviewed changes",
+  applied_saved: "Changes saved",
+  applied_unsaved: "Changes not saved",
+  needs_review: "Review needed",
+  test_review: "Test review required",
+  testing: "Tests running",
+  completed: "Request completed",
+  rejected: "Request rejected",
+  cancelled: "Request cancelled",
+  failed: "Request failed",
+  partial: "Partially applied",
+  interrupted: "Interrupted",
+  needs_reconciliation: "Outcome needs inspection",
+};
+const receiptLabels: {
+  [S in CodeReceipt["scope"]]: Record<
+    Extract<CodeReceipt, { scope: S }>["status"],
+    string
+  >;
+} = {
+  "code.create": {
+    created: "File created",
+    partial: "Creation incomplete",
+    needs_reconciliation: "Creation outcome unknown",
+  },
+  "code.replace": {
+    applied_saved: "Replacement saved",
+    applied_unsaved: "Replacement not saved",
+    needs_review: "Replacement needs review",
+    needs_reconciliation: "Replacement outcome unknown",
+  },
+  "code.test": {
+    passed: "Tests passed",
+    failed: "Tests failed",
+    cancelled: "Test run cancelled",
+    changed_during_test: "Files changed during test",
+    unknown: "Test outcome unknown",
+    termination_unconfirmed: "Test termination unconfirmed",
+  },
+};
+function receiptSummary(receipt: CodeReceipt) {
+  if (receipt.scope === "code.test")
+    return `focus.test.mjs · ${receiptLabels[receipt.scope][receipt.status]}`;
+  const label =
+    receipt.scope === "code.create"
+      ? receiptLabels[receipt.scope][receipt.status]
+      : receiptLabels[receipt.scope][receipt.status];
+  return `${receipt.target} · ${label} · Observed hash: ${receipt.observed_hash ?? "not observed"}`;
+}
 function identity(job: CodeJobView) {
   return `${job.binding.job_id}:${job.binding.revision}:${job.context_hash}:${job.account_generation}`;
 }
@@ -46,6 +100,7 @@ export function Development({ api }: { api: SageApi }) {
     prompt: "",
     gesture: 0,
     sendOwner: 0,
+    historyOwner: 0,
     cleared: new Set<string>(),
     retired: new Set<string>(),
     buffered: new Map<string, CodeJobView>(),
@@ -308,19 +363,20 @@ export function Development({ api }: { api: SageApi }) {
   }
   async function loadHistory(pageOffset = offset ?? 0) {
     const s = state.current,
-      gesture = s.gesture;
+      gesture = s.gesture,
+      owner = ++s.historyOwner;
     try {
       const page = await call(api, "coding.list", {
         limit: 20,
         offset: pageOffset,
       });
-      if (s.alive && s.gesture === gesture) {
+      if (s.alive && s.gesture === gesture && s.historyOwner === owner) {
         setHistory(page.items);
         setOffset(page.next_offset);
         setStatus("Source-free development history loaded");
       }
     } catch (error) {
-      if (s.alive && s.gesture === gesture)
+      if (s.alive && s.gesture === gesture && s.historyOwner === owner)
         setStatus(`History unavailable: ${message(error)}`);
     }
   }
@@ -417,7 +473,7 @@ export function Development({ api }: { api: SageApi }) {
             selection stay in VS Code.
           </p>
           <p>
-            Job status: {job.state}
+            Job status: {jobLabels[job.state]}
             {job.diagnostic ? ` · ${job.diagnostic}` : ""}
           </p>
           {job.state === "applied_saved" && (
@@ -441,19 +497,17 @@ export function Development({ api }: { api: SageApi }) {
           )}
           <p>
             Observed receipts only; proposal text does not prove code ran.
-            Partial, unknown and termination_unconfirmed outcomes need
+            Partial, unknown and unconfirmed test termination outcomes need
             inspection in VS Code.
           </p>
           <ul aria-label="Observed development receipts">
             {job.receipts.map((receipt, i) => (
               <li key={i}>
-                {receipt.scope} ·{" "}
-                {"target" in receipt ? receipt.target : "focus.test.mjs"} ·{" "}
-                {receipt.status}
-                {"observed_hash" in receipt
-                  ? ` · observed ${receipt.observed_hash ?? "unknown"}`
-                  : ""}
-                <pre>{JSON.stringify(receipt, null, 2)}</pre>
+                {receiptSummary(receipt)}
+                <details>
+                  <summary>Technical receipt details</summary>
+                  <pre>{JSON.stringify(receipt, null, 2)}</pre>
+                </details>
               </li>
             ))}
           </ul>
@@ -515,8 +569,8 @@ export function Development({ api }: { api: SageApi }) {
       <ul aria-label="Development history">
         {history.map((item) => (
           <li key={identity(item)}>
-            {item.binding.job_id} · {item.state} ·{" "}
-            {item.receipts.map((r) => `${r.scope}: ${r.status}`).join(", ") ||
+            {item.binding.job_id} · {jobLabels[item.state]} ·{" "}
+            {item.receipts.map(receiptSummary).join(", ") ||
               "No observed receipts"}
           </li>
         ))}
