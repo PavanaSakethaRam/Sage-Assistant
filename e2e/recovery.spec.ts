@@ -92,6 +92,19 @@ test("SQLITE_FULL and a real locked database retain drafts and recover without r
 test("migration startup failure preserves schema/content and recovers on owned app restart", async () => {
   let host = await launch();
   const root = host.root;
+  const schemaVersion = () =>
+    Number(
+      execFileSync(
+        python,
+        [
+          "-I",
+          "-c",
+          "import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); print(c.execute('PRAGMA user_version').fetchone()[0])",
+          join(root, "userData/data/sage.sqlite3"),
+        ],
+        { encoding: "utf8" },
+      ).trim(),
+    );
   try {
     await createDraft(
       host,
@@ -105,6 +118,8 @@ test("migration startup failure preserves schema/content and recovers on owned a
       host.page.getByLabel("Saved body", { exact: true }),
     ).toHaveText("sentinel before migration failure");
     const before = await database(host);
+    const beforeVersion = schemaVersion();
+    expect(Number.isInteger(beforeVersion) && beforeVersion > 0).toBe(true);
     await close(host, false);
     await writeFile(join(root, "userData/migration.fail"), "1");
     host = await launch(root, true);
@@ -113,18 +128,7 @@ test("migration startup failure preserves schema/content and recovers on owned a
     );
     await waitEvent(host, "migration_failed");
     expect(await database(host)).toEqual(before);
-    expect(
-      execFileSync(
-        python,
-        [
-          "-I",
-          "-c",
-          "import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); print(c.execute('PRAGMA user_version').fetchone()[0])",
-          join(root, "userData/data/sage.sqlite3"),
-        ],
-        { encoding: "utf8" },
-      ).trim(),
-    ).toBe("1");
+    expect(schemaVersion()).toBe(beforeVersion);
     await close(host, false);
     await rm(join(root, "userData/migration.fail"));
     host = await launch(root);
@@ -136,6 +140,7 @@ test("migration startup failure preserves schema/content and recovers on owned a
       "sentinel before migration failure",
     );
     expect(await database(host)).toEqual(before);
+    expect(schemaVersion()).toBe(beforeVersion);
   } finally {
     await close(host);
   }

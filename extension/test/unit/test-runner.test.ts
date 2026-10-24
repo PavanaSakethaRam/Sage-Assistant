@@ -1,4 +1,12 @@
-import { afterEach, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { createHash } from "node:crypto";
 import {
   appendFile,
@@ -12,6 +20,7 @@ import {
 } from "node:fs/promises";
 import { lstatSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   FOCUS_NAMES,
@@ -213,7 +222,7 @@ vi.mock("vscode", () => {
     },
   };
 });
-const NODE = "/private/tmp/sage-task1-node.alAwYF/node";
+let NODE: string;
 const roots: string[] = [];
 const reviews: ProposalReview[] = [];
 afterEach(async () => {
@@ -245,7 +254,9 @@ afterEach(async () => {
 async function fixture(
   source = "import {test} from 'node:test'; import assert from 'node:assert/strict'; test('fixed',()=>assert.equal(2+2,4));\n",
 ) {
-  const root = await realpath(await mkdtemp("/private/tmp/sage-test-runner-"));
+  const root = await realpath(
+    await mkdtemp(join(tmpdir(), "sage-test-runner-")),
+  );
   roots.push(root);
   const stat = lstatSync(root, { bigint: true }),
     workspace = {
@@ -392,217 +403,6 @@ async function approved(f: Awaited<ReturnType<typeof fixture>>) {
   await f.review.showTest(f.context, recipe);
   return recipe;
 }
-it("accepts only the exact recorded standalone Node identity/version, never a copied candidate", async () => {
-  const vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(NODE));
-  expect(node).toMatchObject({ version: "26.12.1", available: true });
-  const f = await fixture();
-  await expect(prepareFocusTest(f.context, { ...node })).rejects.toThrow();
-});
-it("binds the fixed argv, saved hashes, original lease, empty PATH and owned temp map", async () => {
-  const f = await fixture(),
-    vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(NODE));
-  const r = await prepareFocusTest(f.context, node);
-  expect(r.argv).toEqual([
-    "--test",
-    "--test-isolation=none",
-    "--test-reporter=tap",
-    "focus.test.mjs",
-  ]);
-  expect(r.file_hashes.map((x) => x.name)).toEqual(FOCUS_NAMES);
-  expect(r.environment.PATH).toBe("");
-  expect(r.environment.HOME).toBeUndefined();
-  expect(r.timeout_seconds).toBe(30);
-  expect(r.recipe_hash).toBe(await recipeHash(r));
-  expect(Date.parse(r.deadline)).toBeLessThanOrEqual(
-    contextOffer(f.context).expires_at_ms,
-  );
-  await expect(runFocusTest(r, {} as never)).rejects.toThrow(/confirmation/);
-});
-it.each([
-  ["success", "", "passed", 0],
-  ["nonzero", "process.exitCode=1;", "failed", 1],
-  ["overflow", "process.stdout.write('x'.repeat(300000));", "failed", null],
-  [
-    "mutation",
-    "import {writeFileSync} from 'node:fs'; writeFileSync('focus.js','changed');",
-    "changed_during_test",
-    0,
-  ],
-] as const)(
-  "real process %s has a correlated receipt and bounded digest",
-  async (_name, body, status, code) => {
-    const f = await fixture(body + "\n");
-    await approved(f);
-    expect(f.receipts).toHaveLength(1);
-    const r = f.receipts[0];
-    expect(r).toMatchObject({
-      scope: "code.test",
-      status,
-      cancel_requested: false,
-      timeout: false,
-    });
-    if (code !== null) expect(r).toHaveProperty("exit_code", code);
-    expect(r).toHaveProperty(
-      "output_digest",
-      expect.stringMatching(/^[0-9a-f]{64}$/),
-    );
-    expect(JSON.stringify(r)).not.toContain(f.root);
-    expect(JSON.stringify(r)).not.toContain("owned");
-    expect(f.messages.some((m) => m.kind === "test.preview")).toBe(true);
-    expect(f.messages.some((m) => m.kind === "result.dismissed")).toBe(false);
-  },
-);
-it("refuses dirty saved buffers before test authority or intent", async () => {
-  const f = await fixture();
-  ui.documents[0].isDirty = true;
-  await expect(approved(f)).rejects.toThrow();
-  expect(f.intents).toEqual([]);
-});
-it("revocation after intent stops spawning and clears transient text", async () => {
-  const f = await fixture();
-  f.afterIntent(() => f.revoke());
-  await expect(approved(f)).rejects.toThrow();
-  expect(f.receipts).toEqual([]);
-});
-it("fixed opener requires current saved identities and emits only canonical index file URI", async () => {
-  const f = await fixture(),
-    calls: string[] = [],
-    opener = new KnownResultOpener(async (u) => {
-      calls.push(u.toString());
-      return true;
-    });
-  await opener.openKnownResult(f.context, "index.html", "browser");
-  expect(calls).toEqual([pathToFileURL(join(f.root, "index.html")).href]);
-  await expect(
-    opener.openKnownResult(f.context, "focus.js", "browser"),
-  ).rejects.toThrow();
-  await writeFile(join(f.root, "index.html"), "human");
-  await expect(
-    opener.openKnownResult(f.context, "index.html", "browser"),
-  ).rejects.toThrow();
-  expect(calls).toHaveLength(1);
-});
-
-it("real timeout never passes and confirms same owned child termination", async () => {
-  const f = await fixture("setInterval(()=>{},1000);\n");
-  await approved(f);
-  expect(f.receipts[0]).toMatchObject({
-    status: "failed",
-    timeout: true,
-    cancel_requested: false,
-    exit_code: 0,
-    signal: null,
-  });
-}, 40000);
-it("real cancellation drops output promptly while preserving the late receipt", async () => {
-  const f = await fixture(
-    "process.stdout.write('private transient'); setInterval(()=>{},1000);\n",
-  );
-  f.afterIntent(() => {
-    setTimeout(() => f.revoke(), 300);
-  });
-  await expect(approved(f)).rejects.toThrow();
-  expect(f.receipts[0]).toMatchObject({
-    status: "cancelled",
-    cancel_requested: true,
-    timeout: false,
-  });
-});
-it("exit_with_inherited_stdout_stays_bounded and does not claim descendant containment", async () => {
-  const f = await fixture(
-    "import {spawn} from 'node:child_process'; spawn(process.execPath,['-e','setTimeout(()=>{},4500)'],{stdio:['ignore',1,2],detached:false}).unref();\n",
-  );
-  const start = performance.now();
-  await approved(f);
-  expect(f.receipts[0]).toMatchObject({
-    status: "unknown",
-    exit_code: 0,
-    signal: null,
-    timeout: false,
-  });
-  expect(performance.now() - start).toBeLessThan(4400);
-  // The owned fixture descendant settles itself; wait for its bounded cleanup before deleting files.
-  await new Promise((r) => setTimeout(r, 1800));
-}, 8000);
-it.each(["during review", "after intent"] as const)(
-  "a genuinely inspected executable changed %s refuses before any fixed-test spawn",
-  async (boundary) => {
-    const f = await fixture(),
-      vscode = await import("vscode"),
-      actual =
-        await vi.importActual<typeof import("node:child_process")>(
-          "node:child_process",
-        ),
-      directory = await realpath(
-        await mkdtemp("/private/tmp/sage-selected-node-"),
-      ),
-      selected = join(directory, "node"),
-      calls: { executable: string; argv: readonly string[] }[] = [],
-      hash = (path: string) =>
-        createHash("sha256").update(readFileSync(path)).digest("hex"),
-      pinnedHash = hash(NODE);
-    roots.push(directory);
-    await copyFile(NODE, selected);
-    await chmod(selected, 0o700);
-    expect(hash(selected)).toBe(pinnedHash);
-    expect(lstatSync(selected).ino).not.toBe(lstatSync(NODE).ino);
-    processDouble.spawn = (...args) => {
-      const argv = Array.isArray(args[1]) ? args[1] : [];
-      calls.push({ executable: args[0], argv });
-      // A failed guard must be observable without executing the mutated file.
-      if (argv[0] !== "--version") throw Error("Unexpected fixed-test spawn");
-      return Reflect.apply(actual.spawn, undefined, args);
-    };
-    const node = await inspectNode(vscode.Uri.file(selected));
-    expect(node).toMatchObject({
-      executable: selected,
-      hash: pinnedHash,
-      version: "26.12.1",
-      available: true,
-    });
-    const recipe = await prepareFocusTest(f.context, node);
-    expect(recipe.executable).toBe(selected);
-    expect(recipe.executable_hash).toBe(pinnedHash);
-    let changed = false;
-    const mutate = async () => {
-      const before = lstatSync(selected, { bigint: true });
-      if (boundary === "during review") {
-        await appendFile(selected, "\0");
-        expect(hash(selected)).not.toBe(pinnedHash);
-      } else {
-        const replacement = join(directory, "replacement");
-        await copyFile(NODE, replacement);
-        await chmod(replacement, 0o700);
-        await rename(replacement, selected);
-        expect(hash(selected)).toBe(pinnedHash);
-        expect(lstatSync(selected, { bigint: true }).ino).not.toBe(before.ino);
-      }
-      changed = true;
-    };
-    if (boundary === "during review") ui.beforeConfirm = mutate;
-    else f.afterIntent(mutate);
-    ui.choices = ["Run fixed tests"];
-    await expect(f.review.showTest(f.context, recipe)).rejects.toThrow(
-      "Fixed test recipe unavailable or changed",
-    );
-    expect(changed).toBe(true);
-    expect(f.intents).toHaveLength(boundary === "during review" ? 0 : 1);
-    expect(f.receipts).toEqual([]);
-    expect(calls).toEqual([{ executable: selected, argv: ["--version"] }]);
-    expect(calls.filter((call) => call.argv[0] === "--test")).toEqual([]);
-    expect(hash(NODE)).toBe(pinnedHash);
-  },
-);
-it("older standalone runtime remains unavailable, without fallback", async () => {
-  const vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(process.execPath));
-  // Unit host may itself be the pinned Node. Only a genuinely older runtime exercises this lane.
-  if (process.version !== "v26.12.1") expect(node.available).toBe(false);
-  else expect(node.version).toBe("26.12.1");
-});
-
 async function fakeProcess(
   mode:
     | "probe"
@@ -657,98 +457,33 @@ async function fakeProcess(
     });
   return Object.assign(c, { start });
 }
-it.each([
-  "spawn-error",
-  "null-exit",
-  "stream-error",
-  "lost-completion",
-] as const)(
-  "unit process event double %s cannot falsely pass",
-  async (mode) => {
-    const f = await fixture();
+it("fixed opener requires current saved identities and emits only canonical index file URI", async () => {
+  const f = await fixture(),
+    calls: string[] = [],
+    opener = new KnownResultOpener(async (u) => {
+      calls.push(u.toString());
+      return true;
+    });
+  await opener.openKnownResult(f.context, "index.html", "browser");
+  expect(calls).toEqual([pathToFileURL(join(f.root, "index.html")).href]);
+  await expect(
+    opener.openKnownResult(f.context, "focus.js", "browser"),
+  ).rejects.toThrow();
+  await writeFile(join(f.root, "index.html"), "human");
+  await expect(
+    opener.openKnownResult(f.context, "index.html", "browser"),
+  ).rejects.toThrow();
+  expect(calls).toHaveLength(1);
+});
 
-    let child: Awaited<ReturnType<typeof fakeProcess>>;
-    f.afterIntent(async () => {
-      child = await fakeProcess(mode);
-      processDouble.spawn = () => {
-        child.start();
-        return child as unknown as ReturnType<
-          typeof import("node:child_process").spawn
-        >;
-      };
-    });
-    await approved(f);
-    expect(f.receipts[0]).toMatchObject({
-      status: "unknown",
-      timeout: false,
-      overflow: false,
-    });
-    expect(child!.stdout.destroyed).toBe(true);
-    if (mode === "stream-error")
-      expect(child!.kill).toHaveBeenCalledWith("SIGTERM");
-    else expect(child!.kill).not.toHaveBeenCalled();
-    if (mode === "lost-completion" || mode === "stream-error")
-      expect(f.receipts[0]).toHaveProperty("exit_code", 0);
-  },
-  8000,
-);
-it("actual captured output is inert/read-only and retained until explicit Done", async () => {
-  const f = await fixture(
-    "process.stdout.write('\\u001b[31msynthetic literal\\u001b[0m\\u0000');\n",
-  );
-  const recipe = await approved(f),
-    { testResultText } = await import("../../src/test-runner");
-  expect(testResultText(recipe)).toContain("synthetic literal");
-  expect(testResultText(recipe)).not.toContain("\x1b");
-  expect(testResultText(recipe)).not.toContain("\0");
-  const text = ui.provider!.provideTextDocumentContent({
-    toString: () => ui.viewed.at(-1)!,
-  });
-  expect(text).toContain("Fixed test result: passed");
-  expect(text).toContain("Exit: 0");
-  expect(text).toContain("Generated tests do not certify app behavior");
+it("older standalone runtime remains unavailable, without fallback", async () => {
   const vscode = await import("vscode"),
-    owned = {
-      input: new vscode.TabInputText(vscode.Uri.parse(ui.viewed.at(-1)!)),
-    },
-    human = {
-      input: new vscode.TabInputText(
-        vscode.Uri.file(join(f.root, "index.html")),
-      ),
-    },
-    unrelated = {
-      input: new vscode.TabInputText(
-        vscode.Uri.parse("sage-diff:/unrelated-owner"),
-      ),
-    };
-  ui.tabs = [owned, human, unrelated];
-  ui.choices = ["Done"];
-  await f.review.resultControls(f.context);
-  expect(ui.closed).toEqual([owned]);
-  expect(f.messages.filter((m) => m.kind === "result.dismissed")).toHaveLength(
-    1,
-  );
-  expect(() => testResultText(recipe)).toThrow();
+    node = await inspectNode(vscode.Uri.file(process.execPath));
+  // Unit host may itself be the pinned Node. Only a genuinely older runtime exercises this lane.
+  if (process.version !== "v26.12.1") expect(node.available).toBe(false);
+  else expect(node.version).toBe("26.12.1");
 });
-it("an expired latest-start cannot create an intent or renew its preview", async () => {
-  const f = await fixture(),
-    vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(NODE)),
-    recipe = await prepareFocusTest(f.context, node);
-  vi.spyOn(Date, "now").mockReturnValue(Date.parse(recipe.deadline));
-  await expect(f.review.showTest(f.context, recipe)).rejects.toThrow();
-  expect(f.intents).toEqual([]);
-});
-it("declining the separate test review has zero execution effects", async () => {
-  const f = await fixture(),
-    vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(NODE)),
-    recipe = await prepareFocusTest(f.context, node);
-  ui.choices = ["Decline"];
-  await f.review.showTest(f.context, recipe);
-  expect(f.intents).toEqual([]);
-  expect(f.receipts).toEqual([]);
-});
+
 it("rejected known-file handoff reports failure without changing target", async () => {
   const f = await fixture(),
     opener = new KnownResultOpener(async () => false);
@@ -760,42 +495,7 @@ it("rejected known-file handoff reports failure without changing target", async 
     opener.openKnownResult(f.context, "index.html", "browser"),
   ).rejects.toThrow();
 });
-it("unit live-child double forces only the same child after two seconds and retains overflow facts", async () => {
-  const f = await fixture();
-  let child: Awaited<ReturnType<typeof fakeProcess>> | undefined,
-    started = false;
-  let bornResolve = () => {};
-  const born = new Promise<void>((resolve) => {
-    bornResolve = resolve;
-  });
-  f.afterIntent(async () => {
-    child = await fakeProcess("term-force", "x".repeat(262145));
-    processDouble.spawn = () => {
-      started = true;
-      child!.start();
-      bornResolve();
-      return child as unknown as ReturnType<
-        typeof import("node:child_process").spawn
-      >;
-    };
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-  });
-  const work = approved(f);
-  await born;
-  expect(started).toBe(true);
-  await vi.advanceTimersByTimeAsync(1999);
-  expect(child!.kill.mock.calls).toEqual([["SIGTERM"]]);
-  await vi.advanceTimersByTimeAsync(1);
-  await work;
-  expect(child!.kill.mock.calls).toEqual([["SIGTERM"], ["SIGKILL"]]);
-  expect(f.receipts[0]).toMatchObject({
-    status: "failed",
-    overflow: true,
-    timeout: false,
-    signal: "SIGKILL",
-    exit_code: null,
-  });
-}, 8000);
+
 it.each(["v26.10.0\n", "v26.13.0\n"])(
   "version probe %s remains unavailable without recorded build evidence",
   async (version) => {
@@ -807,7 +507,7 @@ it.each(["v26.10.0\n", "v26.13.0\n"])(
       >;
     };
     const vscode = await import("vscode"),
-      candidate = await inspectNode(vscode.Uri.file(NODE));
+      candidate = await inspectNode(vscode.Uri.file(process.execPath));
     expect(candidate.available).toBe(false);
   },
 );
@@ -825,146 +525,525 @@ it.each([
     >;
   };
   const vscode = await import("vscode");
-  await expect(inspectNode(vscode.Uri.file(NODE))).rejects.toThrow();
+  await expect(
+    inspectNode(vscode.Uri.file(process.execPath)),
+  ).rejects.toThrow();
 });
-it("correlates the digest with actual combined captured bytes, independently of inert display", async () => {
-  const f = await fixture(
-    "process.stdout.write('constant-output\\u001b[31m');process.stderr.write('constant-error');\n",
-  );
-  const original =
-      await vi.importActual<typeof import("node:child_process")>(
-        "node:child_process",
-      ),
-    chunks: Buffer[] = [];
-  f.afterIntent(() => {
-    processDouble.spawn = (...args: Parameters<typeof original.spawn>) => {
-      const child = Reflect.apply(
-        original.spawn,
-        undefined,
-        args,
-      ) as ReturnType<typeof original.spawn>;
-      for (const stream of [child.stdout, child.stderr])
-        stream!.on("data", (b: Buffer) => chunks.push(Buffer.from(b)));
-      return child as unknown as ReturnType<
-        typeof import("node:child_process").spawn
-      >;
-    };
+
+describe("measured standalone Node recipe", () => {
+  const pinnedHash =
+    "06eb3f5762c2b6890e99d03f931bf01d9b20fd341dec1a8c1ef5c1809e66102b";
+  let sourceNode: string;
+  beforeAll(async () => {
+    sourceNode = await realpath(process.execPath);
+    const source = lstatSync(sourceNode);
+    if (
+      process.release.name !== "node" ||
+      process.versions.electron ||
+      process.version !== "v26.12.1" ||
+      process.platform !== "darwin" ||
+      process.arch !== "arm64" ||
+      !source.isFile() ||
+      source.isSymbolicLink() ||
+      source.nlink !== 1 ||
+      createHash("sha256").update(readFileSync(sourceNode)).digest("hex") !==
+        pinnedHash
+    )
+      throw Error("Unsupported standalone Node recipe prerequisite");
   });
-  await approved(f);
-  expect(
-    "output_digest" in f.receipts[0] ? f.receipts[0].output_digest : null,
-  ).toBe(createHash("sha256").update(Buffer.concat(chunks)).digest("hex"));
-});
-it("revoked source observation never resamples expired document text while settling cancellation", async () => {
-  const f = await fixture("setInterval(()=>{},1000);\n");
-  let revoked = false,
-    expiredReads = 0;
-  for (const document of ui.documents) {
-    const get = document.getText;
-    document.getText = () => {
-      if (revoked) {
-        expiredReads++;
-        throw Error("expired source read");
-      }
-      return get();
-    };
-  }
-  f.afterIntent(() => {
-    setTimeout(() => {
-      revoked = true;
-      f.revoke();
-    }, 300);
+  beforeEach(async () => {
+    const directory = await realpath(
+      await mkdtemp(join(tmpdir(), "sage-node-fixture-")),
+    );
+    roots.push(directory);
+    NODE = join(directory, "node");
+    await copyFile(sourceNode, NODE);
+    await chmod(NODE, 0o700);
+    const source = lstatSync(sourceNode),
+      selected = lstatSync(NODE);
+    expect(selected.isFile() && !selected.isSymbolicLink()).toBe(true);
+    expect(selected.nlink).toBe(1);
+    expect(String(selected.dev) + "-" + String(selected.ino)).not.toBe(
+      String(source.dev) + "-" + String(source.ino),
+    );
+    expect(readFileSync(NODE).equals(readFileSync(sourceNode))).toBe(true);
+    expect(createHash("sha256").update(readFileSync(NODE)).digest("hex")).toBe(
+      pinnedHash,
+    );
   });
-  await expect(approved(f)).rejects.toThrow();
-  expect(expiredReads).toBe(0);
-  expect(f.receipts[0]).toMatchObject({
-    status: "cancelled",
-    cancel_requested: true,
+  it("accepts only the exact recorded standalone Node identity/version, never a copied candidate", async () => {
+    const vscode = await import("vscode"),
+      node = await inspectNode(vscode.Uri.file(NODE));
+    expect(node).toMatchObject({ version: "26.12.1", available: true });
+    const f = await fixture();
+    await expect(prepareFocusTest(f.context, { ...node })).rejects.toThrow();
   });
-});
-it("owned temp cleanup failure cannot discard actual child exit or its receipt", async () => {
-  const f = await fixture();
-  f.afterIntent(() => {
-    cleanupFault.enabled = true;
+  it("binds the fixed argv, saved hashes, original lease, empty PATH and owned temp map", async () => {
+    const f = await fixture(),
+      vscode = await import("vscode"),
+      node = await inspectNode(vscode.Uri.file(NODE));
+    const r = await prepareFocusTest(f.context, node);
+    expect(r.argv).toEqual([
+      "--test",
+      "--test-isolation=none",
+      "--test-reporter=tap",
+      "focus.test.mjs",
+    ]);
+    expect(r.file_hashes.map((x) => x.name)).toEqual(FOCUS_NAMES);
+    expect(r.environment.PATH).toBe("");
+    expect(r.environment.HOME).toBeUndefined();
+    expect(r.timeout_seconds).toBe(30);
+    expect(r.recipe_hash).toBe(await recipeHash(r));
+    expect(Date.parse(r.deadline)).toBeLessThanOrEqual(
+      contextOffer(f.context).expires_at_ms,
+    );
+    await expect(runFocusTest(r, {} as never)).rejects.toThrow(/confirmation/);
   });
-  const recipe = await approved(f);
-  expect(
-    (await import("../../src/test-runner")).testResultText(recipe),
-  ).toContain("Temporary cleanup incomplete");
-  expect(f.receipts).toHaveLength(1);
-  expect(f.receipts[0]).toMatchObject({
-    scope: "code.test",
-    status: "passed",
-    exit_code: 0,
-    signal: null,
-    timeout: false,
-    overflow: false,
-  });
-});
-it("pending cleanup never delays receipt and a later rejection appears on result inspection", async () => {
-  const f = await fixture();
-  f.afterIntent(() => {
-    cleanupFault.enabled = true;
-    cleanupFault.delayed = true;
-  });
-  const recipe = await approved(f);
-  expect(f.receipts[0]).toMatchObject({ status: "passed", exit_code: 0 });
-  expect(cleanupFault.reject).toBeDefined();
-  const runner = await import("../../src/test-runner");
-  expect(runner.testResultText(recipe)).not.toContain(
-    "Temporary cleanup incomplete",
-  );
-  cleanupFault.reject!();
-  await Promise.resolve();
-  await Promise.resolve();
-  const vscode = await import("vscode");
-  let warned = false;
-  vi.spyOn(vscode.window, "showTextDocument").mockImplementation(
-    async (document: unknown) => {
-      warned = (document as { getText(): string })
-        .getText()
-        .includes("Temporary cleanup incomplete");
-      return {} as never;
+  it.each([
+    ["success", "", "passed", 0],
+    ["nonzero", "process.exitCode=1;", "failed", 1],
+    ["overflow", "process.stdout.write('x'.repeat(300000));", "failed", null],
+    [
+      "mutation",
+      "import {writeFileSync} from 'node:fs'; writeFileSync('focus.js','changed');",
+      "changed_during_test",
+      0,
+    ],
+  ] as const)(
+    "real process %s has a correlated receipt and bounded digest",
+    async (_name, body, status, code) => {
+      const f = await fixture(body + "\n");
+      await approved(f);
+      expect(f.receipts).toHaveLength(1);
+      const r = f.receipts[0];
+      expect(r).toMatchObject({
+        scope: "code.test",
+        status,
+        cancel_requested: false,
+        timeout: false,
+      });
+      if (code !== null) expect(r).toHaveProperty("exit_code", code);
+      expect(r).toHaveProperty(
+        "output_digest",
+        expect.stringMatching(/^[0-9a-f]{64}$/),
+      );
+      expect(JSON.stringify(r)).not.toContain(f.root);
+      expect(JSON.stringify(r)).not.toContain("owned");
+      expect(f.messages.some((m) => m.kind === "test.preview")).toBe(true);
+      expect(f.messages.some((m) => m.kind === "result.dismissed")).toBe(false);
     },
   );
-  ui.choices = ["Inspect test result", "Done"];
-  await f.review.resultControls(f.context);
-  expect(warned).toBe(true);
-  expect(f.receipts).toHaveLength(1);
-  expect(f.receipts[0]).toMatchObject({
-    status: "passed",
-    exit_code: 0,
-    timeout: false,
-    overflow: false,
+  it("refuses dirty saved buffers before test authority or intent", async () => {
+    const f = await fixture();
+    ui.documents[0].isDirty = true;
+    await expect(approved(f)).rejects.toThrow();
+    expect(f.intents).toEqual([]);
   });
+  it("revocation after intent stops spawning and clears transient text", async () => {
+    const f = await fixture();
+    f.afterIntent(() => f.revoke());
+    await expect(approved(f)).rejects.toThrow();
+    expect(f.receipts).toEqual([]);
+  });
+  it("real timeout never passes and confirms same owned child termination", async () => {
+    const f = await fixture("setInterval(()=>{},1000);\n");
+    await approved(f);
+    expect(f.receipts[0]).toMatchObject({
+      status: "failed",
+      timeout: true,
+      cancel_requested: false,
+      exit_code: 0,
+      signal: null,
+    });
+  }, 40000);
+  it("real cancellation drops output promptly while preserving the late receipt", async () => {
+    const f = await fixture(
+      "process.stdout.write('private transient'); setInterval(()=>{},1000);\n",
+    );
+    f.afterIntent(() => {
+      setTimeout(() => f.revoke(), 300);
+    });
+    await expect(approved(f)).rejects.toThrow();
+    expect(f.receipts[0]).toMatchObject({
+      status: "cancelled",
+      cancel_requested: true,
+      timeout: false,
+    });
+  });
+  it("exit_with_inherited_stdout_stays_bounded and does not claim descendant containment", async () => {
+    const f = await fixture(
+      "import {spawn} from 'node:child_process'; spawn(process.execPath,['-e','setTimeout(()=>{},4500)'],{stdio:['ignore',1,2],detached:false}).unref();\n",
+    );
+    const actual =
+      await vi.importActual<typeof import("node:child_process")>(
+        "node:child_process",
+      );
+    let exitedAt: number | undefined;
+    const ended: string[] = [];
+    f.afterIntent(() => {
+      processDouble.spawn = (...args) => {
+        const child = Reflect.apply(actual.spawn, undefined, args);
+        if (Array.isArray(args[1]) && args[1][0] === "--test") {
+          child.once("exit", () => {
+            exitedAt = performance.now();
+          });
+          child.stdout!.once("end", () => ended.push("stdout"));
+          child.stderr!.once("end", () => ended.push("stderr"));
+        }
+        return child;
+      };
+    });
+    await approved(f);
+    expect(f.receipts[0]).toMatchObject({
+      status: "unknown",
+      exit_code: 0,
+      signal: null,
+      timeout: false,
+    });
+    expect(exitedAt).toBeTypeOf("number");
+    expect(performance.now() - exitedAt!).toBeLessThan(4400);
+    expect(ended).toEqual([]);
+    // The owned fixture descendant settles itself; wait for its bounded cleanup before deleting files.
+    await new Promise((r) => setTimeout(r, 1800));
+  }, 8000);
+  it.each(["during review", "after intent"] as const)(
+    "a genuinely inspected executable changed %s refuses before any fixed-test spawn",
+    async (boundary) => {
+      const f = await fixture(),
+        vscode = await import("vscode"),
+        actual =
+          await vi.importActual<typeof import("node:child_process")>(
+            "node:child_process",
+          ),
+        directory = await realpath(
+          await mkdtemp(join(tmpdir(), "sage-selected-node-")),
+        ),
+        selected = join(directory, "node"),
+        calls: { executable: string; argv: readonly string[] }[] = [],
+        hash = (path: string) =>
+          createHash("sha256").update(readFileSync(path)).digest("hex"),
+        pinnedHash = hash(NODE);
+      roots.push(directory);
+      await copyFile(NODE, selected);
+      await chmod(selected, 0o700);
+      expect(hash(selected)).toBe(pinnedHash);
+      expect(lstatSync(selected).ino).not.toBe(lstatSync(NODE).ino);
+      processDouble.spawn = (...args) => {
+        const argv = Array.isArray(args[1]) ? args[1] : [];
+        calls.push({ executable: args[0], argv });
+        // A failed guard must be observable without executing the mutated file.
+        if (argv[0] !== "--version") throw Error("Unexpected fixed-test spawn");
+        return Reflect.apply(actual.spawn, undefined, args);
+      };
+      const node = await inspectNode(vscode.Uri.file(selected));
+      expect(node).toMatchObject({
+        executable: selected,
+        hash: pinnedHash,
+        version: "26.12.1",
+        available: true,
+      });
+      const recipe = await prepareFocusTest(f.context, node);
+      expect(recipe.executable).toBe(selected);
+      expect(recipe.executable_hash).toBe(pinnedHash);
+      let changed = false;
+      const mutate = async () => {
+        const before = lstatSync(selected, { bigint: true });
+        if (boundary === "during review") {
+          await appendFile(selected, "\0");
+          expect(hash(selected)).not.toBe(pinnedHash);
+        } else {
+          const replacement = join(directory, "replacement");
+          await copyFile(NODE, replacement);
+          await chmod(replacement, 0o700);
+          await rename(replacement, selected);
+          expect(hash(selected)).toBe(pinnedHash);
+          expect(lstatSync(selected, { bigint: true }).ino).not.toBe(
+            before.ino,
+          );
+        }
+        changed = true;
+      };
+      if (boundary === "during review") ui.beforeConfirm = mutate;
+      else f.afterIntent(mutate);
+      ui.choices = ["Run fixed tests"];
+      await expect(f.review.showTest(f.context, recipe)).rejects.toThrow(
+        "Fixed test recipe unavailable or changed",
+      );
+      expect(changed).toBe(true);
+      expect(f.intents).toHaveLength(boundary === "during review" ? 0 : 1);
+      expect(f.receipts).toEqual([]);
+      expect(calls).toEqual([{ executable: selected, argv: ["--version"] }]);
+      expect(calls.filter((call) => call.argv[0] === "--test")).toEqual([]);
+      expect(hash(NODE)).toBe(pinnedHash);
+    },
+  );
+  it.each([
+    "spawn-error",
+    "null-exit",
+    "stream-error",
+    "lost-completion",
+  ] as const)(
+    "unit process event double %s cannot falsely pass",
+    async (mode) => {
+      const f = await fixture();
+
+      let child: Awaited<ReturnType<typeof fakeProcess>>;
+      f.afterIntent(async () => {
+        child = await fakeProcess(mode);
+        processDouble.spawn = () => {
+          child.start();
+          return child as unknown as ReturnType<
+            typeof import("node:child_process").spawn
+          >;
+        };
+      });
+      await approved(f);
+      expect(f.receipts[0]).toMatchObject({
+        status: "unknown",
+        timeout: false,
+        overflow: false,
+      });
+      expect(child!.stdout.destroyed).toBe(true);
+      if (mode === "stream-error")
+        expect(child!.kill).toHaveBeenCalledWith("SIGTERM");
+      else expect(child!.kill).not.toHaveBeenCalled();
+      if (mode === "lost-completion" || mode === "stream-error")
+        expect(f.receipts[0]).toHaveProperty("exit_code", 0);
+    },
+    8000,
+  );
+  it("actual captured output is inert/read-only and retained until explicit Done", async () => {
+    const f = await fixture(
+      "process.stdout.write('\\u001b[31msynthetic literal\\u001b[0m\\u0000');\n",
+    );
+    const recipe = await approved(f),
+      { testResultText } = await import("../../src/test-runner");
+    expect(testResultText(recipe)).toContain("synthetic literal");
+    expect(testResultText(recipe)).not.toContain("\x1b");
+    expect(testResultText(recipe)).not.toContain("\0");
+    const text = ui.provider!.provideTextDocumentContent({
+      toString: () => ui.viewed.at(-1)!,
+    });
+    expect(text).toContain("Fixed test result: passed");
+    expect(text).toContain("Exit: 0");
+    expect(text).toContain("Generated tests do not certify app behavior");
+    const vscode = await import("vscode"),
+      owned = {
+        input: new vscode.TabInputText(vscode.Uri.parse(ui.viewed.at(-1)!)),
+      },
+      human = {
+        input: new vscode.TabInputText(
+          vscode.Uri.file(join(f.root, "index.html")),
+        ),
+      },
+      unrelated = {
+        input: new vscode.TabInputText(
+          vscode.Uri.parse("sage-diff:/unrelated-owner"),
+        ),
+      };
+    ui.tabs = [owned, human, unrelated];
+    ui.choices = ["Done"];
+    await f.review.resultControls(f.context);
+    expect(ui.closed).toEqual([owned]);
+    expect(
+      f.messages.filter((m) => m.kind === "result.dismissed"),
+    ).toHaveLength(1);
+    expect(() => testResultText(recipe)).toThrow();
+  });
+  it("an expired latest-start cannot create an intent or renew its preview", async () => {
+    const f = await fixture(),
+      vscode = await import("vscode"),
+      node = await inspectNode(vscode.Uri.file(NODE)),
+      recipe = await prepareFocusTest(f.context, node);
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse(recipe.deadline));
+    await expect(f.review.showTest(f.context, recipe)).rejects.toThrow();
+    expect(f.intents).toEqual([]);
+  });
+  it("declining the separate test review has zero execution effects", async () => {
+    const f = await fixture(),
+      vscode = await import("vscode"),
+      node = await inspectNode(vscode.Uri.file(NODE)),
+      recipe = await prepareFocusTest(f.context, node);
+    ui.choices = ["Decline"];
+    await f.review.showTest(f.context, recipe);
+    expect(f.intents).toEqual([]);
+    expect(f.receipts).toEqual([]);
+  });
+  it("unit live-child double forces only the same child after two seconds and retains overflow facts", async () => {
+    const f = await fixture();
+    let child: Awaited<ReturnType<typeof fakeProcess>> | undefined,
+      started = false;
+    let bornResolve = () => {};
+    const born = new Promise<void>((resolve) => {
+      bornResolve = resolve;
+    });
+    f.afterIntent(async () => {
+      child = await fakeProcess("term-force", "x".repeat(262145));
+      processDouble.spawn = () => {
+        started = true;
+        child!.start();
+        bornResolve();
+        return child as unknown as ReturnType<
+          typeof import("node:child_process").spawn
+        >;
+      };
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    });
+    const work = approved(f);
+    await born;
+    expect(started).toBe(true);
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(child!.kill.mock.calls).toEqual([["SIGTERM"]]);
+    await vi.advanceTimersByTimeAsync(1);
+    await work;
+    expect(child!.kill.mock.calls).toEqual([["SIGTERM"], ["SIGKILL"]]);
+    expect(f.receipts[0]).toMatchObject({
+      status: "failed",
+      overflow: true,
+      timeout: false,
+      signal: "SIGKILL",
+      exit_code: null,
+    });
+  }, 8000);
+  it("correlates the digest with actual combined captured bytes, independently of inert display", async () => {
+    const f = await fixture(
+      "process.stdout.write('constant-output\\u001b[31m');process.stderr.write('constant-error');\n",
+    );
+    const original =
+        await vi.importActual<typeof import("node:child_process")>(
+          "node:child_process",
+        ),
+      chunks: Buffer[] = [];
+    f.afterIntent(() => {
+      processDouble.spawn = (...args: Parameters<typeof original.spawn>) => {
+        const child = Reflect.apply(
+          original.spawn,
+          undefined,
+          args,
+        ) as ReturnType<typeof original.spawn>;
+        for (const stream of [child.stdout, child.stderr])
+          stream!.on("data", (b: Buffer) => chunks.push(Buffer.from(b)));
+        return child as unknown as ReturnType<
+          typeof import("node:child_process").spawn
+        >;
+      };
+    });
+    await approved(f);
+    expect(
+      "output_digest" in f.receipts[0] ? f.receipts[0].output_digest : null,
+    ).toBe(createHash("sha256").update(Buffer.concat(chunks)).digest("hex"));
+  });
+  it("revoked source observation never resamples expired document text while settling cancellation", async () => {
+    const f = await fixture("setInterval(()=>{},1000);\n");
+    let revoked = false,
+      expiredReads = 0;
+    for (const document of ui.documents) {
+      const get = document.getText;
+      document.getText = () => {
+        if (revoked) {
+          expiredReads++;
+          throw Error("expired source read");
+        }
+        return get();
+      };
+    }
+    f.afterIntent(() => {
+      setTimeout(() => {
+        revoked = true;
+        f.revoke();
+      }, 300);
+    });
+    await expect(approved(f)).rejects.toThrow();
+    expect(expiredReads).toBe(0);
+    expect(f.receipts[0]).toMatchObject({
+      status: "cancelled",
+      cancel_requested: true,
+    });
+  });
+  it("owned temp cleanup failure cannot discard actual child exit or its receipt", async () => {
+    const f = await fixture();
+    f.afterIntent(() => {
+      cleanupFault.enabled = true;
+    });
+    const recipe = await approved(f);
+    expect(
+      (await import("../../src/test-runner")).testResultText(recipe),
+    ).toContain("Temporary cleanup incomplete");
+    expect(f.receipts).toHaveLength(1);
+    expect(f.receipts[0]).toMatchObject({
+      scope: "code.test",
+      status: "passed",
+      exit_code: 0,
+      signal: null,
+      timeout: false,
+      overflow: false,
+    });
+  });
+  it("pending cleanup never delays receipt and a later rejection appears on result inspection", async () => {
+    const f = await fixture();
+    f.afterIntent(() => {
+      cleanupFault.enabled = true;
+      cleanupFault.delayed = true;
+    });
+    const recipe = await approved(f);
+    expect(f.receipts[0]).toMatchObject({ status: "passed", exit_code: 0 });
+    expect(cleanupFault.reject).toBeDefined();
+    const runner = await import("../../src/test-runner");
+    expect(runner.testResultText(recipe)).not.toContain(
+      "Temporary cleanup incomplete",
+    );
+    cleanupFault.reject!();
+    await Promise.resolve();
+    await Promise.resolve();
+    const vscode = await import("vscode");
+    let warned = false;
+    vi.spyOn(vscode.window, "showTextDocument").mockImplementation(
+      async (document: unknown) => {
+        warned = (document as { getText(): string })
+          .getText()
+          .includes("Temporary cleanup incomplete");
+        return {} as never;
+      },
+    );
+    ui.choices = ["Inspect test result", "Done"];
+    await f.review.resultControls(f.context);
+    expect(warned).toBe(true);
+    expect(f.receipts).toHaveLength(1);
+    expect(f.receipts[0]).toMatchObject({
+      status: "passed",
+      exit_code: 0,
+      timeout: false,
+      overflow: false,
+    });
+  });
+  it("unit lost-completion double blocks new tests after bounded unconfirmed termination", async () => {
+    const f = await fixture(),
+      vscode = await import("vscode"),
+      node = await inspectNode(vscode.Uri.file(NODE));
+    let child: Awaited<ReturnType<typeof fakeProcess>> | undefined,
+      started = false;
+    f.afterIntent(async () => {
+      child = await fakeProcess("unconfirmed");
+      processDouble.spawn = () => {
+        started = true;
+        child!.start();
+        return child as unknown as ReturnType<
+          typeof import("node:child_process").spawn
+        >;
+      };
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    });
+    const work = approved(f);
+    await vi.waitFor(() => expect(started).toBe(true));
+    await vi.advanceTimersByTimeAsync(35000);
+    await work;
+    expect(child!.kill.mock.calls).toEqual([["SIGTERM"], ["SIGKILL"]]);
+    expect(f.receipts[0]).toMatchObject({
+      status: "termination_unconfirmed",
+      timeout: true,
+      exit_code: null,
+      signal: null,
+    });
+    await expect(prepareFocusTest(f.context, node)).rejects.toThrow();
+  }, 8000);
 });
-it("unit lost-completion double blocks new tests after bounded unconfirmed termination", async () => {
-  const f = await fixture(),
-    vscode = await import("vscode"),
-    node = await inspectNode(vscode.Uri.file(NODE));
-  let child: Awaited<ReturnType<typeof fakeProcess>> | undefined,
-    started = false;
-  f.afterIntent(async () => {
-    child = await fakeProcess("unconfirmed");
-    processDouble.spawn = () => {
-      started = true;
-      child!.start();
-      return child as unknown as ReturnType<
-        typeof import("node:child_process").spawn
-      >;
-    };
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-  });
-  const work = approved(f);
-  await vi.waitFor(() => expect(started).toBe(true));
-  await vi.advanceTimersByTimeAsync(35000);
-  await work;
-  expect(child!.kill.mock.calls).toEqual([["SIGTERM"], ["SIGKILL"]]);
-  expect(f.receipts[0]).toMatchObject({
-    status: "termination_unconfirmed",
-    timeout: true,
-    exit_code: null,
-    signal: null,
-  });
-  await expect(prepareFocusTest(f.context, node)).rejects.toThrow();
-}, 8000);
