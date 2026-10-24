@@ -2,6 +2,7 @@
 
 import sqlite3
 from contextlib import closing
+from importlib.resources import files
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,10 @@ STAMP = "2035-01-02T12:00:00.000000+00:00"
 
 
 def existing_database(path: Path) -> None:
-    opened = Store.open(path)
+    with closing(sqlite3.connect(path)) as seed:
+        seed.executescript(storage.INITIAL_MIGRATION.read_text(encoding="utf-8"))
+        seed.execute("PRAGMA user_version=1")
+    opened = Store(sqlite3.connect(path, isolation_level=None))
     try:
         with opened.transaction() as connection:
             connection.execute(
@@ -42,6 +46,7 @@ def test_migration_preserves_notes(tmp_path: Path, monkeypatch: pytest.MonkeyPat
         "_migration_scripts",
         lambda: (
             storage.INITIAL_MIGRATION.read_text(encoding="utf-8"),
+            files("sage").joinpath("migrations/002.sql").read_text(encoding="utf-8"),
             "CREATE TABLE upgrade_marker (id INTEGER);\nINSERT INTO upgrade_marker VALUES(42);",
         ),
     )
@@ -49,7 +54,7 @@ def test_migration_preserves_notes(tmp_path: Path, monkeypatch: pytest.MonkeyPat
     try:
         assert upgraded.list_notes()[0].title == TITLE
         assert upgraded.list_notes()[0].body == BODY
-        assert snapshot(path) == (2, original[1])
+        assert snapshot(path) == (3, original[1])
         with upgraded.transaction() as connection:
             assert connection.execute("SELECT id FROM upgrade_marker").fetchone()[0] == 42
     finally:
@@ -76,6 +81,7 @@ def test_failed_migration_rolls_back(tmp_path: Path, monkeypatch: pytest.MonkeyP
         "_migration_scripts",
         lambda: (
             storage.INITIAL_MIGRATION.read_text(encoding="utf-8"),
+            files("sage").joinpath("migrations/002.sql").read_text(encoding="utf-8"),
             "CREATE TABLE partial_upgrade (id INTEGER);\nDELETE FROM notes;\nINVALID SQL;",
         ),
     )
@@ -94,3 +100,18 @@ def test_failed_migration_rolls_back(tmp_path: Path, monkeypatch: pytest.MonkeyP
 def test_open_failure_has_safe_diagnostic(tmp_path: Path) -> None:
     with pytest.raises(StorageError, match="open"):
         Store.open(tmp_path)  # A directory cannot be used as a database.
+
+
+def test_real_schema001_upgrade_preserves_saved_notes_and_fts(tmp_path: Path) -> None:
+    path = tmp_path / "schema001.sqlite"
+    existing_database(path)
+    assert snapshot(path)[0] == 1
+    opened = Store.open(path)
+    try:
+        assert snapshot(path)[0] == 2
+        assert [note.body for note in opened.search_notes("literal")] == [BODY]
+        with opened.transaction() as db:
+            assert db.execute("SELECT count(*) FROM coding_jobs").fetchone()[0] == 0
+            assert db.execute("SELECT count(*) FROM notes_fts").fetchone()[0] == 1
+    finally:
+        opened.close()

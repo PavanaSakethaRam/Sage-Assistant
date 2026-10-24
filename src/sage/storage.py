@@ -27,7 +27,10 @@ class SchemaVersionError(StorageError):
 
 
 def _migration_scripts() -> tuple[str, ...]:
-    return (INITIAL_MIGRATION.read_text(encoding="utf-8"),)
+    return (
+        INITIAL_MIGRATION.read_text(encoding="utf-8"),
+        files("sage").joinpath("migrations/002.sql").read_text(encoding="utf-8"),
+    )
 
 
 def _execute_script(connection: sqlite3.Connection, script: str) -> None:
@@ -170,6 +173,7 @@ class Store:
                 (draft_cutoff,),
             )
             connection.execute("DELETE FROM tasks WHERE updated_at<=?", (metadata_cutoff,))
+            connection.execute("DELETE FROM coding_jobs WHERE updated_at<=?", (metadata_cutoff,))
 
     def close(self) -> None:
         """Release the connection; repeated shutdown is harmless."""

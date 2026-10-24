@@ -1117,7 +1117,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": true
     },
@@ -1159,7 +1160,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -1207,7 +1209,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -1254,7 +1257,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": true,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -1542,7 +1546,8 @@
           ],
           "deadline": "2026-10-24T12:00:30Z",
           "output_cap": 262144,
-          "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "timeout_seconds": 30
         }
       },
       "valid": false
@@ -1605,7 +1610,8 @@
           ],
           "deadline": "2026-10-24T12:00:30Z",
           "output_cap": 262144,
-          "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "timeout_seconds": 30
         }
       },
       "valid": true
@@ -1908,7 +1914,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -1955,7 +1962,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -2002,7 +2010,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -2059,7 +2068,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": true
     },
@@ -2115,7 +2125,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -2173,7 +2184,8 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
     },
@@ -2220,9 +2232,444 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
       },
       "valid": false
+    },
+    {
+      "label": "job cancellation True",
+      "kind": "job_view",
+      "valid": true,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": true
+      }
+    },
+    {
+      "label": "job cancellation False",
+      "kind": "job_view",
+      "valid": true,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": false
+      }
+    },
+    {
+      "label": "job cancellation 0",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": 0
+      }
+    },
+    {
+      "label": "job cancellation true",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": "true"
+      }
+    },
+    {
+      "label": "job cancellation None",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": null
+      }
+    },
+    {
+      "label": "test timeout 30",
+      "kind": "recipe",
+      "valid": true,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "label": "test timeout 29",
+      "kind": "recipe",
+      "valid": false,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": 29
+      }
+    },
+    {
+      "label": "test timeout True",
+      "kind": "recipe",
+      "valid": false,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": true
+      }
+    },
+    {
+      "label": "test timeout 30",
+      "kind": "recipe",
+      "valid": false,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": "30"
+      }
+    },
+    {
+      "label": "zero generation None",
+      "kind": "job_view",
+      "valid": true,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": null,
+        "model": null,
+        "account_generation": 0,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      }
+    },
+    {
+      "label": "zero generation claimed",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "claimed",
+        "model": null,
+        "account_generation": 0,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      }
+    },
+    {
+      "label": "zero generation draft",
+      "kind": "start",
+      "valid": true,
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 0,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
     }
   ],
   "hash_vectors": [
@@ -2345,9 +2792,10 @@
         ],
         "deadline": "2026-10-24T12:00:30Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": 30
       },
-      "expected": "90ccedca74cd94fa017efa691614d020f773925862c8e7c60122c1c9a5985c12"
+      "expected": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9"
     },
     {
       "recipe": {
@@ -2390,9 +2838,10 @@
         ],
         "deadline": "2026-10-24T12:00:30.000001Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "3d386a2e1ace54c3530b788feac18051fd642ec8948cd33a4679b9f05e7e1951",
+        "timeout_seconds": 30
       },
-      "expected": "e7cac8df47fa4077ac0d2260a374a6c7049378ac3a909c40b1988f17417dfb16",
+      "expected": "3d386a2e1ace54c3530b788feac18051fd642ec8948cd33a4679b9f05e7e1951",
       "python_wire": {
         "platform": "darwin",
         "executable": "/private/owned/node",
@@ -2433,7 +2882,8 @@
         ],
         "deadline": "2026-10-24T12:00:30.000001Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "3d386a2e1ace54c3530b788feac18051fd642ec8948cd33a4679b9f05e7e1951",
+        "timeout_seconds": 30
       }
     },
     {
@@ -2477,9 +2927,10 @@
         ],
         "deadline": "2026-10-24T12:00:30.123456Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "793eba2dee6dd21b0217437a25ea13829e32329493925ed6e783da129bae8243",
+        "timeout_seconds": 30
       },
-      "expected": "6797d4c5d969ce15be5f8941767aac3cd33abc6d0fd97ef1cb6ea9a138d389ad",
+      "expected": "793eba2dee6dd21b0217437a25ea13829e32329493925ed6e783da129bae8243",
       "python_wire": {
         "platform": "darwin",
         "executable": "/private/owned/node",
@@ -2520,7 +2971,8 @@
         ],
         "deadline": "2026-10-24T12:00:30.123456Z",
         "output_cap": 262144,
-        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        "recipe_hash": "793eba2dee6dd21b0217437a25ea13829e32329493925ed6e783da129bae8243",
+        "timeout_seconds": 30
       }
     }
   ],
@@ -2791,6 +3243,101 @@
       "field": "deadline",
       "value": "2026-10-24T12:00:30z",
       "valid": false
+    }
+  ],
+  "proposal_vectors": [
+    {
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "proposal": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ]
+      },
+      "scope": "code.create",
+      "material": {
+        "policy_version": "code-v1",
+        "scope": "code.create",
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "proposal": {
+          "job_id": "job-1",
+          "revision": 1,
+          "explanation": "A simple focus tracker.",
+          "files": [
+            {
+              "name": "index.html",
+              "text": "<main>Focus</main>\n"
+            },
+            {
+              "name": "focus.js",
+              "text": "export const focus = true;\n"
+            },
+            {
+              "name": "focus.test.mjs",
+              "text": "import { test } from 'node:test';\n"
+            },
+            {
+              "name": "README.md",
+              "text": "# Focus\n"
+            }
+          ]
+        },
+        "lengths": {
+          "context_hash": 64,
+          "explanation": 23,
+          "files": [
+            {
+              "name": 10,
+              "text": 19
+            },
+            {
+              "name": 8,
+              "text": 27
+            },
+            {
+              "name": 14,
+              "text": 34
+            },
+            {
+              "name": 9,
+              "text": 8
+            }
+          ]
+        }
+      },
+      "expected": "e8acf85444adbdbf21f141c6f64607654ecd6769002368b043ba5146e9d5cfa3"
     }
   ]
 }

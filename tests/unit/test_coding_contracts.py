@@ -392,3 +392,63 @@ def test_all_public_values_round_trip_through_json_mode_dump() -> None:
     ]
     for value in values:
         assert TypeAdapter(type(value)).validate_python(value.model_dump(mode="json")) == value
+
+
+def test_proposal_hash_binds_validated_source_context_scope_and_explanation() -> None:
+    context = CodeContext.model_validate(make_context())
+    proposal = coding.CodeProposal.model_validate(make_proposal())
+    original = coding.proposal_hash(proposal, context, "code.create")
+    assert original == "e8acf85444adbdbf21f141c6f64607654ecd6769002368b043ba5146e9d5cfa3"
+    changed = proposal.model_copy(update={"explanation": "Changed"})
+    assert coding.proposal_hash(changed, context, "code.create") != original
+    changed_context = context.model_copy(update={"context_hash": "b" * 64})
+    assert coding.proposal_hash(proposal, changed_context, "code.create") != original
+    with pytest.raises(ValueError):
+        coding.proposal_hash(proposal, context, "code.replace")
+
+
+def test_cancel_requested_is_strict_and_defaults_false() -> None:
+    corpus = json.loads(CORPUS.read_text())
+    view = next(
+        row["value"] for row in corpus["cases"] if row["kind"] == "job_view" and row["valid"]
+    )
+    assert CodeJobView.model_validate(view).model_dump()["cancel_requested"] is False
+    with pytest.raises(ValueError):
+        CodeJobView.model_validate({**view, "cancel_requested": 1})
+
+
+def test_recipe_timeout_is_explicit_fixed_and_strict() -> None:
+    corpus = json.loads(CORPUS.read_text())
+    recipe = corpus["recipe_vectors"][0]["recipe"]
+    for invalid in (None, 29, 31, True, "30", 30.0):
+        with pytest.raises(ValueError):
+            CodingTestRecipe.model_validate({**recipe, "timeout_seconds": invalid})
+    assert CodingTestRecipe.model_validate({**recipe, "timeout_seconds": 30}).timeout_seconds == 30
+
+
+def test_unconfigured_generation_zero_has_no_selected_account() -> None:
+    corpus = json.loads(CORPUS.read_text())
+    view = next(
+        row["value"] for row in corpus["cases"] if row["kind"] == "job_view" and row["valid"]
+    )
+    assert (
+        CodeJobView.model_validate(
+            {**view, "account_generation": 0, "account": None}
+        ).account_generation
+        == 0
+    )
+    with pytest.raises(ValueError):
+        CodeJobView.model_validate({**view, "account_generation": 0, "account": "claimed"})
+
+
+def test_shared_proposal_vectors_and_source_order_mutations() -> None:
+    corpus = json.loads(CORPUS.read_text())
+    for row in corpus["proposal_vectors"]:
+        context = CodeContext.model_validate(row["context"])
+        proposal = coding.CodeProposal.model_validate(row["proposal"])
+        assert coding.proposal_hash(proposal, context, row["scope"]) == row["expected"]
+        files = [{**file, "text": file["text"] + "changed"} for file in row["proposal"]["files"]]
+        changed = coding.CodeProposal.model_validate({**row["proposal"], "files": files})
+        assert coding.proposal_hash(changed, context, row["scope"]) != row["expected"]
+        changed = proposal.model_copy(update={"files": tuple(reversed(proposal.files))})
+        assert coding.proposal_hash(changed, context, row["scope"]) != row["expected"]

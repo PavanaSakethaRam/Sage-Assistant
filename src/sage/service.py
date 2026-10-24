@@ -10,6 +10,7 @@ from uuid import uuid4
 from pydantic import AfterValidator, Field, ValidationError, field_validator
 
 from sage.actions import ActionService
+from sage.coding_jobs import CodingJobs
 from sage.config import Settings
 from sage.contracts import (
     Backend,
@@ -117,8 +118,11 @@ class CoreService:
     ) -> None:
         self.store = store
         self.clock = clock or (lambda: datetime.now(UTC))
-        self.actions = ActionService(store, self.clock, uuid4().hex)
+        self.boot_id = uuid4().hex
+        self.actions = ActionService(store, self.clock, self.boot_id)
         self.clock = self.actions.observe_clock
+        self.coding = CodingJobs(store, self.boot_id, self.clock)
+        self.coding.interrupt()
         self.backend = backend
         self._backend_factory = backend_factory
         self._selection_boot: str | None = None
@@ -556,6 +560,7 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
         while True:
             await asyncio.sleep(60)
             try:
+                service.coding.expire()
                 service.store.cleanup(service.clock())
             except Exception:
                 diagnostic("retention_failed")
@@ -626,6 +631,10 @@ async def run_service(reader: asyncio.StreamReader, writer: Writer, service: Cor
                 task.cancel()
         await asyncio.gather(*(task for _, task in list(pending.values())), return_exceptions=True)
     finally:
+        try:
+            service.coding.interrupt()
+        except Exception:
+            diagnostic("request_failed")
         cleanup.cancel()
         stop_waiter.cancel()
         if incoming is not None:

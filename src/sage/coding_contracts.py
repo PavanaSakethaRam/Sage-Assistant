@@ -224,7 +224,7 @@ def context_hash(context: CodeContext) -> str:
 class CodeDraft(Contract):
     job_id: RpcId
     revision: Revision
-    account_generation: Revision
+    account_generation: SafeInt
     user_text: PromptText
     backend: Literal["copilot"]
     model: ModelName | None = None
@@ -302,6 +302,26 @@ def parse_code_proposal(value: object, context: CodeContext) -> CodeProposal:
     return proposal
 
 
+def proposal_hash(proposal: CodeProposal, context: CodeContext, scope: CodeScope) -> str:
+    """Bind exactly the validated displayed proposal and captured context digest."""
+    valid = parse_code_proposal(proposal, context)
+    expected = "code.create" if context.mode == "create_focus_project" else "code.replace"
+    if scope != expected:
+        raise ValueError("Proposal scope mismatch")
+    material = {
+        "policy_version": context.binding.policy_version,
+        "scope": scope,
+        "context_hash": context.context_hash,
+        "proposal": valid.model_dump(mode="json"),
+        "lengths": {
+            "context_hash": len(context.context_hash),
+            "explanation": len(valid.explanation),
+            "files": [{"name": len(file.name), "text": len(file.text)} for file in valid.files],
+        },
+    }
+    return hashlib.sha256(_canonical_json(material)).hexdigest()
+
+
 def provider_context(context: CodeContext) -> tuple[CodeSource, ...]:
     return tuple(CodeSource(name=file.name, text=file.text) for file in context.files)
 
@@ -374,7 +394,7 @@ class CodeJobView(Contract):
     destination: Annotated[str, Field(min_length=1, max_length=200), AfterValidator(_literal)]
     account: Annotated[str, Field(min_length=1, max_length=100), AfterValidator(_literal)] | None
     model: ModelName | None
-    account_generation: Revision
+    account_generation: SafeInt
     context_hash: Hash
     file_count: Annotated[int, Field(strict=True, ge=0, le=4)]
     manifest: Annotated[tuple[FocusName, ...], BeforeValidator(_tuple)]
@@ -385,10 +405,13 @@ class CodeJobView(Contract):
     expires_at: UtcDateTime
     diagnostic: SafeDiagnostic | None
     receipts: Annotated[tuple[CodeReceipt, ...], BeforeValidator(_tuple)]
+    cancel_requested: bool = False
     target: FocusName | None = Field(default=None, exclude_if=lambda value: value is None)
 
     @model_validator(mode="after")
     def check_metadata(self) -> Self:
+        if self.account_generation == 0 and self.account is not None:
+            raise ValueError("Unconfigured account generation")
         if (
             self.file_count != len(self.manifest)
             or len(self.hashes) > 4
@@ -474,6 +497,7 @@ class TestRecipe(Contract):
     file_hashes: Annotated[tuple[TestFileHash, ...], BeforeValidator(_tuple)]
     deadline: UtcDateTime
     output_cap: Literal[262144]
+    timeout_seconds: Annotated[int, Field(strict=True, ge=30, le=30)]
     recipe_hash: Hash
 
     @model_validator(mode="after")

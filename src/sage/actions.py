@@ -73,6 +73,10 @@ class ActionService:
                     "WHERE boot_id=? AND consumed_at IS NULL",
                     (self._boot_id,),
                 )
+            if self._clock_invalidation_pending:
+                db.execute(
+                    "UPDATE coding_grants SET revoked=1 WHERE grant_boot_id=?", (self._boot_id,)
+                )
             yield db
         self._clock_invalidation_pending = False
 
@@ -90,6 +94,7 @@ class ActionService:
                 "UPDATE approvals SET expires_at=issued_at WHERE boot_id=? AND consumed_at IS NULL",
                 (self._boot_id,),
             )
+            db.execute("UPDATE coding_grants SET revoked=1 WHERE grant_boot_id=?", (self._boot_id,))
         # Once the anomaly's invalidation commits, a fresh explicit review may
         # use this clock baseline. Pending invalidation survives any failed commit.
         self._latest = now

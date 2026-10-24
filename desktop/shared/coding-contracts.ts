@@ -152,6 +152,7 @@ export type CodeJobView = Readonly<{
   expires_at: string;
   diagnostic: string | null;
   receipts: readonly CodeReceipt[];
+  cancel_requested: boolean;
   target?: FocusName | null;
 }>;
 export type CodeGrant = Readonly<{
@@ -189,6 +190,7 @@ export type TestRecipe = Readonly<{
   file_hashes: readonly Readonly<{ name: FocusName; hash: string }>[];
   deadline: string;
   output_cap: 262144;
+  timeout_seconds: 30;
   recipe_hash: string;
 }>;
 export type CodeReview = Readonly<{
@@ -483,7 +485,7 @@ function draft(value: unknown, start: boolean): void {
   );
   id(row.job_id);
   integer(row.revision, 1);
-  integer(row.account_generation, 1);
+  integer(row.account_generation);
   string(row.user_text, 32000, true);
   oneOf(row.backend, ["copilot"]);
   if (Object.hasOwn(row, "model")) nullable(row.model, model);
@@ -700,8 +702,13 @@ export function parseCodeJobView(value: unknown): CodeJobView {
       "diagnostic",
       "receipts",
     ],
-    ["target"],
+    ["target", "cancel_requested"],
   );
+  if (
+    row.cancel_requested !== undefined &&
+    typeof row.cancel_requested !== "boolean"
+  )
+    invalid();
   binding(row.binding);
   mode(row.mode);
   oneOf(row.state, STATES);
@@ -712,7 +719,8 @@ export function parseCodeJobView(value: unknown): CodeJobView {
     if (!x) invalid();
   });
   nullable(row.model, model);
-  integer(row.account_generation, 1);
+  integer(row.account_generation);
+  if (row.account_generation === 0 && row.account !== null) invalid();
   hash(row.context_hash);
   integer(row.file_count, 0, 4);
   array(row.manifest, name, 4);
@@ -769,7 +777,10 @@ export function parseCodeJobView(value: unknown): CodeJobView {
   utc(row.expires_at);
   nullable(row.diagnostic, (x) => oneOf(x, DIAGNOSTICS));
   array(row.receipts, receipt, 100);
-  return value as CodeJobView;
+  return {
+    ...row,
+    cancel_requested: row.cancel_requested ?? false,
+  } as CodeJobView;
 }
 export function parseCodeAck(value: unknown): CodeAck {
   frame(value);
@@ -802,6 +813,7 @@ export function parseTestRecipe(value: unknown): TestRecipe {
     "file_hashes",
     "deadline",
     "output_cap",
+    "timeout_seconds",
     "recipe_hash",
   ]);
   oneOf(row.platform, ["darwin", "win32"]);
@@ -893,6 +905,7 @@ export function parseTestRecipe(value: unknown): TestRecipe {
     invalid();
   utc(row.deadline);
   oneOf(row.output_cap, [262144]);
+  oneOf(row.timeout_seconds, [30]);
   hash(row.recipe_hash);
   return value as TestRecipe;
 }
@@ -1074,4 +1087,29 @@ export async function recipeHash(recipe: TestRecipe): Promise<string> {
     ),
   };
   return digest({ ...material, lengths });
+}
+
+export async function proposalHash(
+  proposal: CodeProposal,
+  context: CodeContext,
+  scope: CodeScope,
+): Promise<string> {
+  const valid = parseCodeProposal(proposal, context);
+  const expected =
+    context.mode === "create_focus_project" ? "code.create" : "code.replace";
+  if (scope !== expected) invalid();
+  return digest({
+    policy_version: context.binding.policy_version,
+    scope,
+    context_hash: context.context_hash,
+    proposal: valid,
+    lengths: {
+      context_hash: [...context.context_hash].length,
+      explanation: [...valid.explanation].length,
+      files: valid.files.map((file) => ({
+        name: [...file.name].length,
+        text: [...file.text].length,
+      })),
+    },
+  });
 }

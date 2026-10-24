@@ -321,3 +321,57 @@ describe("closed coding contracts", () => {
     ).toThrow();
   });
 });
+
+it("binds the literal approved proposal vector and cancellation flag", async () => {
+  const { proposalHash } = await import("../shared/coding-contracts");
+  const context = parseCodeContext(makeContext());
+  const proposal = parseCodeProposal(makeProposal(), context);
+  expect(await proposalHash(proposal, context, "code.create")).toBe(
+    "e8acf85444adbdbf21f141c6f64607654ecd6769002368b043ba5146e9d5cfa3",
+  );
+  expect(
+    await proposalHash(
+      { ...proposal, explanation: "Changed" },
+      context,
+      "code.create",
+    ),
+  ).not.toBe(
+    "e8acf85444adbdbf21f141c6f64607654ecd6769002368b043ba5146e9d5cfa3",
+  );
+  const view = corpus.cases.find(
+    (row) => row.kind === "job_view" && row.valid,
+  )!.value;
+  expect(parseCodeJobView(view).cancel_requested).toBe(false);
+  expect(() => parseCodeJobView({ ...view, cancel_requested: 1 })).toThrow();
+});
+
+it("checks shared proposal vectors and literal source/order changes", async () => {
+  const { proposalHash } = await import("../shared/coding-contracts");
+  for (const row of corpus.proposal_vectors) {
+    const context = parseCodeContext(row.context);
+    const proposal = parseCodeProposal(row.proposal, context);
+    expect(await proposalHash(proposal, context, "code.create")).toBe(
+      row.expected,
+    );
+    expect(
+      await proposalHash(
+        {
+          ...proposal,
+          files: proposal.files.map((file) => ({
+            ...file,
+            text: file.text + "changed",
+          })),
+        },
+        context,
+        "code.create",
+      ),
+    ).not.toBe(row.expected);
+    expect(
+      await proposalHash(
+        { ...proposal, files: [...proposal.files].reverse() },
+        context,
+        "code.create",
+      ),
+    ).not.toBe(row.expected);
+  }
+});

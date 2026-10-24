@@ -403,3 +403,48 @@ def test_clock_anomaly_in_rejected_edit_stays_expired(
     statements = trace(store)
     assert restarted.decide(proposal.id, 1, "save").status == "rejected"
     no_effects(store, statements)
+
+
+def test_shared_clock_revokes_coding_even_after_failed_transaction_and_catchup(
+    state: tuple[Store, Clock, ActionService],
+) -> None:
+    import sqlite3
+
+    from sage.coding_jobs import CodingError, CodingJobs
+    from tests.integration.test_coding_jobs import approved, intent, receipt
+
+    store, clock, actions = state
+    jobs = CodingJobs(store, "boot-1", actions.observe_clock)
+    grant, proposal = approved(jobs)
+    request = intent(grant, proposal)
+    jobs.begin(request)
+    jobs.observe(receipt(request))
+    clock.now += timedelta(seconds=1)
+    actions.observe_clock()
+    clock.now -= timedelta(microseconds=1)
+
+    def deny_revoke(
+        action: int,
+        table: str | None,
+        column: str | None,
+        database: str | None,
+        trigger: str | None,
+    ) -> int:
+        return (
+            sqlite3.SQLITE_DENY
+            if action == sqlite3.SQLITE_UPDATE and table == "coding_grants"
+            else sqlite3.SQLITE_OK
+        )
+
+    store._connection.set_authorizer(deny_revoke)
+    with pytest.raises(CodingError):
+        jobs.begin(intent(grant, proposal, 1))
+    store._connection.set_authorizer(None)
+    clock.now += timedelta(microseconds=1)
+    with pytest.raises(CodingError):
+        jobs.begin(intent(grant, proposal, 1))
+    recreated = ActionService(store, clock, "boot-1")
+    recreated.observe_clock()
+    with store.transaction() as db:
+        assert db.execute("SELECT revoked FROM coding_grants").fetchone()[0] == 1
+        assert db.execute("SELECT count(*) FROM coding_effects").fetchone()[0] == 1

@@ -141,6 +141,8 @@ def test_defensive_failure_closes_before_startup_sql(
                 seed_task(connection, "old", datetime(2000, 1, 1, tzinfo=UTC))
         finally:
             prepared.close()
+    with closing(sqlite3.connect(path)) as baseline:
+        schema_before = baseline.execute("PRAGMA user_version").fetchone()[0]
     statements: list[str] = []
     opened_connections: list[sqlite3.Connection] = []
     real_connect = sqlite3.connect
@@ -177,7 +179,7 @@ def test_defensive_failure_closes_before_startup_sql(
         opened_connections[0].execute("SELECT 1")
     with closing(real_connect(path)) as connection:
         if existing:
-            assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
+            assert connection.execute("PRAGMA user_version").fetchone()[0] == schema_before
             assert connection.execute("SELECT body FROM notes").fetchone()[0] == BODY
             assert connection.execute("SELECT id FROM tasks").fetchone()[0] == "old"
         else:
