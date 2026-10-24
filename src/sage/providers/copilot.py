@@ -372,7 +372,9 @@ class CopilotReasoner:
                         )
                         if not isinstance(text, str):
                             return
-                        size = len(text.encode("utf-8"))
+                        size = len(text)
+                        if size <= CODING_OUTPUT_BYTES:
+                            size = len(text.encode("utf-8"))
                         if kind.endswith("_delta"):
                             owned_bytes += size
                         else:
@@ -403,7 +405,10 @@ class CopilotReasoner:
                     try:
                         content = event.data.content
                         if not isinstance(content, str) or (
-                            len(content.encode("utf-8")) > CODING_OUTPUT_BYTES
+                            (
+                                len(content) > CODING_OUTPUT_BYTES
+                                or len(content.encode("utf-8")) > CODING_OUTPUT_BYTES
+                            )
                             if coding
                             else len(content) > 200_500
                         ):

@@ -510,3 +510,48 @@ def test_logical_owners_settle_concurrently_within_existing_cleanup_budget(
             await core.aclose()
 
     asyncio.run(run())
+
+
+@pytest.mark.parametrize("streaming", [False, True])
+def test_oversized_sdk_string_is_rejected_before_owned_encoding(
+    tmp_path: Path, streaming: bool
+) -> None:
+    from sage.coding_contracts import CodeModelRequest
+    from sage.providers.copilot import CODING_OUTPUT_BYTES
+    from tests.helpers.copilot_fake import FakeSdk
+    from tests.unit.test_provider_contract import backend as provider_factory
+
+    encoded: list[bool] = []
+
+    class Oversized(str):
+        def encode(self, encoding: str = "utf-8", errors: str = "strict") -> bytes:
+            encoded.append(True)
+            return super().encode(encoding, errors)
+
+    async def run() -> None:
+        sdk = FakeSdk()
+        text = Oversized("x" * (CODING_OUTPUT_BYTES + 1))
+        if streaming:
+            sdk.deltas = [text]
+        else:
+            sdk.output = text
+        provider = provider_factory(tmp_path, sdk, coding=True)
+        request = CodeModelRequest(
+            job_id="job-1",
+            revision=1,
+            account_generation=0,
+            user_text="synthetic",
+            backend="copilot",
+            disclosure_hash="a" * 64,
+            request_id="request",
+            deadline=datetime.now(UTC) + timedelta(seconds=120),
+            mode="create_focus_project",
+            files=(),
+        )
+        with pytest.raises(ValueError, match="^Coding provider unavailable$"):
+            await provider.propose_code(request)
+        assert encoded == []
+        assert sdk.stopped == sdk.disconnected == 1
+        await provider.aclose()
+
+    asyncio.run(run())
