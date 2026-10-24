@@ -4,11 +4,15 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import math
 import os
 import re
+import stat
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -44,6 +48,265 @@ def execute(
         return result.returncode, data, result.stderr
     except (OSError, subprocess.TimeoutExpired):
         return -1, None, "execution_failed"
+
+
+def native_execute(args: list[str], cwd: Path) -> tuple[int, str, str]:
+    """Bound only the owned native child; no descendant containment is claimed."""
+    try:
+        child = subprocess.Popen(
+            args,
+            cwd=cwd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False,
+        )
+    except OSError:
+        return -1, "", ""
+    streams = [bytearray(), bytearray()]
+    failed = threading.Event()
+    lock = threading.Lock()
+
+    def read_stream(index: int) -> None:
+        pipe = child.stdout if index == 0 else child.stderr
+        assert pipe is not None
+        try:
+            while chunk := pipe.read(4096):
+                with lock:
+                    if sum(map(len, streams)) + len(chunk) > 256 * 1024:
+                        failed.set()
+                        return
+                    streams[index].extend(chunk)
+        except OSError:
+            failed.set()
+        finally:
+            pipe.close()
+
+    readers = [threading.Thread(target=read_stream, args=(i,), daemon=True) for i in range(2)]
+    for reader in readers:
+        reader.start()
+    deadline = time.monotonic() + 30
+    while not failed.is_set() and time.monotonic() < deadline:
+        if child.poll() is not None and not any(reader.is_alive() for reader in readers):
+            break
+        failed.wait(0.01)
+    else:
+        failed.set()
+    if failed.is_set():
+        if child.poll() is None:
+            try:
+                child.terminate()
+                child.wait(timeout=2)
+            except (OSError, subprocess.TimeoutExpired):
+                try:
+                    child.kill()
+                    child.wait(timeout=3)
+                except (OSError, subprocess.TimeoutExpired):
+                    pass
+        return -1, "", ""
+    for pipe in (child.stdout, child.stderr):
+        if pipe is not None:
+            pipe.close()
+    try:
+        return child.returncode, streams[0].decode("utf-8"), streams[1].decode("utf-8")
+    except UnicodeDecodeError:
+        return -1, "", ""
+
+
+def native_sarif_clean(report: Path) -> bool:
+    """Consume only a complete inline SARIF 2.1.0 result packet."""
+
+    def unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate JSON key")
+            result[key] = value
+        return result
+
+    def invalid_constant(value: str) -> None:
+        raise ValueError("nonfinite JSON number")
+
+    def finite_float(value: str) -> float:
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError("nonfinite JSON number")
+        return number
+
+    try:
+        before = report.lstat()
+        if not stat.S_ISREG(before.st_mode) or not 0 < before.st_size <= 256 * 1024:
+            return False
+        with report.open("rb") as stream:
+            opened = os.fstat(stream.fileno())
+            raw = stream.read(256 * 1024 + 1)
+        after = report.lstat()
+        identities = {
+            (
+                info.st_dev,
+                info.st_ino,
+                info.st_mode,
+                info.st_size,
+                info.st_mtime_ns,
+                info.st_ctime_ns,
+            )
+            for info in (before, opened, after)
+        }
+        if len(identities) != 1 or len(raw) != before.st_size:
+            return False
+        packet = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=unique_keys,
+            parse_constant=invalid_constant,
+            parse_float=finite_float,
+        )
+    except (OSError, ValueError):
+        return False
+    if (
+        not isinstance(packet, dict)
+        or packet.get("version") != "2.1.0"
+        or any(
+            key in packet
+            for key in (
+                "inlineExternalProperties",
+                "externalPropertyFileReferences",
+                "externalProperties",
+            )
+        )
+        or not isinstance(packet.get("runs"), list)
+        or len(packet["runs"]) != 1
+    ):
+        return False
+    run = packet["runs"][0]
+    if not isinstance(run, dict) or "externalPropertyFileReferences" in run:
+        return False
+    driver = run.get("tool", {}).get("driver") if isinstance(run.get("tool"), dict) else None
+    if (
+        not isinstance(driver, dict)
+        or not isinstance(driver.get("name"), str)
+        or not driver["name"].strip()
+        or len(driver["name"]) > 256
+        or not isinstance(run.get("results"), list)
+        or run["results"]
+    ):
+        return False
+    if "invocations" in run:
+        invocations = run["invocations"]
+        if not isinstance(invocations, list):
+            return False
+        for invocation in invocations:
+            if (
+                not isinstance(invocation, dict)
+                or invocation.get("executionSuccessful") is not True
+                or any(
+                    key in invocation
+                    for key in ("processStartFailureMessage", "exitSignalNumber", "exitSignalName")
+                )
+                or (
+                    "exitCode" in invocation
+                    and (type(invocation["exitCode"]) is not int or invocation["exitCode"] != 0)
+                )
+                or any(
+                    key in invocation and invocation[key] != []
+                    for key in ("toolExecutionNotifications", "toolConfigurationNotifications")
+                )
+            ):
+                return False
+    return True
+
+
+def windows_native_scan(source: Path, temp: Path) -> dict[str, Any]:
+    incomplete = {"status": "incomplete", "reason": "native analyzer collection failed"}
+    try:
+        install = Path(os.environ.get("VCTOOLSINSTALLDIR", ""))
+        compiler = install / "bin/Hostx64/x64/cl.exe"
+        if (
+            not install.is_absolute()
+            or not install.is_dir()
+            or os.environ.get("VSCMD_ARG_HOST_ARCH") != "x64"
+            or os.environ.get("VSCMD_ARG_TGT_ARCH") != "x64"
+            or not os.environ.get("INCLUDE")
+            or not os.environ.get("LIB")
+            or compiler.is_symlink()
+            or not compiler.is_file()
+            or not compiler.stat().st_size
+        ):
+            return incomplete
+        compiler_hash = hashlib.sha256(compiler.read_bytes()).hexdigest()
+        source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+        probe = native_execute([str(compiler), "/?"], temp)
+        banner_lines = [
+            line for line in (probe[1] + "\n" + probe[2]).splitlines() if "Compiler Version" in line
+        ]
+        banner = (
+            re.fullmatch(
+                r"Microsoft \(R\) C/C\+\+ Optimizing Compiler Version "
+                r"(19\.[0-9]+(?:\.[0-9]+)+) for x64",
+                banner_lines[0],
+            )
+            if len(banner_lines) == 1
+            else None
+        )
+        if (
+            probe[0] != 0
+            or banner is None
+            or "\x00" in probe[1] + probe[2]
+            or re.search(
+                r"(?:fatal error|error|warning|unknown)(?: [A-Z]+[0-9]+)?\s*:",
+                probe[1] + probe[2],
+                re.I,
+            )
+        ):
+            return incomplete
+        report = temp / "analysis.sarif"
+        if report.exists() or report.is_symlink():
+            return incomplete
+        analysis = native_execute(
+            [
+                str(compiler),
+                "/nologo",
+                "/W4",
+                "/WX",
+                "/O2",
+                "/TC",
+                "/c",
+                "/analyze",
+                "/analyze:log",
+                str(report),
+                str(source),
+                "/Fo:" + str(temp / "analysis.obj"),
+            ],
+            temp,
+        )
+        benign = {
+            source.name,
+            banner[0],
+            "Copyright (C) Microsoft Corporation. All rights reserved.",
+        }
+        if (
+            analysis[0] != 0
+            or any(
+                line.strip() not in benign
+                for stream in analysis[1:]
+                for line in stream.splitlines()
+                if line.strip()
+            )
+            or hashlib.sha256(source.read_bytes()).hexdigest() != source_hash
+            or hashlib.sha256(compiler.read_bytes()).hexdigest() != compiler_hash
+            or not native_sarif_clean(report)
+        ):
+            return incomplete
+        return {
+            "status": "pass",
+            "compiler": "MSVC x64",
+            "version": banner[1],
+            "compiler_sha256": compiler_hash,
+            "sources": {source.relative_to(ROOT).as_posix(): source_hash},
+            "mode": "source-only MSVC analyzer; manual security review still required",
+            "windows_gate": "policy collection only; allocated Windows execution remains required",
+        }
+    except (OSError, ValueError):
+        return incomplete
 
 
 def collect_bandit(targets: list[str]) -> tuple[int, Any, str]:
@@ -204,32 +467,47 @@ def scan(base: str, head: str) -> dict[str, Any]:
             raise ValueError("native static source inventory drift")
         if sys.platform == "darwin" and os.uname().machine == "arm64":
             compiler = "/usr/bin/clang"
-            version = subprocess.run(
-                [compiler, "--version"], capture_output=True, text=True, check=False
+            native_version = native_execute([compiler, "--version"], temp)
+            identity = re.fullmatch(
+                r"Apple clang version ([0-9]+(?:\.[0-9]+)+)(?: \([a-zA-Z0-9_.-]+\))?",
+                native_version[1].splitlines()[0] if native_version[1] else "",
             )
-            analysis = execute(
-                [
-                    compiler,
-                    "--analyze",
-                    "-Xanalyzer",
-                    "-analyzer-output=text",
-                    "-std=c11",
-                    "-Wall",
-                    "-Wextra",
-                    "-Werror",
-                    "-arch",
-                    "arm64",
-                    str(native_sources[0]),
-                    "-o",
-                    str(temp / "native.plist"),
-                ]
+            valid_probe = (
+                native_version[0] == 0
+                and identity is not None
+                and not native_version[2]
+                and re.search(r"^Target: arm64-apple-darwin[0-9.]+$", native_version[1], re.M)
+                is not None
+                and not re.search(r"warning|error|unknown|\x00", native_version[1], re.I)
+            )
+            analysis = (
+                native_execute(
+                    [
+                        compiler,
+                        "--analyze",
+                        "-Xanalyzer",
+                        "-analyzer-output=text",
+                        "-std=c11",
+                        "-Wall",
+                        "-Wextra",
+                        "-Werror",
+                        "-arch",
+                        "arm64",
+                        str(native_sources[0]),
+                        "-o",
+                        str(temp / "native.plist"),
+                    ],
+                    temp,
+                )
+                if valid_probe
+                else (-1, "", "")
             )
             results["native"] = {
                 "status": "pass"
-                if version.returncode == 0 and analysis[0] == 0 and not analysis[2]
+                if valid_probe and analysis[0] == 0 and not analysis[1] and not analysis[2]
                 else "incomplete",
                 "compiler": compiler,
-                "version": version.stdout.splitlines()[0] if version.stdout else "unavailable",
+                "version": "Apple clang " + identity[1] if identity else "unavailable",
                 "mode": "clang static analyzer and warnings; manual security review still required",
                 "sources": {
                     p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -237,6 +515,8 @@ def scan(base: str, head: str) -> dict[str, Any]:
                 },
                 "windows_gate": "uncompiled/unobserved; Task10 required",
             }
+        elif sys.platform == "win32" and len(native_sources) == 1:
+            results["native"] = windows_native_scan(native_sources[0], temp)
         else:
             results["native"] = {
                 "status": "incomplete",
