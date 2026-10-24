@@ -167,7 +167,7 @@ def npm_result(code: int, data: Any) -> dict[str, Any]:
 
 def scan(base: str, head: str) -> dict[str, Any]:
     results: dict[str, Any] = {}
-    for tree in ["src", "desktop", "e2e", "tests", "scripts"]:
+    for tree in ["src", "desktop", "extension", "e2e", "tests", "scripts"]:
         if any(path.is_symlink() for path in (ROOT / tree).rglob("*")):
             raise ValueError("maintained symlinks are unsupported by scanner inventory")
     node_lock = json.loads((ROOT / "package-lock.json").read_text())
@@ -320,7 +320,7 @@ def scan(base: str, head: str) -> dict[str, Any]:
         data = eslint[1]
         expected_js = {
             p.resolve()
-            for t in ["desktop", "e2e", "scripts"]
+            for t in ["desktop", "extension", "e2e", "scripts"]
             for p in (ROOT / t).rglob("*")
             if p.suffix in {".ts", ".tsx", ".js", ".mjs"}
         }

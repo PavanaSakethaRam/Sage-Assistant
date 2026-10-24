@@ -24,6 +24,7 @@
     "desktop/main/copilot-account.ts",
     "desktop/main/core-launch.ts",
     "desktop/main/core-process.ts",
+    "desktop/main/editor-bridge.ts",
     "desktop/main/index.ts",
     "desktop/main/ipc.ts",
     "desktop/main/security.ts",
@@ -38,7 +39,11 @@
     "desktop/renderer/main.tsx",
     "desktop/shared/coding-contracts.ts",
     "desktop/shared/contracts.ts",
-    "desktop/shared/external-url.ts"
+    "desktop/shared/editor-bridge.ts",
+    "desktop/shared/external-url.ts",
+    "desktop/shared/framing.ts",
+    "extension/src/bridge.ts",
+    "extension/src/extension.ts"
   ],
   "trusted_python": [
     "src/sage/__init__.py",
@@ -65,6 +70,7 @@
     "desktop/main/copilot-account.ts",
     "desktop/main/core-launch.ts",
     "desktop/main/core-process.ts",
+    "desktop/main/editor-bridge.ts",
     "desktop/main/index.ts",
     "desktop/main/ipc.ts",
     "desktop/main/security.ts",
@@ -73,7 +79,11 @@
     "desktop/renderer/host.ts",
     "desktop/shared/coding-contracts.ts",
     "desktop/shared/contracts.ts",
-    "desktop/shared/external-url.ts"
+    "desktop/shared/editor-bridge.ts",
+    "desktop/shared/external-url.ts",
+    "desktop/shared/framing.ts",
+    "extension/src/bridge.ts",
+    "extension/src/extension.ts"
   ],
   "excluded": [
     "generated build outputs: .vite, out, dist",

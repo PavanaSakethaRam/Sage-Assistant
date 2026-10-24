@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import corpus from "../../tests/fixtures/coding-contracts.json";
-import { FrameDecoder } from "../main/core-process";
+import { FrameDecoder } from "../shared/framing";
 import {
   disclosureHash,
   contextHash,

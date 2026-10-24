@@ -10,12 +10,8 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import {
-  startCore,
-  deployment,
-  encodeFrame,
-  FrameDecoder,
-} from "../main/core-process";
+import { startCore, deployment } from "../main/core-process";
+import { encodeFrame, FrameDecoder } from "../shared/framing";
 import type { CoreOptions } from "../main/core-process";
 import type { CoreRequest } from "../shared/contracts";
 // A test-only spawn seam runs only registered owned scripts through Node on
@@ -628,3 +624,12 @@ subprocessIt(
     });
   },
 );
+it("refuses an overfull decode batch before returning any frames", () => {
+  const bytes = Buffer.concat(
+    Array.from({ length: 9 }, () => encodeFrame({ x: 1 })),
+  );
+  expect(() => new FrameDecoder().push(bytes, 8)).toThrow();
+  expect(
+    new FrameDecoder().push(bytes.subarray(0, bytes.length - 11), 8),
+  ).toHaveLength(8);
+});

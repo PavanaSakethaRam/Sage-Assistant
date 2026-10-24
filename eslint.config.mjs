@@ -12,11 +12,13 @@ export default tseslint.config(
       ".runtime/**",
       ".cache/**",
       "coverage/**",
+      "extension/dist/**",
+      "extension/test/driver/dist/**",
     ],
   },
   ...tseslint.configs.recommended,
   {
-    files: ["desktop/**/*.{ts,tsx}", "*.ts"],
+    files: ["desktop/**/*.{ts,tsx}", "extension/**/*.ts", "*.ts"],
     rules: { "@typescript-eslint/no-explicit-any": "error" },
   },
 );

@@ -19,13 +19,17 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "format:check": "prettier --check desktop e2e \"scripts/*.{mjs,ts}\" *.ts *.json *.mjs",
+    "format:check": "prettier --check desktop \"extension/**/*.{ts,json,md}\" e2e \"scripts/*.{mjs,ts}\" *.ts *.json *.mjs",
     "postinstall": "node scripts/install-electron.mjs",
     "test:e2e": "node e2e/build.ts && playwright test",
     "verify": "node scripts/verify.mjs",
     "verify:deterministic": "node scripts/verify.mjs --deterministic",
     "check:package": "node scripts/check_package.ts",
-    "smoke:package": "node scripts/smoke_package.mjs"
+    "smoke:package": "node scripts/smoke_package.mjs",
+    "build:extension": "vite build --config vite.extension.config.ts",
+    "typecheck:extension": "tsc --noEmit -p extension/tsconfig.json",
+    "test:extension": "node scripts/test-vscode.ts",
+    "package:extension": "npm run build:extension && cd extension && vsce package --no-dependencies --out ../.cache/sage-editor-bridge.vsix && cd .. && node scripts/check_package.ts --vsix .cache/sage-editor-bridge.vsix"
   },
   "devDependencies": {
     "@electron-forge/cli": "8.0.1",
@@ -43,7 +47,10 @@
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/vscode": "1.140.0",
     "@vitest/coverage-v8": "5.0.5",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
     "electron": "45.0.0",
     "eslint": "10.13.0",
     "eslint-plugin-security": "4.2.0",
@@ -58,5 +65,12 @@
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-markdown": "10.1.0"
+  },
+  "overrides": {
+    "@vscode/vsce@4.0.0": {
+      "@azure/identity@4.14.0": {
+        "@azure/msal-node": "7.1.1"
+      }
+    }
   }
 }

@@ -12,7 +12,8 @@
     "types": ["node", "vite/client"],
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true
   },
-  "include": ["desktop", "e2e", "*.ts"]
+  "include": ["desktop", "e2e", "*.ts", "extension"]
 }

@@ -37,3 +37,6 @@ out/
 coverage/
 
 coverage.json
+
+.vscode-test/
+*.vsix

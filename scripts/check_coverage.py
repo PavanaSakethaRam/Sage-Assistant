@@ -30,7 +30,8 @@ def check(python: Path, javascript: Path) -> dict[str, object]:
     actual_py = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "src/sage").rglob("*.py"))
     actual_js = sorted(
         p.relative_to(ROOT).as_posix()
-        for p in (ROOT / "desktop").rglob("*")
+        for tree in [ROOT / "desktop", ROOT / "extension/src"]
+        for p in tree.rglob("*")
         if p.suffix in {".ts", ".tsx"} and "tests" not in p.relative_to(ROOT).parts
     )
     if manifest["python"] != actual_py or manifest["javascript"] != actual_js:

@@ -7,6 +7,8 @@ import {
   uncache,
 } from "@electron/asar";
 import { getCurrentFuseWire, FuseV1Options } from "@electron/fuses";
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -95,7 +97,79 @@ export function validateArchive(archive: string): void {
   if (listedNames.size !== headerNames.size)
     throw Error("Unsafe application archive");
 }
+export async function validateVsix(archive: string): Promise<string[]> {
+  const source = new Map([
+    ["extension/package.json", "extension/package.json"],
+    ["extension/dist/extension.cjs", "extension/dist/extension.cjs"],
+    ["extension/readme.md", "extension/README.md"],
+    ["extension/LICENSE.txt", "extension/LICENSE"],
+    ["extension/THIRD_PARTY_NOTICES.md", "extension/THIRD_PARTY_NOTICES.md"],
+  ]);
+  const allowed = new Set([
+    ...source.keys(),
+    "[Content_Types].xml",
+    "extension.vsixmanifest",
+  ]);
+  const expected: Record<string, string> = {};
+  for (const [name, path] of source)
+    expected[name] = createHash("sha256")
+      .update(await readFile(resolve(path)))
+      .digest("hex");
+  const python = resolve(
+    ".venv",
+    process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+  );
+  const check = `import sys,json,zipfile,hashlib,stat,os
+archive,expected=sys.argv[1],json.loads(sys.argv[2])
+assert os.path.getsize(archive)<=2097152
+with zipfile.ZipFile(archive) as z:
+ items=z.infolist(); names=[i.filename for i in items]
+ assert len(names)==len(set(names))==7
+ assert set(names)==set(expected)|{'[Content_Types].xml','extension.vsixmanifest'}
+ for i in items:
+  assert i.file_size<=1048576 and not stat.S_ISLNK(i.external_attr>>16) and not i.flag_bits&1
+  data=z.read(i)
+  if i.filename in expected: assert hashlib.sha256(data).hexdigest()==expected[i.filename]
+ print(json.dumps(sorted(names)))`;
+  // Only fixed local archive/source bytes reach the existing stdlib ZIP checker.
+  const result = spawnSync(
+    python,
+    ["-c", check, archive, JSON.stringify(expected)],
+    { shell: false, encoding: "utf8", maxBuffer: 262144, timeout: 30_000 },
+  );
+  if (result.status !== 0) throw Error("Unsafe VSIX");
+  const manifest = JSON.parse(
+    (await readFile(resolve("extension/package.json"))).toString(),
+  );
+  if (
+    manifest.main !== "./dist/extension.cjs" ||
+    manifest.publisher !== "sage-local" ||
+    manifest.dependencies ||
+    manifest.devDependencies ||
+    (await readFile(resolve("extension/dist/extension.cjs"))).includes(
+      Buffer.from("sourceMappingURL"),
+    )
+  )
+    throw Error("Unsafe VSIX runtime");
+  const entries: unknown = JSON.parse(result.stdout);
+  if (
+    !Array.isArray(entries) ||
+    entries.some((name) => typeof name !== "string" || !allowed.has(name))
+  )
+    throw Error("Invalid VSIX inventory");
+  return entries as string[];
+}
 async function main(): Promise<void> {
+  if (process.argv[2] === "--vsix") {
+    if (process.argv.length !== 4) throw Error("Invalid VSIX arguments");
+    console.log(
+      JSON.stringify({
+        status: "pass",
+        entries: await validateVsix(resolve(process.argv[3])),
+      }),
+    );
+    return;
+  }
   const app = resolve(process.argv[2]);
   const resources =
     process.platform === "darwin"
