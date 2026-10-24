@@ -44,7 +44,14 @@ const REPLACE_SCENARIOS: readonly import("../extension/test/integration/replace"
   ];
 export function selectedCase(
   args: string[],
-): "bridge" | "context" | "create" | "replace" | "test-runner" | "all" {
+):
+  | "bridge"
+  | "context"
+  | "create"
+  | "replace"
+  | "test-runner"
+  | "recovery"
+  | "all" {
   if (args.length === 0) return "bridge";
   if (args.length === 4) {
     if (
@@ -78,6 +85,7 @@ export function selectedCase(
     args[1] !== "create" &&
     args[1] !== "replace" &&
     args[1] !== "test-runner" &&
+    args[1] !== "recovery" &&
     args[1] !== "all"
   )
     throw Error("Editor case is not implemented in Task4");
@@ -196,6 +204,7 @@ async function lane(
     | "create"
     | "replace"
     | "test-runner"
+    | "recovery"
     | "all" = "bridge",
   createScenario: import("../extension/test/integration/create").CreateScenario = "success",
   replaceScenario: import("../extension/test/integration/replace").ReplaceScenario = "success",
@@ -446,36 +455,42 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
         pathToFileURL(resolve(".cache/vscode-tools/bridge.cjs")).href
       );
       host =
-        selectedCase === "replace"
-          ? await integration.replaceThroughWorkbench(
-              page,
-              fixture,
-              workspace,
-              replaceScenario,
-            )
-          : selectedCase === "create" || selectedCase === "test-runner"
-            ? await integration.createThroughWorkbench(
+        selectedCase === "recovery"
+          ? await integration.recoveryThroughWorkbench(page, fixture, workspace)
+          : selectedCase === "replace"
+            ? await integration.replaceThroughWorkbench(
                 page,
                 fixture,
                 workspace,
-                createScenario,
-                selectedCase === "test-runner",
+                replaceScenario,
               )
-            : await integration.pairThroughWorkbench(
-                page,
-                selectedCase !== "bridge",
-              );
+            : selectedCase === "create" || selectedCase === "test-runner"
+              ? await integration.createThroughWorkbench(
+                  page,
+                  fixture,
+                  workspace,
+                  createScenario,
+                  selectedCase === "test-runner",
+                )
+              : await integration.pairThroughWorkbench(
+                  page,
+                  selectedCase !== "bridge",
+                );
       if (
         selectedCase !== "bridge" &&
         selectedCase !== "create" &&
         selectedCase !== "replace" &&
-        selectedCase !== "test-runner"
+        selectedCase !== "test-runner" &&
+        selectedCase !== "recovery"
       )
         await host!.exerciseContext();
       console.log(
         JSON.stringify({
           profile: owned,
           receipt: await receipt("initial"),
+          ...(selectedCase === "recovery"
+            ? { recovery: await json(join(fixture, "recovery-proof.json")) }
+            : {}),
           ...(selectedCase === "replace"
             ? {
                 replace_authority: await json(
@@ -511,6 +526,7 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
       );
       if (
         !packaged &&
+        selectedCase !== "recovery" &&
         selectedCase !== "test-runner" &&
         (selectedCase !== "replace" || replaceScenario === "success")
       ) {
@@ -570,7 +586,8 @@ with zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read())) as z:
     if (
       selectedCase !== "create" &&
       selectedCase !== "replace" &&
-      selectedCase !== "test-runner"
+      selectedCase !== "test-runner" &&
+      selectedCase !== "recovery"
     )
       await rm(owned, {
         recursive: true,
@@ -625,7 +642,10 @@ async function main(): Promise<void> {
         emptyOutDir: true,
         sourcemap: false,
         lib: {
-          entry: "extension/test/integration/bridge.ts",
+          entry:
+            selected === "recovery"
+              ? "extension/test/integration/recovery.ts"
+              : "extension/test/integration/bridge.ts",
           formats: ["cjs"],
           fileName: () => "bridge.cjs",
         },
@@ -649,7 +669,7 @@ async function main(): Promise<void> {
         );
       else {
         await lane(executable, true, false, selected);
-        if (selected !== "replace") {
+        if (selected !== "replace" && selected !== "recovery") {
           await lane(await revalidate(), true, true, selected);
           await lane(await revalidate(), false, true, selected);
         }
@@ -694,15 +714,17 @@ async function main(): Promise<void> {
             await lane(await revalidate(), true, false, "create", scenario);
       }
       console.log(
-        selected === "replace"
-          ? requestedScenario
-            ? `PASS owned editor replacement scenario ${requestedScenario}`
-            : "PASS owned editor replacement, byte observations, native version races and persisted trust reload"
-          : selected === "test-runner"
+        selected === "recovery"
+          ? "PASS owned explicit pending acknowledgment, actual Core restart and historical hash-only inspection"
+          : selected === "replace"
             ? requestedScenario
-              ? `PASS owned fixed test scenario ${requestedScenario}`
-              : "PASS owned fixed test approval, actual child receipts, result Done and restricted refusal"
-            : "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
+              ? `PASS owned editor replacement scenario ${requestedScenario}`
+              : "PASS owned editor replacement, byte observations, native version races and persisted trust reload"
+            : selected === "test-runner"
+              ? requestedScenario
+                ? `PASS owned fixed test scenario ${requestedScenario}`
+                : "PASS owned fixed test approval, actual child receipts, result Done and restricted refusal"
+              : "PASS owned editor bridge, persisted trust reload and actual Restricted Mode refusal",
       );
     } finally {
       clearTimeout(suiteTimer);

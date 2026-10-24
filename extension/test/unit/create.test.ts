@@ -20,7 +20,11 @@ import {
   type CodeReceipt,
 } from "../../../desktop/shared/coding-contracts";
 import { rootIdentity } from "../../../desktop/shared/editor-bridge";
-import { captureContext, contextOffer } from "../../src/context";
+import {
+  captureContext,
+  contextOffer,
+  releaseContext,
+} from "../../src/context";
 import { ProposalReview } from "../../src/review";
 import { createFocusProject } from "../../src/create";
 const ui = vi.hoisted(() => ({
@@ -28,6 +32,7 @@ const ui = vi.hoisted(() => ({
   diffUris: [] as string[],
   diffs: [] as { left: string; right: string; title: string }[],
   providers: new Map<string, (uri: { toString(): string }) => string>(),
+  createdDiffUris: [] as string[],
   confirm: true,
   beforeConfirm: undefined as (() => Promise<void>) | undefined,
   afterDiff: undefined as (() => void) | undefined,
@@ -40,6 +45,7 @@ const faults = vi.hoisted(() => ({
   close: false,
   read: false,
   afterOpen: undefined as (() => void) | undefined,
+  heldWrite: undefined as ((bytes: Buffer) => Promise<void>) | undefined,
 }));
 vi.mock("node:fs/promises", async (original) => {
   const fs = await original<typeof import("node:fs/promises")>();
@@ -60,7 +66,9 @@ vi.mock("node:fs/promises", async (original) => {
                 await target.write(Buffer.from("partial"));
                 throw Error("ENOSPC");
               }
-              return Reflect.apply(target.write, target, a);
+              const result = await Reflect.apply(target.write, target, a);
+              await faults.heldWrite?.(a[0] as Buffer);
+              return result;
             };
           if (key === "close")
             return async () => {
@@ -83,11 +91,14 @@ vi.mock("../../src/root-probe", () => ({
   validateRootSpelling: () => {},
 }));
 vi.mock("vscode", () => {
-  const uri = (s: string) => ({
-    toString: () => s,
-    fsPath: s.startsWith("file:") ? fileURLToPath(s) : s,
-    scheme: s.split(":")[0],
-  });
+  const uri = (s: string) => {
+    if (s.startsWith("sage-diff:")) ui.createdDiffUris.push(s);
+    return {
+      toString: () => s,
+      fsPath: s.startsWith("file:") ? fileURLToPath(s) : s,
+      scheme: s.split(":")[0],
+    };
+  };
   return {
     Uri: { parse: uri, file: (p: string) => uri(pathToFileURL(p).href) },
     EndOfLine: { LF: 1 },
@@ -96,6 +107,7 @@ vi.mock("vscode", () => {
       fire() {}
       dispose() {}
     },
+    TabInputText: class {},
     TabInputTextDiff: class {},
     workspace: {
       get textDocuments() {
@@ -150,7 +162,12 @@ vi.mock("vscode", () => {
       },
     },
     window: {
-      tabGroups: { all: [], close: async () => true },
+      tabGroups: {
+        all: [],
+        close: async () => true,
+        onDidChangeTabs: () => ({ dispose() {} }),
+      },
+      showTextDocument: async () => {},
       showInformationMessage: async () => "Continue review",
       showWarningMessage: async () => {
         await ui.beforeConfirm?.();
@@ -198,6 +215,7 @@ afterEach(async () => {
   ui.choices = [];
   ui.diffs = [];
   ui.diffUris = [];
+  ui.createdDiffUris = [];
   ui.controls = [];
   ui.confirm = true;
   ui.afterDiff = undefined;
@@ -205,6 +223,7 @@ afterEach(async () => {
   ui.documents = [];
   faults.open = faults.write = faults.close = faults.read = false;
   faults.afterOpen = undefined;
+  faults.heldWrite = undefined;
   await Promise.all(
     roots.splice(0).map((p) => rm(p, { force: true, recursive: true })),
   );
@@ -713,4 +732,155 @@ it("hidden entry after first observation stops before next intent and preserves 
   );
   expect(await readFile(join(f.root, ".human"), "utf8")).toBe("human");
   expect((await readdir(f.root)).sort()).toEqual([".human", "index.html"]);
+});
+
+it("held intent ACK retains no independent approved-source allocation before original lease expiry", async () => {
+  const f = await fixture();
+  approve();
+  let reached!: () => void, resume!: () => void;
+  const held = new Promise<void>((resolve) => {
+    reached = resolve;
+  });
+  const ack = new Promise<void>((resolve) => {
+    resume = resolve;
+  });
+  const marker = f.proposal.files[0].text;
+  let allocated = 0;
+  const original = Buffer.from;
+  ui.afterDiff = () => {
+    vi.spyOn(Buffer, "from").mockImplementation(((...args: unknown[]) => {
+      if (args[0] === marker) allocated++;
+      return Reflect.apply(original, Buffer, args);
+    }) as typeof Buffer.from);
+  };
+  f.afterIntent(async () => {
+    reached();
+    await ack;
+  });
+  const result = f.review.show(f.context, f.proposal);
+  const rejected = expect(result).rejects.toThrow();
+  try {
+    await held;
+    const now = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(now + 1800000);
+    releaseContext(f.context);
+    expect(() => contextOffer(f.context)).toThrow();
+    expect(await readdir(f.root)).toEqual([]);
+    expect(f.receipts).toEqual([]);
+    expect(allocated).toBe(0);
+  } finally {
+    resume();
+    await rejected;
+    vi.restoreAllMocks();
+  }
+  expect(f.intents).toHaveLength(1);
+  expect(f.receipts).toEqual([]);
+  expect(await readdir(f.root)).toEqual([]);
+});
+
+it("original expiry preserves already dispatched bytes and records uncertainty without a next effect", async () => {
+  const f = await fixture();
+  approve();
+  let reached!: () => void, resume!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    reached = resolve;
+  });
+  const held = new Promise<void>((resolve) => {
+    resume = resolve;
+  });
+  let dispatched!: Buffer;
+  const expected = Buffer.from(f.proposal.files[0].text);
+  faults.heldWrite = async (bytes) => {
+    dispatched = bytes;
+    reached();
+    await held;
+  };
+  const failed = expect(f.review.show(f.context, f.proposal)).rejects.toThrow();
+  try {
+    await ready;
+    const now = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(now + 1800000);
+    releaseContext(f.context);
+    expect(dispatched).toEqual(expected);
+  } finally {
+    resume();
+    await failed;
+    vi.restoreAllMocks();
+  }
+  expect(await readFile(join(f.root, "index.html"))).toEqual(expected);
+  expect(f.intents).toHaveLength(1);
+  expect(f.receipts).toMatchObject([
+    {
+      status: "needs_reconciliation",
+      observed_hash: null,
+      observed_length: null,
+    },
+  ]);
+  expect(await readdir(f.root)).toEqual(["index.html"]);
+});
+
+it("historical view coexists with all nine real review addresses and cannot renew the original source lease", async () => {
+  const f = await fixture();
+  approve();
+  const { InspectionView } = await import("../../src/reconcile");
+  const { parseCodeJobView } =
+    await import("../../../desktop/shared/coding-contracts");
+  const corpus = await import("../../../tests/fixtures/coding-contracts.json");
+  const view = new InspectionView();
+  const job = parseCodeJobView({
+    ...corpus.default.cases.find(
+      (item) => item.kind === "job_view" && item.valid,
+    )!.value,
+    binding: {
+      ...f.context.binding,
+      job_id: "older-job",
+      boot_id: "older-boot",
+      pair_id: "older-pair",
+    },
+    state: "interrupted",
+    hashes: [],
+    receipts: [],
+  });
+  let checked = false;
+  ui.beforeConfirm = async () => {
+    const offer = contextOffer(f.context),
+      provider = ui.providers.get("sage-diff")!;
+    const addresses = [...new Set(ui.createdDiffUris)];
+    expect(addresses).toHaveLength(9);
+    expect(new Set(ui.diffUris).size).toBe(8);
+    const contents = addresses.map((uri) => provider({ toString: () => uri }));
+    const sent = [...f.sent];
+    await view.show(
+      {
+        job,
+        root: "verified",
+        local: { complete: true, operations: [] },
+        targets: [],
+      },
+      () => {},
+    );
+    await view.clear();
+    expect(addresses.map((uri) => provider({ toString: () => uri }))).toEqual(
+      contents,
+    );
+    expect([...new Set(ui.createdDiffUris)]).toEqual(addresses);
+    expect(contextOffer(f.context)).toEqual(offer);
+    expect(f.sent).toEqual(sent);
+    expect(f.intents).toEqual([]);
+    vi.spyOn(Date, "now").mockReturnValue(offer.expires_at_ms);
+    expect(() => contextOffer(f.context)).toThrow();
+    checked = true;
+  };
+  try {
+    await expect(f.review.show(f.context, f.proposal)).rejects.toThrow();
+    expect(checked).toBe(true);
+    expect(f.intents).toEqual([]);
+    expect(f.receipts).toEqual([]);
+    expect(f.sent).toEqual([]);
+    expect(await readdir(f.root)).toEqual([]);
+  } finally {
+    vi.restoreAllMocks();
+    view.dispose();
+    await f.review.dispose();
+  }
 });

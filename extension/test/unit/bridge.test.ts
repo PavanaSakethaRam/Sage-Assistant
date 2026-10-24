@@ -2,7 +2,7 @@ import { afterEach, expect, it } from "vitest";
 import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 import { localWorkspace } from "../../src/bridge";
 const roots: string[] = [];
 afterEach(async () => {
@@ -59,6 +59,8 @@ const editor = vi.hoisted(() => ({
   confirmation: undefined as (() => Promise<string | undefined>) | undefined,
   messageHeld: false,
   messages: [] as string[],
+  picks: [] as string[],
+  providers: new Map<string, (uri: { toString(): string }) => string>(),
 }));
 vi.mock("../../src/root-probe", () => ({
   probeRoot: async () => "darwin-unit-root",
@@ -96,7 +98,25 @@ vi.mock("vscode", () => ({
     get workspaceFolders() {
       return [{ uri: { toString: () => editor.root } }];
     },
-    registerTextDocumentContentProvider: () => ({ dispose() {} }),
+    registerTextDocumentContentProvider: (
+      scheme: string,
+      provider: {
+        provideTextDocumentContent: (uri: { toString(): string }) => string;
+      },
+    ) => {
+      editor.providers.set(scheme, provider.provideTextDocumentContent);
+      return {
+        dispose() {
+          editor.providers.delete(scheme);
+        },
+      };
+    },
+    openTextDocument: async (uri: { toString(): string }) => ({
+      uri,
+      getText: () =>
+        editor.providers.get(uri.toString().split(":")[0])?.(uri) ?? "",
+    }),
+    textDocuments: [],
     onDidChangeWorkspaceFolders: (handler: () => void) => {
       editor.workspaceChanged = handler;
       return { dispose() {} };
@@ -117,6 +137,38 @@ vi.mock("vscode", () => ({
       all: [],
       onDidChangeTabs: () => ({ dispose() {} }),
       close: async () => true,
+    },
+    showTextDocument: async () => {},
+    createQuickPick: () => {
+      let accept = () => {},
+        hide = () => {};
+      const picker = {
+        items: [] as { label: string }[],
+        selectedItems: [] as { label: string }[],
+        onDidAccept: (callback: () => void) => {
+          accept = callback;
+          return { dispose() {} };
+        },
+        onDidHide: (callback: () => void) => {
+          hide = callback;
+          return { dispose() {} };
+        },
+        show() {
+          queueMicrotask(() => {
+            const choice = editor.picks.shift();
+            const item = picker.items.find((item) => item.label === choice);
+            if (item) {
+              picker.selectedItems = [item];
+              accept();
+            } else hide();
+          });
+        },
+        hide() {
+          hide();
+        },
+        dispose() {},
+      };
+      return picker;
     },
     showInputBox: async () => (editor.input ? editor.input() : editor.ticket),
     showWarningMessage: async () =>
@@ -651,4 +703,134 @@ it("closed bridge retains only an exact preexisting intent observation locally a
     }),
   ).rejects.toThrow();
   expect((await journal.get(intent.operation_id)).intents).toHaveLength(1);
+});
+
+it("explicit local pending inspection acknowledges exactly one unchanged v1 remnant without pairing or Core", async () => {
+  const f = await commandFixture();
+  const root = fileURLToPath(editor.root),
+    journal = join(root, "effect-journal"),
+    name = "pending-" + "b".repeat(32);
+  const fs = await import("node:fs/promises");
+  await fs.mkdir(journal);
+  await fs.writeFile(join(journal, name), '{"version":1,');
+  const age = new Date(Date.now() - 1000);
+  await fs.utimes(join(journal, name), age, age);
+  editor.picks = [name, "Acknowledge uncertainty and retain evidence"];
+  try {
+    await editor.commands.get("sage.inspectInterruptedJournal")!();
+    expect(f.sockets.size).toBe(0);
+    const directories = await fs.readdir(journal);
+    expect(directories).toHaveLength(1);
+    expect(directories[0]).toMatch(/^acknowledged-/);
+    expect(await fs.readFile(join(journal, directories[0], name), "utf8")).toBe(
+      '{"version":1,',
+    );
+    expect(editor.messages.at(-1)).toContain("old result remains uncertain");
+    await editor.commands.get("sage.dismissInspection")!();
+  } finally {
+    editor.picks = [];
+    await f.cleanup();
+  }
+});
+it("historical command manually advances one bounded filtered page and opens independent source-free metadata", async () => {
+  const f = await commandFixture();
+  const { EditorBridgeHost } =
+    await import("../../../desktop/main/editor-bridge");
+  const { parseCodeJobView } =
+    await import("../../../desktop/shared/coding-contracts");
+  const corpus = await import("../../../tests/fixtures/coding-contracts.json");
+  let paired:
+    import("../../../desktop/shared/editor-bridge").PairView | undefined;
+  const reads: number[] = [],
+    effects: string[] = [];
+  const job = () =>
+    parseCodeJobView({
+      ...corpus.default.cases.find(
+        (item) => item.kind === "job_view" && item.valid,
+      )!.value,
+      binding: {
+        job_id: "older-job",
+        boot_id: "old-boot",
+        pair_id: "old-pair",
+        window_id: "old-window",
+        root_id: paired!.root_id,
+        revision: 1,
+        policy_version: "code-v1",
+      },
+      state: "partial",
+      hashes: [],
+      receipts: [],
+    });
+  const host = new EditorBridgeHost({
+    onData: (message) => {
+      effects.push(message.kind);
+    },
+    onPair: (view) => {
+      paired = view;
+      void host.confirm(view.pair_id);
+    },
+    codingStatus: async () => job(),
+    codingHistory: async (offset) => {
+      reads.push(offset);
+      return offset === 0
+        ? { items: [], next_offset: 20 }
+        : { items: [job()], next_offset: null };
+    },
+  });
+  try {
+    editor.ticket = Buffer.from(JSON.stringify(await host.start())).toString(
+      "base64url",
+    );
+    await f.command();
+    expect(reads).toEqual([]);
+    editor.picks = ["Next page", "older-job"];
+    await editor.commands.get("sage.inspectInterruptedJob")!();
+    expect(reads).toEqual([0, 20]);
+    expect(effects).toEqual([]);
+    const uri = { toString: () => "sage-inspection:/interrupted-job.txt" };
+    expect(editor.providers.get("sage-inspection")!(uri)).toContain(
+      "Job: older-job; state: partial",
+    );
+    expect(editor.providers.get("sage-inspection")!(uri)).toContain(
+      "No retained target hash evidence",
+    );
+    await editor.commands.get("sage.dismissInspection")!();
+    expect(editor.providers.get("sage-inspection")!(uri)).toContain(
+      "dismissed or expired",
+    );
+    expect(effects).toEqual([]);
+    expect(host.currentCodingJob()).toBeUndefined();
+  } finally {
+    editor.picks = [];
+    await f.cleanup();
+    await host.close();
+  }
+});
+
+it("a refused pending-inspection preflight leaves the next trusted gesture usable", async () => {
+  const f = await commandFixture();
+  try {
+    editor.trusted = false;
+    await expect(
+      editor.commands.get("sage.inspectInterruptedJournal")!(),
+    ).rejects.toThrow();
+    editor.trusted = true;
+    const before = editor.messages.length;
+    await editor.commands.get("sage.inspectInterruptedJournal")!();
+    const inventoryDirectory = await import("node:fs/promises")
+      .then((fs) =>
+        fs.lstat(join(fileURLToPath(editor.root), "effect-journal")),
+      )
+      .catch(() => undefined);
+    expect(inventoryDirectory?.isDirectory()).toBe(true);
+    expect(editor.messages).toHaveLength(before);
+    expect(
+      editor.providers.get("sage-inspection")!({
+        toString: () => "sage-inspection:/interrupted-job.txt",
+      }),
+    ).toContain("dismissed or expired");
+  } finally {
+    editor.trusted = true;
+    await f.cleanup();
+  }
 });

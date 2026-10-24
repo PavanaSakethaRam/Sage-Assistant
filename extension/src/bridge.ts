@@ -33,6 +33,8 @@ import {
   type BridgeData,
   type LocalWorkspace,
   type PairView,
+  type HistoryRequest,
+  type HistoryReply,
 } from "../../desktop/shared/editor-bridge";
 type Options = {
   confirm: (view: PairView) => Promise<boolean>;
@@ -44,6 +46,16 @@ export class ExtensionBridge {
   private peer: FramedPeer | undefined;
   private session: BridgeSession | undefined;
   private recording = false;
+  private pendingHistory:
+    | {
+        request: HistoryRequest;
+        session: BridgeSession;
+        started: number;
+        resolve: (value: HistoryReply) => void;
+        reject: (error: Error) => void;
+        timer: ReturnType<typeof setTimeout>;
+      }
+    | undefined;
   private pendingAck:
     | {
         binding: CodeIntent["binding"];
@@ -89,6 +101,7 @@ export class ExtensionBridge {
             this.session = undefined;
           }
           this.rejectAck();
+          this.rejectHistory();
           this.options.onClose?.();
           reject(new Error("Editor bridge closed"));
         });
@@ -137,6 +150,27 @@ export class ExtensionBridge {
             "extension",
             view,
             async (data) => {
+              if (data.kind === "history.reply") {
+                const pending = this.pendingHistory;
+                const reply = data.payload;
+                if (
+                  !pending ||
+                  pending.session !== this.session ||
+                  reply.inspection_id !== pending.request.inspection_id ||
+                  Date.now() < pending.started ||
+                  Date.now() - pending.started >= 30000 ||
+                  (reply.action !== "unavailable" &&
+                    reply.action !== pending.request.action) ||
+                  (reply.action === "inspect" &&
+                    (pending.request.action !== "inspect" ||
+                      reply.job.binding.job_id !== pending.request.job_id))
+                )
+                  invalid();
+                this.pendingHistory = undefined;
+                clearTimeout(pending.timer);
+                pending.resolve(reply);
+                return;
+              }
               if (data.kind === "journal.ack") {
                 const pending = this.pendingAck;
                 if (!pending || !sameBinding(pending.binding, data.binding))
@@ -254,6 +288,41 @@ export class ExtensionBridge {
   recordObserved(journal: EffectJournal, value: CodeReceipt): Promise<CodeAck> {
     return this.record(journal, value, true);
   }
+  private rejectHistory(): void {
+    const pending = this.pendingHistory;
+    this.pendingHistory = undefined;
+    if (pending) {
+      clearTimeout(pending.timer);
+      pending.reject(Error("Historical inspection unavailable"));
+    }
+  }
+  history(
+    request:
+      | { action: "list"; offset: number }
+      | { action: "inspect"; job_id: string },
+  ): Promise<HistoryReply> {
+    this.check();
+    if (!this.session || this.pendingHistory) invalid();
+    const session = this.session;
+    const payload: HistoryRequest = {
+      ...request,
+      inspection_id: randomBytes(16).toString("hex"),
+    };
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => this.rejectHistory(), 30000);
+      this.pendingHistory = {
+        request: payload,
+        session,
+        started: Date.now(),
+        resolve,
+        reject,
+        timer,
+      };
+      void this.send({ kind: "history.request", payload }).catch(() =>
+        this.rejectHistory(),
+      );
+    });
+  }
   async send(message: BridgeData): Promise<void> {
     this.check();
     if (!this.session) invalid();
@@ -265,6 +334,7 @@ export class ExtensionBridge {
   }
   async close(): Promise<void> {
     this.rejectAck();
+    this.rejectHistory();
     this.peer?.close();
     this.peer = undefined;
     this.session = undefined;

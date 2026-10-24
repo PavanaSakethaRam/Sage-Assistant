@@ -1,12 +1,21 @@
 /** Durable metadata only. A local receipt never authorizes an effect by itself. */
 import { createHash, randomBytes } from "node:crypto";
 import { constants, type Stats } from "node:fs";
-import { lstat, mkdir, open, readdir, rename, unlink } from "node:fs/promises";
+import {
+  lstat,
+  mkdir,
+  open,
+  readdir,
+  rename,
+  unlink,
+  rmdir,
+} from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   FOCUS_NAMES,
   parseCodeAck,
+  type CodeBinding,
   parseCodeIntent,
   parseCodeReceipt,
   type CodeAck,
@@ -39,6 +48,30 @@ export type JournalOperation = {
   observations: CodeReceipt[];
   ack_ids: CodeAck[];
 };
+export class PendingJournalError extends Error {
+  constructor() {
+    super(
+      "Sage found an interrupted private journal write; use Sage: Inspect interrupted Sage journal before pairing.",
+    );
+  }
+}
+export type PendingEvidence = Readonly<{
+  name: string;
+  classification:
+    | "supported_v1"
+    | "malformed_v1"
+    | "future_version"
+    | "unrecognized"
+    | "unsafe";
+  digest: string | null;
+  mtime: number | null;
+  identity: string | null;
+  operation?: JournalOperation;
+}>;
+export type JobEvidence = Readonly<{
+  complete: boolean;
+  operations: readonly JournalOperation[];
+}>;
 const RETENTION = 30 * 86400000,
   CAP = 1048576,
   MAX_OPERATIONS = 1024;
@@ -250,6 +283,7 @@ export class EffectJournal {
   private readonly root: string;
   private queue: Promise<unknown> = Promise.resolve();
   private last = 0;
+  private pendingChoices = new WeakSet<PendingEvidence>();
   constructor(storageUri: { toString(): string }) {
     const uri = new URL(storageUri.toString());
     if (uri.protocol !== "file:" || uri.host || uri.search || uri.hash)
@@ -280,7 +314,7 @@ export class EffectJournal {
         /^pending-[0-9a-f]{32}$/.test(name),
       )
     )
-      invalid();
+      throw new PendingJournalError();
   }
   private async readText(path: string): Promise<{ text: string; info: Stats }> {
     const before = await lstat(path);
@@ -351,7 +385,7 @@ export class EffectJournal {
       !Number.isFinite(info.mtimeMs) ||
       info.mtimeMs < 0 ||
       info.mtimeMs > time ||
-      time - info.mtimeMs < RETENTION
+      time - info.mtimeMs <= RETENTION
     )
       invalid();
     const versions = [...text.matchAll(/"version"\s*:\s*([0-9]+)/g)].map(
@@ -546,6 +580,238 @@ export class EffectJournal {
       return value;
     });
   }
+  private identity(info: Stats): string {
+    return [info.dev, info.ino, info.size, info.mtimeMs, info.ctimeMs].join(
+      ":",
+    );
+  }
+  private async pending(name: string): Promise<PendingEvidence> {
+    if (!/^pending-[0-9a-f]{32}$/.test(name)) invalid();
+    try {
+      const path = join(this.root, name);
+      const { text, info } = await this.readText(path);
+      if (
+        !this.sameFile(info, await lstat(path)) ||
+        !Number.isFinite(info.mtimeMs) ||
+        info.mtimeMs < 0 ||
+        Math.floor(info.mtimeMs) > this.clock()
+      )
+        invalid();
+      const base = {
+        name,
+        digest: createHash("sha256").update(text, "utf8").digest("hex"),
+        mtime: info.mtimeMs,
+        identity: this.identity(info),
+      };
+      const versions = [...text.matchAll(/"version"\s*:\s*([^,}\]\s]+)/g)].map(
+        (match) => match[1],
+      );
+      let classification: PendingEvidence["classification"] = "unrecognized";
+      let operation: JournalOperation | undefined;
+      if (
+        versions.length &&
+        versions.some((version) => /^[0-9]+$/.test(version) && version !== "1")
+      )
+        classification = "future_version";
+      else if (
+        versions.length &&
+        versions.every((version) => version === "1")
+      ) {
+        classification = "malformed_v1";
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          /* Recognizable partial version1 evidence. */
+        }
+        if (parsed !== undefined) {
+          if (
+            !parsed ||
+            typeof parsed !== "object" ||
+            !("version" in parsed) ||
+            parsed.version !== 1
+          )
+            classification = "unrecognized";
+          else {
+            try {
+              const candidate = parsed as JournalOperation;
+              if (canonical(candidate) !== text) invalid();
+              this.path(candidate.operation_id);
+              operation = parseOperation(candidate, candidate.operation_id);
+              classification = "supported_v1";
+            } catch {
+              operation = undefined;
+            }
+          }
+        }
+      }
+      if (operation && this.clock() < Date.parse(operation.updated_at))
+        invalid();
+      const result: PendingEvidence = Object.freeze({
+        ...base,
+        classification,
+        ...(operation ? { operation } : {}),
+      });
+      if (
+        classification === "supported_v1" ||
+        classification === "malformed_v1"
+      )
+        this.pendingChoices.add(result);
+      return result;
+    } catch {
+      return {
+        name,
+        classification: "unsafe",
+        digest: null,
+        mtime: null,
+        identity: null,
+      };
+    }
+  }
+  inspectPending(): Promise<{
+    complete: boolean;
+    entries: readonly PendingEvidence[];
+  }> {
+    return this.serial(async () => {
+      const started = this.clock();
+      await this.directory(true);
+      const names = (await readdir(this.root)).filter((name) =>
+        /^pending-[0-9a-f]{32}$/.test(name),
+      );
+      if (names.length > MAX_OPERATIONS)
+        return { complete: false, entries: [] };
+      const entries: PendingEvidence[] = [];
+      let size = 0;
+      for (const name of names) {
+        const now = this.clock();
+        if (now - started >= 30000 || size >= 8 * CAP)
+          return { complete: false, entries };
+        const entry = await this.pending(name);
+        this.clock();
+        size += entry.identity ? Number(entry.identity.split(":")[2]) : CAP;
+        entries.push(entry);
+      }
+      return {
+        complete: this.clock() - started < 30000 && size <= 8 * CAP,
+        entries,
+      };
+    });
+  }
+  acknowledgePending(choice: PendingEvidence): Promise<void> {
+    return this.serial(async () => {
+      this.clock();
+      if (!this.pendingChoices.has(choice)) invalid();
+      this.pendingChoices.delete(choice);
+      await this.directory(true);
+      const checked = await this.pending(choice.name);
+      if (
+        !this.pendingChoices.has(checked) ||
+        checked.classification !== choice.classification ||
+        checked.digest !== choice.digest ||
+        checked.identity !== choice.identity
+      )
+        invalid();
+      const destination = join(
+        this.root,
+        `acknowledged-${randomBytes(16).toString("hex")}`,
+      );
+      await mkdir(destination, { mode: 0o700 });
+      const dir = await lstat(destination);
+      if (
+        !dir.isDirectory() ||
+        dir.isSymbolicLink() ||
+        (await readdir(destination)).length
+      )
+        invalid();
+      this.clock();
+      // Re-read immediately before rename; the new exclusive directory has an empty destination.
+      const final = await this.pending(choice.name);
+      if (
+        final.identity !== choice.identity ||
+        final.digest !== choice.digest ||
+        final.classification !== choice.classification
+      )
+        invalid();
+      const source = join(this.root, choice.name),
+        target = join(destination, choice.name);
+      const before = await lstat(source);
+      if (this.identity(before) !== choice.identity) invalid();
+      await rename(source, target);
+      const moved = await this.readText(target);
+      const current = await lstat(target);
+      if (
+        moved.info.dev !== before.dev ||
+        moved.info.ino !== before.ino ||
+        moved.info.size !== before.size ||
+        moved.info.mtimeMs !== before.mtimeMs ||
+        !this.sameFile(moved.info, current) ||
+        createHash("sha256").update(moved.text, "utf8").digest("hex") !==
+          choice.digest
+      )
+        invalid();
+      this.clock();
+    });
+  }
+  inspectJob(binding: CodeBinding): Promise<JobEvidence> {
+    if (
+      Object.keys(binding).sort().join() !==
+        "boot_id,job_id,pair_id,policy_version,revision,root_id,window_id" ||
+      [
+        binding.job_id,
+        binding.boot_id,
+        binding.pair_id,
+        binding.window_id,
+        binding.root_id,
+      ].some(
+        (value) =>
+          typeof value !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(value),
+      ) ||
+      !Number.isSafeInteger(binding.revision) ||
+      binding.revision < 1 ||
+      binding.policy_version !== "code-v1"
+    )
+      invalid();
+    const expected = canonical(binding);
+    return this.serial(async () => {
+      const operations: JournalOperation[] = [];
+      const started = this.clock();
+      let total = 0;
+      try {
+        await this.directory();
+        const names = (await readdir(this.root)).filter((name) =>
+          /^operation-[A-Za-z0-9_-]{1,64}\.json$/.test(name),
+        );
+        if (names.length > MAX_OPERATIONS)
+          return { complete: false, operations: [] };
+        for (const name of names) {
+          const now = this.clock();
+          if (now - started >= 30000) return { complete: false, operations };
+          const path = join(this.root, name),
+            info = await lstat(path);
+          total += info.size;
+          if (total > 8 * CAP) return { complete: false, operations };
+          const { text, info: opened } = await this.readText(path);
+          if (
+            !this.sameFile(info, opened) ||
+            !this.sameFile(opened, await lstat(path))
+          )
+            invalid();
+          const value = JSON.parse(text) as JournalOperation;
+          if (canonical(value) !== text) invalid();
+          const record = parseOperation(value, name.slice(10, -5));
+          const time = this.clock();
+          if (time - started >= 30000 || time < Date.parse(record.updated_at))
+            invalid();
+          if (time >= Date.parse(record.expires_at)) continue;
+          if (canonical(record.intents[0].binding) === expected)
+            operations.push(record);
+        }
+        return { complete: true, operations };
+      } catch {
+        return { complete: false, operations };
+      }
+    });
+  }
   expire(now: Date): Promise<void> {
     const time = now.getTime();
     return this.serial(async () => {
@@ -553,7 +819,31 @@ export class EffectJournal {
       await this.directory(true);
       for (const name of await readdir(this.root)) {
         if (/^pending-[0-9a-f]{32}$/.test(name)) {
-          await this.expirePending(name, time);
+          try {
+            await this.expirePending(name, time);
+          } catch {
+            throw new PendingJournalError();
+          }
+          continue;
+        }
+        if (/^acknowledged-[0-9a-f]{32}$/.test(name)) {
+          const path = join(this.root, name),
+            info = await lstat(path);
+          if (!info.isDirectory() || info.isSymbolicLink()) invalid();
+          const retained = await readdir(path);
+          if (
+            retained.length > 1 ||
+            retained.some((entry) => !/^pending-[0-9a-f]{32}$/.test(entry))
+          )
+            invalid();
+          if (retained.length) {
+            const pendingPath = join(name, retained[0]);
+            const stat = await lstat(join(this.root, pendingPath));
+            if (time <= stat.mtimeMs || time - stat.mtimeMs <= RETENTION)
+              continue;
+            await this.expirePending(pendingPath, time);
+          }
+          await rmdir(path);
           continue;
         }
         const match = /^operation-([A-Za-z0-9_-]{1,64})\.json$/.exec(name);

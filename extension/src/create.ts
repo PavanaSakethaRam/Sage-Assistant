@@ -1,7 +1,7 @@
 /** One private local gesture, four independently durable exclusive creates. */
 import { createHash, randomBytes } from "node:crypto";
 import { constants, type BigIntStats } from "node:fs";
-import { open, lstat } from "node:fs/promises";
+import { open, lstat, type FileHandle } from "node:fs/promises";
 import { join } from "node:path";
 import {
   FOCUS_NAMES,
@@ -12,8 +12,45 @@ import {
 } from "../../desktop/shared/coding-contracts";
 import { validateCreateProgress, type CreatedPrefix } from "./context";
 import { consumeLocalReview, type LocalReview } from "./review";
-const hash = (bytes: Buffer) =>
-  createHash("sha256").update(bytes).digest("hex");
+// The caller continuation retains only length/hash facts, never dispatched source bytes.
+function dispatch(
+  handle: FileHandle,
+  proposal: CodeProposal,
+  name: string,
+  check: () => void,
+): Promise<number> {
+  check();
+  const bytes = Buffer.from(
+    proposal.files.find((f) => f.name === name)!.text,
+    "utf8",
+  );
+  return handle
+    .write(bytes, 0, bytes.length, 0)
+    .then((result) => result.bytesWritten);
+}
+async function readHash(
+  reader: FileHandle,
+  length: number,
+  check: () => void,
+): Promise<{ hash: string; length: number }> {
+  const buffer = Buffer.alloc(length + 1);
+  let offset = 0;
+  while (offset < buffer.length) {
+    const read = await reader.read(
+      buffer,
+      offset,
+      buffer.length - offset,
+      offset,
+    );
+    check();
+    offset += read.bytesRead;
+    if (!read.bytesRead) break;
+  }
+  return {
+    hash: createHash("sha256").update(buffer.subarray(0, offset)).digest("hex"),
+    length: offset,
+  };
+}
 export async function createFocusProject(
   context: CodeContext,
   proposal: CodeProposal,
@@ -26,10 +63,13 @@ export async function createFocusProject(
     owner.check();
     let root = await validateCreateProgress(context, proposal, prefix);
     owner.check();
-    const bytes = Buffer.from(
+    const expectedLength = Buffer.byteLength(
       proposal.files.find((f) => f.name === name)!.text,
       "utf8",
     );
+    const expectedHash = createHash("sha256")
+      .update(proposal.files.find((f) => f.name === name)!.text, "utf8")
+      .digest("hex");
     const intent: CodeIntent = {
       binding: context.binding,
       scope: "code.create",
@@ -37,7 +77,7 @@ export async function createFocusProject(
       effect_id: randomBytes(16).toString("hex"),
       ordinal,
       target: name,
-      expected_hash: hash(bytes),
+      expected_hash: expectedHash,
     };
     await owner.bridge.recordIntent(owner.journal, intent);
     // No effect has happened: a failed guard here needs no fabricated file receipt.
@@ -61,8 +101,8 @@ export async function createFocusProject(
         if (!initial.isFile() || initial.nlink !== 1n)
           throw Error("Created identity uncertain");
         try {
-          const result = await handle.write(bytes, 0, bytes.length, 0);
-          written = result.bytesWritten === bytes.length;
+          const count = await dispatch(handle, proposal, name, owner.check);
+          written = count === expectedLength;
           if (!written) throw Error("Incomplete create write");
         } catch (error) {
           status = "partial";
@@ -99,23 +139,10 @@ export async function createFocusProject(
           before.nlink !== 1n ||
           before.dev.toString() !== identity!.dev.toString() ||
           before.ino.toString() !== identity!.ino.toString() ||
-          before.size !== BigInt(bytes.length)
+          before.size !== BigInt(expectedLength)
         )
           throw Error("Created identity changed");
-        const buffer = Buffer.alloc(bytes.length + 1);
-        let offset = 0;
-        while (offset < buffer.length) {
-          const read = await reader.read(
-            buffer,
-            offset,
-            buffer.length - offset,
-            offset,
-          );
-          owner.check();
-          offset += read.bytesRead;
-          if (!read.bytesRead) break;
-        }
-        const actual = buffer.subarray(0, offset);
+        const actual = await readHash(reader, expectedLength, owner.check);
         owner.check();
         const after = await reader.stat({ bigint: true });
         owner.check();
@@ -130,7 +157,8 @@ export async function createFocusProject(
           disk.dev !== before.dev ||
           disk.ino !== before.ino ||
           disk.nlink !== 1n ||
-          !actual.equals(bytes)
+          actual.length !== expectedLength ||
+          actual.hash !== expectedHash
         )
           throw Error("Created bytes changed");
         prefix.push({ name, stat: after });
@@ -141,7 +169,7 @@ export async function createFocusProject(
       await validateCreateProgress(context, proposal, prefix);
       owner.check();
       observedHash = intent.expected_hash;
-      observedLength = bytes.length;
+      observedLength = expectedLength;
       status = "created";
     } catch (error) {
       failure = error;

@@ -13,7 +13,9 @@
   ],
   "main": "./dist/extension.cjs",
   "activationEvents": [
-    "onCommand:sage.pairLocalEditor"
+    "onCommand:sage.pairLocalEditor",
+    "onCommand:sage.inspectInterruptedJournal",
+    "onCommand:sage.inspectInterruptedJob"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -40,6 +42,18 @@
       {
         "command": "sage.cancelContext",
         "title": "Sage: Cancel Context"
+      },
+      {
+        "command": "sage.inspectInterruptedJournal",
+        "title": "Sage: Inspect Interrupted Sage Journal"
+      },
+      {
+        "command": "sage.inspectInterruptedJob",
+        "title": "Sage: Inspect Interrupted Job"
+      },
+      {
+        "command": "sage.dismissInspection",
+        "title": "Sage: Dismiss Inspection"
       }
     ]
   },

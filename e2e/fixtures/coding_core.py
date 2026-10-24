@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import re
 import socket
 import sys
 from datetime import UTC, datetime, timedelta
@@ -29,8 +30,7 @@ def fixture_text(name):
             "cancel": "\nsetInterval(()=>{},1000);\n",
             "overflow": "\nprocess.stdout.write('x'.repeat(300000));\n",
             "mutation": (
-                "\n(await import('node:fs')).writeFileSync("
-                "'focus.js','changed by owned test');\n"
+                "\n(await import('node:fs')).writeFileSync('focus.js','changed by owned test');\n"
             ),
             "inherited": (
                 "\n(await import('node:child_process')).spawn(process.execPath,"
@@ -101,6 +101,30 @@ async def main():
             if value.get("fixture") == "expire":
                 offset += timedelta(minutes=31)
                 result = {"expired": True}
+            elif value.get("fixture") == "expire_history":
+                assert set(value) == {"fixture"}
+                offset += timedelta(days=31)
+                result = {"history_advanced": True}
+            elif value.get("fixture") == "retained_job":
+                assert set(value) == {"fixture", "job_id"}
+                selected = value["job_id"]
+                assert isinstance(selected, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", selected)
+                with store.transaction() as db:
+                    row = db.execute(
+                        "SELECT updated_at,view_json FROM coding_jobs WHERE id=?", (selected,)
+                    ).fetchone()
+                    effects = db.execute(
+                        "SELECT count(*) FROM coding_effects e JOIN coding_grants g "
+                        "ON e.operation_id=g.operation_id WHERE g.job_id=?",
+                        (selected,),
+                    ).fetchone()[0]
+                result = {
+                    "job_id": selected,
+                    "present": row is not None,
+                    "updated_at": row["updated_at"] if row else None,
+                    "expires_at": json.loads(row["view_json"])["expires_at"] if row else None,
+                    "effects": effects,
+                }
             elif value.get("fixture") == "proof":
                 with store.transaction() as db:
                     effects = db.execute("SELECT count(*) FROM coding_effects").fetchone()[0]

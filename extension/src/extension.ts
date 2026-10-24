@@ -16,7 +16,8 @@ import {
 } from "./context";
 import { ProposalReview } from "./review";
 import { probeRoot } from "./root-probe";
-import { EffectJournal } from "./journal";
+import { InspectionView, inspectInterruptedJob } from "./reconcile";
+import { EffectJournal, PendingJournalError } from "./journal";
 import {
   FOCUS_NAMES,
   type CodeContext,
@@ -41,10 +42,12 @@ type PairOperation = {
   preview?: vscode.Uri;
   timer?: ReturnType<typeof setTimeout>;
   pickers: Set<vscode.QuickInput>;
+  clearInspection?: () => Promise<void>;
   clearPreview?: () => Promise<void>;
   releaseContextListener?: () => void;
 };
 let owner: PairOperation | undefined;
+let clearActiveInspection: (() => Promise<void>) | undefined;
 async function closeOperation(
   operation: PairOperation | undefined,
 ): Promise<void> {
@@ -62,7 +65,9 @@ async function closeOperation(
   const reviewCleanup = operation.review?.dispose();
   operation.review = undefined;
   const cleanup = operation.clearPreview?.();
+  const inspectionCleanup = operation.clearInspection?.();
   await client?.close();
+  await inspectionCleanup;
   await cleanup;
   await reviewCleanup;
   operation.journal = undefined;
@@ -133,6 +138,21 @@ export function activate(context: vscode.ExtensionContext): void {
       windowId,
     );
   current();
+  const inspection = new InspectionView();
+  let inspectionEpoch = 0,
+    inspectionBusy = false,
+    disposed = false;
+  const inspectionPickers = new Set<vscode.QuickInput>();
+  const clearInspection = () => {
+    inspectionEpoch++;
+    for (const picker of inspectionPickers) {
+      picker.hide();
+      picker.dispose();
+    }
+    inspectionPickers.clear();
+    return inspection.clear();
+  };
+  clearActiveInspection = clearInspection;
   const previewProvider = vscode.workspace.registerTextDocumentContentProvider(
     "sage-context",
     {
@@ -178,10 +198,17 @@ export function activate(context: vscode.ExtensionContext): void {
     })();
   };
   const dispose = () => {
+    void clearInspection();
     void closeOperation(owner);
   };
   context.subscriptions.push(
-    { dispose },
+    {
+      dispose: () => {
+        disposed = true;
+        dispose();
+        inspection.dispose();
+      },
+    },
     changed,
     previewProvider,
     vscode.workspace.onDidChangeWorkspaceFolders(() => {
@@ -215,6 +242,7 @@ export function activate(context: vscode.ExtensionContext): void {
         };
       owner = operation;
       operation.clearPreview = () => clearPreview(operation);
+      operation.clearInspection = clearInspection;
       let ticket: string | undefined;
       try {
         await closeOperation(previous);
@@ -327,12 +355,14 @@ export function activate(context: vscode.ExtensionContext): void {
         void vscode.window.showInformationMessage(
           "Sage paired with this local folder. No source has been shared.",
         );
-      } catch {
+      } catch (error) {
         const cancelled = operation.cancelled;
         await closeOperation(operation);
         if (!cancelled)
           void vscode.window.showErrorMessage(
-            "Sage could not pair. Use a fresh ticket in a trusted local single-folder desktop window.",
+            error instanceof PendingJournalError
+              ? error.message
+              : "Sage could not pair. Use a fresh ticket in a trusted local single-folder desktop window.",
           );
       } finally {
         ticket = undefined;
@@ -340,6 +370,194 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!operation.client && owner === operation) owner = undefined;
       }
     }),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "sage.inspectInterruptedJournal",
+      async () => {
+        if (inspectionBusy || disposed) return;
+        const workspace = current();
+        inspectionBusy = true;
+        const cleanup = clearInspection(),
+          epoch = inspectionEpoch,
+          capturedGeneration = generation;
+        const raw = vscode.workspace.workspaceFolders?.[0].uri.toString();
+        const guard = () => {
+          if (
+            disposed ||
+            epoch !== inspectionEpoch ||
+            generation !== capturedGeneration ||
+            raw !== vscode.workspace.workspaceFolders?.[0].uri.toString() ||
+            JSON.stringify(current()) !== JSON.stringify(workspace)
+          )
+            throw Error("Inspection changed");
+        };
+        const local: PairOperation = {
+          pending: true,
+          cancelled: false,
+          guard,
+          pickers: inspectionPickers,
+        };
+        try {
+          await cleanup;
+          guard();
+          const journal = new EffectJournal(
+            vscode.Uri.file(
+              join(context.globalStorageUri.fsPath, "effect-journal"),
+            ),
+          );
+          const inventory = await journal.inspectPending();
+          guard();
+          if (!inventory.complete) throw Error("Incomplete inventory");
+          const selected = await input(
+            local,
+            inventory.entries.map((entry) => ({
+              label: entry.name,
+              description: entry.classification,
+              entry,
+            })),
+            "Sage: Inspect interrupted Sage journal",
+          );
+          guard();
+          const entry = selected?.[0]?.entry;
+          if (!entry) return;
+          await inspection.show(entry, guard);
+          guard();
+          if (!["supported_v1", "malformed_v1"].includes(entry.classification))
+            return;
+          const choice = await input(
+            local,
+            [
+              {
+                label: "Acknowledge uncertainty and retain evidence",
+                acknowledge: true,
+              },
+              { label: "Keep blocked", acknowledge: false },
+            ],
+            "Old effects and test outcomes remain uncertain; new work needs fresh pairing and approvals",
+          );
+          guard();
+          if (choice?.[0]?.acknowledge) {
+            await journal.acknowledgePending(entry);
+            guard();
+            await clearInspection();
+            void vscode.window.showInformationMessage(
+              "Sage retained the unchanged interrupted evidence. The old result remains uncertain. Use fresh pairing, context and approvals for new work.",
+            );
+          }
+        } catch {
+          if (epoch === inspectionEpoch) await clearInspection();
+          void vscode.window.showErrorMessage(
+            "Sage journal inspection unavailable or changed. Preserve private state; inspect again or use compatible-version support. No effect was recovered.",
+          );
+        } finally {
+          inspectionBusy = false;
+        }
+      },
+    ),
+    vscode.commands.registerCommand("sage.inspectInterruptedJob", async () => {
+      const operation = owner;
+      if (
+        inspectionBusy ||
+        disposed ||
+        !operation?.client ||
+        !operation.pair ||
+        !operation.journal ||
+        !operation.guard ||
+        !operation.rawRootUri ||
+        !operation.nativeIdentity
+      )
+        return;
+      inspectionBusy = true;
+      const cleanup = clearInspection(),
+        epoch = inspectionEpoch,
+        client = operation.client;
+      const guard = () => {
+        operation.guard!();
+        if (
+          disposed ||
+          epoch !== inspectionEpoch ||
+          operation.client !== client
+        )
+          throw Error("Inspection changed");
+      };
+      const local: PairOperation = {
+        pending: true,
+        cancelled: false,
+        guard,
+        pickers: inspectionPickers,
+      };
+      try {
+        await cleanup;
+        guard();
+        let offset = 0;
+        for (;;) {
+          const page = await client.history({ action: "list", offset });
+          guard();
+          if (page.action !== "list") throw Error("History unavailable");
+          const items = page.items.map((item) => ({
+            label: item.job_id,
+            description: `${item.mode}; ${item.state}`,
+            job: item.job_id,
+            next: false,
+          }));
+          if (page.next_offset !== null)
+            items.push({
+              label: "Next page",
+              description: "Read one further bounded Core page",
+              job: "",
+              next: true,
+            });
+          if (!items.length) {
+            void vscode.window.showInformationMessage(
+              "No eligible interrupted jobs in this Core page. This does not establish absence from all retained history.",
+            );
+            return;
+          }
+          const selected = await input(
+            local,
+            items,
+            "Sage: Inspect interrupted job — one retained Core page",
+          );
+          guard();
+          const choice = selected?.[0];
+          if (!choice) return;
+          if (choice.next) {
+            offset = page.next_offset!;
+            continue;
+          }
+          const reply = await client.history({
+            action: "inspect",
+            job_id: choice.job,
+          });
+          guard();
+          if (reply.action !== "inspect") throw Error("History unavailable");
+          const result = await inspectInterruptedJob(reply.job, {
+            pair: operation.pair,
+            rawRootUri: operation.rawRootUri,
+            nativeIdentity: operation.nativeIdentity,
+            extensionPath: context.extensionPath,
+            storagePath: context.globalStorageUri.fsPath,
+            guard,
+            journal: operation.journal,
+          });
+          guard();
+          await inspection.show(result, guard);
+          guard();
+          return;
+        }
+      } catch {
+        if (epoch === inspectionEpoch) await clearInspection();
+        void vscode.window.showErrorMessage(
+          "Sage historical inspection unavailable or changed. Fresh pairing and retained metadata are required; no effect was recovered.",
+        );
+      } finally {
+        inspectionBusy = false;
+      }
+    }),
+    vscode.commands.registerCommand("sage.dismissInspection", () =>
+      clearInspection(),
+    ),
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("sage.captureContext", async () => {
@@ -561,5 +779,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 }
 export async function deactivate(): Promise<void> {
+  await clearActiveInspection?.();
+  clearActiveInspection = undefined;
   await closeOperation(owner);
 }

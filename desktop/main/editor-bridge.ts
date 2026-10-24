@@ -4,6 +4,8 @@ import {
   type CodeBinding,
   type CodeJobView,
   parseCodeJobView,
+  parseCodeJobPage,
+  type CodeJobPage,
 } from "../shared/coding-contracts";
 /** Loopback listener owns all ticket, key and socket references; no native-effect API. */
 import { createServer, type Server } from "node:net";
@@ -22,6 +24,10 @@ import {
   nonce,
   parseWorkspace,
   rootIdentity,
+  historicalJob,
+  parseHistoricalJob,
+  type HistoryRequest,
+  type HistoryReply,
   transcript,
   verifyProof,
   type BridgeData,
@@ -34,6 +40,7 @@ type HostOptions = {
   onClose?: (view: PairView | undefined) => void | Promise<void>;
   codingControl?: (value: CodingControlInput) => Promise<HostCodingReply>;
   onJobStatus?: (job: CodeJobView) => void;
+  codingHistory?: (offset: number) => Promise<CodeJobPage>;
   codingStatus?: (jobId: string) => Promise<CodeJobView>;
   now?: () => number;
   random?: (size: number) => Buffer;
@@ -52,6 +59,7 @@ export class EditorBridgeHost {
   private expires = 0;
   private expiry: ReturnType<typeof setTimeout> | undefined;
   private closed = false;
+  private historyTask: object | undefined;
   private polling: ReturnType<typeof setTimeout> | undefined;
   private activeBinding: CodeBinding | undefined;
   private epoch = 0;
@@ -253,6 +261,78 @@ export class EditorBridgeHost {
       !this.closed
     );
   }
+  private async history(
+    request: HistoryRequest,
+    session: BridgeSession,
+    view: PairView,
+    epoch: number,
+  ): Promise<void> {
+    if (this.historyTask) invalid();
+    const token = {};
+    this.historyTask = token;
+    const started = this.now();
+    let settled = false;
+    const current = () =>
+      this.current(session, view, epoch) &&
+      this.now() >= started &&
+      this.now() - started < 30000;
+    const reply = async (payload: HistoryReply) => {
+      if (settled) return;
+      settled = true;
+      if (this.current(session, view, epoch))
+        await session.send({ kind: "history.reply", payload });
+    };
+    const unavailable: HistoryReply = {
+      inspection_id: request.inspection_id,
+      action: "unavailable",
+    };
+    const timer = setTimeout(() => {
+      void reply(unavailable).catch(() => session.close());
+    }, 30000);
+    try {
+      if (request.action === "list") {
+        if (!this.options.codingHistory) throw Error("Unavailable");
+        const page = parseCodeJobPage(
+          await this.options.codingHistory(request.offset),
+        );
+        if (!current()) return;
+        if (page.items.length > 20) throw Error("Unavailable");
+        const items = page.items
+          .map(parseHistoricalJob)
+          .filter((job) => historicalJob(job, view))
+          .map((job) => ({
+            job_id: job.binding.job_id,
+            root_id: job.binding.root_id,
+            mode: job.mode,
+            state: job.state,
+          }));
+        await reply({
+          inspection_id: request.inspection_id,
+          action: "list",
+          items,
+          next_offset: page.next_offset,
+        });
+      } else {
+        if (!this.options.codingStatus) throw Error("Unavailable");
+        const job = parseHistoricalJob(
+          await this.options.codingStatus(request.job_id),
+        );
+        if (!current()) return;
+        if (job.binding.job_id !== request.job_id || !historicalJob(job, view))
+          throw Error("Unavailable");
+        await reply({
+          inspection_id: request.inspection_id,
+          action: "inspect",
+          job,
+        });
+      }
+    } catch {
+      if (current()) await reply(unavailable);
+    } finally {
+      clearTimeout(timer);
+      if (this.historyTask === token) this.historyTask = undefined;
+    }
+  }
   private async receive(
     message: BridgeData,
     session: BridgeSession,
@@ -261,6 +341,13 @@ export class EditorBridgeHost {
     const control = this.options.codingControl;
     const epoch = this.epoch;
     if (!this.current(session, view, epoch)) invalid();
+    if (message.kind === "history.request") {
+      // Release the receive pump so a delayed informational read cannot hold effect ACKs.
+      void this.history(message.payload, session, view, epoch).catch(() =>
+        session.close(),
+      );
+      return;
+    }
     if (!control) {
       await this.options.onData(message);
       return;

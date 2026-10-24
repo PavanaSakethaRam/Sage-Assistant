@@ -51,7 +51,110 @@ type Data<K extends string, P> = Readonly<{
   binding: CodeBinding;
   payload: P;
 }>;
+export type HistoryRequest =
+  | Readonly<{ inspection_id: string; action: "list"; offset: number }>
+  | Readonly<{ inspection_id: string; action: "inspect"; job_id: string }>;
+export type HistorySummary = Pick<CodeJobView, "mode" | "state"> & {
+  job_id: string;
+  root_id: string;
+};
+export type HistoryReply =
+  | Readonly<{
+      inspection_id: string;
+      action: "list";
+      items: readonly HistorySummary[];
+      next_offset: number | null;
+    }>
+  | Readonly<{ inspection_id: string; action: "inspect"; job: CodeJobView }>
+  | Readonly<{ inspection_id: string; action: "unavailable" }>;
+export function historicalJob(job: CodeJobView, view: PairView): boolean {
+  return (
+    job.binding.root_id === view.root_id &&
+    [
+      "interrupted",
+      "needs_reconciliation",
+      "partial",
+      "applied_unsaved",
+      "needs_review",
+    ].includes(job.state) &&
+    !(
+      job.binding.boot_id === view.host_boot_id &&
+      job.binding.pair_id === view.pair_id &&
+      job.binding.window_id === view.window_id
+    )
+  );
+}
+export function parseHistoricalJob(value: unknown): CodeJobView {
+  const job = parseCodeJobView(value);
+  if (
+    job.receipts.some((receipt) => !sameBinding(receipt.binding, job.binding))
+  )
+    invalid();
+  return job;
+}
+function offset(value: unknown): void {
+  if (
+    !Number.isSafeInteger(value) ||
+    (value as number) < 0 ||
+    (value as number) > 1000000
+  )
+    invalid();
+}
+function parseHistory(
+  value: unknown,
+  direction: Direction,
+  view: PairView,
+): BridgeData {
+  const row = exact(value, ["kind", "payload"]);
+  const p = row.payload as Row;
+  if (!p || typeof p !== "object") invalid();
+  identifier(p.inspection_id);
+  if (row.kind === "history.request" && direction === "extension") {
+    if (p.action === "list") {
+      exact(p, ["inspection_id", "action", "offset"]);
+      offset(p.offset);
+    } else if (p.action === "inspect") {
+      exact(p, ["inspection_id", "action", "job_id"]);
+      identifier(p.job_id);
+    } else invalid();
+  } else if (row.kind === "history.reply" && direction === "host") {
+    if (p.action === "unavailable") exact(p, ["inspection_id", "action"]);
+    else if (p.action === "inspect") {
+      exact(p, ["inspection_id", "action", "job"]);
+      if (!historicalJob(parseHistoricalJob(p.job), view)) invalid();
+    } else if (p.action === "list") {
+      exact(p, ["inspection_id", "action", "items", "next_offset"]);
+      if (p.next_offset !== null) offset(p.next_offset);
+      if (!Array.isArray(p.items) || p.items.length > 20) invalid();
+      const ids = new Set<string>();
+      for (const value of p.items) {
+        const item = exact(value, ["job_id", "state", "mode", "root_id"]);
+        identifier(item.job_id);
+        identifier(item.root_id);
+        if (
+          ids.has(item.job_id) ||
+          item.root_id !== view.root_id ||
+          ![
+            "interrupted",
+            "needs_reconciliation",
+            "partial",
+            "applied_unsaved",
+            "needs_review",
+          ].includes(item.state as string) ||
+          !["create_focus_project", "replace_focus_file"].includes(
+            item.mode as string,
+          )
+        )
+          invalid();
+        ids.add(item.job_id);
+      }
+    } else invalid();
+  } else invalid();
+  return value as BridgeData;
+}
 export type BridgeData =
+  | Readonly<{ kind: "history.request"; payload: HistoryRequest }>
+  | Readonly<{ kind: "history.reply"; payload: HistoryReply }>
   | Data<"context.offer", ContextOffer>
   | Data<"proposal.offer", CodeProposal>
   | Data<"test.preview", TestRecipe>
@@ -369,6 +472,12 @@ export function parseBridgeData(
   context?: CodeContext,
 ): BridgeData {
   encodeFrame(value);
+  if (
+    value &&
+    typeof value === "object" &&
+    ["history.request", "history.reply"].includes((value as Row).kind as string)
+  )
+    return parseHistory(value, direction, view);
   const row = exact(value, ["kind", "binding", "payload"]);
   if (
     typeof row.kind !== "string" ||

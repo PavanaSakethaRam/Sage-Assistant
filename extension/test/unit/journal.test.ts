@@ -11,6 +11,7 @@ import {
   link,
   chmod,
   mkdir,
+  lstat,
 } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -372,4 +373,127 @@ it("rejects persisted observation order that differs from effect ordinals", asyn
   value.observations.reverse();
   await writeFile(path, JSON.stringify(value));
   await expect(journal.get("op")).rejects.toThrow();
+});
+
+it("identifies unexpired pending evidence as the specific pairing blocker", async () => {
+  const { root, journal } = await fixture();
+  await writeFile(join(root, "pending-" + "a".repeat(32)), '{"version":1,');
+  await expect(journal.intent(intent())).rejects.toThrow(
+    /Inspect interrupted Sage journal/,
+  );
+});
+
+it.each(["supported", "malformed"])(
+  "acknowledges one %s v1 remnant without changing evidence age or promoting operation authority",
+  async (kind) => {
+    const { root, journal } = await fixture();
+    const pending = "pending-" + "c".repeat(32);
+    if (kind === "supported") {
+      await journal.intent(intent());
+      await rename(join(root, "operation-op.json"), join(root, pending));
+    } else await writeFile(join(root, pending), '{"version":1,');
+    const before = await readFile(join(root, pending));
+    const age = new Date(Date.now() - 10000);
+    await utimes(join(root, pending), age, age);
+    const stat = await lstat(join(root, pending));
+    const result = await journal.inspectPending();
+    expect(result.complete).toBe(true);
+    expect(result.entries[0].classification).toBe(
+      kind === "supported" ? "supported_v1" : "malformed_v1",
+    );
+    await journal.acknowledgePending(result.entries[0]);
+    const names = await readdir(root);
+    expect(names).toHaveLength(1);
+    expect(names[0]).toMatch(/^acknowledged-[a-f0-9]{32}$/);
+    expect(await readFile(join(root, names[0], pending))).toEqual(before);
+    expect((await lstat(join(root, names[0], pending))).mtimeMs).toBe(
+      stat.mtimeMs,
+    );
+    await expect(journal.get("op")).rejects.toThrow();
+    await expect(
+      journal.acknowledgePending(result.entries[0]),
+    ).rejects.toThrow();
+    expect(
+      (await journal.intent({ ...intent(), operation_id: "fresh" })).status,
+    ).toBe("recorded");
+    await journal.expire(new Date());
+    expect(await readFile(join(root, names[0], pending))).toEqual(before);
+  },
+);
+it.each([
+  '{"version":2}',
+  '{"unknown":1}',
+  '{"version":1.5}',
+  '{"version":1,"version":2}',
+])("keeps opaque %s pending evidence blocked", async (content) => {
+  const { root, journal } = await fixture();
+  const name = "pending-" + "d".repeat(32);
+  await writeFile(join(root, name), content);
+  const result = await journal.inspectPending();
+  expect(["future_version", "unrecognized"]).toContain(
+    result.entries[0].classification,
+  );
+  await expect(journal.acknowledgePending(result.entries[0])).rejects.toThrow();
+  expect(await readFile(join(root, name), "utf8")).toBe(content);
+});
+it("refuses an exact pending choice after replacement and preserves both versions", async () => {
+  const { root, journal } = await fixture();
+  const name = "pending-" + "e".repeat(32);
+  await writeFile(join(root, name), '{"version":1,');
+  const result = await journal.inspectPending();
+  await rename(join(root, name), join(root, "human-backup"));
+  await writeFile(join(root, name), '{"version":1, "different":true');
+  await expect(journal.acknowledgePending(result.entries[0])).rejects.toThrow();
+  expect(await readFile(join(root, "human-backup"), "utf8")).toBe(
+    '{"version":1,',
+  );
+  expect(await readdir(root)).toHaveLength(2);
+});
+it("inventories only complete old bindings including a local intent missing from Core without renewing retention", async () => {
+  const { root, journal } = await fixture();
+  await journal.intent(intent());
+  const path = join(root, "operation-op.json");
+  const before = await readFile(path);
+  expect(await journal.inspectJob(BINDING as CodeBinding)).toMatchObject({
+    complete: true,
+    operations: [{ operation_id: "op", observations: [] }],
+  });
+  expect(
+    await journal.inspectJob({ ...BINDING, boot_id: "other" } as CodeBinding),
+  ).toEqual({ complete: true, operations: [] });
+  expect(await readFile(path)).toEqual(before);
+  await writeFile(join(root, "operation-corrupt.json"), '{"version":2}');
+  expect((await journal.inspectJob(BINDING as CodeBinding)).complete).toBe(
+    false,
+  );
+});
+it("acknowledged malformed v1 retains original strict 30-day age and then expires", async () => {
+  const { root, journal } = await fixture();
+  const name = "pending-" + "f".repeat(32),
+    now = Date.now(),
+    age = new Date(now - 31 * 86400000);
+  await writeFile(join(root, name), '{"version":1,');
+  await utimes(join(root, name), age, age);
+  await journal.acknowledgePending((await journal.inspectPending()).entries[0]);
+  await journal.expire(new Date());
+  expect(await readdir(root)).toEqual([]);
+});
+
+it("refuses acknowledging otherwise valid v1 evidence whose original metadata clock is in the future", async () => {
+  const { root, journal } = await fixture();
+  await journal.intent(intent());
+  const path = join(root, "operation-op.json"),
+    name = "pending-" + "9".repeat(32);
+  let text = await readFile(path, "utf8");
+  const record = JSON.parse(text),
+    futureMs = Date.now() + 86400000,
+    future = new Date(futureMs).toISOString(),
+    expiry = new Date(futureMs + 30 * 86400000).toISOString();
+  text = text
+    .replaceAll(record.created_at, future)
+    .replaceAll(record.expires_at, expiry);
+  await writeFile(join(root, name), text);
+  const result = await journal.inspectPending();
+  expect(result.entries[0].classification).toBe("unsafe");
+  await expect(journal.acknowledgePending(result.entries[0])).rejects.toThrow();
 });

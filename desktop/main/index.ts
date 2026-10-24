@@ -18,7 +18,7 @@ import {
   isTrustedSender,
 } from "./security";
 import { handleRequest } from "./ipc";
-import { parseCodeJobView } from "../shared/coding-contracts";
+import { parseCodeJobView, parseCodeJobPage } from "../shared/coding-contracts";
 import { EditorBridgeHost } from "./editor-bridge";
 import { AccountBroker, defaultGhConfig } from "./copilot-account";
 import {
@@ -212,6 +212,19 @@ void app
               codingControl: (value) => {
                 if (!valid()) throw Error("Editor unavailable");
                 return child.codingControl(value);
+              },
+              codingHistory: async (offset) => {
+                if (!valid()) throw Error("Editor unavailable");
+                const response = await child.request({
+                  version: 1,
+                  kind: "request",
+                  id: randomUUID(),
+                  method: "coding.list",
+                  params: { limit: 20, offset },
+                });
+                if (!valid() || response.kind !== "response")
+                  throw Error("Editor unavailable");
+                return parseCodeJobPage(response.result);
               },
               codingStatus: async (job_id) => {
                 if (!valid()) throw Error("Editor unavailable");

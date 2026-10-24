@@ -3,7 +3,7 @@ import {
   type CodingControlInput,
   type HostCodingReply,
 } from "../shared/coding-contracts";
-import { makeProposal } from "./coding-fixtures";
+import { makeProposal, makeReceipt } from "./coding-fixtures";
 import { afterEach, expect, it, vi } from "vitest";
 import { connect, createServer, type Socket } from "node:net";
 import { createHash } from "node:crypto";
@@ -41,7 +41,9 @@ const workspace: LocalWorkspace = {
 const wait = (ms = 20) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 const capturedAt = Date.now();
-function context(view: PairView): BridgeData {
+function context(
+  view: PairView,
+): Extract<BridgeData, { kind: "context.offer" }> {
   const binding = {
     job_id: "job-1",
     boot_id: view.host_boot_id,
@@ -101,7 +103,9 @@ async function setup(
     },
   };
 }
-function selectedContext(view: PairView): BridgeData {
+function selectedContext(
+  view: PairView,
+): Extract<BridgeData, { kind: "context.offer" }> {
   const base = context(view);
   const payload = base.payload as ContextOffer;
   return {
@@ -702,7 +706,7 @@ it.each([
       "wrong-root": "root_id",
       "wrong-job": "job_id",
     }[kind]!;
-    const value = data as BridgeData;
+    const value = data as Extract<BridgeData, { kind: "context.offer" }>;
     data = { ...value, binding: { ...value.binding, [field]: "other" } };
     frame = raw.data(data);
   }
@@ -1761,7 +1765,9 @@ it("routes authenticated coding controls once, polls source-free status and drop
       .toISOString()
       .replace(/\.\d{3}Z$/, "Z"),
   };
-  const selected: { binding?: BridgeData["binding"] } = {};
+  const selected: {
+    binding?: Extract<BridgeData, { kind: "context.offer" }>["binding"];
+  } = {};
   let polls = 0;
   const observer = vi.fn();
   const s = await setup(true, observer, {
@@ -1851,7 +1857,9 @@ it("routes only fixed review/test/journal/finish kinds and keeps fresh ack corre
   const journal = new EffectJournal(pathToFileURL(root));
   const controls: string[] = [];
   const received: BridgeData[] = [];
-  const selected: { binding?: BridgeData["binding"] } = {};
+  const selected: {
+    binding?: Extract<BridgeData, { kind: "context.offer" }>["binding"];
+  } = {};
   const good = (kind: string) =>
     corpus.cases.find((row) => row.kind === kind && row.valid)!.value;
   const template = {
@@ -2106,7 +2114,9 @@ it.each(["completed", "review_required", "failure"])(
       await vi.advanceTimersByTimeAsync(0);
       expect(h.host.codingJobStatus("job-2")?.binding.job_id).toBe("job-2");
       expect(
-        h.sent.filter((value) => value.binding.job_id === "job-1"),
+        h.sent.filter(
+          (value) => "binding" in value && value.binding.job_id === "job-1",
+        ),
       ).toHaveLength(2);
       expect(proposal).not.toHaveBeenCalled();
       expect(h.session.close).not.toHaveBeenCalled();
@@ -2220,6 +2230,7 @@ it.each(["job.status", "proposal.offer"] as const)(
     h.session.send = async (value) => {
       if (
         !blocked &&
+        "binding" in value &&
         value.binding.job_id === "job-1" &&
         value.kind === kind &&
         (value.kind !== "job.status" ||
@@ -2338,3 +2349,248 @@ it("still closes the listener when a close notification throws synchronously", a
   await expect(s.host.close()).rejects.toThrow("synthetic observer");
   expect(server.listening).toBe(false);
 });
+
+it("accepts source-free historical list requests under the fresh pair without a fabricated binding", () => {
+  const view: PairView = {
+    ...workspace,
+    host_boot_id: "fresh-boot",
+    pair_id: "fresh-pair",
+    root_id: rootIdentity(workspace),
+    challenge: "proof",
+    status: "paired",
+  };
+  const request = {
+    kind: "history.request",
+    payload: { inspection_id: "random-inspection", action: "list", offset: 0 },
+  };
+  expect(parseBridgeData(request, "extension", view)).toEqual(request);
+  expect(() => parseBridgeData(request, "host", view)).toThrow();
+});
+
+function historicalFixture(
+  view: PairView,
+  overrides: Record<string, unknown> = {},
+) {
+  return parseCodeJobView({
+    ...corpus.cases.find((row) => row.kind === "job_view" && row.valid)!.value,
+    binding: {
+      ...BINDING,
+      boot_id: "older-boot",
+      pair_id: "older-pair",
+      window_id: "older-window",
+      root_id: view.root_id,
+    },
+    state: "interrupted",
+    receipts: [],
+    ...overrides,
+  });
+}
+it("filters one bounded Core history page, preserving manual next and exact old receipt bindings", async () => {
+  const controls = vi.fn();
+  let readView: () => PairView = () => {
+    throw Error("Not paired");
+  };
+  const reader = vi.fn(async () => {
+    const view = readView();
+    return {
+      items: [
+        historicalFixture(view),
+        historicalFixture(view, {
+          binding: { ...BINDING, job_id: "other-root" },
+        }),
+        historicalFixture(view, { state: "completed" }),
+        historicalFixture(view, {
+          binding: context(view).binding,
+          state: "partial",
+        }),
+      ],
+      next_offset: 20,
+    };
+  });
+  const s = await setup(true, () => {}, {
+    codingControl: controls,
+    codingHistory: reader,
+    codingStatus: async () => historicalFixture(readView()),
+  });
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  readView = () => view;
+  expect(await s.client.history({ action: "list", offset: 0 })).toMatchObject({
+    action: "list",
+    items: [
+      { job_id: BINDING.job_id, root_id: view.root_id, state: "interrupted" },
+    ],
+    next_offset: 20,
+  });
+  expect(reader).toHaveBeenCalledTimes(1);
+  expect(reader).toHaveBeenCalledWith(0);
+  const reply = await s.client.history({
+    action: "inspect",
+    job_id: BINDING.job_id,
+  });
+  expect(reply.action).toBe("inspect");
+  if (reply.action === "inspect")
+    expect(reply.job.binding.boot_id).toBe("older-boot");
+  expect(controls).not.toHaveBeenCalled();
+  expect(s.host.currentCodingJob()).toBeUndefined();
+});
+it.each([
+  "interrupted",
+  "needs_reconciliation",
+  "partial",
+  "applied_unsaved",
+  "needs_review",
+])(
+  "supports only historical eligible %s on this authenticated root",
+  async (state) => {
+    const s = await setup();
+    await s.host.confirm(s.view.pair_id);
+    const view = await s.pairing;
+    const message = {
+      kind: "history.reply",
+      payload: {
+        inspection_id: "id",
+        action: "inspect",
+        job: historicalFixture(view, { state }),
+      },
+    };
+    expect(parseBridgeData(message, "host", view)).toMatchObject(message);
+    expect(() =>
+      parseBridgeData(
+        { ...message, binding: context(view).binding },
+        "host",
+        view,
+      ),
+    ).toThrow();
+    expect(() => parseBridgeData(message, "extension", view)).toThrow();
+    const job = message.payload.job;
+    for (const wrong of [
+      { ...job, binding: { ...job.binding, root_id: "other" } },
+      {
+        ...job,
+        receipts: [
+          { ...makeReceipt(), binding: { ...job.binding, boot_id: "forged" } },
+        ],
+      },
+      { ...job, state: "testing" },
+      { ...job, binding: context(view).binding },
+    ])
+      expect(() =>
+        parseBridgeData(
+          { ...message, payload: { ...message.payload, job: wrong } },
+          "host",
+          view,
+        ),
+      ).toThrow();
+  },
+);
+it("delayed history read leaves ordinary intent ACK progress and current owner untouched", async () => {
+  const { EffectJournal, journalHash, intentProjection } =
+    await import("../../extension/src/journal");
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { pathToFileURL } = await import("node:url");
+  const root = await mkdtemp("/private/tmp/sage-history-ack-");
+  let resume!: (job: ReturnType<typeof historicalFixture>) => void,
+    reached!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    reached = resolve;
+  });
+  const read = new Promise<ReturnType<typeof historicalFixture>>((resolve) => {
+    resume = resolve;
+  });
+  const control = vi.fn(async (input: CodingControlInput) => {
+    if (input.operation === "revoke_pair")
+      return {
+        operation: "revoke_pair",
+        result: { status: "revoked" },
+      } as HostCodingReply;
+    if (input.operation !== "intent") throw Error("Only intent allowed");
+    return {
+      operation: "intent",
+      result: {
+        operation_id: input.params.operation_id,
+        effect_id: input.params.effect_id,
+        status: "recorded",
+        recorded_hash: journalHash(intentProjection(input.params)),
+      },
+    } as HostCodingReply;
+  });
+  const s = await setup(true, () => {}, {
+    codingControl: control,
+    codingStatus: async () => {
+      reached();
+      return read;
+    },
+  });
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  const history = s.client.history({
+    action: "inspect",
+    job_id: BINDING.job_id,
+  });
+  try {
+    await ready;
+    const ack = await s.client.recordIntent(
+      new EffectJournal(pathToFileURL(root)),
+      {
+        binding: context(view).binding,
+        scope: "code.create",
+        operation_id: "live-op",
+        effect_id: "live-effect",
+        ordinal: 0,
+        target: "index.html",
+        expected_hash: "a".repeat(64),
+      },
+    );
+    expect(ack.status).toBe("recorded");
+    expect(control).toHaveBeenCalledTimes(1);
+    expect(s.host.currentCodingJob()).toBeUndefined();
+  } finally {
+    resume(historicalFixture(view));
+    await history;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+it("pair loss rejects a pending historical inspection and ignores its late completion", async () => {
+  let resume!: (job: ReturnType<typeof historicalFixture>) => void;
+  const held = new Promise<ReturnType<typeof historicalFixture>>((resolve) => {
+    resume = resolve;
+  });
+  const s = await setup(true, () => {}, { codingStatus: () => held });
+  await s.host.confirm(s.view.pair_id);
+  const view = await s.pairing;
+  const pending = s.client.history({
+    action: "inspect",
+    job_id: BINDING.job_id,
+  });
+  const rejected = expect(pending).rejects.toThrow();
+  await wait();
+  await s.host.close();
+  await rejected;
+  resume(historicalFixture(view));
+  await wait();
+  expect(s.host.currentCodingJob()).toBeUndefined();
+});
+it.each([-1, 1.5, 1000001, Number.MAX_SAFE_INTEGER])(
+  "rejects history offset %s and unsolicited binding fields",
+  (offset) => {
+    const view: PairView = {
+      ...workspace,
+      host_boot_id: "boot",
+      pair_id: "pair",
+      root_id: rootIdentity(workspace),
+      challenge: "proof",
+      status: "paired",
+    };
+    expect(() =>
+      parseBridgeData(
+        {
+          kind: "history.request",
+          payload: { inspection_id: "id", action: "list", offset },
+        },
+        "extension",
+        view,
+      ),
+    ).toThrow();
+  },
+);

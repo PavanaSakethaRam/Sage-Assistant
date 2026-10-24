@@ -83,7 +83,7 @@ it("keeps supplied maps separate from the sealed actual native additions", () =>
   expect(
     nativeEnvironmentProof(supplied, actual, "darwin", 501, 501).accepted,
   ).toBe(true);
-  for (const mutation of [
+  const mutations: Record<string, string>[] = [
     { __CF_USER_TEXT_ENCODING: "0x000000001:0x0:0x0" },
     { __CF_USER_TEXT_ENCODING: "0x1F4:0x0:0x0" },
     { __CF_USER_TEXT_ENCODING: "0x1F5:0x0:0x0\n" },
@@ -93,7 +93,8 @@ it("keeps supplied maps separate from the sealed actual native additions", () =>
     { Path: "" },
     { PATH: "fallback" },
     { NODE_TEST_WORKER_ID: "2" },
-  ])
+  ];
+  for (const mutation of mutations)
     expect(
       nativeEnvironmentProof(
         supplied,

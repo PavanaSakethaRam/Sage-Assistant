@@ -51,7 +51,8 @@
     "extension/src/replace.ts",
     "extension/src/review.ts",
     "extension/src/test-runner.ts",
-    "extension/src/root-probe.ts"
+    "extension/src/root-probe.ts",
+    "extension/src/reconcile.ts"
   ],
   "trusted_python": [
     "src/sage/__init__.py",
@@ -98,7 +99,8 @@
     "extension/src/replace.ts",
     "extension/src/review.ts",
     "extension/src/test-runner.ts",
-    "extension/src/root-probe.ts"
+    "extension/src/root-probe.ts",
+    "extension/src/reconcile.ts"
   ],
   "excluded": [
     "generated build outputs: .vite, out, dist",

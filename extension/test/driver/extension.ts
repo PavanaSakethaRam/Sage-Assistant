@@ -276,6 +276,7 @@ async function run(): Promise<void> {
       }
       if (
         config.selectedCase === "create" ||
+        config.selectedCase === "recovery" ||
         config.selectedCase === "test-runner"
       ) {
         stage = "create-capture";
@@ -430,6 +431,11 @@ async function run(): Promise<void> {
           }
         }
         assert.ok(await readFile(join(fixture, "create-finished.json")));
+      }
+      if (config.selectedCase === "recovery") {
+        stage = "recovery";
+        const { runRecoveryFixture } = await import("../integration/recovery");
+        await runRecoveryFixture(product.extensionPath, fixture);
       }
       if (config.selectedCase === "context" || config.selectedCase === "all") {
         stage = "context-preview";
