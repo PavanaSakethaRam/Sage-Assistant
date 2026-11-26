@@ -463,15 +463,40 @@ def test_startup_interrupts_only_actual_inference_metadata(tmp_path: Path) -> No
     service.close()
 
 
-def test_closed_service_and_request_session_memory_bound(core: CoreService) -> None:
-    for index in range(4096):
-        response = dispatch(core, request(f"r{index}", "connection.test"))
-        assert response["kind"] == "response"
-    assert dispatch(core, request("overflow", "connection.test"))["code"] == "session_limit"
-    fresh = CoreService(core.store)
-    fresh.shutting_down = True
+def test_new_requests_continue_with_bounded_request_history(core: CoreService) -> None:
+    async def run() -> None:
+        for index in range(4_100):
+            response = await core.dispatch(request(f"r{index}", "settings.get"))
+            assert result(response)["ai_mode"] == "local"
+        assert (await core.dispatch(request("r4099", "settings.get")))["code"] == "duplicate_id"
+        assert len(core._seen) == 4_096
+
+    asyncio.run(run())
+
+
+def test_pending_settings_request_keeps_its_id_when_history_advances(core: CoreService) -> None:
+    async def run() -> None:
+        async with core._selection_lock:
+            pending = asyncio.create_task(
+                core.dispatch(request("pending", "settings.update", coding_backend="none"))
+            )
+            await asyncio.sleep(0)
+            assert not pending.done()
+            for index in range(4_100):
+                assert (await core.dispatch(request(f"read-{index}", "settings.get")))[
+                    "kind"
+                ] == "response"
+            response = await core.dispatch(request("pending", "settings.get"))
+            assert response.get("code") == "duplicate_id", response
+        assert result(await pending)["coding_backend"] == "none"
+
+    asyncio.run(run())
+
+
+def test_closed_service_refuses_new_notes(core: CoreService) -> None:
+    core.shutting_down = True
     assert (
-        dispatch(fresh, request("closed", "notes.propose", title="X", body="Y"))["code"]
+        dispatch(core, request("closed", "notes.propose", title="X", body="Y"))["code"]
         == "shutting_down"
     )
 

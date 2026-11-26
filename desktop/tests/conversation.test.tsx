@@ -115,6 +115,28 @@ it("keeps newer local edits when a completed response includes a stale proposal"
     screen.getByRole("status", { name: "Task history status" }),
   ).toHaveTextContent(/ignored/);
 });
+it("keeps an unsaved note when a later conversation returns a proposal", async () => {
+  const { api } = fixture({
+    "settings.get": () => ({
+      ai_mode: "assistant",
+      reasoning_backend: "copilot",
+    }),
+    "reasoning.start": () => ({
+      status: "completed",
+      task_id: "task_1",
+      text: "Draft ready in history",
+      proposal,
+      usage: null,
+    }),
+  });
+  render(<App api={api} />);
+  await userEvent.click(screen.getByRole("button", { name: "New note" }));
+  await userEvent.type(screen.getByLabelText("Note body"), "Keep this draft");
+  await userEvent.type(screen.getByLabelText("Message"), "Suggest a note");
+  await userEvent.click(screen.getByRole("button", { name: "Send message" }));
+  await screen.findByText("Draft ready in history", { selector: "p" });
+  expect(screen.getByLabelText("Note body")).toHaveValue("Keep this draft");
+});
 it("enforces code point message/context limits without native UTF16 truncation", async () => {
   const { api } = fixture({
     "settings.get": () => ({
@@ -155,6 +177,9 @@ it("does not let a late local proposal replace a fresh editor", async () => {
   );
   await userEvent.click(screen.getByRole("button", { name: "Review note" }));
   await userEvent.click(screen.getByRole("button", { name: "New note" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Discard changes" }),
+  );
   await userEvent.type(
     screen.getByRole("textbox", { name: "Note title" }),
     "new",

@@ -92,6 +92,7 @@ export function deployment(options: {
 // abort/disconnect/stop/force-stop (3+3+5+10s), pipe close (5s), 10s headroom.
 // EOF normally cancels provider work in parallel sooner. The host keeps draining.
 const SHUTDOWN_GRACE_MS = 60_000;
+const RECENT_REQUEST_IDS = 4_096;
 type Child = ChildProcessByStdio<Writable, Readable, Readable>;
 type SelectionResponse = {
   version: 1;
@@ -109,8 +110,9 @@ export class CoreProcess {
   private child: Child | undefined;
   private closed = false;
   private children = new Set<Child>();
-  private seen = new Set<string>();
+  private recent = new Set<string>();
   private discarded = new Set<string>();
+  private stopTransport: (() => void) | undefined;
   private pending = new Map<string, Pending>();
   private handlers = new Set<(progress: Progress) => void>();
   private lifecycle = new Set<() => void>();
@@ -148,12 +150,14 @@ export class CoreProcess {
       if (frameTimer) clearTimeout(frameTimer);
       if (this.child === child) {
         this.child = undefined;
-        this.notifyLifecycle();
+        this.stopTransport = undefined;
+        this.discarded.clear();
         for (const [id, p] of this.pending) {
           clearTimeout(p.timer);
           p.resolve(failure(id, "internal_error"));
         }
         this.pending.clear();
+        this.notifyLifecycle();
       }
       child.stdin.destroy();
       child.stdout.destroy();
@@ -164,6 +168,7 @@ export class CoreProcess {
         child.once("close", () => clearTimeout(reap));
       }
     };
+    this.stopTransport = stop;
     child.stderr.on("data", () => {
       /* Never relay child diagnostics or exception strings. */
     });
@@ -176,12 +181,16 @@ export class CoreProcess {
       stop();
     });
     child.stdout.on("data", (chunk: Buffer) => {
+      if (this.child !== child) return;
       try {
         for (const message of decoder.push(chunk)) {
           const identifier = message.id;
           if (typeof identifier !== "string")
             throw new TypeError("Invalid response");
-          if (this.discarded.has(identifier)) continue;
+          if (this.discarded.has(identifier)) {
+            if (message.kind !== "progress") this.discarded.delete(identifier);
+            continue;
+          }
           const p = this.pending.get(identifier);
           if (!p) throw new TypeError("Invalid response");
           if (message.kind === "progress") {
@@ -316,11 +325,12 @@ export class CoreProcess {
   ): Promise<Terminal> {
     if (this.closed)
       return Promise.resolve(failure(request.id, "shutting_down"));
-    if (this.seen.has(request.id))
+    if (
+      this.recent.has(request.id) ||
+      this.pending.has(request.id) ||
+      this.discarded.has(request.id)
+    )
       return Promise.resolve(failure(request.id, "duplicate_id"));
-    if (this.seen.size >= 4096)
-      return Promise.resolve(failure(request.id, "session_limit"));
-    this.seen.add(request.id);
     const controls = [...this.pending.values()].filter(
       (entry) => entry.request.kind === "host_copilot_selection",
     ).length;
@@ -342,6 +352,11 @@ export class CoreProcess {
       return Promise.resolve(failure(request.id, "busy"));
     const child = this.launch();
     if (!child) return Promise.resolve(failure(request.id, "internal_error"));
+    this.recent.add(request.id);
+    if (this.recent.size > RECENT_REQUEST_IDS) {
+      const oldest = this.recent.values().next();
+      if (!oldest.done) this.recent.delete(oldest.value);
+    }
     if (
       request.kind === "request" &&
       request.method === "reasoning.cancel" &&
@@ -350,11 +365,14 @@ export class CoreProcess {
         .method === "reasoning.start"
     )
       this.invalidate(request.params.request_id, "cancelled");
+    if (this.child !== child)
+      return Promise.resolve(failure(request.id, "internal_error"));
     return new Promise((resolve) => {
       const timer = setTimeout(
         () => {
           this.invalidate(request.id, "timeout");
           if (
+            this.child === child &&
             request.kind === "request" &&
             request.method === "reasoning.start"
           )
@@ -387,6 +405,10 @@ export class CoreProcess {
       this.pending.delete(identifier);
       this.discarded.add(identifier);
       p.resolve(failure(identifier, code));
+      // A late reply still owns its ID after the recent history moves on.
+      // Retire an unresponsive transport before its reserved IDs can grow unbounded.
+      if (!this.closed && this.discarded.size > RECENT_REQUEST_IDS)
+        this.stopTransport?.();
     }
   }
   cancel(requestId: string): Promise<CoreResponse> {

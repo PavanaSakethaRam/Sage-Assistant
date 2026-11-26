@@ -56,7 +56,7 @@ async function fake(mode = "normal") {
     executable,
     `#!${process.execPath}\n${String.raw`
  const fs=require('node:fs'); let input=Buffer.alloc(0); const mode=MODE;const root=process.argv[process.argv.indexOf('--root')+1];fs.appendFileSync(root+'/launches','1\n');
- let selected=null;const held=[];let heldSelection;
+ let selected=null;const held=[];let heldSelection;let released=false;
  const send=value=>{const b=Buffer.from(JSON.stringify(value));const h=Buffer.alloc(4);h.writeUInt32BE(b.length);process.stdout.write(Buffer.concat([h,b]));};
  process.stderr.write('SYNTHETIC_SECRET raw exception\n');fs.writeFileSync(process.argv[process.argv.indexOf('--root')+1]+'/pid',String(process.pid));if(mode==='stubborn'){process.on('SIGTERM',()=>{});setInterval(()=>{},1000);}
  process.stdin.on('data',chunk=>{input=Buffer.concat([input,chunk]);while(input.length>=4&&input.length>=4+input.readUInt32BE(0)){const n=input.readUInt32BE(0);const r=JSON.parse(input.subarray(4,4+n));input=input.subarray(4+n);
@@ -66,6 +66,9 @@ async function fake(mode = "normal") {
  let result=r.method==='app.shutdown'?{status:'shutting_down'}:r.method==='reasoning.cancel'?{status:'cancelled'}:r.method==='reasoning.start'?{status:'completed',task_id:'t',text:'late',proposal:null,usage:null}:{ai_mode:'local',reasoning_backend:null};
  if(mode==='ready'&&['connection.test','readiness.list'].includes(r.method)){const ready={provider:'copilot',status:'ready',evidence:['explicit_synthetic_check'],version:'sdk:1.0.25/runtime:1.0.102',destination:'GitHub Copilot cloud',diagnostic:null,explanation:'explicit_connection_check_succeeded'};result=r.method==='readiness.list'?{items:[ready]}:ready;}
  if(mode==='saturated-selection'&&r.kind==='request'&&r.method==='settings.get'){held.push(r);fs.writeFileSync(root+'/held',String(held.length));continue;}
+ if(mode==='rolled-late'&&r.id==='old'&&!released){held.push(r);continue;}
+ if(mode==='rolled-late'&&r.id==='release'){released=true;for(const old of held.splice(0))send({version:1,id:old.id,kind:'response',result});}
+ if(mode==='selection-refused'&&r.kind==='host_copilot_selection'&&!r.account){send({version:1,id:r.id,kind:'error',code:'internal_error'});continue;}
  if(r.kind==='host_copilot_selection'){if(mode==='control-overlap'&&r.account){fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');heldSelection=r;fs.writeFileSync(root+'/selection-held','1');continue;}if(mode==='control-overlap'&&heldSelection){send({version:1,id:heldSelection.id,kind:'response',result:{generation:heldSelection.generation,status:'selected'}});heldSelection=undefined;}if(mode==='saturated-selection'){selected=r.account;fs.writeFileSync(root+'/selected',JSON.stringify(selected));if(!selected){fs.writeFileSync(root+'/disposed',String(held.length));for(const old of held.splice(0))send({version:1,id:old.id,kind:'error',code:'cancelled'});}}fs.appendFileSync(root+'/selection-frames',JSON.stringify(r)+'\n');result={generation:mode==='selection-mismatch'?r.generation+1:r.generation,status:r.account?'selected':'cleared'};}
  if(r.kind==='host_coding'){fs.appendFileSync(root+'/coding-frames',JSON.stringify(r)+'\n');send({version:1,kind:'host_coding_reply',id:r.id,host_boot_id:r.host_boot_id,generation:r.generation,operation:r.operation,result:{status:'revoked'}});continue;}
  if(mode==='environment'&&(process.env.GITHUB_TOKEN||process.env.GH_TOKEN||process.env.NODE_OPTIONS||process.env.PYTHONPATH||process.env.PATH||process.env.HOME||process.env.HOMEDRIVE||process.env.HOMEPATH||process.env.LOGONSERVER||process.env.USERDOMAIN||process.env.USERNAME||process.env.USERPROFILE)) result.ai_mode='bad';
@@ -267,7 +270,7 @@ subprocessIt(
     });
   },
 );
-it("runs the actual fixed isolated Python core for local notes and unavailable runtime", async () => {
+it("runs local notes on the actual isolated Python core after more than 4,096 requests", async () => {
   const root = await mkdtemp(join(tmpdir(), "sage-real-core-"));
   roots.push(root);
   const core = startCore({
@@ -281,8 +284,17 @@ it("runs the actual fixed isolated Python core for local notes and unavailable r
     runtimePath: join(root, "missing-runtime"),
   });
   owned.push(core);
-  expect(await core.request(request("settings"))).toMatchObject({
-    result: { ai_mode: "local", reasoning_backend: null },
+  for (let i = 0; i < 4_100; i++) {
+    const id = `settings-${i}`;
+    expect(await core.request(request(id))).toMatchObject({
+      id,
+      kind: "response",
+      result: { ai_mode: "local", reasoning_backend: null },
+    });
+  }
+  expect(await core.request(request("settings-4099"))).toMatchObject({
+    kind: "error",
+    code: "duplicate_id",
   });
   const note = await core.request(
     request("propose", "notes.propose", {
@@ -303,11 +315,40 @@ it("runs the actual fixed isolated Python core for local notes and unavailable r
       ]),
     },
   });
+  expect(core.launchGeneration).toBe(1);
   await core.close();
   expect(await core.request(request("after-close"))).toMatchObject({
     code: "shutting_down",
   });
-});
+}, 20_000);
+
+subprocessIt(
+  "keeps a timed-out reply correlated after the recent ID history advances",
+  async () => {
+    const core = await fake("rolled-late");
+    expect(
+      await core.request({ ...request("old"), timeout_ms: 25 }),
+    ).toMatchObject({ code: "timeout" });
+
+    for (let i = 0; i < 4_100; i++) {
+      expect(await core.request(request(`after-${i}`))).toMatchObject({
+        kind: "response",
+      });
+    }
+    expect(await core.request(request("old"))).toMatchObject({
+      code: "duplicate_id",
+    });
+
+    expect(await core.request(request("release"))).toMatchObject({
+      kind: "response",
+    });
+    expect(await core.request(request("old"))).toMatchObject({
+      kind: "response",
+    });
+    expect(core.launchGeneration).toBe(1);
+  },
+  20_000,
+);
 
 subprocessIt(
   "reaps an invalid-protocol child even when it ignores termination",
@@ -556,9 +597,11 @@ subprocessIt(
       await new Promise((resolve) => setTimeout(resolve, 5));
     }
     expect(await readFile(join(root, "held"), "utf8")).toBe("8");
-    expect(await core.request(request("ninth"))).toMatchObject({
-      code: "busy",
-    });
+    for (let i = 0; i < 4_100; i++) {
+      expect(await core.request(request(`busy-${i}`))).toMatchObject({
+        code: "busy",
+      });
+    }
     expect(await core.selectAccount(null)).toEqual({
       generation: 2,
       status: "cleared",
@@ -605,21 +648,14 @@ subprocessIt(
   },
 );
 subprocessIt(
-  "session-budget revocation failure closes the owned core before reporting unavailable",
+  "a rejected revocation closes the owned core before reporting unavailable",
   async () => {
-    const core = await fake("saturated-selection");
+    const core = await fake("selection-refused");
     const root = roots.at(-1)!;
     await core.selectAccount({ host: "github.com", login: "synthetic-user" });
-    const work = Array.from({ length: 8 }, (_, i) =>
-      core.request(request(`held-${i}`)),
-    );
-    for (let i = 0; i < 4087; i++) await core.request(request(`busy-${i}`));
     const pid = Number(await readFile(join(root, "pid"), "utf8"));
     await expect(core.selectAccount(null)).rejects.toThrow();
     expect(() => process.kill(pid, 0)).toThrow();
-    expect(
-      (await Promise.all(work)).every((result) => result.kind === "error"),
-    ).toBe(true);
     expect(await core.request(request("after-failed-clear"))).toMatchObject({
       code: "shutting_down",
     });

@@ -14,14 +14,15 @@ import { Setup } from "./Setup";
 import { Conversation } from "./Conversation";
 import { NoteReview } from "./NoteReview";
 import { Notes } from "./Notes";
+
+type DraftTarget = { proposal: Proposal | null; reviewRequired: boolean };
+type OpenDraft = DraftTarget & { key: number };
+
 export function App({ api = window.sage }: { api?: SageApi }) {
   const [settings, setSettings] = useState<Settings | null>(null),
     [busy, setBusy] = useState(false),
-    [draft, setDraft] = useState<{
-      proposal: Proposal | null;
-      reviewRequired: boolean;
-      key: number;
-    } | null>(null),
+    [draft, setDraft] = useState<OpenDraft | null>(null),
+    [draftToOpen, setDraftToOpen] = useState<DraftTarget | null>(null),
     [version, setVersion] = useState(0),
     [refresh, setRefresh] = useState(0),
     [tasks, setTasks] = useState<Page<TaskSummary>>({
@@ -35,6 +36,7 @@ export function App({ api = window.sage }: { api?: SageApi }) {
   const generation = useRef(0),
     taskGeneration = useRef(0),
     alive = useRef(true),
+    editedDraft = useRef<OpenDraft | null>(null),
     terminalOutcomes = useRef(
       new Map<string, ActionResult & { status: "succeeded" | "cancelled" }>(),
     );
@@ -45,6 +47,12 @@ export function App({ api = window.sage }: { api?: SageApi }) {
   const dirty = () => {
     setVersion(++generation.current);
   };
+  function clearDraftEdits(key: number) {
+    if (editedDraft.current?.key === key) {
+      editedDraft.current = null;
+      setDraftToOpen(null);
+    }
+  }
   useEffect(() => {
     let alive = true;
     void call(api, "tasks.list", { limit: 20, offset }).then(
@@ -102,6 +110,12 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     const terminal = { ...outcome, status: outcome.status };
     // The acknowledgement fences this identity, independently of selected detail.
     terminalOutcomes.current.set(task_id, terminal);
+    const edited = editedDraft.current;
+    if (
+      edited?.proposal?.task_id === task_id &&
+      (!proposal_id || edited.proposal.id === proposal_id)
+    )
+      clearDraftEdits(edited.key);
     setDraft((current) =>
       current?.proposal?.task_id === task_id &&
       (!proposal_id || current.proposal.id === proposal_id)
@@ -121,10 +135,21 @@ export function App({ api = window.sage }: { api?: SageApi }) {
     }));
     setRefresh((v) => v + 1);
   }
-  function openDraft(proposal: Proposal | null, reviewRequired = false) {
-    if (proposal && terminalOutcomes.current.has(proposal.task_id)) return;
+  function openDraft(target: DraftTarget) {
+    setDraftToOpen(null);
+    if (
+      target.proposal &&
+      terminalOutcomes.current.has(target.proposal.task_id)
+    )
+      return;
+    editedDraft.current = null;
     dirty();
-    setDraft({ proposal, reviewRequired, key: generation.current });
+    setDraft({ ...target, key: generation.current });
+  }
+  function requestDraft(proposal: Proposal | null, reviewRequired = false) {
+    const target = { proposal, reviewRequired };
+    if (editedDraft.current === null) openDraft(target);
+    else setDraftToOpen(target);
   }
   async function getTask(task_id: string) {
     const token = ++taskGeneration.current;
@@ -173,11 +198,14 @@ export function App({ api = window.sage }: { api?: SageApi }) {
             busy={busy}
             draftVersion={version}
             onProposal={(p, v) => {
-              if (v === generation.current) openDraft(p);
-              else
+              if (v === generation.current && editedDraft.current === null)
+                openDraft({ proposal: p, reviewRequired: false });
+              else {
                 setStatus(
-                  "Response draft ignored because local review changed.",
+                  "Response draft ignored in the editor. Find it in task history.",
                 );
+                setRefresh((current) => current + 1);
+              }
             }}
           />
         </div>
@@ -187,7 +215,22 @@ export function App({ api = window.sage }: { api?: SageApi }) {
             <p>
               Create a note without connecting an assistant or running a model.
             </p>
-            <button onClick={() => openDraft(null)}>New note</button>
+            <button onClick={() => requestDraft(null)}>New note</button>
+            {draftToOpen && (
+              <div role="group" aria-label="Unsaved note changes">
+                <p role="status">
+                  Discard your unsaved edits to switch drafts?
+                </p>
+                <div className="actions">
+                  <button autoFocus onClick={() => setDraftToOpen(null)}>
+                    Keep editing
+                  </button>
+                  <button onClick={() => openDraft(draftToOpen)}>
+                    Discard changes
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
           {draft && (
             <NoteReview
@@ -195,8 +238,13 @@ export function App({ api = window.sage }: { api?: SageApi }) {
               api={api}
               proposal={draft.proposal}
               reviewRequired={draft.reviewRequired}
-              onChange={dirty}
+              onChange={(hasEdits) => {
+                dirty();
+                if (hasEdits) editedDraft.current = draft;
+                else clearDraftEdits(draft.key);
+              }}
               onProposal={(proposal) => {
+                clearDraftEdits(draft.key);
                 setDraft((current) =>
                   current?.key === draft.key
                     ? terminalOutcomes.current.has(proposal.task_id)
@@ -273,7 +321,9 @@ export function App({ api = window.sage }: { api?: SageApi }) {
             )}
             {task.proposal && (
               <button
-                onClick={() => openDraft(task.proposal, task.review_required)}
+                onClick={() =>
+                  requestDraft(task.proposal, task.review_required)
+                }
               >
                 Open retained draft
               </button>

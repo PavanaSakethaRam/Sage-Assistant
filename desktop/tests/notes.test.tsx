@@ -105,6 +105,49 @@ it("ignores stale selected-note details", async () => {
   );
   expect(screen.queryByText("stale body")).toBeNull();
 });
+it("keeps unsaved note text until the user confirms starting a new note", async () => {
+  const { api } = fixture();
+  render(<App api={api} />);
+  const newNote = screen.getByRole("button", { name: "New note" });
+  await userEvent.click(newNote);
+  await userEvent.type(screen.getByLabelText("Note title"), "Unreviewed title");
+  await userEvent.type(screen.getByLabelText("Note body"), "Unreviewed body");
+
+  await userEvent.click(newNote);
+  expect(screen.getByLabelText("Note title")).toHaveValue("Unreviewed title");
+  expect(screen.getByLabelText("Note body")).toHaveValue("Unreviewed body");
+  await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
+  expect(screen.getByLabelText("Note body")).toHaveValue("Unreviewed body");
+
+  await userEvent.click(newNote);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Discard changes" }),
+  );
+  expect(screen.getByLabelText("Note title")).toHaveValue("");
+  expect(screen.getByLabelText("Note body")).toHaveValue("");
+});
+it("checks for unreviewed revisions before switching to another retained draft", async () => {
+  const { api } = taskFixture();
+  render(<App api={api} />);
+  await openFirstDraft();
+  await userEvent.click(screen.getByRole("button", { name: "Edit draft" }));
+  await userEvent.type(screen.getByLabelText("Note body"), " with new edits");
+  await userEvent.click(
+    screen.getByRole("button", { name: "task_2 · pending" }),
+  );
+  await userEvent.click(
+    await screen.findByRole("button", { name: "Open retained draft" }),
+  );
+  expect(screen.getByLabelText("Note body")).toHaveValue(
+    proposal.arguments.body + " with new edits",
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "Discard changes" }),
+  );
+  expect(screen.getByLabelText("Literal note body").textContent).toBe(
+    "Unrelated task two body",
+  );
+});
 it("opens interrupted retained metadata without replay and recovers only through Review again", async () => {
   const { api, calls } = fixture({
     "tasks.list": () => ({
@@ -437,10 +480,6 @@ it("does not invalidate newer unrelated inference when an older task cancellatio
   await openFirstDraft();
   await userEvent.click(screen.getByRole("button", { name: "Cancel task" }));
   await userEvent.click(screen.getByRole("button", { name: "New note" }));
-  await userEvent.type(
-    screen.getByRole("textbox", { name: "Note title" }),
-    "Newer context",
-  );
   await userEvent.type(
     screen.getByRole("textbox", { name: "Message" }),
     "Unrelated new request",

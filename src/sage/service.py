@@ -1,6 +1,7 @@
 """One local core owner and a closed private request dispatcher."""
 
 import asyncio
+from collections import OrderedDict
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -51,6 +52,8 @@ from sage.protocol import (
 )
 from sage.providers.base import CodingBackend, ReasoningBackend
 from sage.storage import Store
+
+_RECENT_REQUEST_IDS = 4_096
 
 
 class Empty(Contract):
@@ -160,7 +163,8 @@ class CoreService:
         self._selection_lock = asyncio.Lock()
         self._generation = 0
         self._inflight: dict[str, _Inference] = {}
-        self._seen: set[str] = set()
+        self._active_requests: set[str] = set()
+        self._seen: OrderedDict[str, None] = OrderedDict()
         self.shutting_down = False
         self.store.interrupt_inference(self.clock())
         self._configure_coding()
@@ -184,6 +188,14 @@ class CoreService:
             account_generation=self._selection_generation if enabled else 0,
         )
 
+    def _request_id_used(self, identifier: str) -> bool:
+        return identifier in self._seen or identifier in self._active_requests
+
+    def _remember_request_id(self, identifier: str) -> None:
+        self._seen[identifier] = None
+        if len(self._seen) > _RECENT_REQUEST_IDS:
+            self._seen.popitem(last=False)
+
     async def coding_control(self, message: dict[str, object]) -> dict[str, object]:
         identifier: str | None = None
         try:
@@ -191,17 +203,15 @@ class CoreService:
             identifier = control.id
             if self.shutting_down:
                 return failure(control.id, "shutting_down")
-            if control.id in self._seen:
+            if self._request_id_used(control.id):
                 return failure(control.id, "duplicate_id")
-            if len(self._seen) >= 4096:
-                return failure(control.id, "session_limit")
             if (
                 self._coding_boot is not None
                 and control.host_boot_id != self._coding_boot
                 or control.generation <= self._coding_generation
             ):
                 return failure(control.id, "invalid_request")
-            self._seen.add(control.id)
+            self._remember_request_id(control.id)
             self._coding_boot = control.host_boot_id
             self._coding_generation = control.generation
             value = control.parsed_params()
@@ -260,15 +270,13 @@ class CoreService:
         async with self._selection_lock:
             if self.shutting_down:
                 return failure(frame.id, "shutting_down")
-            if frame.id in self._seen:
+            if self._request_id_used(frame.id):
                 return failure(frame.id, "duplicate_id")
-            if len(self._seen) >= 4096:
-                return failure(frame.id, "session_limit")
             if (
                 self._selection_boot is not None and frame.boot_id != self._selection_boot
             ) or frame.generation <= self._selection_generation:
                 return failure(frame.id, "invalid_request")
-            self._seen.add(frame.id)
+            self._remember_request_id(frame.id)
             self._selection_boot = frame.boot_id
             self._selection_generation = frame.generation
             if frame.account is not None and self.get_settings().ai_mode != "assistant":
@@ -324,13 +332,12 @@ class CoreService:
             envelope = request(message)
         except ProtocolError:
             return failure(None, "invalid_request")
-        if envelope.id in self._seen:
+        if self._request_id_used(envelope.id):
             return failure(envelope.id, "duplicate_id")
-        if len(self._seen) >= 4096:
-            return failure(envelope.id, "session_limit")
-        self._seen.add(envelope.id)
+        self._remember_request_id(envelope.id)
         if self.shutting_down:
             return failure(envelope.id, "shutting_down")
+        self._active_requests.add(envelope.id)
         try:
             self.clock()
             if envelope.method in {"reasoning.start", "connection.test", "reasoning.cancel"}:
@@ -382,6 +389,8 @@ class CoreService:
         except Exception:
             diagnostic("request_failed")
             return failure(envelope.id, "internal_error")
+        finally:
+            self._active_requests.remove(envelope.id)
 
     async def _cancel_request(self, request_id: str) -> bool:
         entry = self._inflight.get(request_id)

@@ -21,7 +21,7 @@ export function NoteReview({
   api: SageApi;
   proposal?: Proposal | null;
   reviewRequired?: boolean;
-  onChange?: () => void;
+  onChange?: (hasEdits: boolean) => void;
   onSaved?: () => void;
   onProposal?: (proposal: Proposal) => void;
   onOutcome?: (
@@ -51,6 +51,13 @@ export function NoteReview({
     parseNoteContent(content);
   } catch {
     valid = false;
+  }
+  function edit(next: NoteContent) {
+    setContent(next);
+    onChange(
+      next.title !== (proposal?.arguments.title ?? "") ||
+        next.body !== (proposal?.arguments.body ?? ""),
+    );
   }
   async function review() {
     setBusy(true);
@@ -140,10 +147,7 @@ export function NoteReview({
                 <input
                   aria-label="Note title"
                   value={content.title}
-                  onChange={(e) => {
-                    setContent({ ...content, title: e.target.value });
-                    onChange();
-                  }}
+                  onChange={(e) => edit({ ...content, title: e.target.value })}
                   disabled={busy}
                 />
               </label>
@@ -153,10 +157,7 @@ export function NoteReview({
                 <textarea
                   aria-label="Note body"
                   value={content.body}
-                  onChange={(e) => {
-                    setContent({ ...content, body: e.target.value });
-                    onChange();
-                  }}
+                  onChange={(e) => edit({ ...content, body: e.target.value })}
                   disabled={busy}
                 />
               </label>
@@ -205,7 +206,7 @@ export function NoteReview({
                   disabled={busy}
                   onClick={() => {
                     setEditing(true);
-                    onChange();
+                    onChange(false);
                   }}
                 >
                   Edit draft
@@ -219,7 +220,7 @@ export function NoteReview({
               onClick={() => {
                 setContent({ title: "", body: "" });
                 setEnded(true);
-                onChange();
+                onChange(false);
                 setStatus("Local edits discarded");
               }}
             >
