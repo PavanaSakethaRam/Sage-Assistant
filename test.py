@@ -16,22 +16,6 @@
 
 
 
-# # import tweepy
-
-# # apiKey= 'kVTwlCIWpdbPItEOFlZgqbKOq'
-# # apiSecret= 'tPwkt2FTBOeoKOUQQ0QuiMnnZvQHZfANabZKqAR06vIq31H88r'
-# # accessToken= '1408020571208568833-sk5nWl7rkeeUw8irY0l6Fil8cJS9XY'
-# # accessTokenSecret= 'qOg4Fcy3XaKQhvKaHnwNxfn1LxRY3Z9J5n5dmkh6zdeLk'
-
-# # client = tweepy.Client(
-# #     consumer_key=apiKey, consumer_secret=apiSecret,
-# #     access_token=accessToken, access_token_secret=accessTokenSecret
-# # )
-
-# # text = 'Hello, World!'
-# # client.create_tweet(text="Hi how are you?")
-
-
 # from TTS.api import TTS
 
 # # Initialize the model
