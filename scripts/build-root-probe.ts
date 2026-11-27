@@ -24,6 +24,8 @@ type Toolchain = {
 };
 const digest = (bytes: Buffer) =>
   createHash("sha256").update(bytes).digest("hex");
+class NativeCommandError extends Error {}
+
 function unavailable(): never {
   throw Error("Native installed toolchain unavailable");
 }
@@ -56,14 +58,29 @@ function run(command: string, args: string[], cwd: string, limit = 65536) {
   if (
     result.error ||
     result.signal ||
-    result.status !== 0 ||
     typeof result.stdout !== "string" ||
     typeof result.stderr !== "string" ||
     Buffer.byteLength(result.stdout) + Buffer.byteLength(result.stderr) >
       limit ||
     /\0/u.test(result.stdout + result.stderr)
   )
-    unavailable();
+    throw new NativeCommandError(
+      (result.error as NodeJS.ErrnoException | undefined)?.code === "ETIMEDOUT"
+        ? "command timed out"
+        : "command output unavailable",
+    );
+  if (result.status !== 0) {
+    const codes = new Set(
+      (result.stdout + "\n" + result.stderr).match(
+        /(?<=\b(?:error|warning) )(?:C|D|LNK)\d{4}(?=:)/gu,
+      ),
+    );
+    const summary = [
+      `exit ${result.status ?? "unknown"}`,
+      ...[...codes].slice(0, 4),
+    ];
+    throw new NativeCommandError(summary.join(", "));
+  }
   return { stdout: result.stdout, stderr: result.stderr };
 }
 async function fileHash(path: string): Promise<string> {
@@ -102,7 +119,9 @@ function llvmRelease(tool: Tool, windows: boolean): string {
 async function installedTools(
   coverage: boolean,
   cwd: string,
+  reportStage?: (stage: string) => void,
 ): Promise<Toolchain> {
+  reportStage?.("allocated host");
   rootProbeName();
   if (
     (process.env.RUNNER_OS &&
@@ -114,11 +133,13 @@ async function installedTools(
   )
     unavailable();
   if (process.platform === "darwin") {
+    reportStage?.("Apple clang");
     const compiler = await tool("/usr/bin/clang", ["--version"], cwd);
     const release = llvmRelease(compiler, false);
     if (!/^Target: arm64-apple-darwin[0-9.]+$/mu.test(compiler.version))
       unavailable();
     if (!coverage) return { compiler };
+    reportStage?.("Apple coverage tools");
     const locate = (name: string) => {
       const output = run("/usr/bin/xcrun", ["--find", name], cwd);
       const path = output.stdout.trim();
@@ -142,6 +163,7 @@ async function installedTools(
     if (new Set(builds).size > 1) unavailable();
     return { compiler, profdata, cov };
   }
+  reportStage?.("MSVC environment");
   const vc = process.env.VCToolsInstallDir;
   if (
     !vc ||
@@ -151,8 +173,11 @@ async function installedTools(
   )
     unavailable();
   const bin = win32.join(vc, "bin", "Hostx64", "x64");
+  reportStage?.("MSVC compiler probe");
   const msvc = await tool(win32.join(bin, "cl.exe"), ["/?"], cwd);
+  reportStage?.("MSVC linker probe");
   const linker = await tool(win32.join(bin, "link.exe"), ["/?"], cwd);
+  reportStage?.("MSVC banners");
   if (
     !/Microsoft \(R\) C\/C\+\+ Optimizing Compiler Version 19\.[0-9]+\.[0-9]+(?:\.[0-9]+)? for x64\b/u.test(
       msvc.version,
@@ -164,6 +189,7 @@ async function installedTools(
   )
     unavailable();
   // The vendor shell and driver must resolve the same installed child linker.
+  reportStage?.("MSVC linker resolution");
   let selected: string | undefined;
   for (const directory of (process.env.PATH ?? "").split(";")) {
     if (!win32.isAbsolute(directory)) continue;
@@ -183,6 +209,7 @@ async function installedTools(
   )
     unavailable();
   if (!coverage) return { compiler: msvc, linker };
+  reportStage?.("LLVM tools");
   const llvm = "C:\\Program Files\\LLVM\\bin";
   const compiler = await tool(
     win32.join(llvm, "clang-cl.exe"),
@@ -202,6 +229,7 @@ async function installedTools(
     !/^Target: x86_64-pc-windows-msvc$/mu.test(compiler.version)
   )
     unavailable();
+  reportStage?.("LLVM linker resolution");
   const child = run(compiler.path, ["/clang:-print-prog-name=link"], cwd);
   if (
     child.stderr ||
@@ -210,6 +238,7 @@ async function installedTools(
       linker.path.toLowerCase()
   )
     unavailable();
+  reportStage?.("LLVM profile runtime");
   const output = run(compiler.path, ["/clang:-print-runtime-dir"], cwd);
   const runtimeSpelling = output.stdout.trim(),
     runtimeDir = win32.normalize(runtimeSpelling);
@@ -259,6 +288,7 @@ function validateBinary(bytes: Buffer): void {
 export async function buildRootProbe(
   coverage = false,
 ): Promise<{ path: string; name: string; sha256: string }> {
+  let stage = "build preparation";
   try {
     const name = rootProbeName(),
       dir = resolve(coverage ? ".cache/native-coverage" : ".cache/root-probe"),
@@ -274,7 +304,10 @@ export async function buildRootProbe(
           ["coverage.profdata", "coverage.json"].includes(file)
         )
           await unlink(join(dir, file));
-    const toolchain = await installedTools(coverage, dir);
+    const toolchain = await installedTools(coverage, dir, (value) => {
+      stage = value;
+    });
+    stage = "compile";
     const flags =
       process.platform === "darwin"
         ? [
@@ -319,8 +352,10 @@ export async function buildRootProbe(
         )
     )
       unavailable();
+    stage = "compiled artifact";
     const bytes = await readFile(path);
     validateBinary(bytes);
+    stage = "build provenance";
     if (sourceHash !== (await fileHash(source))) unavailable();
     for (const entry of Object.values(toolchain))
       if (entry.sha256 !== (await fileHash(entry.path))) unavailable();
@@ -344,8 +379,11 @@ export async function buildRootProbe(
       ),
     );
     return { path, name, sha256 };
-  } catch {
-    throw Error("Native root probe build failed");
+  } catch (error) {
+    // Emit only fixed stages, exit status, and bounded compiler codes.
+    const detail =
+      error instanceof NativeCommandError ? `: ${error.message}` : "";
+    throw Error(`Native root probe build failed (${stage}${detail})`);
   }
 }
 function validateCoverage(data: unknown, source: string): void {

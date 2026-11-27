@@ -630,6 +630,14 @@ async function windowsToolFixture() {
       if (damage === "compile-stdout")
         return { ...result, stdout: "owned unknown diagnostic" };
       if (damage === "compile-exit") return { ...result, status: 1 };
+      if (damage === "compile-diagnostic")
+        return {
+          ...result,
+          status: 2,
+          stdout: "private compiler path: error C2220: private warning text\n",
+          stderr:
+            "private compiler path: warning C4267: private warning text\n",
+        };
       if (damage === "wrong-pe")
         writeFileSync(
           args.find((a) => a.startsWith("/Fe:"))!.slice(4),
@@ -711,6 +719,19 @@ async function windowsToolFixture() {
 }
 
 describe("installed native builder decisions", () => {
+  it("reports the failed native build stage and codes without raw diagnostics", async () => {
+    const fixture = await windowsToolFixture();
+    try {
+      fixture.damage("compile-diagnostic");
+      await expect(buildRootProbe()).rejects.toHaveProperty(
+        "message",
+        "Native root probe build failed (compile: exit 2, C2220, C4267)",
+      );
+    } finally {
+      await fixture.cleanup();
+    }
+  });
+
   it("accepts the actual installed Apple LLVM export version with complete counters", async () => {
     const fixture = await windowsToolFixture();
     try {
