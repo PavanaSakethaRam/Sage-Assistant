@@ -564,10 +564,14 @@ it.each([
 it("refuses an exact pending choice after replacement and preserves both versions", async () => {
   const { root, journal } = await fixture();
   const name = "pending-" + "e".repeat(32);
+  const age = new Date(Date.now() - 1000);
   await writeFile(join(root, name), '{"version":1,');
+  await utimes(join(root, name), age, age);
   const result = await journal.inspectPending();
+  expect(result.entries[0]?.classification).toBe("malformed_v1");
   await rename(join(root, name), join(root, "human-backup"));
   await writeFile(join(root, name), '{"version":1, "different":true');
+  await utimes(join(root, name), age, age);
   await expect(journal.acknowledgePending(result.entries[0])).rejects.toThrow();
   expect(await readFile(join(root, "human-backup"), "utf8")).toBe(
     '{"version":1,',
@@ -626,10 +630,15 @@ it("refuses acknowledging otherwise valid v1 evidence whose original metadata cl
 it("an exclusive acknowledgment-directory collision never overwrites an existing destination", async () => {
   const { root, journal } = await fixture();
   const name = "pending-" + "7".repeat(32);
+  const age = new Date(Date.now() - 1000);
   await writeFile(join(root, name), '{"version":1,');
+  await utimes(join(root, name), age, age);
   const choice = (await journal.inspectPending()).entries[0];
+  expect(choice?.classification).toBe("malformed_v1");
   boundary.collision = true;
-  await expect(journal.acknowledgePending(choice)).rejects.toThrow();
+  await expect(journal.acknowledgePending(choice)).rejects.toMatchObject({
+    code: "EEXIST",
+  });
   expect(await readFile(join(root, name), "utf8")).toBe('{"version":1,');
   const retained = (await readdir(root)).find((entry) =>
     entry.startsWith("acknowledged-"),
