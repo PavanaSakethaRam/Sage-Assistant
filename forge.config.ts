@@ -1,19 +1,33 @@
-import { resolve } from "node:path";
+import { cp } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { WindowsSafeMakerZIP } from "./scripts/windows-zip-maker";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseVersion, FuseV1Options } from "@electron/fuses";
+export async function copyStagedResources(
+  staging: string,
+  resources: string,
+): Promise<void> {
+  await Promise.all(
+    ["core", "copilot", "gh", "notices", "editor-extension"].map((name) =>
+      cp(join(staging, name), join(resources, name), {
+        recursive: true,
+        verbatimSymlinks: true,
+      }),
+    ),
+  );
+}
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     download: { cacheRoot: resolve(".cache/electron") },
-    extraResource: [
-      ".runtime/package/core",
-      ".runtime/package/copilot",
-      ".runtime/package/gh",
-      ".runtime/package/notices",
-      ".runtime/package/editor-extension",
+    // Copy beside app.asar before signing. Packager's default resource copy
+    // turns relative symlinks into absolute paths back to the build checkout.
+    afterAsar: [
+      ({ buildPath }) =>
+        copyStagedResources(resolve(".runtime/package"), dirname(buildPath)),
     ],
   },
   makers: [new WindowsSafeMakerZIP({}, ["darwin", "win32"])],

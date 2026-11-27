@@ -30,6 +30,38 @@ async function productionLayout(root: string) {
   }
 }
 
+test.skipIf(process.platform === "win32")(
+  "packaged native resources retain relative framework symlinks",
+  async () => {
+    const { copyStagedResources } = await import("../../forge.config");
+    const { readFile, readlink, symlink } = await import("node:fs/promises");
+    const root = await mkdtemp(join(tmpdir(), "sage-package-relative-link-"));
+    const staging = join(root, "staged");
+    const resources = join(root, "Resources");
+    const core = join(staging, "core", "_internal");
+    const framework = join("Python.framework", "Versions", "3.13");
+    const target = join(framework, "Python");
+    const content = "owned runtime fixture";
+
+    try {
+      for (const name of ["copilot", "gh", "notices", "editor-extension"]) {
+        await mkdir(join(staging, name), { recursive: true });
+      }
+      await mkdir(join(core, framework), { recursive: true });
+      await writeFile(join(core, target), content);
+      await symlink(target, join(core, "Python"));
+
+      await copyStagedResources(staging, resources);
+      const packagedLink = join(resources, "core", "_internal", "Python");
+      expect(await readlink(packagedLink)).toBe(target);
+      await rm(staging, { recursive: true });
+      expect(await readFile(packagedLink, "utf8")).toBe(content);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
 test("release makers produce only portable ZIPs on macOS and Windows", async () => {
   const { default: config } = await import("../../forge.config");
   expect(config.makers).toHaveLength(1);
