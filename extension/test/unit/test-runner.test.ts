@@ -74,6 +74,17 @@ const processDouble = vi.hoisted(() => ({
         ...args: Parameters<typeof import("node:child_process").spawn>
       ) => ReturnType<typeof import("node:child_process").spawn>),
 }));
+const measuredNodeFixture = vi.hoisted(() => ({
+  sha256: undefined as string | undefined,
+}));
+vi.mock("../../src/node-recipe", async (original) => {
+  const policy = await original<typeof import("../../src/node-recipe")>();
+  return {
+    isMeasuredNodeRecipe: (version: string, sha256: string) =>
+      policy.isMeasuredNodeRecipe(version, sha256) ||
+      (version === "26.12.1" && sha256 === measuredNodeFixture.sha256),
+  };
+});
 vi.mock("node:child_process", async (original) => {
   const actual = await original<typeof import("node:child_process")>();
   return {
@@ -236,6 +247,7 @@ afterEach(async () => {
       .map((p) => rm(p, { recursive: true, force: true })),
   );
   processDouble.spawn = undefined;
+  measuredNodeFixture.sha256 = undefined;
   vi.useRealTimers();
   vi.restoreAllMocks();
   for (const r of reviews.splice(0)) await r.dispose();
@@ -536,24 +548,28 @@ it.each([
 });
 
 const measuredHost = process.platform === "darwin" && process.arch === "arm64";
-describe.runIf(measuredHost)("measured standalone Node recipe", () => {
+const windowsHost = process.platform === "win32" && process.arch === "x64";
+const recipeTestHost = measuredHost || windowsHost;
+describe.runIf(recipeTestHost)("standalone Node recipe", () => {
+  const measuredIt = it.runIf(measuredHost);
   const pinnedHash =
     "06eb3f5762c2b6890e99d03f931bf01d9b20fd341dec1a8c1ef5c1809e66102b";
-  let sourceNode: string;
+  const executableName = windowsHost ? "node.exe" : "node";
+  let sourceNode: string, sourceHash: string;
   beforeAll(async () => {
     sourceNode = await realpath(process.execPath);
     const source = lstatSync(sourceNode);
+    sourceHash = createHash("sha256")
+      .update(readFileSync(sourceNode))
+      .digest("hex");
     if (
       process.release.name !== "node" ||
       process.versions.electron ||
       process.version !== "v26.12.1" ||
-      process.platform !== "darwin" ||
-      process.arch !== "arm64" ||
       !source.isFile() ||
       source.isSymbolicLink() ||
       source.nlink !== 1 ||
-      createHash("sha256").update(readFileSync(sourceNode)).digest("hex") !==
-        pinnedHash
+      (measuredHost && sourceHash !== pinnedHash)
     )
       throw Error("Unsupported standalone Node recipe prerequisite");
   });
@@ -562,7 +578,7 @@ describe.runIf(measuredHost)("measured standalone Node recipe", () => {
       await mkdtemp(join(tmpdir(), "sage-node-fixture-")),
     );
     roots.push(directory);
-    NODE = join(directory, "node");
+    NODE = join(directory, executableName);
     await copyFile(sourceNode, NODE);
     await chmod(NODE, 0o700);
     const source = lstatSync(sourceNode),
@@ -574,16 +590,22 @@ describe.runIf(measuredHost)("measured standalone Node recipe", () => {
     );
     expect(readFileSync(NODE).equals(readFileSync(sourceNode))).toBe(true);
     expect(createHash("sha256").update(readFileSync(NODE)).digest("hex")).toBe(
-      pinnedHash,
+      sourceHash,
     );
+    // Windows exercises review and execution with a copied local Node.
+    // The real Windows availability check runs separately with the production policy.
+    if (windowsHost) measuredNodeFixture.sha256 = sourceHash;
   });
-  it("accepts only the exact recorded standalone Node identity/version, never a copied candidate", async () => {
-    const vscode = await import("vscode"),
-      node = await inspectNode(vscode.Uri.file(NODE));
-    expect(node).toMatchObject({ version: "26.12.1", available: true });
-    const f = await fixture();
-    await expect(prepareFocusTest(f.context, { ...node })).rejects.toThrow();
-  });
+  measuredIt(
+    "accepts only the exact recorded standalone Node identity/version, never a copied candidate",
+    async () => {
+      const vscode = await import("vscode"),
+        node = await inspectNode(vscode.Uri.file(NODE));
+      expect(node).toMatchObject({ version: "26.12.1", available: true });
+      const f = await fixture();
+      await expect(prepareFocusTest(f.context, { ...node })).rejects.toThrow();
+    },
+  );
   it("binds the fixed argv, saved hashes, original lease, empty PATH and owned temp map", async () => {
     const f = await fixture(),
       vscode = await import("vscode"),
@@ -597,7 +619,7 @@ describe.runIf(measuredHost)("measured standalone Node recipe", () => {
     ]);
     expect(r.file_hashes.map((x) => x.name)).toEqual(FOCUS_NAMES);
     expect(r.environment.PATH).toBe("");
-    expect(r.environment.HOME).toBeUndefined();
+    expect(r.environment.HOME).toBe(windowsHost ? "" : undefined);
     expect(r.timeout_seconds).toBe(30);
     expect(r.recipe_hash).toBe(await recipeHash(r));
     expect(Date.parse(r.deadline)).toBeLessThanOrEqual(
@@ -651,17 +673,21 @@ describe.runIf(measuredHost)("measured standalone Node recipe", () => {
     await expect(approved(f)).rejects.toThrow();
     expect(f.receipts).toEqual([]);
   });
-  it("real timeout never passes and confirms same owned child termination", async () => {
-    const f = await fixture("setInterval(()=>{},1000);\n");
-    await approved(f);
-    expect(f.receipts[0]).toMatchObject({
-      status: "failed",
-      timeout: true,
-      cancel_requested: false,
-      exit_code: 0,
-      signal: null,
-    });
-  }, 40000);
+  measuredIt(
+    "real timeout never passes and confirms same owned child termination",
+    async () => {
+      const f = await fixture("setInterval(()=>{},1000);\n");
+      await approved(f);
+      expect(f.receipts[0]).toMatchObject({
+        status: "failed",
+        timeout: true,
+        cancel_requested: false,
+        exit_code: 0,
+        signal: null,
+      });
+    },
+    40000,
+  );
   it("real cancellation drops output promptly while preserving the late receipt", async () => {
     const f = await fixture(
       "process.stdout.write('private transient'); setInterval(()=>{},1000);\n",
@@ -676,42 +702,46 @@ describe.runIf(measuredHost)("measured standalone Node recipe", () => {
       timeout: false,
     });
   });
-  it("exit_with_inherited_stdout_stays_bounded and does not claim descendant containment", async () => {
-    const f = await fixture(
-      "import {spawn} from 'node:child_process'; spawn(process.execPath,['-e','setTimeout(()=>{},4500)'],{stdio:['ignore',1,2],detached:false}).unref();\n",
-    );
-    const actual =
-      await vi.importActual<typeof import("node:child_process")>(
-        "node:child_process",
+  measuredIt(
+    "exit_with_inherited_stdout_stays_bounded and does not claim descendant containment",
+    async () => {
+      const f = await fixture(
+        "import {spawn} from 'node:child_process'; spawn(process.execPath,['-e','setTimeout(()=>{},4500)'],{stdio:['ignore',1,2],detached:false}).unref();\n",
       );
-    let exitedAt: number | undefined;
-    const ended: string[] = [];
-    f.afterIntent(() => {
-      processDouble.spawn = (...args) => {
-        const child = Reflect.apply(actual.spawn, undefined, args);
-        if (Array.isArray(args[1]) && args[1][0] === "--test") {
-          child.once("exit", () => {
-            exitedAt = performance.now();
-          });
-          child.stdout!.once("end", () => ended.push("stdout"));
-          child.stderr!.once("end", () => ended.push("stderr"));
-        }
-        return child;
-      };
-    });
-    await approved(f);
-    expect(f.receipts[0]).toMatchObject({
-      status: "unknown",
-      exit_code: 0,
-      signal: null,
-      timeout: false,
-    });
-    expect(exitedAt).toBeTypeOf("number");
-    expect(performance.now() - exitedAt!).toBeLessThan(4400);
-    expect(ended).toEqual([]);
-    // The owned fixture descendant settles itself; wait for its bounded cleanup before deleting files.
-    await new Promise((r) => setTimeout(r, 1800));
-  }, 8000);
+      const actual =
+        await vi.importActual<typeof import("node:child_process")>(
+          "node:child_process",
+        );
+      let exitedAt: number | undefined;
+      const ended: string[] = [];
+      f.afterIntent(() => {
+        processDouble.spawn = (...args) => {
+          const child = Reflect.apply(actual.spawn, undefined, args);
+          if (Array.isArray(args[1]) && args[1][0] === "--test") {
+            child.once("exit", () => {
+              exitedAt = performance.now();
+            });
+            child.stdout!.once("end", () => ended.push("stdout"));
+            child.stderr!.once("end", () => ended.push("stderr"));
+          }
+          return child;
+        };
+      });
+      await approved(f);
+      expect(f.receipts[0]).toMatchObject({
+        status: "unknown",
+        exit_code: 0,
+        signal: null,
+        timeout: false,
+      });
+      expect(exitedAt).toBeTypeOf("number");
+      expect(performance.now() - exitedAt!).toBeLessThan(4400);
+      expect(ended).toEqual([]);
+      // The owned fixture descendant settles itself; wait for its bounded cleanup before deleting files.
+      await new Promise((r) => setTimeout(r, 1800));
+    },
+    8000,
+  );
   it.each(["during review", "after intent"] as const)(
     "a genuinely inspected executable changed %s refuses before any fixed-test spawn",
     async (boundary) => {
@@ -724,7 +754,7 @@ describe.runIf(measuredHost)("measured standalone Node recipe", () => {
         directory = await realpath(
           await mkdtemp(join(tmpdir(), "sage-selected-node-")),
         ),
-        selected = join(directory, "node"),
+        selected = join(directory, executableName),
         calls: { executable: string; argv: readonly string[] }[] = [],
         hash = (path: string) =>
           createHash("sha256").update(readFileSync(path)).digest("hex"),

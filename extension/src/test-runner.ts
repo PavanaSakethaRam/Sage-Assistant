@@ -20,13 +20,13 @@ import {
 import { focusTestState, onContextRelease, contextOffer } from "./context";
 import { consumeLocalTestReview, type LocalReview } from "./review";
 import { journalHash } from "./journal";
+import { isMeasuredNodeRecipe } from "./node-recipe";
 const TEST_ARGV = [
   "--test",
   "--test-isolation=none",
   "--test-reporter=tap",
   "focus.test.mjs",
 ] as const;
-const PIN = "06eb3f5762c2b6890e99d03f931bf01d9b20fd341dec1a8c1ef5c1809e66102b";
 export type NodeCandidate = Readonly<{
   executable: string;
   identity: string;
@@ -385,11 +385,7 @@ export async function inspectNode(uri: vscode.Uri): Promise<NodeCandidate> {
     if (!same(before.stat, after.stat) || before.hash !== after.hash)
       unavailable();
     const version = output.slice(1, -1),
-      available =
-        process.platform === "darwin" &&
-        process.arch === "arm64" &&
-        version === "26.12.1" &&
-        after.hash === PIN;
+      available = isMeasuredNodeRecipe(version, after.hash);
     const candidate = Object.freeze({
       executable: path,
       identity: after.identity,

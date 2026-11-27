@@ -55,6 +55,31 @@ def deadline(seconds: float = 2) -> datetime:
     return datetime.now(UTC) + timedelta(seconds=seconds)
 
 
+@pytest.mark.parametrize(
+    ("program", "expected"),
+    [
+        ("print('synthetic-result', end='')", b"synthetic-result"),
+        ("print('synthetic-result', end=''); raise SystemExit(7)", None),
+    ],
+)
+def test_owned_native_helper_accepts_stdout_only_on_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, program: str, expected: bytes | None
+) -> None:
+    from sage.providers import protected_auth as auth
+
+    executable = Path(sys.executable).resolve(strict=True)
+    platform = auth.platform_key()
+    monkeypatch.setitem(
+        auth.EXECUTABLE_HASHES, platform, hashlib.sha256(executable.read_bytes()).hexdigest()
+    )
+    monkeypatch.setitem(auth.EXECUTABLE_SIZES, platform, executable.stat().st_size)
+
+    output = asyncio.run(
+        auth.run_helper(executable, tmp_path / "owned", ("-I", "-S", "-c", program), deadline(5))
+    )
+    assert output == expected
+
+
 def test_token_helper_exact_argv_env_empty_config_and_identity(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

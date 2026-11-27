@@ -138,6 +138,7 @@ import { isolatedChildEnv } from "../../../desktop/main/child-env";
 const nativeHost =
   (process.platform === "darwin" && process.arch === "arm64") ||
   (process.platform === "win32" && process.arch === "x64");
+const windowsFaultFixture = "extension/test/fixtures/root-probe-win32-faults.h";
 
 function ownTestDirectories(...directories: string[]): void {
   if (process.platform !== "win32") return;
@@ -181,9 +182,11 @@ it.runIf(nativeHost)(
     try {
       await mkdir(join(root, "scripts"));
       await mkdir(join(root, "extension/native"), { recursive: true });
+      await mkdir(join(root, "extension/test/fixtures"), { recursive: true });
       for (const name of [
         "scripts/build-root-probe.ts",
         "extension/native/root-probe.c",
+        windowsFaultFixture,
       ])
         await copyFile(join(process.cwd(), name), join(root, name));
       const built = spawnSync(
@@ -217,7 +220,11 @@ it.runIf(nativeHost)(
       const coverage = process.env.SAGE_NATIVE_COVERAGE === "1",
         probe = await buildRootProbe(coverage);
       let sequence = 0;
-      const invoke = (input: Buffer | string, args = ["--check-root-v1"]) =>
+      const invoke = (
+        input: Buffer | string,
+        args = ["--check-root-v1"],
+        fault?: string,
+      ) =>
         spawnSync(probe.path, args, {
           shell: false,
           input,
@@ -234,6 +241,7 @@ it.runIf(nativeHost)(
                       process.cwd(),
                       `.cache/native-coverage/run-${process.pid}-${sequence++}.profraw`,
                     ),
+                    ...(fault ? { SAGE_ROOT_PROBE_FAULT: fault } : {}),
                   }
                 : {}),
             },
@@ -282,6 +290,23 @@ it.runIf(nativeHost)(
       );
       for (const path of [join(root, "ordinary"), join(root, "😀")])
         expect(invoke(path).status).toBe(0);
+      if (coverage && process.platform === "win32") {
+        for (const fault of [
+          "security-info",
+          "empty-token",
+          "oversized-token",
+          "token-read",
+          "unresolved-path",
+          "oversized-path",
+          "unprefixed-path",
+          "different-path",
+        ]) {
+          const result = invoke(root, ["--check-root-v1"], fault);
+          expect(result.status, fault).toBe(1);
+          expect(result.stdout.length).toBe(0);
+          expect(result.stderr.length).toBe(0);
+        }
+      }
       const denied = join(root, "denied");
       await mkdir(denied);
       if (process.platform === "darwin") await chmod(denied, 0);
@@ -301,6 +326,13 @@ it.runIf(nativeHost)(
         ...(process.platform === "darwin"
           ? [denied]
           : [
+              "C:",
+              "0:\\invalid-drive",
+              "C-\\invalid-drive",
+              "C:/invalid-separator",
+              join(root, "short~1"),
+              join(root, "file:stream"),
+              join(root, "trailing-space "),
               join(root, "missing-owned"),
               root + "\\",
               root + "\\\\ordinary",
@@ -516,8 +548,11 @@ async function windowsToolFixture() {
   const library = resource + "\\lib\\windows\\clang_rt.profile-x86_64.lib";
   const targetLibrary = runtime + "\\clang_rt.profile.lib";
   const source = join(root, "extension/native/root-probe.c");
+  const faultHeader = join(root, windowsFaultFixture);
   await mkdir(join(root, "extension/native"), { recursive: true });
+  await mkdir(join(root, "extension/test/fixtures"), { recursive: true });
   await copyFile(join(process.cwd(), "extension/native/root-probe.c"), source);
+  await copyFile(join(process.cwd(), windowsFaultFixture), faultHeader);
   for (const path of [compiler, linker, clang, profdata, cov, library])
     nativeDouble.files.set(path, Buffer.from("owned installed tool " + path));
   nativeDouble.directories.add(resource);
@@ -776,6 +811,7 @@ async function windowsToolFixture() {
     calls,
     binary,
     source,
+    faultHeader,
     damage: (value: string) => {
       damage = value;
     },
@@ -907,6 +943,7 @@ describe("installed native builder decisions", () => {
           coverage: true,
           target: "win32-x64",
           source_sha256: digest(await readFile(fixture.source)),
+          coverage_fixture_sha256: digest(await readFile(fixture.faultHeader)),
           sha256: built.sha256,
           size: fixture.binary.length,
           toolchain: {
@@ -1011,6 +1048,7 @@ describe("installed native builder decisions", () => {
         "/TC",
         "-fprofile-instr-generate",
         "-fcoverage-mapping",
+        `/FI${fixture.faultHeader}`,
         fixture.source,
         `/Fe:${instrumented.path}`,
         `/Fo:${join(fixture.root, ".cache/native-coverage/root-probe.obj")}`,
@@ -1136,6 +1174,7 @@ describe("installed native builder decisions", () => {
     "empty-profile",
     "stale-profile",
     "source-hash",
+    "fixture-hash",
     "binary-hash",
     "runtime-hash",
     "profile-hash",
@@ -1157,6 +1196,8 @@ describe("installed native builder decisions", () => {
         else if (damage === "stale-profile") await utimes(profile, 1, 1);
         else if (damage === "source-hash")
           await writeFile(fixture.source, "owned source drift");
+        else if (damage === "fixture-hash")
+          await writeFile(fixture.faultHeader, "owned fixture drift");
         else if (damage === "binary-hash")
           await writeFile(
             join(

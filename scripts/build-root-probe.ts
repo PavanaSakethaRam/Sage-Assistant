@@ -27,6 +27,8 @@ const digest = (bytes: Buffer) =>
 const msvcLinkerBanner =
   /Microsoft \(R\) Incremental Linker Version 14\.[0-9]+\.[0-9]+(?:\.[0-9]+)?\b/u;
 const msvcDiagnostic = /\b(?:error|warning) [A-Z]+[0-9]+/iu;
+const windowsCoverageFixture =
+  "extension/test/fixtures/root-probe-win32-faults.h";
 class NativeCommandError extends Error {}
 class CoverageValidationError extends Error {}
 
@@ -323,7 +325,11 @@ export async function buildRootProbe(
     const name = rootProbeName(),
       dir = resolve(coverage ? ".cache/native-coverage" : ".cache/root-probe"),
       path = join(dir, name),
-      source = resolve("extension/native/root-probe.c");
+      source = resolve("extension/native/root-probe.c"),
+      fixture =
+        coverage && process.platform === "win32"
+          ? resolve(windowsCoverageFixture)
+          : undefined;
     await mkdir(dir, { recursive: true });
     await removeOwned(path);
     await removeOwned(join(dir, "provenance.json"));
@@ -361,8 +367,12 @@ export async function buildRootProbe(
             "/WX",
             "/O2",
             "/TC",
-            ...(coverage
-              ? ["-fprofile-instr-generate", "-fcoverage-mapping"]
+            ...(fixture
+              ? [
+                  "-fprofile-instr-generate",
+                  "-fcoverage-mapping",
+                  `/FI${fixture}`,
+                ]
               : []),
             source,
             `/Fe:${path}`,
@@ -371,6 +381,7 @@ export async function buildRootProbe(
             "advapi32.lib",
           ];
     const sourceHash = await fileHash(source);
+    const fixtureHash = fixture ? await fileHash(fixture) : undefined;
     const result = run(toolchain.compiler.path, flags, dir);
     if (
       result.stderr ||
@@ -386,7 +397,11 @@ export async function buildRootProbe(
     const bytes = await readFile(path);
     validateBinary(bytes);
     stage = "build provenance";
-    if (sourceHash !== (await fileHash(source))) unavailable();
+    if (
+      sourceHash !== (await fileHash(source)) ||
+      (fixture && fixtureHash !== (await fileHash(fixture)))
+    )
+      unavailable();
     for (const entry of Object.values(toolchain))
       if (entry.sha256 !== (await fileHash(entry.path))) unavailable();
     const sha256 = digest(bytes);
@@ -399,6 +414,7 @@ export async function buildRootProbe(
           flags,
           target: `${process.platform}-${process.arch}`,
           source_sha256: sourceHash,
+          coverage_fixture_sha256: fixtureHash,
           sha256,
           size: bytes.length,
           coverage,
@@ -469,7 +485,11 @@ export async function reportNativeCoverage(): Promise<void> {
   try {
     const dir = resolve(".cache/native-coverage"),
       binary = join(dir, rootProbeName()),
-      source = resolve("extension/native/root-probe.c");
+      source = resolve("extension/native/root-probe.c"),
+      fixture =
+        process.platform === "win32"
+          ? resolve(windowsCoverageFixture)
+          : undefined;
     await removeOwned(join(dir, "coverage.json"));
     await removeOwned(join(dir, "coverage.profdata"));
     const toolchain = await installedTools(true, dir, (value) => {
@@ -480,10 +500,12 @@ export async function reportNativeCoverage(): Promise<void> {
       await readFile(join(dir, "provenance.json"), "utf8"),
     );
     const sourceHash = await fileHash(source),
-      binaryHash = await fileHash(binary);
+      binaryHash = await fileHash(binary),
+      fixtureHash = fixture ? await fileHash(fixture) : undefined;
     validateBinary(await readFile(binary));
     if (
       provenance.source_sha256 !== sourceHash ||
+      provenance.coverage_fixture_sha256 !== fixtureHash ||
       provenance.sha256 !== binaryHash ||
       provenance.coverage !== true ||
       provenance.target !== `${process.platform}-${process.arch}` ||
@@ -518,9 +540,15 @@ export async function reportNativeCoverage(): Promise<void> {
     if (merge.stdout || merge.stderr) unavailable();
     const mergedHash = await fileHash(merged);
     stage = "coverage export";
+    // Export the reviewed probe source alone when the Windows fixture is included.
     const exported = run(
       toolchain.cov!.path,
-      ["export", binary, `-instr-profile=${merged}`],
+      [
+        "export",
+        binary,
+        `-instr-profile=${merged}`,
+        ...(fixture ? [source] : []),
+      ],
       dir,
       1048576,
     );
@@ -532,7 +560,8 @@ export async function reportNativeCoverage(): Promise<void> {
     if (
       sourceHash !== (await fileHash(source)) ||
       binaryHash !== (await fileHash(binary)) ||
-      mergedHash !== (await fileHash(merged))
+      mergedHash !== (await fileHash(merged)) ||
+      (fixture && fixtureHash !== (await fileHash(fixture)))
     )
       unavailable();
     for (const [path, sha256] of Object.entries(hashes))
@@ -545,6 +574,7 @@ export async function reportNativeCoverage(): Promise<void> {
         version: 1,
         platform: `${process.platform}-${process.arch}`,
         source_sha256: { "extension/native/root-probe.c": sourceHash },
+        coverage_fixture_sha256: fixtureHash,
         binary_sha256: binaryHash,
         profile_sha256: hashes,
         merged_sha256: mergedHash,
