@@ -112,11 +112,16 @@ export interface CheckedPackage extends ExtensionIdentity {
   vsix: string;
   bundleSha256: string;
 }
+type ReportPackageStage = (stage: string) => void;
+
 export async function validatePackage(
   app: string,
   manifest: string,
+  reportStage?: ReportPackageStage,
 ): Promise<CheckedPackage> {
+  reportStage?.("app path");
   ordinaryPath(app, true);
+  reportStage?.("resource manifest");
   ordinaryPath(manifest, false);
   const baseline: unknown = JSON.parse(readFileSync(manifest, "utf8"));
   if (
@@ -160,8 +165,10 @@ export async function validatePackage(
       ? join(app, "Contents/Resources")
       : join(app, "resources");
   const archive = join(resources, "app.asar");
+  reportStage?.("resource paths");
   ordinaryPath(resources, true);
   ordinaryPath(archive, false);
+  reportStage?.("ASAR archive");
   validateArchive(archive);
   const entries = listPackage(archive, { isPack: false }).map((name) =>
     canonicalArchiveEntry(name),
@@ -172,6 +179,7 @@ export async function validatePackage(
     "/.vite/renderer/main_window/index.html",
   ])
     if (!entries.includes(required)) throw Error("Missing application entry");
+  reportStage?.("Electron fuses");
   const wire = await getCurrentFuseWire(
     process.platform === "darwin" ? app : join(app, "Sage.exe"),
   );
@@ -186,6 +194,7 @@ export async function validatePackage(
     FuseV1Options.OnlyLoadAppFromAsar,
   ])
     if (wire[option] !== 49) throw Error("Missing production fuse");
+  reportStage?.("external resources");
   const project = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   const python = resolve(
     project,
@@ -210,6 +219,7 @@ export async function validatePackage(
     },
   );
   if (result.status !== 0) throw Error("External resource mismatch");
+  reportStage?.("editor extension identity");
   const identity = readExtensionIdentity(
     join(dirname(manifest), "editor-extension.json"),
     resources,
@@ -223,6 +233,7 @@ export async function validatePackage(
   )
     throw Error("Packaged extension identity mismatch");
   const vsix = join(resources, "editor-extension/sage-editor-bridge.vsix");
+  reportStage?.("editor VSIX");
   const checked = await validateVsix(vsix);
   if (checked.sha256 !== identity.sha256)
     throw Error("Packaged extension changed");
@@ -240,9 +251,10 @@ export async function validatePackage(
     bundleSha256: checked.bundleSha256,
   };
 }
-async function main(): Promise<void> {
+async function main(reportStage: ReportPackageStage): Promise<void> {
   if (process.argv[2] === "--vsix") {
     if (process.argv.length !== 4) throw Error("Invalid VSIX arguments");
+    reportStage("editor VSIX");
     console.log(
       JSON.stringify({
         status: "pass",
@@ -252,7 +264,11 @@ async function main(): Promise<void> {
     return;
   }
   if (process.argv.length !== 4) throw Error("Invalid package arguments");
-  await validatePackage(resolve(process.argv[2]), resolve(process.argv[3]));
+  await validatePackage(
+    resolve(process.argv[2]),
+    resolve(process.argv[3]),
+    reportStage,
+  );
   console.log("PASS actual ASAR, production fuses and resource baseline");
 }
 
@@ -260,8 +276,14 @@ if (
   process.argv[1] &&
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
-  main().catch(() => {
-    console.error("FAIL package checks");
+  let stage: string | undefined;
+  main((currentStage) => {
+    stage = currentStage;
+  }).catch(() => {
+    // Keep paths, archive names, and subprocess output out of CI diagnostics.
+    console.error(
+      stage ? `FAIL package checks (${stage})` : "FAIL package checks",
+    );
     process.exitCode = 1;
   });
 }

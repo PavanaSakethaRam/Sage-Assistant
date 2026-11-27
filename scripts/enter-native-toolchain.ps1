@@ -27,7 +27,8 @@ try {
     foreach ($nativeName in @('cl.exe', 'link.exe')) {
         $nativeStage = if ($nativeName -eq 'cl.exe') { 'compiler_identity' } else { 'linker_identity' }
         $nativeExpected = Join-Path $env:VCToolsInstallDir "bin/Hostx64/x64/$nativeName"
-        $nativeResolved = (Get-Command $nativeName -CommandType Application -ErrorAction Stop).Source
+        # -CommandType also finds later PATH matches. Validate the one that would run.
+        $nativeResolved = (Get-Command $nativeName -CommandType Application -TotalCount 1 -ErrorAction Stop).Source
         if (-not (Test-Path -LiteralPath $nativeExpected -PathType Leaf) -or $nativeResolved -ine $nativeExpected) { throw 'unavailable' }
     }
 } catch {
