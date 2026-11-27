@@ -686,10 +686,10 @@ it("valid pending summary exposes bounded receipt facts and original expiry with
     expected_hash: digest("proposed\n"),
   });
   const fs = await import("node:fs/promises");
-  await fs.rename(
-    join(f.storage, "operation-pending-op.json"),
-    join(f.storage, "pending-" + "c".repeat(32)),
-  );
+  const pending = join(f.storage, "pending-" + "c".repeat(32));
+  await fs.rename(join(f.storage, "operation-pending-op.json"), pending);
+  const age = new Date(Date.now() - 1000);
+  await fs.utimes(pending, age, age);
   const entry = (await f.owner.journal.inspectPending()).entries[0];
   const { pendingText } = await import("../../src/reconcile");
   expect(entry.classification).toBe("supported_v1");

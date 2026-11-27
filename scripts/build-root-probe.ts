@@ -28,6 +28,7 @@ const msvcLinkerBanner =
   /Microsoft \(R\) Incremental Linker Version 14\.[0-9]+\.[0-9]+(?:\.[0-9]+)?\b/u;
 const msvcDiagnostic = /\b(?:error|warning) [A-Z]+[0-9]+/iu;
 class NativeCommandError extends Error {}
+class CoverageValidationError extends Error {}
 
 function unavailable(): never {
   throw Error("Native installed toolchain unavailable");
@@ -431,13 +432,15 @@ function validateCoverage(data: unknown, source: string): void {
     packet.type !== "llvm.coverage.json.export" ||
     (packet.version !== "2.0.1" && packet.version !== "3.0.1") ||
     !Array.isArray(packet.data) ||
-    packet.data.length !== 1 ||
-    !Array.isArray(packet.data[0].files) ||
-    packet.data[0].files.length !== 1
+    packet.data.length !== 1
   )
-    unavailable();
-  const file = packet.data[0].files[0];
-  if (file.filename !== source) unavailable();
+    throw new CoverageValidationError("unsupported export format");
+  const files = packet.data[0]?.files;
+  if (!Array.isArray(files) || files.length !== 1)
+    throw new CoverageValidationError("unexpected source inventory");
+  const file = files[0];
+  if (file.filename !== source)
+    throw new CoverageValidationError("unexpected source path");
   for (const [metric, threshold] of [
     ["regions", 90],
     ["branches", 85],
@@ -452,20 +455,27 @@ function validateCoverage(data: unknown, source: string): void {
       typeof covered !== "number" ||
       !Number.isSafeInteger(covered) ||
       covered < 0 ||
-      covered > total ||
-      covered * 100 < total * threshold
+      covered > total
     )
-      unavailable();
+      throw new CoverageValidationError(`invalid ${metric} counts`);
+    if (covered * 100 < total * threshold)
+      throw new CoverageValidationError(
+        `${metric} ${covered}/${total}, minimum ${threshold}%`,
+      );
   }
 }
 export async function reportNativeCoverage(): Promise<void> {
+  let stage = "report preparation";
   try {
     const dir = resolve(".cache/native-coverage"),
       binary = join(dir, rootProbeName()),
       source = resolve("extension/native/root-probe.c");
     await removeOwned(join(dir, "coverage.json"));
     await removeOwned(join(dir, "coverage.profdata"));
-    const toolchain = await installedTools(true, dir);
+    const toolchain = await installedTools(true, dir, (value) => {
+      stage = value;
+    });
+    stage = "build provenance";
     const provenance = JSON.parse(
       await readFile(join(dir, "provenance.json"), "utf8"),
     );
@@ -482,6 +492,7 @@ export async function reportNativeCoverage(): Promise<void> {
       JSON.stringify(provenance.toolchain) !== JSON.stringify(toolchain)
     )
       unavailable();
+    stage = "raw profiles";
     const profiles = (await readdir(dir))
       .filter((name) => /^run-[0-9]+-[0-9]+\.profraw$/u.test(name))
       .sort()
@@ -497,6 +508,7 @@ export async function reportNativeCoverage(): Promise<void> {
         unavailable();
       hashes[path] = await fileHash(path);
     }
+    stage = "profile merge";
     const merged = join(dir, "coverage.profdata");
     const merge = run(
       toolchain.profdata!.path,
@@ -505,6 +517,7 @@ export async function reportNativeCoverage(): Promise<void> {
     );
     if (merge.stdout || merge.stderr) unavailable();
     const mergedHash = await fileHash(merged);
+    stage = "coverage export";
     const exported = run(
       toolchain.cov!.path,
       ["export", binary, `-instr-profile=${merged}`],
@@ -513,7 +526,9 @@ export async function reportNativeCoverage(): Promise<void> {
     );
     if (exported.stderr) unavailable();
     const coverage: unknown = JSON.parse(exported.stdout);
+    stage = "coverage validation";
     validateCoverage(coverage, source);
+    stage = "report integrity";
     if (
       sourceHash !== (await fileHash(source)) ||
       binaryHash !== (await fileHash(binary)) ||
@@ -537,8 +552,13 @@ export async function reportNativeCoverage(): Promise<void> {
         coverage,
       }),
     );
-  } catch {
-    throw Error("Native coverage report failed");
+  } catch (error) {
+    const detail =
+      error instanceof NativeCommandError ||
+      error instanceof CoverageValidationError
+        ? `: ${error.message}`
+        : "";
+    throw Error(`Native coverage report failed (${stage}${detail})`);
   }
 }
 if (

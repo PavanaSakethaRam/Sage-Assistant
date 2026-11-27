@@ -1171,9 +1171,19 @@ describe("installed native builder decisions", () => {
             Buffer.from("owned runtime drift"),
           );
         else fixture.damage(damage);
-        await expect(reportNativeCoverage()).rejects.toThrow(
-          "Native coverage report failed",
-        );
+        const expected: Record<string, string> = {
+          "failed-export":
+            "Native coverage report failed (coverage export: exit 1)",
+          "export-diagnostic":
+            "Native coverage report failed (coverage export)",
+          "below-threshold":
+            "Native coverage report failed (coverage validation: branches 8/10, minimum 85%)",
+        };
+        await expect(reportNativeCoverage()).rejects.toMatchObject({
+          message:
+            expected[damage] ??
+            expect.stringContaining("Native coverage report failed"),
+        });
       } finally {
         await fixture.cleanup();
       }
