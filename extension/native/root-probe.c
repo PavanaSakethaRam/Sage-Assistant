@@ -65,7 +65,8 @@ static int owned(HANDLE handle){
  done:if(user)free(user);if(token)CloseHandle(token);if(descriptor)LocalFree(descriptor);return ok;
 }
 static int check(char *input_path) {
- wchar_t path[INPUT_CAP+1],volume[INPUT_CAP+1],final[INPUT_CAP+5];
+ /* One probe per process. Keep the fixed working buffers off the stack. */
+ static wchar_t path[INPUT_CAP+1],volume[INPUT_CAP+1],final[INPUT_CAP+5];
  int count=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,input_path,-1,path,INPUT_CAP+1);
  if(!count||count<4||path[0]<L'A'||path[0]>L'Z'||path[1]!=L':'||path[2]!=L'\\'||(count>4&&path[count-2]==L'\\'))return 0;
  for(int i=3;i<count-1;i++)if(path[i]==L'/'||path[i]==L':'||path[i]==L'~')return 0;
@@ -97,7 +98,7 @@ int main(int argc,char **argv){
 #ifdef _WIN32
  if(_setmode(_fileno(stdin),_O_BINARY)==-1||_setmode(_fileno(stdout),_O_BINARY)==-1)return 1;
 #endif
- char path[INPUT_CAP+2];
+ static char path[INPUT_CAP+2];
  if(argc!=2||strcmp(argv[1],"--check-root-v1")||!input(path)||!check(path))return 1;
  return fflush(stdout)==0?0:1;
 }

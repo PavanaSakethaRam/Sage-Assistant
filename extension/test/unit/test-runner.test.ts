@@ -480,8 +480,9 @@ it("older standalone runtime remains unavailable, without fallback", async () =>
   const vscode = await import("vscode"),
     node = await inspectNode(vscode.Uri.file(process.execPath));
   // Unit host may itself be the pinned Node. Only a genuinely older runtime exercises this lane.
-  if (process.version !== "v26.12.1") expect(node.available).toBe(false);
-  else expect(node.version).toBe("26.12.1");
+  if (process.version !== "v26.12.1" || process.platform === "win32")
+    expect(node.available).toBe(false);
+  expect("v" + node.version).toBe(process.version);
 });
 
 it("rejected known-file handoff reports failure without changing target", async () => {
@@ -499,7 +500,9 @@ it("rejected known-file handoff reports failure without changing target", async 
 it.each(["v26.10.0\n", "v26.13.0\n"])(
   "version probe %s remains unavailable without recorded build evidence",
   async (version) => {
-    const child = await fakeProcess("probe", version);
+    const output =
+      process.platform === "win32" ? version.replace(/\n$/u, "\r\n") : version;
+    const child = await fakeProcess("probe", output);
     processDouble.spawn = () => {
       child.start();
       return child as unknown as ReturnType<
@@ -509,12 +512,14 @@ it.each(["v26.10.0\n", "v26.13.0\n"])(
     const vscode = await import("vscode"),
       candidate = await inspectNode(vscode.Uri.file(process.execPath));
     expect(candidate.available).toBe(false);
+    expect("v" + candidate.version + "\n").toBe(version);
   },
 );
 it.each([
   "v26.12.1-rc.1\n",
   "v26.12.1\nv26.12.1\n",
-  "v26.12.1\r\n",
+  ...(process.platform === "win32" ? [] : ["v26.12.1\r\n"]),
+  "v26.12.1\r\n\r\n",
   "v26.12.1\n\n",
 ])("probe rejects non-exact stable single line %s", async (version) => {
   const child = await fakeProcess("probe", version);
@@ -530,7 +535,8 @@ it.each([
   ).rejects.toThrow();
 });
 
-describe("measured standalone Node recipe", () => {
+const measuredHost = process.platform === "darwin" && process.arch === "arm64";
+describe.runIf(measuredHost)("measured standalone Node recipe", () => {
   const pinnedHash =
     "06eb3f5762c2b6890e99d03f931bf01d9b20fd341dec1a8c1ef5c1809e66102b";
   let sourceNode: string;

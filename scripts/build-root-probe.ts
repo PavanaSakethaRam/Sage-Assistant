@@ -130,6 +130,19 @@ function llvmRelease(tool: Tool, windows: boolean): string {
     unavailable();
   return release;
 }
+function llvmDirectory(result: ReturnType<typeof run>, parent: string): string {
+  const spelling = result.stdout.trim();
+  const directory = win32.normalize(spelling);
+  if (
+    result.stderr ||
+    !win32.isAbsolute(spelling) ||
+    /[\r\n]/u.test(spelling) ||
+    spelling.split(/[\\/]/u).some((part) => part === "." || part === "..") ||
+    !directory.toLowerCase().startsWith(parent.toLowerCase() + "\\")
+  )
+    unavailable();
+  return directory;
+}
 async function installedTools(
   coverage: boolean,
   cwd: string,
@@ -251,21 +264,25 @@ async function installedTools(
   )
     unavailable();
   reportStage?.("LLVM profile runtime");
-  const output = run(compiler.path, ["/clang:-print-runtime-dir"], cwd);
-  const runtimeSpelling = output.stdout.trim(),
-    runtimeDir = win32.normalize(runtimeSpelling);
-  if (
-    output.stderr ||
-    !win32.isAbsolute(runtimeDir) ||
-    /[\r\n]/u.test(runtimeDir) ||
-    runtimeSpelling
-      .split(/[\\/]/u)
-      .some((part) => part === "." || part === "..") ||
-    !runtimeDir.toLowerCase().startsWith("c:\\program files\\llvm\\") ||
-    !(await stat(runtimeDir)).isDirectory()
-  )
-    unavailable();
-  const path = win32.join(runtimeDir, "clang_rt.profile-x86_64.lib");
+  const resourceDir = llvmDirectory(
+    run(compiler.path, ["/clang:-print-resource-dir"], cwd),
+    win32.dirname(llvm),
+  );
+  if (!(await stat(resourceDir)).isDirectory()) unavailable();
+  const libraries = win32.join(resourceDir, "lib");
+  const targetDir = llvmDirectory(
+    run(compiler.path, ["/clang:-print-runtime-dir"], cwd),
+    libraries,
+  );
+  // Match Clang's search order. The driver can report a per-target runtime
+  // directory even when the installed distribution uses the legacy layout.
+  let path = win32.join(targetDir, "clang_rt.profile.lib");
+  try {
+    await lstat(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    path = win32.join(libraries, "windows", "clang_rt.profile-x86_64.lib");
+  }
   return {
     compiler,
     msvc,

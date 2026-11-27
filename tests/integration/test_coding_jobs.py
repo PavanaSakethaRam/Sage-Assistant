@@ -917,7 +917,9 @@ def test_literal_extension_journal_projection_and_receipt_parity() -> None:
 
     from sage.coding_contracts import parse_code_intent, parse_code_receipt
 
-    corpus = json.loads((Path(__file__).parents[1] / "fixtures/coding-contracts.json").read_text())
+    corpus = json.loads(
+        (Path(__file__).parents[1] / "fixtures/coding-contracts.json").read_text(encoding="utf-8")
+    )
     for vector in corpus["journal_vectors"]:
         if vector["kind"] == "intent":
             material = CodingJobs._projection(parse_code_intent(vector["input"]))

@@ -7,6 +7,9 @@ import { makeProposal, makeReceipt } from "./coding-fixtures";
 import { afterEach, expect, it, vi } from "vitest";
 import { connect, createServer, type Socket } from "node:net";
 import { createHash } from "node:crypto";
+import { mkdtemp, realpath } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { EditorBridgeHost } from "../main/editor-bridge";
 import { ExtensionBridge } from "../../extension/src/bridge";
 import { encodeFrame, FrameDecoder } from "../shared/framing";
@@ -33,8 +36,11 @@ afterEach(async () => {
   sockets.splice(0).forEach((socket) => socket.destroy());
   await Promise.all(resources.splice(0).map((item) => item.close()));
 });
+async function temporaryRoot(prefix: string): Promise<string> {
+  return realpath(await mkdtemp(join(tmpdir(), prefix)));
+}
 const workspace: LocalWorkspace = {
-  root_uri: "file:///tmp/sage-owned",
+  root_uri: "file:///C:/sage-owned",
   root_file_id: "fixture-root",
   window_id: "window-1",
 };
@@ -342,7 +348,7 @@ it("uses independent nonce, transcript, HKDF and direction MAC vectors", () => {
     pair_id: "pair",
     window_id: "window",
     root_id: "root",
-    root_uri: "file:///tmp/sage-owned",
+    root_uri: "file:///C:/sage-owned",
     root_file_id: "file",
     challenge: "",
     status: "awaiting_confirmation",
@@ -367,19 +373,19 @@ it("uses independent nonce, transcript, HKDF and direction MAC vectors", () => {
     s,
     commitment,
   );
-  expect(commitment).toBe("x51kWSGetoHhU89nYm6R_q03tZHdInsdjtFIz_XTEY0");
+  expect(commitment).toBe("czT_4atl7xEieeY4BCSgsOylTjpbtidXIPtB6j-x3XQ");
   expect(initial.toString()).toBe(
-    '[1,12345,"boot","pair","AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE","AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI","x51kWSGetoHhU89nYm6R_q03tZHdInsdjtFIz_XTEY0"]',
+    '[1,12345,"boot","pair","AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE","AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI","czT_4atl7xEieeY4BCSgsOylTjpbtidXIPtB6j-x3XQ"]',
   );
   const bytes = transcript(view, c, s, 12345, commitment);
   expect(bytes.toString()).toBe(
-    '[1,12345,"boot","pair","AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE","AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI","x51kWSGetoHhU89nYm6R_q03tZHdInsdjtFIz_XTEY0","window","root","file:///tmp/sage-owned","file"]',
+    '[1,12345,"boot","pair","AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE","AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI","czT_4atl7xEieeY4BCSgsOylTjpbtidXIPtB6j-x3XQ","window","root","file:///C:/sage-owned","file"]',
   );
   expect(clientProof(secret, bytes)).toBe(
-    "3K2EjldYtLnXiiGIIW1If0ONoZaMbS0Msd6-IhDS05U",
+    "e95gzDOp3KlLiUuJzZQVSiPKR4fEJpev_G2HQMTCKPg",
   );
   expect(hostProof(secret, initial)).toBe(
-    "TcRlHLQDmQk21u6pwzba4dhOXcEo6u-i-gJdaP5IT24",
+    "t4m8tQu0JzdCvRLtvlZ2i9EUMem4nXITmmKyZOFbHNA",
   );
   for (const initialBytes of [
     initialTranscript(12346, "boot", "pair", c, s, commitment),
@@ -411,7 +417,7 @@ it("uses independent nonce, transcript, HKDF and direction MAC vectors", () => {
     ),
   ])
     expect(hostProof(secret, initialBytes)).not.toBe(
-      "TcRlHLQDmQk21u6pwzba4dhOXcEo6u-i-gJdaP5IT24",
+      "t4m8tQu0JzdCvRLtvlZ2i9EUMem4nXITmmKyZOFbHNA",
     );
   for (const field of [
     "window_id",
@@ -425,7 +431,7 @@ it("uses independent nonce, transcript, HKDF and direction MAC vectors", () => {
         transcript(
           {
             ...view,
-            [field]: field === "root_uri" ? "file:///other" : "other",
+            [field]: field === "root_uri" ? "file:///C:/other" : "other",
           },
           c,
           s,
@@ -433,7 +439,7 @@ it("uses independent nonce, transcript, HKDF and direction MAC vectors", () => {
           commitment,
         ),
       ),
-    ).not.toBe("3K2EjldYtLnXiiGIIW1If0ONoZaMbS0Msd6-IhDS05U");
+    ).not.toBe("e95gzDOp3KlLiUuJzZQVSiPKR4fEJpev_G2HQMTCKPg");
   for (const field of ["window_id", "root_uri", "root_file_id"] as const)
     expect(
       workspaceCommitment(
@@ -442,11 +448,11 @@ it("uses independent nonce, transcript, HKDF and direction MAC vectors", () => {
           root_uri: view.root_uri,
           root_file_id: view.root_file_id,
           window_id: view.window_id,
-          [field]: field === "root_uri" ? "file:///other" : "other",
+          [field]: field === "root_uri" ? "file:///C:/other" : "other",
         },
         c,
       ),
-    ).not.toBe("x51kWSGetoHhU89nYm6R_q03tZHdInsdjtFIz_XTEY0");
+    ).not.toBe("czT_4atl7xEieeY4BCSgsOylTjpbtidXIPtB6j-x3XQ");
   const key = deriveKey(secret, c, s);
   expect(key.toString("hex")).toBe(
     "a932aec749a3dd86354b9eb34f491a252d463febb39c2ca23bfee53c2f9fe45a",
@@ -958,9 +964,9 @@ it("rejects malformed tickets, noncanonical local identity and invalid nonce siz
     "invalid",
     "https://example.com/",
     "file://server/root",
-    "file:///tmp/root#fragment",
-    "file:///tmp/root?query",
-    "file:///tmp/%61",
+    "file:///C:/root#fragment",
+    "file:///C:/root?query",
+    "file:///C:/%61",
     "x".repeat(8193),
   ])
     expect(() => parseWorkspace({ ...workspace, root_uri })).toThrow();
@@ -980,10 +986,10 @@ it("rejects malformed tickets, noncanonical local identity and invalid nonce siz
     deriveKey(Buffer.alloc(0), Buffer.alloc(32), Buffer.alloc(32)),
   ).toThrow();
   expect(rootIdentity(workspace)).toBe(
-    "b46f51a3bf793878e1393f3d63f4ce40efc87d202e8676908580df048ae4a9da",
+    "628a2366e3f9dd9c6978d87a8da1e02bd3d2dead1a6b2c5842e6d40d982bf036",
   );
   expect(rootIdentity({ ...workspace, window_id: "another" })).toBe(
-    "b46f51a3bf793878e1393f3d63f4ce40efc87d202e8676908580df048ae4a9da",
+    "628a2366e3f9dd9c6978d87a8da1e02bd3d2dead1a6b2c5842e6d40d982bf036",
   );
 });
 it("original ticket deadline closes an authenticated but locally unconfirmed pair", async () => {
@@ -1124,7 +1130,7 @@ it.each(["forged-proof", "workspace-mismatch"])(
     );
     const chosen =
       mode === "workspace-mismatch"
-        ? { ...workspace, root_uri: "file:///tmp/other", root_file_id: "other" }
+        ? { ...workspace, root_uri: "file:///C:/other", root_file_id: "other" }
         : workspace;
     const commitment = workspaceCommitment(
       Buffer.from(ticket.secret, "base64url"),
@@ -1231,7 +1237,7 @@ it.each(["malformed", "forged", "replayed"])(
           }),
         ).toString("base64url"),
         {
-          root_uri: "file:///private/private-root-before-proof",
+          root_uri: "file:///C:/private/private-root-before-proof",
           root_file_id: "private-file-before-proof",
           window_id: "private-window-before-proof",
         },
@@ -1406,9 +1412,9 @@ it("rejects renewed, future, expired and malformed transport-only capture leases
 it("records local intent before core acknowledgment and refuses repeat/reconciliation as effect authority", async () => {
   const { EffectJournal, journalHash, intentProjection } =
     await import("../../extension/src/journal");
-  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { rm } = await import("node:fs/promises");
   const { pathToFileURL } = await import("node:url");
-  const root = await mkdtemp("/private/tmp/sage-bridge-journal-");
+  const root = await temporaryRoot("sage-bridge-journal-");
   const journal = new EffectJournal(pathToFileURL(root));
   let calls = 0;
   const s = await setup(true, async (data) => {
@@ -1531,9 +1537,9 @@ it.each([
   async (mode) => {
     const { EffectJournal, journalHash, intentProjection } =
       await import("../../extension/src/journal");
-    const { mkdtemp, rm } = await import("node:fs/promises");
+    const { rm } = await import("node:fs/promises");
     const { pathToFileURL } = await import("node:url");
-    const root = await mkdtemp("/private/tmp/sage-core-ack-");
+    const root = await temporaryRoot("sage-core-ack-");
     const journal = new EffectJournal(pathToFileURL(root));
     let calls = 0;
     const s = await setup(true, async (data) => {
@@ -1587,9 +1593,9 @@ it.each([
 );
 it("local journal failure sends zero core intent frames", async () => {
   const { EffectJournal } = await import("../../extension/src/journal");
-  const { mkdtemp, rm, writeFile } = await import("node:fs/promises");
+  const { rm, writeFile } = await import("node:fs/promises");
   const { pathToFileURL } = await import("node:url");
-  const root = await mkdtemp("/private/tmp/sage-failed-local-");
+  const root = await temporaryRoot("sage-failed-local-");
   let calls = 0;
   const s = await setup(true, () => {
     calls++;
@@ -1619,7 +1625,7 @@ it("owns acknowledgment recording before the first local durability await", asyn
   const { EffectJournal } = await import("../../extension/src/journal");
   const { pathToFileURL } = await import("node:url");
   const journal = new EffectJournal(
-    pathToFileURL("/private/tmp/sage-unused-journal"),
+    pathToFileURL(join(tmpdir(), "sage-unused-journal")),
   );
   let release!: (value: import("../shared/coding-contracts").CodeAck) => void;
   const held = new Promise<import("../shared/coding-contracts").CodeAck>(
@@ -1664,9 +1670,9 @@ it("owns acknowledgment recording before the first local durability await", asyn
 it("correlates a core acknowledgement by binding values rather than JSON key order", async () => {
   const { EffectJournal, intentProjection, journalHash } =
     await import("../../extension/src/journal");
-  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { rm } = await import("node:fs/promises");
   const { pathToFileURL } = await import("node:url");
-  const root = await mkdtemp("/private/tmp/sage-ack-order-");
+  const root = await temporaryRoot("sage-ack-order-");
   const journal = new EffectJournal(pathToFileURL(root));
   const s = await setup(true, async (data) => {
     if (data.kind !== "journal.intent") throw Error("Unexpected");
@@ -1707,9 +1713,9 @@ it("correlates a core acknowledgement by binding values rather than JSON key ord
 it("durably records observation before dispatching it to the core consumer", async () => {
   const { EffectJournal, receiptProjection, journalHash } =
     await import("../../extension/src/journal");
-  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { rm } = await import("node:fs/promises");
   const { pathToFileURL } = await import("node:url");
-  const root = await mkdtemp("/private/tmp/sage-observed-before-core-");
+  const root = await temporaryRoot("sage-observed-before-core-");
   const journal = new EffectJournal(pathToFileURL(root));
   let calls = 0;
   const s = await setup(true, async (data) => {
@@ -1850,9 +1856,9 @@ it("routes authenticated coding controls once, polls source-free status and drop
 it("routes only fixed review/test/journal/finish kinds and keeps fresh ack correlation", async () => {
   const { EffectJournal, journalHash, intentProjection, receiptProjection } =
     await import("../../extension/src/journal");
-  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { rm } = await import("node:fs/promises");
   const { pathToFileURL } = await import("node:url");
-  const root = await mkdtemp("/private/tmp/sage-task5-journal-");
+  const root = await temporaryRoot("sage-task5-journal-");
   resources.push({ close: () => rm(root, { recursive: true, force: true }) });
   const journal = new EffectJournal(pathToFileURL(root));
   const controls: string[] = [];
@@ -2487,9 +2493,9 @@ it.each([
 it("delayed history read leaves ordinary intent ACK progress and current owner untouched", async () => {
   const { EffectJournal, journalHash, intentProjection } =
     await import("../../extension/src/journal");
-  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { rm } = await import("node:fs/promises");
   const { pathToFileURL } = await import("node:url");
-  const root = await mkdtemp("/private/tmp/sage-history-ack-");
+  const root = await temporaryRoot("sage-history-ack-");
   let resume!: (job: ReturnType<typeof historicalFixture>) => void,
     reached!: () => void;
   const ready = new Promise<void>((resolve) => {

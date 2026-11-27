@@ -11,6 +11,7 @@ import {
 import { lstatSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import corpus from "../../../tests/fixtures/coding-contracts.json";
 import {
@@ -165,10 +166,10 @@ function positions(text: string) {
 const digest = (text: string) =>
   createHash("sha256").update(text).digest("hex");
 async function fixture(prefix = "sage-inspection-") {
-  const root = await realpath(await mkdtemp("/private/tmp/" + prefix));
+  const root = await realpath(await mkdtemp(join(tmpdir(), prefix)));
   roots.push(root);
   const storage = await realpath(
-    await mkdtemp("/private/tmp/sage-inspection-journal-"),
+    await mkdtemp(join(tmpdir(), "sage-inspection-journal-")),
   );
   roots.push(storage);
   const info = lstatSync(root, { bigint: true });
@@ -425,13 +426,17 @@ it("independent fixed view closes only its slot and delayed display cannot reviv
   expect(ui.tabs).toHaveLength(1);
 });
 
-it("observes an exact already-open VS Code URI in a colon-named root without rewriting Node root identity", async () => {
-  const f = await fixture("sage-inspection:encoded-");
-  await writeFile(join(f.root, "index.html"), "proposed\n");
-  const raw = pathToFileURL(f.root).href.replace(
-    /sage-inspection:/,
-    "sage-inspection%3A",
+it("observes an encoded VS Code folder URI without rewriting the Node root identity", async () => {
+  const windows = process.platform === "win32";
+  const f = await fixture(
+    windows ? "sage-inspection-" : "sage-inspection:encoded-",
   );
+  await writeFile(join(f.root, "index.html"), "proposed\n");
+  const canonical = pathToFileURL(f.root).href;
+  const raw = windows
+    ? canonical.replace(/^(file:\/\/\/[A-Z]):/iu, "$1%3A")
+    : canonical.replace("sage-inspection:", "sage-inspection%3A");
+  expect(raw).not.toBe(canonical);
   f.owner.rawRootUri = raw;
   const bufferUri = raw + "/index.html";
   ui.documents = [

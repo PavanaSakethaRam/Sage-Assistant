@@ -223,7 +223,14 @@ async function archive(mutation: Mutation = {}) {
     ]),
   );
   entries["extension.vsixmanifest"] = Buffer.from(XML).toString("base64");
-  entries["[Content_Types].xml"] = Buffer.from(TYPES).toString("base64");
+  const types =
+    platform === "win32-x64"
+      ? TYPES.replace(
+          "</Types>",
+          '<Default Extension=".exe" ContentType="application/octet-stream"/></Types>',
+        )
+      : TYPES;
+  entries["[Content_Types].xml"] = Buffer.from(types).toString("base64");
   const name = mutation.name ?? helper;
   if (mutation.data !== undefined) {
     entries[name] = Buffer.from(mutation.data).toString("base64");
@@ -253,9 +260,10 @@ async function archive(mutation: Mutation = {}) {
 + if mutation.get('archiveComment'): z.comment=b'PRIVATE_MARKER'
 + for name,data in entries.items():
 +  if mutation.get('missing') and name==helper: continue
-+  item=zipfile.ZipInfo(name); item.create_system=3; item.external_attr=(0o100755 if name==helper else 0o100664)<<16
++  item=zipfile.ZipInfo(name); item.create_system=3; item.external_attr=0o100664<<16
 +  if name==helper:
-+   item.external_attr=mutation.get('mode',0o100755)<<16; item.create_system=mutation.get('creator',3)
++   helper_mode=0o100666 if helper.endswith('.exe') else 0o100755
++   item.external_attr=mutation.get('mode',helper_mode)<<16; item.create_system=mutation.get('creator',3)
 +   if mutation.get('memberComment'): item.comment=b'PRIVATE_MARKER'
 +   if mutation.get('memberExtra'): item.extra=b'\\xfe\\xca\\x04\\x00test'
 +  item.compress_type=zipfile.ZIP_STORED if mutation.get('stored') else zipfile.ZIP_DEFLATED; z.writestr(item,base64.b64decode(data))
@@ -382,6 +390,13 @@ test.each(["darwin-arm64", "win32-x64"] as const)(
     );
   },
 );
+
+test("Windows VSIX rejects a helper mode that differs from VSCE output", async () => {
+  const fixture = await archive({ platform: "win32-x64", mode: 0o100755 });
+  await expect(validateVsix(fixture.path, fixture.expected)).rejects.toThrow(
+    "Unsafe VSIX metadata",
+  );
+});
 
 test("refuses an inherited platform key that would otherwise select an unapproved helper name", async () => {
   const fixture = await archive({

@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import {
   mkdtemp,
+  realpath,
   readFile,
   readdir,
   rm,
@@ -14,6 +15,7 @@ import {
   lstat,
 } from "node:fs/promises";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 import {
   EffectJournal,
@@ -155,7 +157,7 @@ afterEach(async () => {
   );
 });
 async function fixture() {
-  const root = await mkdtemp("/private/tmp/sage-journal-");
+  const root = await realpath(await mkdtemp(join(tmpdir(), "sage-journal-")));
   roots.push(root);
   return { root, journal: new EffectJournal(pathToFileURL(root)) };
 }

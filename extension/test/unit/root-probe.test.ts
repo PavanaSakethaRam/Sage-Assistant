@@ -74,6 +74,7 @@ const nativeDouble = vi.hoisted(() => ({
   run: undefined as undefined | ((...args: unknown[]) => unknown),
   files: new Map<string, Buffer>(),
   directories: new Set<string>(),
+  missing: new Set<string>(),
 }));
 vi.mock("node:child_process", async (importOriginal) => ({
   ...(await importOriginal<typeof import("node:child_process")>()),
@@ -97,24 +98,33 @@ vi.mock("node:fs/promises", async (importOriginal) => {
         ? Promise.resolve(args[1] === "utf8" ? bytes.toString() : bytes)
         : actual.readFile(...args);
     },
-    stat: (...args: Parameters<typeof actual.stat>) =>
-      nativeDouble.files.has(String(args[0])) ||
-      nativeDouble.directories.has(String(args[0]))
-        ? Promise.resolve({
-            isFile: () => nativeDouble.files.has(String(args[0])),
-            isDirectory: () => nativeDouble.directories.has(String(args[0])),
-            isSymbolicLink: () => false,
-            size: nativeDouble.files.get(String(args[0]))?.length ?? 0,
-          })
-        : actual.stat(...args),
+    stat: (...args: Parameters<typeof actual.stat>) => {
+      const file = String(args[0]);
+      if (nativeDouble.missing.has(file))
+        return Promise.reject(
+          Object.assign(Error("owned tool absent"), { code: "ENOENT" }),
+        );
+      if (nativeDouble.files.has(file) || nativeDouble.directories.has(file))
+        return Promise.resolve({
+          isFile: () => nativeDouble.files.has(file),
+          isDirectory: () => nativeDouble.directories.has(file),
+          isSymbolicLink: () => false,
+          size: nativeDouble.files.get(file)?.length ?? 0,
+        });
+      return actual.stat(...args);
+    },
     lstat: (...args: Parameters<typeof actual.lstat>) =>
-      nativeDouble.files.has(String(args[0]))
-        ? Promise.resolve({
-            isFile: () => true,
-            isSymbolicLink: () => false,
-            size: nativeDouble.files.get(String(args[0]))!.length,
-          })
-        : actual.lstat(...args),
+      nativeDouble.missing.has(String(args[0]))
+        ? Promise.reject(
+            Object.assign(Error("owned tool absent"), { code: "ENOENT" }),
+          )
+        : nativeDouble.files.has(String(args[0]))
+          ? Promise.resolve({
+              isFile: () => true,
+              isSymbolicLink: () => false,
+              size: nativeDouble.files.get(String(args[0]))!.length,
+            })
+          : actual.lstat(...args),
   };
 });
 import { writeFileSync } from "node:fs";
@@ -297,6 +307,7 @@ afterEach(() => {
   nativeDouble.run = undefined;
   nativeDouble.files.clear();
   nativeDouble.directories.clear();
+  nativeDouble.missing.clear();
   vi.restoreAllMocks();
 });
 async function runtimeFixture() {
@@ -460,14 +471,17 @@ async function windowsToolFixture() {
   const clang = "C:\\Program Files\\LLVM\\bin\\clang-cl.exe";
   const profdata = "C:\\Program Files\\LLVM\\bin\\llvm-profdata.exe";
   const cov = "C:\\Program Files\\LLVM\\bin\\llvm-cov.exe";
-  const runtime = "C:\\Program Files\\LLVM\\lib\\clang\\20\\lib\\windows";
-  const library = runtime + "\\clang_rt.profile-x86_64.lib";
+  const resource = "C:\\Program Files\\LLVM\\lib\\clang\\20";
+  const runtime = resource + "\\lib\\x86_64-pc-windows-msvc";
+  const library = resource + "\\lib\\windows\\clang_rt.profile-x86_64.lib";
+  const targetLibrary = runtime + "\\clang_rt.profile.lib";
   const source = join(root, "extension/native/root-probe.c");
   await mkdir(join(root, "extension/native"), { recursive: true });
   await copyFile(join(process.cwd(), "extension/native/root-probe.c"), source);
   for (const path of [compiler, linker, clang, profdata, cov, library])
     nativeDouble.files.set(path, Buffer.from("owned installed tool " + path));
-  nativeDouble.directories.add(runtime);
+  nativeDouble.directories.add(resource);
+  nativeDouble.missing.add(targetLibrary);
   const binary = Buffer.alloc(512);
   binary.write("MZ");
   binary.writeUInt32LE(128, 0x3c);
@@ -511,6 +525,8 @@ async function windowsToolFixture() {
       }
       return result;
     }
+    if (args[0] === "/clang:-print-resource-dir")
+      return { ...result, stdout: resource + "\n" };
     if (args[0] === "/clang:-print-runtime-dir")
       return { ...result, stdout: runtime + "\n" };
     if (args[0] === "/clang:-print-prog-name=link")
@@ -716,6 +732,7 @@ async function windowsToolFixture() {
     cov,
     runtime,
     library,
+    targetLibrary,
     calls,
     binary,
     source,
@@ -796,6 +813,33 @@ describe("installed native builder decisions", () => {
       await expect(buildRootProbe(true)).resolves.toMatchObject({
         name: "root-probe-win32-x64.exe",
       });
+    } finally {
+      await fixture.cleanup();
+    }
+  });
+  it("matches the installed LLVM profile archive search order", async () => {
+    const fixture = await windowsToolFixture();
+    const provenancePath = join(
+      fixture.root,
+      ".cache/native-coverage/provenance.json",
+    );
+    try {
+      await buildRootProbe(true);
+      expect(
+        JSON.parse(await readFile(provenancePath, "utf8")).toolchain.runtime
+          .path,
+      ).toBe(fixture.library);
+
+      nativeDouble.missing.delete(fixture.targetLibrary);
+      nativeDouble.files.set(
+        fixture.targetLibrary,
+        Buffer.from("owned per-target profile archive"),
+      );
+      await buildRootProbe(true);
+      expect(
+        JSON.parse(await readFile(provenancePath, "utf8")).toolchain.runtime
+          .path,
+      ).toBe(fixture.targetLibrary);
     } finally {
       await fixture.cleanup();
     }
@@ -992,9 +1036,9 @@ describe("installed native builder decisions", () => {
     try {
       await buildRootProbe(true);
       const before = fixture.calls.length;
-      if (damage === "missing-tool") nativeDouble.files.delete(fixture.cov);
+      if (damage === "missing-tool") nativeDouble.missing.add(fixture.cov);
       else if (damage === "missing-runtime")
-        nativeDouble.files.delete(fixture.library);
+        nativeDouble.missing.add(fixture.library);
       else if (damage === "empty-runtime")
         nativeDouble.files.set(fixture.library, Buffer.alloc(0));
       else if (damage === "tool-hash") {

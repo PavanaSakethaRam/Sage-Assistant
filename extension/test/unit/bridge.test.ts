@@ -249,9 +249,13 @@ it("deterministic editor cache validation rejects changed bytes, extra files and
   await writeFile(join(root, "extra"), "unexpected");
   await expect(revalidate(root)).rejects.toThrow();
   await rm(join(root, "extra"));
-  await chmod(executable, 0o700);
+  await chmod(executable, 0o444);
   await expect(revalidate(root)).rejects.toThrow();
-  await symlink(tmpdir(), join(root, "escape"));
+  await symlink(
+    tmpdir(),
+    join(root, "escape"),
+    process.platform === "win32" ? "junction" : "dir",
+  );
   await expect(inventory(root)).rejects.toThrow();
   await rm(join(root, "escape"));
   await writeFile(
@@ -631,7 +635,7 @@ import type {
 } from "../../../desktop/shared/coding-contracts";
 it("closed bridge retains only an exact preexisting intent observation locally and sends no frame", async () => {
   const root = await realpath(
-    await mkdtemp("/private/tmp/sage-closed-observed-"),
+    await mkdtemp(join(tmpdir(), "sage-closed-observed-")),
   );
   roots.push(root);
   const journal = new EffectJournal(pathToFileURL(root));

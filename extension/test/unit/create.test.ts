@@ -11,6 +11,7 @@ import {
 } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import {
   FOCUS_NAMES,
@@ -229,7 +230,7 @@ afterEach(async () => {
   );
 });
 async function fixture() {
-  const root = await realpath(await mkdtemp("/private/tmp/sage-create-"));
+  const root = await realpath(await mkdtemp(join(tmpdir(), "sage-create-")));
   roots.push(root);
   const workspace = {
     root_uri: pathToFileURL(root).href,
@@ -686,7 +687,9 @@ it("malicious proposal text stays literal in all four diffs and cannot invoke co
 it("cancellation after actual wx retains one honest local observation with zero closed-Core sends", async () => {
   const f = await fixture();
   approve();
-  const journalRoot = await mkdtemp("/private/tmp/sage-create-late-journal-");
+  const journalRoot = await realpath(
+    await mkdtemp(join(tmpdir(), "sage-create-late-journal-")),
+  );
   roots.push(journalRoot);
   const { EffectJournal } = await import("../../src/journal");
   const { ExtensionBridge } = await import("../../src/bridge");

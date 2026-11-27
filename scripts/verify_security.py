@@ -216,7 +216,23 @@ def native_sarif_clean(report: Path) -> bool:
 
 
 def windows_native_scan(source: Path, temp: Path) -> dict[str, Any]:
-    incomplete = {"status": "incomplete", "reason": "native analyzer collection failed"}
+    def incomplete(stage: str, result: tuple[int | None, str, str] | None = None) -> dict[str, Any]:
+        report: dict[str, Any] = {
+            "status": "incomplete",
+            "reason": "native analyzer collection failed",
+            "stage": stage,
+        }
+        if result is not None:
+            report["exit_code"] = result[0]
+            report["diagnostics"] = sorted(
+                set(
+                    re.findall(
+                        r"\b(?:error|warning) ((?:C|D|LNK)\d{4})(?=:)", result[1] + "\n" + result[2]
+                    )
+                )
+            )[:4]
+        return report
+
     try:
         install = Path(os.environ.get("VCTOOLSINSTALLDIR", ""))
         compiler = install / "bin/Hostx64/x64/cl.exe"
@@ -231,7 +247,7 @@ def windows_native_scan(source: Path, temp: Path) -> dict[str, Any]:
             or not compiler.is_file()
             or not compiler.stat().st_size
         ):
-            return incomplete
+            return incomplete("MSVC environment")
         compiler_hash = hashlib.sha256(compiler.read_bytes()).hexdigest()
         source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
         probe = native_execute([str(compiler), "/?"], temp)
@@ -257,10 +273,10 @@ def windows_native_scan(source: Path, temp: Path) -> dict[str, Any]:
                 re.I,
             )
         ):
-            return incomplete
+            return incomplete("MSVC compiler probe", probe)
         report = temp / "analysis.sarif"
         if report.exists() or report.is_symlink():
-            return incomplete
+            return incomplete("SARIF destination")
         analysis = native_execute(
             [
                 str(compiler),
@@ -283,19 +299,20 @@ def windows_native_scan(source: Path, temp: Path) -> dict[str, Any]:
             banner[0],
             "Copyright (C) Microsoft Corporation. All rights reserved.",
         }
-        if (
-            analysis[0] != 0
-            or any(
-                line.strip() not in benign
-                for stream in analysis[1:]
-                for line in stream.splitlines()
-                if line.strip()
-            )
-            or hashlib.sha256(source.read_bytes()).hexdigest() != source_hash
-            or hashlib.sha256(compiler.read_bytes()).hexdigest() != compiler_hash
-            or not native_sarif_clean(report)
+        if analysis[0] != 0 or any(
+            line.strip() not in benign
+            for stream in analysis[1:]
+            for line in stream.splitlines()
+            if line.strip()
         ):
-            return incomplete
+            return incomplete("MSVC analysis command", analysis)
+        if (
+            hashlib.sha256(source.read_bytes()).hexdigest() != source_hash
+            or hashlib.sha256(compiler.read_bytes()).hexdigest() != compiler_hash
+        ):
+            return incomplete("MSVC analysis provenance")
+        if not native_sarif_clean(report):
+            return incomplete("SARIF report")
         return {
             "status": "pass",
             "compiler": "MSVC x64",
@@ -306,7 +323,7 @@ def windows_native_scan(source: Path, temp: Path) -> dict[str, Any]:
             "windows_gate": "policy collection only; allocated Windows execution remains required",
         }
     except (OSError, ValueError):
-        return incomplete
+        return incomplete("MSVC analysis inputs")
 
 
 def collect_bandit(targets: list[str]) -> tuple[int, Any, str]:

@@ -225,7 +225,7 @@ export async function validatePackage(
     resources,
   );
   const compiled = compiledExtensionIdentity(
-    extractFile(archive, ".vite/build/main.cjs").toString("utf8"),
+    extractFile(archive, join(".vite", "build", "main.cjs")).toString("utf8"),
   );
   if (
     identity === null ||

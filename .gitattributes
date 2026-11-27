@@ -14,6 +14,7 @@ scripts/*.mjs text eol=lf
 extension/**/*.ts text eol=lf
 extension/**/*.c text eol=lf
 extension/**/*.json text eol=lf
+extension/**/*.md text eol=lf
 tests/fixtures/focus-project/index.html text eol=lf
 tests/fixtures/focus-project/focus.js text eol=lf
 tests/fixtures/focus-project/focus.test.mjs text eol=lf

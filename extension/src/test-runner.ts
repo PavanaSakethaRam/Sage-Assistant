@@ -366,7 +366,11 @@ export async function inspectNode(uri: vscode.Uri): Promise<NodeCandidate> {
       capture = collect(child, 5000, 4096, new AbortController().signal),
       observed = await capture.result;
     if (observed.spawned && !observed.ended) terminationUnconfirmed = true;
-    const output = observed.text(true);
+    const rawVersion = observed.text(true);
+    const output =
+      process.platform === "win32"
+        ? rawVersion.replace(/\r\n$/u, "\n")
+        : rawVersion;
     capture.clear();
     if (
       !observed.complete ||

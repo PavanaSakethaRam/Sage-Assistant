@@ -440,6 +440,33 @@ def owned_windows_scan(
     return module, output, calls
 
 
+def test_windows_analysis_reports_only_fixed_stage_and_compiler_codes(
+    owned_windows_scan: tuple[ModuleType, Path, list[tuple[list[str], Path]]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module, output, _ = owned_windows_scan
+    good = module.native_execute
+
+    def execute(args: list[str], cwd: Path) -> tuple[int, str, str]:
+        return (
+            good(args, cwd)
+            if args[1:] == ["/?"]
+            else (2, "private-marker: warning C6262: private details", "")
+        )
+
+    monkeypatch.setattr(module, "native_execute", execute)
+    assert module.main() == 1
+    report = output.read_text()
+    assert "private-marker" not in report
+    assert json.loads(report)["native"] == {
+        "status": "incomplete",
+        "reason": "native analyzer collection failed",
+        "stage": "MSVC analysis command",
+        "exit_code": 2,
+        "diagnostics": ["C6262"],
+    }
+
+
 def test_windows_complete_synthetic_sarif_passes_actual_scan_and_main(
     owned_windows_scan: tuple[ModuleType, Path, list[tuple[list[str], Path]]],
 ) -> None:

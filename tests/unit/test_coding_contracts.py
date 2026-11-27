@@ -408,7 +408,7 @@ def test_proposal_hash_binds_validated_source_context_scope_and_explanation() ->
 
 
 def test_cancel_requested_is_strict_and_defaults_false() -> None:
-    corpus = json.loads(CORPUS.read_text())
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
     view = next(
         row["value"] for row in corpus["cases"] if row["kind"] == "job_view" and row["valid"]
     )
@@ -418,7 +418,7 @@ def test_cancel_requested_is_strict_and_defaults_false() -> None:
 
 
 def test_recipe_timeout_is_explicit_fixed_and_strict() -> None:
-    corpus = json.loads(CORPUS.read_text())
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
     recipe = corpus["recipe_vectors"][0]["recipe"]
     for invalid in (None, 29, 31, True, "30", 30.0):
         with pytest.raises(ValueError):
@@ -427,7 +427,7 @@ def test_recipe_timeout_is_explicit_fixed_and_strict() -> None:
 
 
 def test_unconfigured_generation_zero_has_no_selected_account() -> None:
-    corpus = json.loads(CORPUS.read_text())
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
     view = next(
         row["value"] for row in corpus["cases"] if row["kind"] == "job_view" and row["valid"]
     )
@@ -442,7 +442,7 @@ def test_unconfigured_generation_zero_has_no_selected_account() -> None:
 
 
 def test_shared_proposal_vectors_and_source_order_mutations() -> None:
-    corpus = json.loads(CORPUS.read_text())
+    corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
     for row in corpus["proposal_vectors"]:
         context = CodeContext.model_validate(row["context"])
         proposal = coding.CodeProposal.model_validate(row["proposal"])

@@ -220,7 +220,7 @@ def xml(raw):
  check(not re.search(br'<!\\s*(?:DOCTYPE|ENTITY)',raw,re.I),'xml')
  check(not re.search(br'<!--|<\\?(?!xml(?:\\s|\\?>))',raw),'xml')
  return ET.fromstring(raw.decode('utf-8'))
-def xml_check(data,manifest):
+def xml_check(data,helper):
  ns='http://schemas.microsoft.com/developer/vsx-schema/2011'
  q=lambda name:'{'+ns+'}'+name
  root=xml(data['extension.vsixmanifest'])
@@ -253,7 +253,8 @@ def xml_check(data,manifest):
  check(not assets.attrib and len(assets)==3 and [x.attrib for x in assets]==expected_assets and all(x.tag==q('Asset') and not list(x) for x in assets),'xml')
  types=xml(data['[Content_Types].xml']); cns='{http://schemas.openxmlformats.org/package/2006/content-types}'
  expected_types={'.cjs':'application/octet-stream','.json':'application/json','.md':'text/markdown','.txt':'text/plain','.vsixmanifest':'text/xml'}
- check(types.tag==cns+'Types' and not types.attrib and len(types)==5,'xml')
+ if helper.endswith('.exe'): expected_types['.exe']='application/octet-stream'
+ check(types.tag==cns+'Types' and not types.attrib and len(types)==len(expected_types),'xml')
  check(all(not (item.text or '').strip() and not (item.tail or '').strip() for item in types.iter()),'xml')
  actual={}
  for item in types:
@@ -268,12 +269,14 @@ try:
   check(len(names)==len(set(names))==8 and set(names)==set(expected)|{'[Content_Types].xml','extension.vsixmanifest'},'inventory')
   check(not z.comment and raw[-2:]==bytes(2) and min(i.header_offset for i in items)==0 and raw[-22:-18]==b'PK\\x05\\x06','metadata')
   decoded=envelope(raw,items)
+  # VSCE records writable Windows files without POSIX execute bits.
+  helper_mode=0o100666 if helper.endswith('.exe') else 0o100755
   data={}
   for item in items:
    mode=item.external_attr>>16
    check(not item.extra and not item.comment and 0<=item.header_offset<=len(raw)-30,'metadata')
    check(item.create_system==3 and stat.S_ISREG(mode) and not mode&0o7000 and not item.external_attr&0x10,'metadata')
-   check(item.filename!=helper or mode==0o100755,'metadata')
+   check(item.filename!=helper or mode==helper_mode,'metadata')
    data[item.filename]=z.read(item)
    check(data[item.filename]==decoded[item.filename],'metadata')
    if item.filename in expected: check(hashlib.sha256(data[item.filename]).hexdigest()==expected[item.filename],'content')
@@ -286,7 +289,7 @@ try:
   commands=[('sage.pairLocalEditor','Sage: Pair Local Editor'),('sage.captureContext','Sage: Capture Explicit Context'),('sage.sendContext','Sage: Send Selected Context'),('sage.cancelContext','Sage: Cancel Context'),('sage.inspectInterruptedJournal','Sage: Inspect Interrupted Sage Journal'),('sage.inspectInterruptedJob','Sage: Inspect Interrupted Job'),('sage.dismissInspection','Sage: Dismiss Inspection')]
   wanted={'name':'sage-editor-bridge','displayName':'Sage Local Editor Bridge','description':'Explicit local pairing with the Sage desktop host','version':'0.1.0','publisher':'sage-local','license':'UNLICENSED','engines':{'vscode':'^1.143.0'},'extensionKind':['ui'],'main':'./dist/extension.cjs','activationEvents':['onCommand:sage.pairLocalEditor','onCommand:sage.inspectInterruptedJournal','onCommand:sage.inspectInterruptedJob'],'capabilities':{'untrustedWorkspaces':{'supported':False},'virtualWorkspaces':{'supported':False}},'contributes':{'commands':[{'command':key,'title':title} for key,title in commands]},'repository':{'type':'git','url':'https://github.com/PavanaSakethaRam/Sage-Assistant.git','directory':'extension'}}
   check(json.dumps(manifest,sort_keys=True)==json.dumps(wanted,sort_keys=True),'manifest')
-  xml_check(data,manifest)
+  xml_check(data,helper)
   bundle=data['extension/dist/extension.cjs'].decode('utf-8')
   check(expected[helper] in bundle,'runtime')
   if len(sys.argv)==4:
@@ -360,8 +363,14 @@ if (
         ...(await validateVsix(resolve(process.argv[2]))),
       }),
     );
-  } catch {
-    console.error("FAIL extension checks");
+  } catch (error) {
+    const failure =
+      error instanceof Error
+        ? /^Unsafe VSIX ([a-z]+)$/u.exec(error.message)?.[1]
+        : undefined;
+    console.error(
+      failure ? `FAIL extension checks (${failure})` : "FAIL extension checks",
+    );
     process.exitCode = 1;
   }
 }

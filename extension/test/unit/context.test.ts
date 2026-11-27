@@ -11,7 +11,8 @@ import {
   mkdir,
 } from "node:fs/promises";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { tmpdir } from "node:os";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { localWorkspace } from "../../src/bridge";
 import * as contextModule from "../../src/context";
 import {
@@ -106,7 +107,9 @@ vi.mock("vscode", () => {
   const uri = (value: string) => ({
     toString: () => value,
     scheme: new URL(value).protocol.slice(0, -1),
-    fsPath: new URL(value).pathname,
+    fsPath: value.startsWith("file:")
+      ? fileURLToPath(value)
+      : new URL(value).pathname,
   });
   class TabInputText {
     constructor(public uri: { toString(): string }) {}
@@ -121,7 +124,7 @@ vi.mock("vscode", () => {
     },
     Uri: {
       file: (p: string) => {
-        const value = new URL("file://" + p).href;
+        const value = pathToFileURL(p).href;
         return uri(
           editor.encodeUris
             ? value.slice(0, 7) + value.slice(7).replaceAll(":", "%3A")
@@ -282,7 +285,7 @@ afterEach(async () => {
   );
 });
 async function selection(create = false): Promise<ContextSelection> {
-  const root = await realpath(await mkdtemp("/private/tmp/sage-context-"));
+  const root = await realpath(await mkdtemp(join(tmpdir(), "sage-context-")));
   roots.push(root);
   const workspace = localWorkspace(
     {
@@ -336,10 +339,7 @@ it("reject_nonempty_create_root_including_hidden_entries", async () => {
 it("preserve_utf8_lf_without_conversion", async () => {
   const s = await selection();
   editor.text = "const emoji = '😀';\n";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   const c = await captureContext(s);
   expect(c.files[0].text).toBe(editor.text);
   expect(c.files[0].document_version).toBe(1);
@@ -355,16 +355,13 @@ it.each([
 ])("refuses unconverted invalid source bytes %j", async (bytes) => {
   const s = await selection();
   editor.text = bytes.toString();
-  await writeFile(join(new URL(s.rawRootUri).pathname, "focus.js"), bytes);
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), bytes);
   await expect(captureContext(s)).rejects.toThrow();
 });
 it("accepts astral boundary and rejects dirty or editor/disk conflicts", async () => {
   const s = await selection();
   editor.text = "😀".repeat(32000);
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   expect((await captureContext(s)).files[0].text).toBe(editor.text);
   for (const dirty of [true, false]) {
     editor.dirty = dirty;
@@ -390,7 +387,7 @@ it("bind_windows_alias_and_workspace_generation", async () => {
 });
 it("refuses linked targets and a root switched after pairing", async () => {
   const s = await selection();
-  const root = new URL(s.rawRootUri).pathname;
+  const root = fileURLToPath(s.rawRootUri);
   await writeFile(join(root, "other"), "x");
   await symlink(join(root, "other"), join(root, "focus.js"));
   await expect(captureContext(s)).rejects.toThrow();
@@ -405,10 +402,7 @@ it("refuses linked targets and a root switched after pairing", async () => {
 it("selects diagnostics explicitly, counts their text and anchors expiry to capture", async () => {
   const s = await selection();
   editor.text = "x";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   editor.diagnostics = [
     {
       message: "selected message",
@@ -432,10 +426,7 @@ it("selects diagnostics explicitly, counts their text and anchors expiry to capt
 it("revalidates after editor await and never validates a model-supplied clone", async () => {
   const s = await selection();
   editor.text = "x";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   let changed = false;
   s.guard = () => {
     if (changed) throw Error("workspace");
@@ -454,12 +445,9 @@ async function controller() {
   const s = await selection();
   editor.rootUri = s.rawRootUri;
   editor.text = "selected source 😀\n";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   const storage = await realpath(
-    await mkdtemp("/private/tmp/sage-controller-storage-"),
+    await mkdtemp(join(tmpdir(), "sage-controller-storage-")),
   );
   roots.push(storage);
   const { activate, deactivate } = await import("../../src/extension");
@@ -581,10 +569,7 @@ it("expiry hides pending controls, clears selected text and prevents a late send
 it("does not read diagnostics when none were explicitly selected", async () => {
   const s = await selection();
   editor.text = "x";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   const captured = await captureContext(s);
   await validateContext(captured);
   expect(editor.diagnosticReads).toBe(0);
@@ -627,7 +612,11 @@ it("expires source-bearing diagnostic selection while its native picker is still
 
 it("accepts an encoded colon URI for the same exact original native folder and document", async () => {
   const s = await selection();
-  const root = join(new URL(s.rawRootUri).pathname, "owner:folder");
+  const windows = process.platform === "win32";
+  const root = join(
+    fileURLToPath(s.rawRootUri),
+    windows ? "owner-folder" : "owner:folder",
+  );
   await mkdir(root);
   const workspace = localWorkspace(
     {
@@ -640,7 +629,11 @@ it("accepts an encoded colon URI for the same exact original native folder and d
   );
   s.pair = { ...s.pair, ...workspace, root_id: rootIdentity(workspace) };
   s.binding = { ...s.binding, root_id: s.pair.root_id };
-  s.rawRootUri = pathToFileURL(root).href.replace(":folder", "%3Afolder");
+  const canonical = pathToFileURL(root).href;
+  s.rawRootUri = windows
+    ? canonical.replace(/^(file:\/\/\/[A-Z]):/iu, "$1%3A")
+    : canonical.replace(":folder", "%3Afolder");
+  expect(s.rawRootUri).not.toBe(canonical);
   editor.encodeUris = true;
   editor.text = "colon source 😀\n";
   await writeFile(join(root, "focus.js"), editor.text);
@@ -651,10 +644,7 @@ it("accepts an encoded colon URI for the same exact original native folder and d
     await expect(
       captureContext({
         ...s,
-        rawRootUri: s.rawRootUri.replace(
-          "/owner%3Afolder",
-          `/${segment}owner%3Afolder`,
-        ),
+        rawRootUri: s.rawRootUri.replace(/[^/]+$/u, (leaf) => segment + leaf),
       }),
     ).rejects.toThrow();
 });
@@ -662,10 +652,7 @@ it("accepts an encoded colon URI for the same exact original native folder and d
 it("refuses a selected document changed during the final native await", async () => {
   const s = await selection();
   editor.text = "x";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   const context = await captureContext(s);
   const { probeRoot } = await import("../../src/root-probe");
   let checks = 0;
@@ -722,7 +709,7 @@ it.each([false, true])(
     const c = await controller();
     let pending: Promise<void> | undefined;
     try {
-      const root = new URL(editor.rootUri).pathname;
+      const root = fileURLToPath(editor.rootUri);
       if (creation) {
         await rm(join(root, "focus.js"));
         editor.choices = [["Create focus project"]];
@@ -792,10 +779,7 @@ it.each([false, true])(
 it("revocation clears source and diagnostic getter cells while retaining only hash metadata", async () => {
   const s = await selection();
   editor.text = "owned selected body\n";
-  await writeFile(
-    join(new URL(s.rawRootUri).pathname, "focus.js"),
-    editor.text,
-  );
+  await writeFile(join(fileURLToPath(s.rawRootUri), "focus.js"), editor.text);
   editor.diagnostics = [
     {
       message: "owned diagnostic body",

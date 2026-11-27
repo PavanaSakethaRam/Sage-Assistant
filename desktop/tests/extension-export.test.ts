@@ -33,7 +33,7 @@ const identity = {
 const encode = (data: unknown) => Buffer.from(JSON.stringify(data));
 const roots: string[] = [];
 function fixture() {
-  const root = realpathSync(
+  const root = realpathSync.native(
     mkdtempSync(join(tmpdir(), "sage-extension-identity-")),
   );
   roots.push(root);

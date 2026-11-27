@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { mkdtemp, realpath, rm, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import {
   proposalHash,
@@ -236,7 +237,7 @@ async function fixture(
   baseline = "// human baseline 😀\n",
   readOnly = "read only source\n",
 ) {
-  const root = await realpath(await mkdtemp("/private/tmp/sage-create-"));
+  const root = await realpath(await mkdtemp(join(tmpdir(), "sage-create-")));
   roots.push(root);
   const workspace = {
     root_uri: pathToFileURL(root).href,
