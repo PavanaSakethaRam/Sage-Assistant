@@ -10,11 +10,10 @@ import {
   rename,
   symlink,
   link,
-  chmod,
   mkdir,
   lstat,
 } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 import {
@@ -45,6 +44,7 @@ const boundary = vi.hoisted(() => ({
   directoryCloses: 0,
   readBytes: 0,
   opened: [] as string[],
+  unreadable: undefined as string | undefined,
   sortListing: false,
   elapsedAfterEntry: undefined as (() => void) | undefined,
 }));
@@ -96,6 +96,8 @@ vi.mock("node:fs/promises", async (original) => {
     },
     open: async (...args: Parameters<typeof fs.open>) => {
       boundary.opened.push(String(args[0]));
+      if (String(args[0]) === boundary.unreadable)
+        throw Object.assign(Error("owned read denied"), { code: "EACCES" });
       const handle = await fs.open(...args);
       return new Proxy(handle, {
         get(target, key) {
@@ -149,6 +151,7 @@ afterEach(async () => {
   boundary.collision = false;
   boundary.rename = "";
   boundary.sortListing = false;
+  boundary.unreadable = undefined;
   boundary.elapsedAfterEntry = undefined;
   resetInventoryCounts();
   vi.restoreAllMocks();
@@ -403,7 +406,7 @@ it("ages out only recognized expired owned version1 pending metadata", async () 
   await rename(source, pending);
   await utimes(pending, old, old);
   await expect(journal.expire(new Date(now))).rejects.toThrow();
-  expect(await readdir(root)).toEqual([pending.split("/").at(-1)]);
+  expect(await readdir(root)).toEqual([basename(pending)]);
   const value = JSON.parse(await readFile(pending, "utf8"));
   value.created_at = old.toISOString();
   value.updated_at = old.toISOString();
@@ -457,9 +460,10 @@ it("preserves future/unknown versions, invalid types, links, oversized or clock-
   await rm(pending, { recursive: true });
   await writeFile(pending, '{"version":1');
   await utimes(pending, old, old);
-  await chmod(pending, 0);
+  boundary.unreadable = pending;
   await expect(journal.expire(new Date(now))).rejects.toThrow();
-  await chmod(pending, 0o600);
+  boundary.unreadable = undefined;
+  expect(await readFile(pending, "utf8")).toBe('{"version":1');
   await expect(journal.expire(new Date(NaN))).rejects.toThrow();
 });
 
@@ -546,7 +550,10 @@ it.each([
 ])("keeps opaque %s pending evidence blocked", async (content) => {
   const { root, journal } = await fixture();
   const name = "pending-" + "d".repeat(32);
-  await writeFile(join(root, name), content);
+  const pending = join(root, name);
+  const stableTime = new Date(Date.now() - 1000);
+  await writeFile(pending, content);
+  await utimes(pending, stableTime, stableTime);
   const result = await journal.inspectPending();
   expect(["future_version", "unrecognized"]).toContain(
     result.entries[0].classification,

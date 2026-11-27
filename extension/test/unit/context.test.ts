@@ -256,11 +256,9 @@ vi.mock("vscode", () => {
     },
   };
 });
-vi.mock("../../src/root-probe", () => ({
+vi.mock("../../src/root-probe", async (original) => ({
+  ...(await original<typeof import("../../src/root-probe")>()),
   probeRoot: vi.fn(async () => "darwin-native-1"),
-  validateRootSpelling: (p: string) => {
-    if (!p.startsWith("/") || p.includes("/../")) throw Error("root");
-  },
 }));
 const roots: string[] = [];
 afterEach(async () => {

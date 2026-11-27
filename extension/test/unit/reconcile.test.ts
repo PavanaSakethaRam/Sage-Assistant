@@ -57,6 +57,13 @@ vi.mock("node:fs/promises", async (original) => {
     },
   };
 });
+function editorFileUri(path: string): string {
+  return pathToFileURL(path).href.replaceAll(
+    ":",
+    (match: string, offset: number) => (offset > 5 ? "%3A" : match),
+  );
+}
+
 vi.mock("vscode", () => {
   class TextInput {
     constructor(readonly uri: { toString(): string }) {}
@@ -64,11 +71,7 @@ vi.mock("vscode", () => {
   return {
     Uri: {
       file: (path: string) => ({
-        toString: () =>
-          pathToFileURL(path).href.replaceAll(
-            ":",
-            (match: string, offset: number) => (offset > 5 ? "%3A" : match),
-          ),
+        toString: () => editorFileUri(path),
       }),
       parse: (value: string) => ({
         toString: () => value,
@@ -236,7 +239,7 @@ async function fixture(prefix = "sage-inspection-") {
 it("hashes only evidenced exact files and existing dirty buffers independently without opening source documents", async () => {
   const f = await fixture();
   await writeFile(join(f.root, "index.html"), "proposed\n");
-  const path = pathToFileURL(join(f.root, "index.html")).href;
+  const path = editorFileUri(join(f.root, "index.html"));
   let unrelatedReads = 0;
   ui.documents = [
     {
@@ -371,7 +374,7 @@ it.each(["\ufefftext", "CRLF\r\n", "\ud800"])(
     await writeFile(join(f.root, "index.html"), text);
     ui.documents = [
       {
-        uri: { toString: () => pathToFileURL(join(f.root, "index.html")).href },
+        uri: { toString: () => editorFileUri(join(f.root, "index.html")) },
         version: 1,
         isDirty: true,
         isClosed: false,
@@ -533,7 +536,7 @@ it.each(["closed", "eol", "oversize", "version", "removed", "dirty"])(
     const f = await fixture();
     await writeFile(join(f.root, "index.html"), "proposed\n");
     const document = {
-      uri: { toString: () => pathToFileURL(join(f.root, "index.html")).href },
+      uri: { toString: () => editorFileUri(join(f.root, "index.html")) },
       version: 1,
       isDirty: false,
       isClosed: fault === "closed",
@@ -639,7 +642,7 @@ it.each(["bom", "utf16"])(
     await writeFile(join(f.root, "index.html"), raw);
     const before = await lstat(join(f.root, "index.html"));
     const document = {
-      uri: { toString: () => pathToFileURL(join(f.root, "index.html")).href },
+      uri: { toString: () => editorFileUri(join(f.root, "index.html")) },
       version: 4,
       isClosed: false,
       isDirty: true,
@@ -762,7 +765,7 @@ it("oversized open-buffer metadata refuses before copying any logical source", a
   const getText = vi.fn(() => "proposed\n");
   ui.documents = [
     {
-      uri: { toString: () => pathToFileURL(join(f.root, "index.html")).href },
+      uri: { toString: () => editorFileUri(join(f.root, "index.html")) },
       version: 1,
       isDirty: true,
       isClosed: false,
@@ -782,7 +785,7 @@ it("the bounded metadata preflight permits exactly 32000 astral logical code poi
     text = "😀".repeat(32000);
   ui.documents = [
     {
-      uri: { toString: () => pathToFileURL(join(f.root, "index.html")).href },
+      uri: { toString: () => editorFileUri(join(f.root, "index.html")) },
       version: 3,
       isDirty: true,
       isClosed: false,

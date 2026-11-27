@@ -218,6 +218,8 @@ def test_extension_stage_measures_copied_bytes_before_inventory(
     core.chmod(0o755)
     source = root / ".cache/sage-editor-bridge.vsix"
     source.write_bytes(b"owned synthetic archive")
+    # Exercise a stable file whose metadata has changed since creation.
+    os.utime(source, (1_700_000_000, 1_700_000_000))
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     monkeypatch.setattr(stage, "check_extension", lambda _: digest)
     stage.stage_editor_extension(root)

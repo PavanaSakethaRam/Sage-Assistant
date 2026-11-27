@@ -10,7 +10,7 @@ import {
   mkdir,
 } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { tmpdir } from "node:os";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import {
@@ -56,7 +56,7 @@ vi.mock("node:fs/promises", async (original) => {
       if (args[1] === "wx" && faults.open)
         await fs.writeFile(args[0], "human", { flag: "wx" });
       const h = await fs.open(...args);
-      if (args[1] === "wx" && String(args[0]).endsWith("/index.html"))
+      if (args[1] === "wx" && basename(String(args[0])) === "index.html")
         faults.afterOpen?.();
       if (args[1] !== "wx" && !faults.read) return h;
       return new Proxy(h, {

@@ -38,11 +38,19 @@ def extension_bytes(path: Path) -> bytes:
         after = os.fstat(source.fileno())
         current = path.lstat()
 
-    def identity(info: os.stat_result) -> tuple[int, int, int, int, int]:
-        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    def identity(info: os.stat_result) -> tuple[int, int, int, int, int, int]:
+        # CPython's Windows path stat reports creation time as ctime, while
+        # fstat reports the handle's change time. Compare creation time across APIs.
+        timestamp = (
+            getattr(info, "st_birthtime_ns", info.st_ctime_ns)
+            if os.name == "nt"
+            else info.st_ctime_ns
+        )
+        return (info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns, timestamp)
 
     if (
         len(content) != before.st_size
+        or before.st_ctime_ns != after.st_ctime_ns
         or identity(before) != identity(after)
         or identity(before) != identity(current)
     ):

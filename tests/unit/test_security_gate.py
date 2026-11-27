@@ -467,6 +467,39 @@ def test_windows_analysis_reports_only_fixed_stage_and_compiler_codes(
     }
 
 
+@pytest.mark.parametrize("handle_changed", [False, True])
+def test_windows_sarif_compares_cross_api_birth_time_and_same_handle_change_time(
+    owned_windows_scan: tuple[ModuleType, Path, list[tuple[list[str], Path]]],
+    monkeypatch: pytest.MonkeyPatch,
+    handle_changed: bool,
+) -> None:
+    module, output, _ = owned_windows_scan
+    calls = 0
+
+    def handle_stat(fd: int) -> SimpleNamespace:
+        nonlocal calls
+        calls += 1
+        info = os.fstat(fd)
+        birthtime = getattr(info, "st_birthtime_ns", info.st_ctime_ns)
+        # A Windows handle can report a change time distinct from creation time.
+        return SimpleNamespace(
+            st_dev=info.st_dev,
+            st_ino=info.st_ino,
+            st_size=info.st_size,
+            st_mode=info.st_mode,
+            st_mtime_ns=info.st_mtime_ns,
+            st_birthtime_ns=birthtime,
+            st_ctime_ns=birthtime + (calls if handle_changed else 1),
+        )
+
+    monkeypatch.setattr(module.os, "fstat", handle_stat)
+    assert module.main() == int(handle_changed)
+    assert calls == 2
+    assert json.loads(output.read_text())["native"]["status"] == (
+        "incomplete" if handle_changed else "pass"
+    )
+
+
 def test_windows_complete_synthetic_sarif_passes_actual_scan_and_main(
     owned_windows_scan: tuple[ModuleType, Path, list[tuple[list[str], Path]]],
 ) -> None:

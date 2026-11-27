@@ -140,7 +140,10 @@ def native_sarif_clean(report: Path) -> bool:
         with report.open("rb") as stream:
             opened = os.fstat(stream.fileno())
             raw = stream.read(256 * 1024 + 1)
+            read_end = os.fstat(stream.fileno())
         after = report.lstat()
+        # Windows path stat ctime is creation time. Only handle snapshots
+        # expose the same change time, so compare that separately.
         identities = {
             (
                 info.st_dev,
@@ -148,11 +151,17 @@ def native_sarif_clean(report: Path) -> bool:
                 info.st_mode,
                 info.st_size,
                 info.st_mtime_ns,
-                info.st_ctime_ns,
+                getattr(info, "st_birthtime_ns", info.st_ctime_ns)
+                if os.name == "nt"
+                else info.st_ctime_ns,
             )
-            for info in (before, opened, after)
+            for info in (before, opened, read_end, after)
         }
-        if len(identities) != 1 or len(raw) != before.st_size:
+        if (
+            len(identities) != 1
+            or opened.st_ctime_ns != read_end.st_ctime_ns
+            or len(raw) != before.st_size
+        ):
             return False
         packet = json.loads(
             raw.decode("utf-8"),

@@ -138,6 +138,40 @@ import { isolatedChildEnv } from "../../../desktop/main/child-env";
 const nativeHost =
   (process.platform === "darwin" && process.arch === "arm64") ||
   (process.platform === "win32" && process.arch === "x64");
+
+function ownTestDirectories(...directories: string[]): void {
+  if (process.platform !== "win32") return;
+  const systemRoot = process.env.SystemRoot;
+  if (!systemRoot) throw Error("Windows fixture requires SystemRoot");
+  const systemTools = join(systemRoot, "System32");
+  const options = {
+    shell: false,
+    encoding: "utf8" as const,
+    timeout: 5000,
+    maxBuffer: 4096,
+  };
+  const identity = actualSpawnSync(
+    join(systemTools, "whoami.exe"),
+    ["/user", "/fo", "csv", "/nh"],
+    options,
+  );
+  const owner = /"(S-1-[0-9]+(?:-[0-9]+)+)"\s*$/u.exec(
+    identity.stdout ?? "",
+  )?.[1];
+  if (identity.status !== 0 || !owner)
+    throw Error("Could not read the fixture owner");
+  // An elevated Windows runner can default new folders to group ownership.
+  // Set the process user as owner only on the test's disposable directories.
+  for (const directory of directories) {
+    const result = actualSpawnSync(
+      join(systemTools, "icacls.exe"),
+      [directory, "/setowner", `*${owner}`],
+      options,
+    );
+    if (result.status !== 0) throw Error("Could not assign the fixture owner");
+  }
+}
+
 it.runIf(nativeHost)(
   "builds instrumented helpers in the canonical cache under an owned root",
   async () => {
@@ -171,6 +205,7 @@ it.runIf(nativeHost)(
       await rm(root, { recursive: true, force: true });
     }
   },
+  35000,
 );
 it.runIf(nativeHost)(
   "exercises the actual fixed native helper on local folders and refuses aliases/invalid bytes",
@@ -229,6 +264,7 @@ it.runIf(nativeHost)(
         ])
           expect(env[name]).toBe("");
       }
+      ownTestDirectories(root);
       const valid = invoke(root);
       expect(valid.status).toBe(0);
       expect(valid.stderr.length).toBe(0);
@@ -237,6 +273,7 @@ it.runIf(nativeHost)(
       );
       await mkdir(join(root, "ordinary"));
       await mkdir(join(root, "😀"));
+      ownTestDirectories(join(root, "ordinary"), join(root, "😀"));
       await writeFile(join(root, "file"), "owned");
       await symlink(
         join(root, "ordinary"),
@@ -298,6 +335,7 @@ it.runIf(nativeHost)(
       await rm(root, { recursive: true, force: true });
     }
   },
+  35000,
 );
 
 afterEach(() => {
@@ -359,6 +397,7 @@ it.runIf(nativeHost)(
           "node:child_process",
         );
       mockSpawn.mockImplementation(actual.spawn);
+      ownTestDirectories(fixture.root);
       expect(await fixture.invoke()).toMatch(
         new RegExp(`^${process.platform}-[0-9]+-[0-9]+$`, "u"),
       );
@@ -399,6 +438,7 @@ it.runIf(nativeHost)(
       await fixture.cleanup();
     }
   },
+  15000,
 );
 it.runIf(nativeHost)(
   "refuses malformed/non-ASCII/overflow/side-output records and always removes owned temp state",
