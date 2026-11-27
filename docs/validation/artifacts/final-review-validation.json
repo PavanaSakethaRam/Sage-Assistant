@@ -1,0 +1,130 @@
+{
+  "base": "d015992026d8db395b7e6234e1e739a30f608585",
+  "scope": "ONE consolidated final review fix wave; FinalI1/I2/I3",
+  "focused_RED": {
+    "javascript_failed": 6,
+    "javascript_passed": 12,
+    "python_failed": 1,
+    "python_passed": 54,
+    "persistent_receipt_failed": 2
+  },
+  "focused_GREEN": {
+    "javascript_passed": 30,
+    "python_passed": 56
+  },
+  "final_python": {
+    "passed": 536,
+    "opt_in_live_skipped": 1
+  },
+  "initial_javascript_coverage": {
+    "passed": 159,
+    "failed": 1,
+    "reason": "sandbox Electron launch denied; Vitest emitted no coverage"
+  },
+  "recovered_javascript_coverage": {
+    "passed": 160,
+    "failed": 0,
+    "reason": "one controller-approved native full coverage recovery because failed initial suite emitted no usable counts"
+  },
+  "affected_E2E": {
+    "passed": 1,
+    "initial_sandbox_launch_failed": 1,
+    "first_native_attempt_failed": "test omitted required Review again after retained-draft reopening; corrected test only",
+    "scope": "real host retained draft fresh review/save/detail reconciliation/literal body/local restart"
+  },
+  "integer_coverage": {
+    "javascript_maintained": {
+      "branches": [
+        682,
+        794
+      ],
+      "statements": [
+        1078,
+        1162
+      ]
+    },
+    "javascript_trusted": {
+      "branches": [
+        482,
+        531
+      ],
+      "statements": [
+        736,
+        784
+      ]
+    },
+    "python_maintained": {
+      "branches": [
+        529,
+        568
+      ],
+      "statements": [
+        1835,
+        1898
+      ]
+    },
+    "python_trusted": {
+      "branches": [
+        529,
+        568
+      ],
+      "statements": [
+        1835,
+        1898
+      ]
+    }
+  },
+  "static": {
+    "base": "d015992026d8db395b7e6234e1e739a30f608585",
+    "scope": "Affected 2 Python and 5 JS/TS files rescanned; all unchanged source/finding hashes checked. Dependency advisory audits retained unchanged; full aggregate not repeated.",
+    "python_files": [
+      "src/sage/sdk_probe.py",
+      "tests/unit/test_sdk_probe.py"
+    ],
+    "javascript_files": [
+      "desktop/renderer/App.tsx",
+      "desktop/tests/e2e-harness.test.ts",
+      "desktop/tests/notes.test.tsx",
+      "e2e/foundation.spec.ts",
+      "e2e/harness.ts"
+    ],
+    "targeted_bandit_findings": 34,
+    "targeted_eslint_hotspots": 6,
+    "bandit_severity_counts": {
+      "LOW": 715,
+      "MEDIUM": 9
+    },
+    "retained_dependency_audits": true
+  },
+  "checks": {
+    "typecheck": "PASS after narrowing terminal map to succeeded/cancelled; initial type errors preserved",
+    "mypy": "PASS 43 source files",
+    "ruff": "PASS after test-only byte literal wrap; initial E501 preserved",
+    "prettier": "PASS changed paths",
+    "eslint": "PASS changed paths"
+  },
+  "retained_unchanged_evidence": {
+    "dependency_advisories": "foundation-security.json python/node earlier measured locked audits; hashes checked",
+    "unrelated_E2E": "prior five scenarios remain historical; only affected scenario rerun",
+    "old_native_UI_and_failed_live": "separate historical artifacts unchanged"
+  },
+  "package": {
+    "zip_bytes": 214591340,
+    "zip_sha256": "c4aeb2af4b1b9b7f5a8651570f915ac709bb6057598eeab1bc125efaff461a05",
+    "core_sha256": "d91760b34e6b3676ccfbb3ce98bfe01c099a4d204453682a82211b29312d5cce",
+    "full_app_entries": 1956,
+    "symlinks": 14,
+    "selected_entries": 1138,
+    "native_files": 27,
+    "native_signatures_pass": 22,
+    "outer_signature_exit": 1,
+    "frozen_CA_count": 128,
+    "javascript_license_files": 88,
+    "asar_sha256": "b62bb2171de7843c5c980c8583efd1cd14134322fc0eeb9d79de395e55d74ef4",
+    "main_sha256": "086bfd2308b6ac1e5503f8076cdb83c14151a992d73f67539c80c9df2191e87c"
+  },
+  "package_evidence": "macos-arm64-final-fix-evidence.json",
+  "new_native_main_UI": "NOT EXECUTED",
+  "new_live": "NOT EXECUTED",
+  "foundation_and_release_complete": false
+}

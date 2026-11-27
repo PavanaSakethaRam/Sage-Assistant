@@ -1,0 +1,94 @@
+[
+  {
+    "valid": true,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "choose_1",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 1,
+      "account": { "host": "github.com", "login": "synthetic-user" }
+    }
+  },
+  {
+    "valid": true,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "clear",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 9007199254740991,
+      "account": null
+    }
+  },
+  {
+    "valid": false,
+    "frame": {
+      "version": true,
+      "kind": "host_copilot_selection",
+      "id": "bad",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 1,
+      "account": null
+    }
+  },
+  {
+    "valid": false,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "bad",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 9007199254740992,
+      "account": null
+    }
+  },
+  {
+    "valid": false,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "bad",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": true,
+      "account": null
+    }
+  },
+  {
+    "valid": false,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "bad",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 1,
+      "account": {
+        "host": "github.com",
+        "login": "synthetic-user",
+        "token": "gho_synthetic"
+      }
+    }
+  },
+  {
+    "valid": false,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "bad",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 1,
+      "account": { "host": "github.com", "login": "synthetic-user\n" }
+    }
+  },
+  {
+    "valid": false,
+    "frame": {
+      "version": 1,
+      "kind": "host_copilot_selection",
+      "id": "bad",
+      "boot_id": "0123456789abcdef0123456789abcdef",
+      "generation": 1,
+      "account": { "host": "other.invalid", "login": "synthetic-user" }
+    }
+  }
+]

@@ -1,0 +1,120 @@
+name: Package foundation (unreleased)
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'desktop/**'
+      - 'extension/**'
+      - 'scripts/**'
+      - '*lock*'
+      - '*.spec'
+      - 'forge.config.ts'
+      - '.gitattributes'
+      - '.github/workflows/package.yml'
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
+      UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/.runtime/python
+      UV_PYTHON_BIN_DIR: ${{ github.workspace }}/.runtime/python-bin
+      npm_config_cache: ${{ github.workspace }}/.cache/npm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.12.1'
+          package-manager-cache: false
+      - name: Assert allocated host and standalone Node
+        run: node -e "if(process.version!=='v26.12.1'||!((process.env.RUNNER_OS==='macOS'&&process.env.RUNNER_ARCH==='ARM64'&&process.platform==='darwin'&&process.arch==='arm64')||(process.env.RUNNER_OS==='Windows'&&process.env.RUNNER_ARCH==='X64'&&process.platform==='win32'&&process.arch==='x64')))throw Error('Unsupported allocated native host'); console.log(JSON.stringify({platform:process.platform,arch:process.arch,node:process.version,os:require('node:os').release(),image:process.env.ImageVersion}));"
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: '0.13.5'
+          python-version: '3.13.17'
+          enable-cache: false
+      # One native command per step preserves failures on both bash and pwsh.
+      - name: Locked verification dependencies
+        run: uv sync --locked --all-groups --python 3.13.17
+      - name: Locked desktop dependencies
+        run: npm ci --include=dev
+      - name: Explicit verified native source staging (network)
+        run: uv run --locked --no-sync python scripts/provision_package.py
+      - name: Isolated runtime and freezer environment
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
+        run: uv sync --locked --no-dev --group build --python 3.13.17
+      - name: Native core
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
+        run: uv run --locked --no-sync python scripts/build_core.py --output .runtime/package/core
+      - name: Production editor VSIX and native helper prerequisite
+        shell: pwsh
+        run: |
+          if ($IsWindows) {
+            $allocationOutput = (& pwsh -NoProfile -NonInteractive -Command '$env:RUNNER_ARCH = "ARM64"; try { . ./scripts/enter-native-toolchain.ps1 } catch { [Console]::Error.WriteLine($_.Exception.Message); exit 1 }; exit 0' 2>&1 | Out-String).Trim()
+            $allocationExit = $LASTEXITCODE
+            if ($allocationExit -eq 0 -or $allocationOutput -cne 'Native installed toolchain unavailable: allocation' -or $allocationOutput.Contains('sage-native-private-marker-')) { throw 'Native allocation diagnostic measurement failed' }
+            Write-Output 'Native allocation diagnostic measurement passed'
+            $locatorOutput = (& pwsh -NoProfile -NonInteractive -Command '$marker = Join-Path ([System.IO.Path]::GetTempPath()) ("sage-native-private-marker-" + [guid]::NewGuid().ToString("N")); try { [System.IO.Directory]::CreateDirectory($marker) | Out-Null; ${env:ProgramFiles(x86)} = $marker; try { . ./scripts/enter-native-toolchain.ps1 } catch { [Console]::Error.WriteLine($_.Exception.Message); exit 1 }; exit 0 } finally { Remove-Item -LiteralPath $marker -Recurse -Force }' 2>&1 | Out-String).Trim()
+            $locatorExit = $LASTEXITCODE
+            if ($locatorExit -eq 0 -or $locatorOutput -cne 'Native installed toolchain unavailable: locator' -or $locatorOutput.Contains('sage-native-private-marker-')) { throw 'Native locator diagnostic measurement failed' }
+            Write-Output 'Native locator diagnostic measurement passed'
+            . ./scripts/enter-native-toolchain.ps1
+          }
+          npm run package:extension
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Selected resources and notices
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.runtime/build-venv
+        run: uv run --locked --no-sync python -m scripts.stage_package
+      - name: Unreleased portable ZIP (no installer)
+        if: runner.os != 'Windows'
+        run: npm run make
+      - name: Windows unreleased portable ZIP (installed vendor shell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          . ./scripts/enter-native-toolchain.ps1
+          npm run make
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Actual Windows ZIP content inventory
+        if: runner.os == 'Windows'
+        run: uv run --locked --no-sync python scripts/check_windows_zip.py
+      - name: Actual ASAR, fuse and external inventory checks
+        shell: pwsh
+        run: |
+          $appPath = if ($IsMacOS) { Join-Path $env:GITHUB_WORKSPACE 'out/Sage-darwin-arm64/Sage.app' } elseif ($IsWindows) { Join-Path $env:GITHUB_WORKSPACE 'out/Sage-win32-x64' } else { throw 'Unsupported package host' }
+          $manifest = Join-Path $env:GITHUB_WORKSPACE 'build/resource-manifest.json'
+          node scripts/check_package.ts $appPath $manifest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Actual frozen fixed probes and note/restart smoke
+        shell: pwsh
+        run: |
+          $appPath = if ($IsMacOS) { Join-Path $env:GITHUB_WORKSPACE 'out/Sage-darwin-arm64/Sage.app' } elseif ($IsWindows) { Join-Path $env:GITHUB_WORKSPACE 'out/Sage-win32-x64' } else { throw 'Unsupported package host' }
+          $resources = if ($IsMacOS) { Join-Path $appPath 'Contents/Resources' } else { Join-Path $appPath 'resources' }
+          node scripts/smoke_package.mjs $resources
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      # Uploading bundled binaries is an explicit opt-in pending redistribution review.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ vars.SAGE_UPLOAD_UNRELEASED_ZIPS == 'true' }}
+        with:
+          name: unreleased-portable-zip-${{ matrix.os }}
+          path: |
+            out/make/
+            build/resource-manifest.json
+            build/core-analysis.json
+            .runtime/native-source-inventory.json
+          if-no-files-found: error
+          retention-days: 7
+# No updater, publish, signing identity, notarization or account/model smoke.
+# Workflow source is not completed Windows/clean-machine evidence.
+# Windows installers are deferred; both matrix hosts build portable ZIPs only.

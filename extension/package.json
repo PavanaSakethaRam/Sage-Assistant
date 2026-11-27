@@ -1,0 +1,65 @@
+{
+  "name": "sage-editor-bridge",
+  "displayName": "Sage Local Editor Bridge",
+  "description": "Explicit local pairing with the Sage desktop host",
+  "version": "0.1.0",
+  "publisher": "sage-local",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.143.0"
+  },
+  "extensionKind": [
+    "ui"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [
+    "onCommand:sage.pairLocalEditor",
+    "onCommand:sage.inspectInterruptedJournal",
+    "onCommand:sage.inspectInterruptedJob"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "sage.pairLocalEditor",
+        "title": "Sage: Pair Local Editor"
+      },
+      {
+        "command": "sage.captureContext",
+        "title": "Sage: Capture Explicit Context"
+      },
+      {
+        "command": "sage.sendContext",
+        "title": "Sage: Send Selected Context"
+      },
+      {
+        "command": "sage.cancelContext",
+        "title": "Sage: Cancel Context"
+      },
+      {
+        "command": "sage.inspectInterruptedJournal",
+        "title": "Sage: Inspect Interrupted Sage Journal"
+      },
+      {
+        "command": "sage.inspectInterruptedJob",
+        "title": "Sage: Inspect Interrupted Job"
+      },
+      {
+        "command": "sage.dismissInspection",
+        "title": "Sage: Dismiss Inspection"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PavanaSakethaRam/Sage-Assistant.git",
+    "directory": "extension"
+  }
+}

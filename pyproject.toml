@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sage-assistant"
+version = "0.1.0"
+description = "Sage's explicit, locally controlled assistant core"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "pydantic>=2.12,<3",
+    "platformdirs>=4.5,<5",
+    "github-copilot-sdk==1.0.25",
+]
+
+[dependency-groups]
+dev = [
+    "hatchling==1.32.4",
+    "pytest>=8.4,<10",
+    "pytest-cov>=7,<8",
+    "mypy>=1.18,<2",
+    "ruff>=0.14,<1",
+    "pip-audit==2.10.1",
+    "bandit==1.9.4",
+    "uv==0.13.5",
+]
+
+build = ["pyinstaller==6.22.3", "pyinstaller-hooks-contrib==2026.9"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sage"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = "--strict-markers --strict-config"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["src/sage", "tests"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.coverage.run]
+branch = true
+source = ["sage"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true

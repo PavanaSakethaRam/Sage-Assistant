@@ -1,0 +1,3679 @@
+{
+  "cases": [
+    {
+      "label": "create-empty-context",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": true
+    },
+    {
+      "label": "replace-one-selected-context",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "valid": true
+    },
+    {
+      "label": "create-source",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": false
+    },
+    {
+      "label": "replace-no-target",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": false
+    },
+    {
+      "label": "replace-target-not-selected",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "focus.js"
+      },
+      "valid": false
+    },
+    {
+      "label": "duplicate-source",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          },
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "valid": false
+    },
+    {
+      "label": "unknown-name",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "secret.txt",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "valid": false
+    },
+    {
+      "label": "context-command",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "command": "node other.js"
+      },
+      "valid": false
+    },
+    {
+      "label": "uppercase-hash",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "valid": false
+    },
+    {
+      "label": "invalid-id",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "has space",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": false
+    },
+    {
+      "label": "boolean-revision",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": true,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": false
+    },
+    {
+      "label": "diagnostic-control",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "diagnostics": ["unsafe\u0000data"]
+      },
+      "valid": false
+    },
+    {
+      "label": "four-file-proposal",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ]
+      },
+      "valid": true,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "one-file-replacement",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "updated\n"
+          }
+        ]
+      },
+      "valid": true,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      }
+    },
+    {
+      "label": "missing-file",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          }
+        ]
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "duplicate-file",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          }
+        ]
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "wrong-target",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "focus.js",
+            "text": "x"
+          }
+        ]
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      }
+    },
+    {
+      "label": "command",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ],
+        "command": "npm install"
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "source-command",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "x",
+            "command": "pwd"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ]
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "crlf",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "a\r\nb"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ]
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "bom",
+      "kind": "proposal",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "﻿a"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ]
+      },
+      "valid": false,
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "label": "job-view",
+      "kind": "job_view",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      },
+      "valid": true
+    },
+    {
+      "label": "view-source",
+      "kind": "job_view",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "user_text": "private"
+      },
+      "valid": false
+    },
+    {
+      "label": "view-state",
+      "kind": "job_view",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "approved",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      },
+      "valid": false
+    },
+    {
+      "label": "file-receipt",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.create",
+        "target": "index.html",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "created",
+        "observed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "observed_length": 12
+      },
+      "valid": true
+    },
+    {
+      "label": "receipt-output",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.create",
+        "target": "index.html",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "created",
+        "observed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "observed_length": 12,
+        "output": "private"
+      },
+      "valid": false
+    },
+    {
+      "label": "scope-status",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.create",
+        "target": "index.html",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "passed",
+        "observed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "observed_length": 12
+      },
+      "valid": false
+    },
+    {
+      "label": "fresh-ack",
+      "kind": "ack",
+      "value": {
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "status": "recorded",
+        "recorded_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": true
+    },
+    {
+      "label": "duplicate-ack",
+      "kind": "ack",
+      "value": {
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "status": "duplicate",
+        "recorded_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": true
+    },
+    {
+      "label": "conflict-ack",
+      "kind": "ack",
+      "value": {
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "status": "conflict",
+        "recorded_hash": null
+      },
+      "valid": true
+    },
+    {
+      "label": "duplicate-ack-without-hash",
+      "kind": "ack",
+      "value": {
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "status": "duplicate",
+        "recorded_hash": null
+      },
+      "valid": false
+    },
+    {
+      "label": "conflict-ack-with-hash",
+      "kind": "ack",
+      "value": {
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "status": "conflict",
+        "recorded_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": false
+    },
+    {
+      "label": "create-proposed-hash-records",
+      "kind": "job_view",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "review_required",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [
+          {
+            "name": "index.html",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          },
+          {
+            "name": "focus.js",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          },
+          {
+            "name": "focus.test.mjs",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          },
+          {
+            "name": "README.md",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          }
+        ],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      },
+      "valid": true
+    },
+    {
+      "label": "create-cannot-claim-existing-source",
+      "kind": "job_view",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "review_required",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [
+          {
+            "name": "index.html",
+            "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          },
+          {
+            "name": "focus.js",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          },
+          {
+            "name": "focus.test.mjs",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          },
+          {
+            "name": "README.md",
+            "source_hash": null,
+            "proposed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "observed_hash": null
+          }
+        ],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      },
+      "valid": false
+    },
+    {
+      "label": "create-target-must-be-absent",
+      "kind": "context",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": null
+      },
+      "valid": false
+    },
+    {
+      "label": "fixed-recipe",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": true
+    },
+    {
+      "label": "recipe-command",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": ["-e", "evil"],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "recipe-credential-env",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp",
+          "TOKEN": "secret"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "recipe-boolean-cap",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": true,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "start",
+      "kind": "start",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": true
+    },
+    {
+      "label": "start-command",
+      "kind": "start",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "command": "npm install"
+      },
+      "valid": false
+    },
+    {
+      "label": "create-model-request",
+      "kind": "model_request",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "request_id": "request-1",
+        "deadline": "2026-10-24T12:00:00Z",
+        "mode": "create_focus_project",
+        "files": [],
+        "diagnostics": ["selected diagnostic"]
+      },
+      "valid": true
+    },
+    {
+      "label": "replace-model-request",
+      "kind": "model_request",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "request_id": "request-1",
+        "deadline": "2026-10-24T12:00:00Z",
+        "mode": "replace_focus_file",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          }
+        ],
+        "diagnostics": ["selected diagnostic"],
+        "target": "index.html"
+      },
+      "valid": true
+    },
+    {
+      "label": "model-request-no-target",
+      "kind": "model_request",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "request_id": "request-1",
+        "deadline": "2026-10-24T12:00:00Z",
+        "mode": "replace_focus_file",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          }
+        ],
+        "diagnostics": ["selected diagnostic"]
+      },
+      "valid": false
+    },
+    {
+      "label": "model-request-private-root",
+      "kind": "model_request",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "request_id": "request-1",
+        "deadline": "2026-10-24T12:00:00Z",
+        "mode": "create_focus_project",
+        "files": [],
+        "diagnostics": ["selected diagnostic"],
+        "root_uri": "file:///secret"
+      },
+      "valid": false
+    },
+    {
+      "label": "create-model-request-target",
+      "kind": "model_request",
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "request_id": "request-1",
+        "deadline": "2026-10-24T12:00:00Z",
+        "mode": "create_focus_project",
+        "files": [],
+        "diagnostics": ["selected diagnostic"],
+        "target": null
+      },
+      "valid": false
+    },
+    {
+      "label": "create-applied-status",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.create",
+        "target": "index.html",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "applied_saved",
+        "observed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "observed_length": 12
+      },
+      "valid": false
+    },
+    {
+      "label": "replace-created-status",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.replace",
+        "target": "index.html",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "created",
+        "observed_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "observed_length": 12
+      },
+      "valid": false
+    },
+    {
+      "label": "file-intent",
+      "kind": "intent",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "valid": true
+    },
+    {
+      "label": "file-intent-command",
+      "kind": "intent",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html",
+        "command": "node -e evil"
+      },
+      "valid": false
+    },
+    {
+      "label": "test-intent",
+      "kind": "intent",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html",
+        "recipe": {
+          "platform": "darwin",
+          "executable": "/private/owned/node",
+          "executable_identity": "node-file-1",
+          "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "executable_version": "v26.12.1",
+          "argv": [
+            "--test",
+            "--test-isolation=none",
+            "--test-reporter=tap",
+            "focus.test.mjs"
+          ],
+          "cwd": "/private/owned/project",
+          "root_id": "root-1",
+          "environment": {
+            "PATH": "",
+            "TEMP": "/private/owned/tmp",
+            "TMP": "/private/owned/tmp",
+            "TMPDIR": "/private/owned/tmp"
+          },
+          "file_hashes": [
+            {
+              "name": "index.html",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "focus.js",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "focus.test.mjs",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "README.md",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "deadline": "2026-10-24T12:00:30Z",
+          "output_cap": 262144,
+          "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "timeout_seconds": 30
+        }
+      },
+      "valid": false
+    },
+    {
+      "label": "test-intent-valid",
+      "kind": "intent",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-1",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "recipe": {
+          "platform": "darwin",
+          "executable": "/private/owned/node",
+          "executable_identity": "node-file-1",
+          "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "executable_version": "v26.12.1",
+          "argv": [
+            "--test",
+            "--test-isolation=none",
+            "--test-reporter=tap",
+            "focus.test.mjs"
+          ],
+          "cwd": "/private/owned/project",
+          "root_id": "root-1",
+          "environment": {
+            "PATH": "",
+            "TEMP": "/private/owned/tmp",
+            "TMP": "/private/owned/tmp",
+            "TMPDIR": "/private/owned/tmp"
+          },
+          "file_hashes": [
+            {
+              "name": "index.html",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "focus.js",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "focus.test.mjs",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "README.md",
+              "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "deadline": "2026-10-24T12:00:30Z",
+          "output_cap": 262144,
+          "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "timeout_seconds": 30
+        }
+      },
+      "valid": true
+    },
+    {
+      "label": "review",
+      "kind": "review",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "scope": "code.create",
+        "approved_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "decision": "accept"
+      },
+      "valid": true
+    },
+    {
+      "label": "review-command",
+      "kind": "review",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "scope": "code.create",
+        "approved_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "decision": "accept",
+        "command": "npm install"
+      },
+      "valid": false
+    },
+    {
+      "label": "grant",
+      "kind": "grant",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "grant_boot_id": "grant-boot-1",
+        "scope": "code.create",
+        "operation_id": "operation-1",
+        "approved_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "issued_at": "2026-10-24T12:00:00Z",
+        "expires_at": "2026-10-24T12:05:00Z"
+      },
+      "valid": true
+    },
+    {
+      "label": "grant-local-time",
+      "kind": "grant",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "grant_boot_id": "grant-boot-1",
+        "scope": "code.create",
+        "operation_id": "operation-1",
+        "approved_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "issued_at": "2026-10-24T12:00:00Z",
+        "expires_at": "2026-10-24T17:35:00+05:30"
+      },
+      "valid": false
+    },
+    {
+      "label": "page-defaults",
+      "kind": "page",
+      "value": {},
+      "valid": true
+    },
+    {
+      "label": "page-limit",
+      "kind": "page",
+      "value": {
+        "limit": 100,
+        "offset": 1000000
+      },
+      "valid": true
+    },
+    {
+      "label": "page-boolean",
+      "kind": "page",
+      "value": {
+        "limit": true
+      },
+      "valid": false
+    },
+    {
+      "label": "page-over-max",
+      "kind": "page",
+      "value": {
+        "offset": 1000001
+      },
+      "valid": false
+    },
+    {
+      "label": "job-page",
+      "kind": "job_page",
+      "value": {
+        "items": [
+          {
+            "binding": {
+              "job_id": "job-1",
+              "boot_id": "boot-1",
+              "pair_id": "pair-1",
+              "window_id": "window-1",
+              "root_id": "root-1",
+              "revision": 1,
+              "policy_version": "code-v1"
+            },
+            "mode": "create_focus_project",
+            "state": "context_ready",
+            "destination": "GitHub Copilot cloud",
+            "account": "alice",
+            "model": null,
+            "account_generation": 1,
+            "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "file_count": 0,
+            "manifest": [],
+            "hashes": [],
+            "source_codepoints": 0,
+            "diagnostics_codepoints": 0,
+            "metadata_codepoints": 20,
+            "expires_at": "2026-10-24T12:05:00Z",
+            "diagnostic": null,
+            "receipts": []
+          }
+        ],
+        "next_offset": null
+      },
+      "valid": true
+    },
+    {
+      "label": "job-page-over-max",
+      "kind": "job_page",
+      "value": {
+        "items": [],
+        "next_offset": 1000001
+      },
+      "valid": false
+    },
+    {
+      "label": "test-receipt",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-5",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "passed",
+        "environment_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "exit_code": 0,
+        "signal": null,
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false,
+        "output_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": true
+    },
+    {
+      "label": "test-receipt-source",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-5",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "passed",
+        "environment_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "exit_code": 0,
+        "signal": null,
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false,
+        "output_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "secret"
+      },
+      "valid": false
+    },
+    {
+      "label": "test-receipt-boolean-exit",
+      "kind": "receipt",
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "operation-1",
+        "effect_id": "effect-5",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "passed",
+        "environment_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "exit_code": true,
+        "signal": null,
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false,
+        "output_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valid": false
+    },
+    {
+      "label": "recipe-mac-identity",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp",
+          "HOME": ""
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "recipe-relative-cwd",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "relative",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "recipe-env-control",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/tmp/\u0000",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "windows-recipe",
+      "kind": "recipe",
+      "value": {
+        "platform": "win32",
+        "executable": "C:\\owned\\node.exe",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "C:\\owned\\project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "C:\\owned\\tmp",
+          "TMP": "C:\\owned\\tmp",
+          "TMPDIR": "C:\\owned\\tmp",
+          "SystemRoot": "C:\\Windows",
+          "WINDIR": "C:\\Windows",
+          "SystemDrive": "C:",
+          "HOME": "",
+          "HOMEDRIVE": "",
+          "HOMEPATH": "",
+          "LOGONSERVER": "",
+          "USERDOMAIN": "",
+          "USERNAME": "",
+          "USERPROFILE": ""
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": true
+    },
+    {
+      "label": "windows-missing-home",
+      "kind": "recipe",
+      "value": {
+        "platform": "win32",
+        "executable": "C:\\owned\\node.exe",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "C:\\owned\\project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "C:\\owned\\tmp",
+          "TMP": "C:\\owned\\tmp",
+          "TMPDIR": "C:\\owned\\tmp",
+          "SystemRoot": "C:\\Windows",
+          "WINDIR": "C:\\Windows",
+          "SystemDrive": "C:",
+          "HOMEDRIVE": "",
+          "HOMEPATH": "",
+          "LOGONSERVER": "",
+          "USERDOMAIN": "",
+          "USERNAME": "",
+          "USERPROFILE": ""
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "windows-case-alias",
+      "kind": "recipe",
+      "value": {
+        "platform": "win32",
+        "executable": "C:\\owned\\node.exe",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "C:\\owned\\project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "C:\\owned\\tmp",
+          "TMP": "C:\\owned\\tmp",
+          "TMPDIR": "C:\\owned\\tmp",
+          "SystemRoot": "C:\\Windows",
+          "WINDIR": "C:\\Windows",
+          "SystemDrive": "C:",
+          "HOME": "",
+          "HOMEDRIVE": "",
+          "HOMEPATH": "",
+          "LOGONSERVER": "",
+          "USERDOMAIN": "",
+          "USERNAME": "",
+          "USERPROFILE": "",
+          "temp": "C:\\owned\\tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "recipe-nonempty-path",
+      "kind": "recipe",
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "/usr/bin",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "timeout_seconds": 30
+      },
+      "valid": false
+    },
+    {
+      "label": "job cancellation True",
+      "kind": "job_view",
+      "valid": true,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": true
+      }
+    },
+    {
+      "label": "job cancellation False",
+      "kind": "job_view",
+      "valid": true,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": false
+      }
+    },
+    {
+      "label": "job cancellation 0",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": 0
+      }
+    },
+    {
+      "label": "job cancellation true",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": "true"
+      }
+    },
+    {
+      "label": "job cancellation None",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": [],
+        "cancel_requested": null
+      }
+    },
+    {
+      "label": "test timeout 30",
+      "kind": "recipe",
+      "valid": true,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "label": "test timeout 29",
+      "kind": "recipe",
+      "valid": false,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": 29
+      }
+    },
+    {
+      "label": "test timeout True",
+      "kind": "recipe",
+      "valid": false,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": true
+      }
+    },
+    {
+      "label": "test timeout 30",
+      "kind": "recipe",
+      "valid": false,
+      "value": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": "30"
+      }
+    },
+    {
+      "label": "zero generation None",
+      "kind": "job_view",
+      "valid": true,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": null,
+        "model": null,
+        "account_generation": 0,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      }
+    },
+    {
+      "label": "zero generation claimed",
+      "kind": "job_view",
+      "valid": false,
+      "value": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "claimed",
+        "model": null,
+        "account_generation": 0,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      }
+    },
+    {
+      "label": "zero generation draft",
+      "kind": "start",
+      "valid": true,
+      "value": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 0,
+        "user_text": "Build a tracker",
+        "backend": "copilot",
+        "disclosure_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "hash_vectors": [
+    {
+      "view": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "alice",
+        "model": null,
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      },
+      "draft": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "Build a focus tracker 😀",
+        "backend": "copilot",
+        "model": null
+      },
+      "expected": "54af717977790fd53ae60cc30de260ce24487f4ee924531aad14714ce66dd389"
+    },
+    {
+      "view": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "state": "context_ready",
+        "destination": "GitHub Copilot cloud",
+        "account": "bob",
+        "model": "gpt-5.5",
+        "account_generation": 1,
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "file_count": 0,
+        "manifest": [],
+        "hashes": [],
+        "source_codepoints": 0,
+        "diagnostics_codepoints": 0,
+        "metadata_codepoints": 20,
+        "expires_at": "2026-10-24T12:05:00Z",
+        "diagnostic": null,
+        "receipts": []
+      },
+      "draft": {
+        "job_id": "job-1",
+        "revision": 1,
+        "account_generation": 1,
+        "user_text": "literal ${HOME} & <script>",
+        "backend": "copilot",
+        "model": "gpt-5.5"
+      },
+      "expected": "72840ef3339157998ed600ce3314d4025eda378f805bfe946cc0bcce39990a5c"
+    }
+  ],
+  "recipe_vectors": [
+    {
+      "recipe": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30Z",
+        "output_cap": 262144,
+        "recipe_hash": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9",
+        "timeout_seconds": 30
+      },
+      "expected": "ff417f38ac77fc44898b651a52010cf219ea2f58d5c9bc542fe72e5857dabed9"
+    },
+    {
+      "recipe": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.000001Z",
+        "output_cap": 262144,
+        "recipe_hash": "3d386a2e1ace54c3530b788feac18051fd642ec8948cd33a4679b9f05e7e1951",
+        "timeout_seconds": 30
+      },
+      "expected": "3d386a2e1ace54c3530b788feac18051fd642ec8948cd33a4679b9f05e7e1951",
+      "python_wire": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.000001Z",
+        "output_cap": 262144,
+        "recipe_hash": "3d386a2e1ace54c3530b788feac18051fd642ec8948cd33a4679b9f05e7e1951",
+        "timeout_seconds": 30
+      }
+    },
+    {
+      "recipe": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.123456Z",
+        "output_cap": 262144,
+        "recipe_hash": "793eba2dee6dd21b0217437a25ea13829e32329493925ed6e783da129bae8243",
+        "timeout_seconds": 30
+      },
+      "expected": "793eba2dee6dd21b0217437a25ea13829e32329493925ed6e783da129bae8243",
+      "python_wire": {
+        "platform": "darwin",
+        "executable": "/private/owned/node",
+        "executable_identity": "node-file-1",
+        "executable_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "executable_version": "v26.12.1",
+        "argv": [
+          "--test",
+          "--test-isolation=none",
+          "--test-reporter=tap",
+          "focus.test.mjs"
+        ],
+        "cwd": "/private/owned/project",
+        "root_id": "root-1",
+        "environment": {
+          "PATH": "",
+          "TEMP": "/private/owned/tmp",
+          "TMP": "/private/owned/tmp",
+          "TMPDIR": "/private/owned/tmp"
+        },
+        "file_hashes": [
+          {
+            "name": "index.html",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.js",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "focus.test.mjs",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "README.md",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "deadline": "2026-10-24T12:00:30.123456Z",
+        "output_cap": 262144,
+        "recipe_hash": "793eba2dee6dd21b0217437a25ea13829e32329493925ed6e783da129bae8243",
+        "timeout_seconds": 30
+      }
+    }
+  ],
+  "context_hash_vectors": [
+    {
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "d68007231619aa23990b06126ce8b0bbbd01b21a9e13a70e634bc5ff7798b10b"
+    },
+    {
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "replace_focus_file",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n",
+            "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "disk_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "document_version": 1,
+            "file_id": "file-1"
+          }
+        ],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "expected": "09f8bb872c6879a550323e7a5100dbe588c558f2da6c13f859bb6a6d07e9b74e"
+    }
+  ],
+  "utc_cases": [
+    {
+      "label": "microsecond-min",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.000001Z",
+      "valid": true
+    },
+    {
+      "label": "microsecond-max",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.999999Z",
+      "valid": true
+    },
+    {
+      "label": "zero-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.000000Z",
+      "valid": false
+    },
+    {
+      "label": "short-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.1Z",
+      "valid": false
+    },
+    {
+      "label": "five-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.12345Z",
+      "valid": false
+    },
+    {
+      "label": "long-fraction",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.1234567Z",
+      "valid": false
+    },
+    {
+      "label": "alternate-offset",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30+00:00",
+      "valid": false
+    },
+    {
+      "label": "negative-zero-offset",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30-00:00",
+      "valid": false
+    },
+    {
+      "label": "leap-day",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2024-02-29T23:59:59Z",
+      "valid": true
+    },
+    {
+      "label": "nonleap-day",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-02-29T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "impossible-day",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-02-30T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "month-thirteen",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-13-01T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "month-zero",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-00-01T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "day-zero",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-01-00T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "hour-twenty-four",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T24:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "minute-sixty",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:60:30Z",
+      "valid": false
+    },
+    {
+      "label": "second-sixty",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:60Z",
+      "valid": false
+    },
+    {
+      "label": "year-zero",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "0000-10-24T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "first-year",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "0001-01-01T00:00:00Z",
+      "valid": true
+    },
+    {
+      "label": "last-year",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "9999-12-31T23:59:59Z",
+      "valid": true
+    },
+    {
+      "label": "request-microsecond",
+      "kind": "model_request",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30.123456Z",
+      "valid": true
+    },
+    {
+      "label": "request-offset",
+      "kind": "model_request",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30+00:00",
+      "valid": false
+    },
+    {
+      "label": "view-leap-microsecond",
+      "kind": "job_view",
+      "field": "expires_at",
+      "value": "2024-02-29T23:59:59.000001Z",
+      "valid": true
+    },
+    {
+      "label": "view-impossible-day",
+      "kind": "job_view",
+      "field": "expires_at",
+      "value": "2026-02-30T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "grant-issued-microsecond",
+      "kind": "grant",
+      "field": "issued_at",
+      "value": "2026-10-24T12:00:30.123456Z",
+      "valid": true
+    },
+    {
+      "label": "grant-expires-microsecond",
+      "kind": "grant",
+      "field": "expires_at",
+      "value": "2026-10-24T12:05:30.654321Z",
+      "valid": true
+    },
+    {
+      "label": "grant-impossible-second",
+      "kind": "grant",
+      "field": "expires_at",
+      "value": "2026-10-24T12:00:60Z",
+      "valid": false
+    },
+    {
+      "label": "nonleap-century",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "1900-02-29T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "leap-century",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2000-02-29T12:00:30Z",
+      "valid": true
+    },
+    {
+      "label": "nonascii-digits",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "２０２６-10-24T12:00:30Z",
+      "valid": false
+    },
+    {
+      "label": "lowercase-zone",
+      "kind": "recipe",
+      "field": "deadline",
+      "value": "2026-10-24T12:00:30z",
+      "valid": false
+    }
+  ],
+  "proposal_vectors": [
+    {
+      "context": {
+        "binding": {
+          "job_id": "job-1",
+          "boot_id": "boot-1",
+          "pair_id": "pair-1",
+          "window_id": "window-1",
+          "root_id": "root-1",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "mode": "create_focus_project",
+        "root_uri": "file:///private/owner-marker/focus",
+        "root_file_id": "root-file-1",
+        "files": [],
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "proposal": {
+        "job_id": "job-1",
+        "revision": 1,
+        "explanation": "A simple focus tracker.",
+        "files": [
+          {
+            "name": "index.html",
+            "text": "<main>Focus</main>\n"
+          },
+          {
+            "name": "focus.js",
+            "text": "export const focus = true;\n"
+          },
+          {
+            "name": "focus.test.mjs",
+            "text": "import { test } from 'node:test';\n"
+          },
+          {
+            "name": "README.md",
+            "text": "# Focus\n"
+          }
+        ]
+      },
+      "scope": "code.create",
+      "material": {
+        "policy_version": "code-v1",
+        "scope": "code.create",
+        "context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "proposal": {
+          "job_id": "job-1",
+          "revision": 1,
+          "explanation": "A simple focus tracker.",
+          "files": [
+            {
+              "name": "index.html",
+              "text": "<main>Focus</main>\n"
+            },
+            {
+              "name": "focus.js",
+              "text": "export const focus = true;\n"
+            },
+            {
+              "name": "focus.test.mjs",
+              "text": "import { test } from 'node:test';\n"
+            },
+            {
+              "name": "README.md",
+              "text": "# Focus\n"
+            }
+          ]
+        },
+        "lengths": {
+          "context_hash": 64,
+          "explanation": 23,
+          "files": [
+            {
+              "name": 10,
+              "text": 19
+            },
+            {
+              "name": 8,
+              "text": 27
+            },
+            {
+              "name": 14,
+              "text": 34
+            },
+            {
+              "name": 9,
+              "text": 8
+            }
+          ]
+        }
+      },
+      "expected": "e8acf85444adbdbf21f141c6f64607654ecd6769002368b043ba5146e9d5cfa3"
+    }
+  ],
+  "journal_vectors": [
+    {
+      "label": "file-intent",
+      "kind": "intent",
+      "input": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "projection": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html"
+      },
+      "canonical_sha256": "407276db8760cea8b97945da0890b67fc64598a63302bb1a70e4b44c2b3b01d5"
+    },
+    {
+      "label": "test-private-projection-unicode-env",
+      "kind": "intent",
+      "input": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "recipe": {
+          "platform": "darwin",
+          "executable": "/private/EXECUTABLE_PRIVATE_MARKER/node",
+          "executable_identity": "native-node-identity",
+          "executable_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "executable_version": "26.12.1",
+          "argv": [
+            "--test",
+            "--test-isolation=none",
+            "--test-reporter=tap",
+            "focus.test.mjs"
+          ],
+          "cwd": "/private/WORKSPACE_PRIVATE_MARKER",
+          "root_id": "journal-root",
+          "environment": {
+            "PATH": "",
+            "TEMP": "/private/TEMP_PRIVATE_MARKER-😀",
+            "TMP": "/private/TEMP_PRIVATE_MARKER-😀",
+            "TMPDIR": "/private/TEMP_PRIVATE_MARKER-😀"
+          },
+          "file_hashes": [
+            {
+              "name": "index.html",
+              "hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            },
+            {
+              "name": "focus.js",
+              "hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            },
+            {
+              "name": "focus.test.mjs",
+              "hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            },
+            {
+              "name": "README.md",
+              "hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            }
+          ],
+          "deadline": "2035-01-02T12:00:00.123456Z",
+          "output_cap": 262144,
+          "timeout_seconds": 30,
+          "recipe_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        }
+      },
+      "projection": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "recipe": {
+          "recipe_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "environment_hash": "6e31d6cf7c1aa8c2ca5958fab8df17b04e78dcd0f85d01e1525ab9c83e660c84",
+          "executable_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "executable_identity": "native-node-identity",
+          "executable_version": "26.12.1",
+          "argv": [
+            "--test",
+            "--test-isolation=none",
+            "--test-reporter=tap",
+            "focus.test.mjs"
+          ],
+          "deadline": "2035-01-02T12:00:00.123456Z",
+          "output_cap": 262144,
+          "timeout_seconds": 30
+        }
+      },
+      "canonical_sha256": "c900c525db9afd12b0a84c19f35b2d53bfe7134fe6ccfb0ad8552f766ced501d"
+    },
+    {
+      "label": "file-receipt-omitted",
+      "kind": "receipt",
+      "input": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html",
+        "status": "created"
+      },
+      "projection": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html",
+        "status": "created",
+        "observed_hash": null,
+        "observed_length": null
+      },
+      "canonical_sha256": "a7e9a608f866676aefe3f8a8505acc60621d55890cf058f8e69128d124bb4cc3"
+    },
+    {
+      "label": "file-receipt-null",
+      "kind": "receipt",
+      "input": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html",
+        "status": "created",
+        "observed_hash": null,
+        "observed_length": null
+      },
+      "projection": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.create",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target": "index.html",
+        "status": "created",
+        "observed_hash": null,
+        "observed_length": null
+      },
+      "canonical_sha256": "a7e9a608f866676aefe3f8a8505acc60621d55890cf058f8e69128d124bb4cc3"
+    },
+    {
+      "label": "test-receipt-omitted",
+      "kind": "receipt",
+      "input": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "unknown",
+        "environment_hash": "6e31d6cf7c1aa8c2ca5958fab8df17b04e78dcd0f85d01e1525ab9c83e660c84",
+        "executable_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "executable_version": "26.12.1",
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false
+      },
+      "projection": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "unknown",
+        "environment_hash": "6e31d6cf7c1aa8c2ca5958fab8df17b04e78dcd0f85d01e1525ab9c83e660c84",
+        "executable_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "executable_version": "26.12.1",
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false,
+        "exit_code": null,
+        "signal": null,
+        "output_digest": null
+      },
+      "canonical_sha256": "9ab0ea1ac5dfe2a91d3f2888e55577fdf4d00daff526ce96b14b22d5b48c7059"
+    },
+    {
+      "label": "test-receipt-null",
+      "kind": "receipt",
+      "input": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "unknown",
+        "environment_hash": "6e31d6cf7c1aa8c2ca5958fab8df17b04e78dcd0f85d01e1525ab9c83e660c84",
+        "executable_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "executable_version": "26.12.1",
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false,
+        "exit_code": null,
+        "signal": null,
+        "output_digest": null
+      },
+      "projection": {
+        "binding": {
+          "job_id": "journal-job",
+          "boot_id": "journal-boot",
+          "pair_id": "journal-pair",
+          "window_id": "journal-window",
+          "root_id": "journal-root",
+          "revision": 1,
+          "policy_version": "code-v1"
+        },
+        "operation_id": "journal-operation",
+        "effect_id": "journal-effect",
+        "scope": "code.test",
+        "ordinal": 0,
+        "expected_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "unknown",
+        "environment_hash": "6e31d6cf7c1aa8c2ca5958fab8df17b04e78dcd0f85d01e1525ab9c83e660c84",
+        "executable_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "executable_version": "26.12.1",
+        "cancel_requested": false,
+        "timeout": false,
+        "overflow": false,
+        "exit_code": null,
+        "signal": null,
+        "output_digest": null
+      },
+      "canonical_sha256": "9ab0ea1ac5dfe2a91d3f2888e55577fdf4d00daff526ce96b14b22d5b48c7059"
+    }
+  ]
+}

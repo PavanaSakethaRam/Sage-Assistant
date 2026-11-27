@@ -1,0 +1,23 @@
+{
+  "name": "sage-owned-host-driver",
+  "publisher": "sage-local",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.143.0"
+  },
+  "main": "./dist/driver.cjs",
+  "activationEvents": [
+    "*"
+  ],
+  "extensionKind": [
+    "ui"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  }
+}

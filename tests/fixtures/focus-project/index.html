@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Focus timer</title>
+    <style>
+      body {
+        font: 18px system-ui;
+        max-width: 40rem;
+        margin: 4rem auto;
+        padding: 0 1rem;
+        background: #f7f5ee;
+        color: #24352b;
+      }
+      label {
+        display: block;
+      }
+      input,
+      button {
+        font: inherit;
+        padding: 0.6rem;
+        margin: 0.4rem 0.3rem 0.4rem 0;
+      }
+      output {
+        font-size: 3rem;
+        font-variant-numeric: tabular-nums;
+      }
+      button {
+        cursor: pointer;
+      }
+      small {
+        display: block;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Focus timer</h1>
+    <label for="session-name">Session name</label
+    ><input id="session-name" maxlength="200" value="Focus session" />
+    <p id="status" role="status"></p>
+    <output id="elapsed" aria-label="Elapsed time">00:00</output>
+    <div>
+      <button id="start">Start</button><button id="pause">Pause</button
+      ><button id="reset">Reset timer</button
+      ><button id="finish">Finish session</button>
+    </div>
+    <p>Completed sessions: <span id="completed">0</span></p>
+    <p>Completed focus total: <span id="total">00:00</span></p>
+    <small
+      >Current page session only. Refresh resets the timer, completed count and
+      total. Finish adds positive elapsed time to the completed total. Reset
+      clears only the current timer.</small
+    >
+    <script src="./focus.js"></script>
+  </body>
+</html>

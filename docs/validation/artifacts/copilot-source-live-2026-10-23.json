@@ -1,0 +1,78 @@
+{
+  "source_head": "f486facbb41b7bc664f58506c47840047d3cd570",
+  "harness_sha256": "0991e03be94cf90f37de55dc16b025754834168ac7a9ee88df529a8d3aaabd8d",
+  "approved_account": "PavanaSakethaRam",
+  "test": "tests/live/test_copilot_smoke.py::test_one_synthetic_prompt_auth_cancellation_and_disposal",
+  "approval_scope": "one existing source authentication/cancellation/disposal test; no retry",
+  "managed_vendor_integrity_files": 302,
+  "managed_vendor_inventory_sha256": "87c9ac34b5eb40862e10bd3de976f528a08541ef05b390488ff441d3b871ae41",
+  "phase": "finished",
+  "retry_count": 0,
+  "protected_read_count": "unknown",
+  "identity_request_count": "unknown",
+  "model_request_count": "unknown",
+  "raw_test_output_persisted": false,
+  "workspace_context": false,
+  "isolated_home_temp": true,
+  "plugins_autoload_disabled": true,
+  "single_check_launched": true,
+  "exit_code": 0,
+  "elapsed_seconds": 6.03,
+  "pytest_summary": "1 passed",
+  "status": "pass",
+  "raw_output_bytes": 98,
+  "post_run_inventory_available": true,
+  "new_managed_processes_not_attributed_to_test": 0,
+  "observed_owned_descendant_count": 2,
+  "owned_processes_remaining_before_controller_cleanup": 0,
+  "controller_termination_needed": false,
+  "owned_processes_remaining_after_controller_cleanup": 0,
+  "owned_directory_metadata": [
+    {
+      "name": "protected-source",
+      "directory_count": 5,
+      "file_count": 0
+    },
+    {
+      "name": "cache",
+      "directory_count": 0,
+      "file_count": 0
+    },
+    {
+      "name": "config",
+      "directory_count": 0,
+      "file_count": 0
+    },
+    {
+      "name": "state",
+      "directory_count": 0,
+      "file_count": 0
+    },
+    {
+      "name": "data",
+      "directory_count": 0,
+      "file_count": 0
+    },
+    {
+      "name": "tmp",
+      "directory_count": 0,
+      "file_count": 0
+    },
+    {
+      "name": "sessions",
+      "directory_count": 0,
+      "file_count": 0
+    },
+    {
+      "name": "tmp",
+      "directory_count": 0,
+      "file_count": 0
+    }
+  ],
+  "owned_temporary_root_removed": true,
+  "evidence_kind": "one explicitly approved source authentication/cancellation smoke",
+  "request_scope": "fixed synthetic prompt with attached_context=(); pytest imports project source",
+  "process_observation_scope": "sampled attributed descendants and post-run managed executable snapshot, not exhaustive containment proof",
+  "independent_interpretation": "source auth/identity and SDK send entry/cancellation; no completed inference or frozen UI proof",
+  "source_receipt_sha256": "d99981a433c62357c42b36db3fac322bff838c353a65009990aa18d07e2f61e4"
+}

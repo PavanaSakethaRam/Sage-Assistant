@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "types": ["node", "vscode"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "../desktop/shared/**/*.ts",
+    "../desktop/main/editor-bridge.ts"
+  ]
+}
