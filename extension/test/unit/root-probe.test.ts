@@ -502,6 +502,13 @@ async function windowsToolFixture() {
             ? "Microsoft (R) Incremental Linker Version 14.44.35217.0\n"
             : "LLVM version 20.1.8\nTarget: x86_64-pc-windows-msvc\n";
       if (damage === "failed-version") result.status = 1;
+      if (command === linker && damage.startsWith("linker-help")) {
+        result.status = 1100;
+        if (damage !== "linker-help-without-usage")
+          result.stdout += "usage: LINK [options] [files] [@commandfile]\r\n";
+        if (damage === "linker-help-error")
+          result.stderr = "LINK : fatal error LNK1100: owned diagnostic\n";
+      }
       return result;
     }
     if (args[0] === "/clang:-print-runtime-dir")
@@ -630,6 +637,7 @@ async function windowsToolFixture() {
       if (damage === "compile-stdout")
         return { ...result, stdout: "owned unknown diagnostic" };
       if (damage === "compile-exit") return { ...result, status: 1 };
+      if (damage === "compile-1100") return { ...result, status: 1100 };
       if (damage === "compile-diagnostic")
         return {
           ...result,
@@ -719,6 +727,28 @@ async function windowsToolFixture() {
 }
 
 describe("installed native builder decisions", () => {
+  it("accepts exit 1100 only for verified MSVC linker help", async () => {
+    const fixture = await windowsToolFixture();
+    try {
+      fixture.damage("linker-help");
+      await expect(buildRootProbe()).resolves.toMatchObject({
+        name: "root-probe-win32-x64.exe",
+      });
+      fixture.damage("linker-help-error");
+      await expect(buildRootProbe()).rejects.toThrow(
+        /MSVC linker probe.*LNK1100/u,
+      );
+      fixture.damage("linker-help-without-usage");
+      await expect(buildRootProbe()).rejects.toThrow(
+        /MSVC linker probe.*exit 1100/u,
+      );
+      fixture.damage("compile-1100");
+      await expect(buildRootProbe()).rejects.toThrow(/compile.*exit 1100/u);
+    } finally {
+      await fixture.cleanup();
+    }
+  });
+
   it("reports the failed native build stage and codes without raw diagnostics", async () => {
     const fixture = await windowsToolFixture();
     try {

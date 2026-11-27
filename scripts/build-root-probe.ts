@@ -24,6 +24,9 @@ type Toolchain = {
 };
 const digest = (bytes: Buffer) =>
   createHash("sha256").update(bytes).digest("hex");
+const msvcLinkerBanner =
+  /Microsoft \(R\) Incremental Linker Version 14\.[0-9]+\.[0-9]+(?:\.[0-9]+)?\b/u;
+const msvcDiagnostic = /\b(?:error|warning) [A-Z]+[0-9]+/iu;
 class NativeCommandError extends Error {}
 
 function unavailable(): never {
@@ -70,16 +73,27 @@ function run(command: string, args: string[], cwd: string, limit = 65536) {
         : "command output unavailable",
     );
   if (result.status !== 0) {
-    const codes = new Set(
-      (result.stdout + "\n" + result.stderr).match(
-        /(?<=\b(?:error|warning) )(?:C|D|LNK)\d{4}(?=:)/gu,
-      ),
-    );
-    const summary = [
-      `exit ${result.status ?? "unknown"}`,
-      ...[...codes].slice(0, 4),
-    ];
-    throw new NativeCommandError(summary.join(", "));
+    const output = result.stdout + "\n" + result.stderr;
+    // Installed MSVC LINK can return 1100 for its help response.
+    const linkerHelp =
+      process.platform === "win32" &&
+      win32.basename(command).toLowerCase() === "link.exe" &&
+      args.length === 1 &&
+      args[0] === "/?" &&
+      result.status === 1100 &&
+      msvcLinkerBanner.test(output) &&
+      /^\s*usage:\s+link(?:\.exe)?\b/imu.test(output) &&
+      !msvcDiagnostic.test(output);
+    if (!linkerHelp) {
+      const codes = new Set(
+        output.match(/(?<=\b(?:error|warning) )(?:C|D|LNK)\d{4}(?=:)/gu),
+      );
+      const summary = [
+        `exit ${result.status ?? "unknown"}`,
+        ...[...codes].slice(0, 4),
+      ];
+      throw new NativeCommandError(summary.join(", "));
+    }
   }
   return { stdout: result.stdout, stderr: result.stderr };
 }
@@ -182,10 +196,8 @@ async function installedTools(
     !/Microsoft \(R\) C\/C\+\+ Optimizing Compiler Version 19\.[0-9]+\.[0-9]+(?:\.[0-9]+)? for x64\b/u.test(
       msvc.version,
     ) ||
-    !/Microsoft \(R\) Incremental Linker Version 14\.[0-9]+\.[0-9]+(?:\.[0-9]+)?\b/u.test(
-      linker.version,
-    ) ||
-    /\b(?:error|warning) [A-Z]+[0-9]+/iu.test(msvc.version + linker.version)
+    !msvcLinkerBanner.test(linker.version) ||
+    msvcDiagnostic.test(msvc.version + linker.version)
   )
     unavailable();
   // The vendor shell and driver must resolve the same installed child linker.
